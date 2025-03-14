@@ -21,17 +21,19 @@ const AddUrlForm: React.FC<AddUrlFormProps> = ({ onAddUrl }) => {
       // Make sure it's a valid URL
       new URL(url);
       
-      // Check if it's likely a media URL (basic check)
+      // Accept any URL that looks like a media URL or stream URL
+      // This includes URLs with audio file extensions or URLs containing "stream", "radio", etc.
       const fileExtension = url.split('.').pop()?.toLowerCase();
       const validExtensions = ['mp3', 'wav', 'ogg', 'aac', 'm4a', 'flac'];
+      const isStreamUrl = url.includes('stream') || url.includes('radio') || url.includes('audio') || url.includes('music');
       
-      if (validExtensions.includes(fileExtension || '')) {
+      if (validExtensions.includes(fileExtension || '') || isStreamUrl) {
         onAddUrl(url);
         setUrl("");
       } else {
         toast({
-          title: "Invalid URL format",
-          description: "Please enter a URL that points to an audio file (mp3, wav, etc.)",
+          title: "Unsupported URL format",
+          description: "Please enter a URL that points to an audio file or streaming service",
           variant: "destructive",
         });
       }
@@ -48,7 +50,7 @@ const AddUrlForm: React.FC<AddUrlFormProps> = ({ onAddUrl }) => {
     <form onSubmit={handleSubmit} className="flex gap-2">
       <Input
         type="url"
-        placeholder="Enter audio URL (mp3, wav, etc.)"
+        placeholder="Enter audio URL or stream URL"
         value={url}
         onChange={(e) => setUrl(e.target.value)}
         className="flex-1 bg-white/20 backdrop-blur-sm border-none"
