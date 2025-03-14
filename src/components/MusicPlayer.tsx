@@ -6,20 +6,29 @@ import { Slider } from "@/components/ui/slider";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 
+interface Track {
+  url: string;
+  name: string;
+}
+
 interface MusicPlayerProps {
-  urls: string[];
+  tracks: Track[];
   currentIndex: number;
   setCurrentIndex: (index: number) => void;
   isPlaying: boolean;
   setIsPlaying: (isPlaying: boolean) => void;
+  onSkipNext: () => void;
+  onSkipPrevious: () => void;
 }
 
 const MusicPlayer: React.FC<MusicPlayerProps> = ({
-  urls,
+  tracks,
   currentIndex,
   setCurrentIndex,
   isPlaying,
   setIsPlaying,
+  onSkipNext,
+  onSkipPrevious,
 }) => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [duration, setDuration] = useState(0);
@@ -42,7 +51,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
     };
     
     const handleEnded = () => {
-      handleNext();
+      onSkipNext();
     };
     
     audio.addEventListener("timeupdate", handleTimeUpdate);
@@ -55,12 +64,12 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
       audio.removeEventListener("loadedmetadata", handleLoadedMetadata);
       audio.removeEventListener("ended", handleEnded);
     };
-  }, []);
+  }, [onSkipNext]);
 
   useEffect(() => {
     if (audioRef.current) {
-      if (urls.length > 0 && currentIndex >= 0 && currentIndex < urls.length) {
-        audioRef.current.src = urls[currentIndex];
+      if (tracks.length > 0 && currentIndex >= 0 && currentIndex < tracks.length) {
+        audioRef.current.src = tracks[currentIndex].url;
         if (isPlaying) {
           audioRef.current.play().catch(error => {
             console.error("Error playing audio:", error);
@@ -74,7 +83,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
         }
       }
     }
-  }, [currentIndex, urls]);
+  }, [currentIndex, tracks]);
 
   useEffect(() => {
     if (audioRef.current) {
@@ -99,18 +108,6 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
     setIsPlaying(!isPlaying);
   };
 
-  const handleNext = () => {
-    if (urls.length > 0) {
-      setCurrentIndex((currentIndex + 1) % urls.length);
-    }
-  };
-
-  const handlePrevious = () => {
-    if (urls.length > 0) {
-      setCurrentIndex((currentIndex - 1 + urls.length) % urls.length);
-    }
-  };
-
   const handleSeek = (value: number[]) => {
     if (audioRef.current) {
       audioRef.current.currentTime = value[0];
@@ -124,16 +121,20 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
     return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
   };
 
+  const currentTrack = tracks[currentIndex];
+  const trackName = currentTrack ? currentTrack.name : "No track selected";
+  const trackUrl = currentTrack ? currentTrack.url : "";
+
   return (
     <Card className="w-full max-w-md mx-auto backdrop-blur-md bg-white/20 border-none shadow-lg">
       <CardContent className="p-4">
         <div className="flex flex-col gap-4">
           <div className="text-center">
             <h3 className="font-bold text-lg truncate">
-              {urls.length > 0 ? `Track ${currentIndex + 1}` : "No track selected"}
+              {trackName}
             </h3>
             <p className="text-xs text-gray-500 truncate">
-              {urls[currentIndex] ? new URL(urls[currentIndex]).hostname : "Add a URL to begin"}
+              {trackUrl ? new URL(trackUrl).hostname : "Add a URL to begin"}
             </p>
           </div>
 
@@ -153,8 +154,8 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
             <Button
               variant="ghost"
               size="icon"
-              onClick={handlePrevious}
-              disabled={urls.length === 0}
+              onClick={onSkipPrevious}
+              disabled={tracks.length === 0}
             >
               <SkipBack className="w-6 h-6" />
             </Button>
@@ -163,7 +164,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
               size="icon"
               className="rounded-full bg-primary text-primary-foreground"
               onClick={handlePlayPause}
-              disabled={urls.length === 0}
+              disabled={tracks.length === 0}
             >
               {isPlaying ? (
                 <Pause className="w-6 h-6" />
@@ -174,8 +175,8 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
             <Button
               variant="ghost"
               size="icon"
-              onClick={handleNext}
-              disabled={urls.length === 0}
+              onClick={onSkipNext}
+              disabled={tracks.length === 0}
             >
               <SkipForward className="w-6 h-6" />
             </Button>
