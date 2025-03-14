@@ -47,7 +47,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
     };
     
     const handleLoadedMetadata = () => {
-      setDuration(audio.duration);
+      setDuration(isNaN(audio.duration) ? 0 : audio.duration);
     };
     
     const handleEnded = () => {
@@ -109,13 +109,14 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
   };
 
   const handleSeek = (value: number[]) => {
-    if (audioRef.current) {
+    if (audioRef.current && !isNaN(value[0]) && isFinite(value[0])) {
       audioRef.current.currentTime = value[0];
       setCurrentTime(value[0]);
     }
   };
 
   const formatTime = (time: number) => {
+    if (isNaN(time) || !isFinite(time)) return "0:00";
     const minutes = Math.floor(time / 60);
     const seconds = Math.floor(time % 60);
     return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
@@ -134,15 +135,15 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
               {trackName}
             </h3>
             <p className="text-xs text-gray-500 truncate">
-              {trackUrl ? new URL(trackUrl).hostname : "Add a URL to begin"}
+              {trackUrl ? (trackUrl.startsWith('http') ? new URL(trackUrl).hostname : trackUrl) : "Add a URL to begin"}
             </p>
           </div>
 
           <div className="flex items-center gap-2">
             <span className="text-xs">{formatTime(currentTime)}</span>
             <Slider
-              value={[currentTime]}
-              max={duration || 100}
+              value={[isNaN(currentTime) || !isFinite(currentTime) ? 0 : currentTime]}
+              max={isNaN(duration) || !isFinite(duration) ? 100 : duration || 100}
               step={1}
               onValueChange={handleSeek}
               className="flex-1"

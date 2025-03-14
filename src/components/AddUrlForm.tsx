@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { PlusCircle, Music } from "lucide-react";
+import { PlusCircle, Music, Radio } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 
 interface AddUrlFormProps {
@@ -17,30 +17,25 @@ const AddUrlForm: React.FC<AddUrlFormProps> = ({ onAddUrl }) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (!url.trim()) {
+      toast({
+        title: "URL required",
+        description: "Please enter a URL",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     // Basic URL validation
     try {
-      // Make sure it's a valid URL
+      // Try to create a URL object to validate basic URL structure
       new URL(url);
       
-      // Accept any URL that looks like a media URL or stream URL
-      // This includes URLs with audio file extensions or URLs containing "stream", "radio", etc.
-      const fileExtension = url.split('.').pop()?.toLowerCase();
-      const validExtensions = ['mp3', 'wav', 'ogg', 'aac', 'm4a', 'flac'];
-      const isStreamUrl = url.includes('stream') || url.includes('radio') || url.includes('audio') || url.includes('music');
-      
-      if (validExtensions.includes(fileExtension || '') || isStreamUrl) {
-        // Generate a name if not provided
-        const trackName = name.trim() || `Track ${new Date().toISOString()}`;
-        onAddUrl(url, trackName);
-        setUrl("");
-        setName("");
-      } else {
-        toast({
-          title: "Unsupported URL format",
-          description: "Please enter a URL that points to an audio file or streaming service",
-          variant: "destructive",
-        });
-      }
+      // Accept any kind of URL
+      const trackName = name.trim() || `Track ${new Date().toISOString().slice(0, 19).replace('T', ' ')}`;
+      onAddUrl(url, trackName);
+      setUrl("");
+      setName("");
     } catch (error) {
       toast({
         title: "Invalid URL",
@@ -50,25 +45,33 @@ const AddUrlForm: React.FC<AddUrlFormProps> = ({ onAddUrl }) => {
     }
   };
 
+  const isStreamUrl = url.includes('stream') || url.includes('radio');
+  const Icon = isStreamUrl ? Radio : Music;
+
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-2">
       <div className="flex gap-2">
         <Input
           type="text"
-          placeholder="Enter track name (optional)"
+          placeholder="Enter track name"
           value={name}
           onChange={(e) => setName(e.target.value)}
           className="flex-1 bg-white/20 backdrop-blur-sm border-none"
         />
       </div>
       <div className="flex gap-2">
-        <Input
-          type="url"
-          placeholder="Enter audio URL or stream URL"
-          value={url}
-          onChange={(e) => setUrl(e.target.value)}
-          className="flex-1 bg-white/20 backdrop-blur-sm border-none"
-        />
+        <div className="relative flex-1">
+          <Input
+            type="url"
+            placeholder="Enter audio URL or stream URL"
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+            className="w-full bg-white/20 backdrop-blur-sm border-none pl-9"
+          />
+          <div className="absolute left-2 top-1/2 transform -translate-y-1/2">
+            <Icon className="h-5 w-5 text-primary" />
+          </div>
+        </div>
         <Button type="submit" variant="outline" className="bg-white/20 backdrop-blur-sm border-none">
           <PlusCircle className="w-4 h-4 mr-2" />
           Add
