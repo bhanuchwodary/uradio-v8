@@ -26,20 +26,34 @@ const AddUrlForm: React.FC<AddUrlFormProps> = ({ onAddUrl }) => {
       return;
     }
     
-    // Basic URL validation
+    // Less strict URL validation for audio streams
+    let processedUrl = url.trim();
+    
+    // Try to prepend http:// if no protocol is specified
+    if (!processedUrl.startsWith('http://') && !processedUrl.startsWith('https://')) {
+      processedUrl = 'https://' + processedUrl;
+    }
+    
     try {
-      // Try to create a URL object to validate basic URL structure
-      new URL(url);
+      // Basic URL structure check
+      new URL(processedUrl);
       
-      // Accept any kind of URL
+      // Use provided name or generate one
       const trackName = name.trim() || `Track ${new Date().toISOString().slice(0, 19).replace('T', ' ')}`;
-      onAddUrl(url, trackName);
+      
+      onAddUrl(processedUrl, trackName);
       setUrl("");
       setName("");
+      
+      toast({
+        title: "Track added",
+        description: `"${trackName}" has been added to your playlist.`,
+      });
     } catch (error) {
+      console.error("URL parsing error:", error);
       toast({
         title: "Invalid URL",
-        description: "Please enter a valid URL",
+        description: "Please enter a valid URL format",
         variant: "destructive",
       });
     }
@@ -62,7 +76,7 @@ const AddUrlForm: React.FC<AddUrlFormProps> = ({ onAddUrl }) => {
       <div className="flex gap-2">
         <div className="relative flex-1">
           <Input
-            type="url"
+            type="text"
             placeholder="Enter audio URL or stream URL"
             value={url}
             onChange={(e) => setUrl(e.target.value)}
