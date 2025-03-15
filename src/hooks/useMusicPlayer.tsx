@@ -2,13 +2,8 @@
 import { useState, useEffect } from "react";
 import androidAutoService from "../services/androidAutoService";
 
-interface Track {
-  url: string;
-  name: string;
-}
-
 export const useMusicPlayer = () => {
-  const [tracks, setTracks] = useState<Track[]>([]);
+  const [urls, setUrls] = useState<string[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [trackDuration, setTrackDuration] = useState(0);
@@ -33,39 +28,47 @@ export const useMusicPlayer = () => {
 
   // Update Android Auto with current track info
   useEffect(() => {
-    if (tracks.length > 0 && currentIndex < tracks.length) {
-      const currentTrack = tracks[currentIndex];
+    if (urls.length > 0) {
+      const currentUrl = urls[currentIndex];
+      let title;
       
+      try {
+        // Try to extract a filename from the URL
+        title = new URL(currentUrl).pathname.split('/').pop() || `Track ${currentIndex + 1}`;
+      } catch {
+        title = `Track ${currentIndex + 1}`;
+      }
+
       androidAutoService.updateTrackInfo({
-        title: currentTrack.name,
+        title,
         artist: "Music Streaming App",
         duration: trackDuration,
         position: trackPosition,
       });
     }
-  }, [tracks, currentIndex, trackDuration, trackPosition]);
+  }, [urls, currentIndex, trackDuration, trackPosition]);
 
   // Update Android Auto with playback state
   useEffect(() => {
     androidAutoService.updatePlaybackState(isPlaying);
   }, [isPlaying]);
 
-  // Add a new track to the playlist
-  const addTrack = (url: string, name: string) => {
-    setTracks((prevTracks) => [...prevTracks, { url, name }]);
+  // Add a new URL to the playlist
+  const addUrl = (url: string) => {
+    setUrls((prevUrls) => [...prevUrls, url]);
   };
 
-  // Remove a track from the playlist
-  const removeTrack = (index: number) => {
-    setTracks((prevTracks) => {
-      const newTracks = [...prevTracks];
-      newTracks.splice(index, 1);
+  // Remove a URL from the playlist
+  const removeUrl = (index: number) => {
+    setUrls((prevUrls) => {
+      const newUrls = [...prevUrls];
+      newUrls.splice(index, 1);
       
       // If we removed the current track
       if (index === currentIndex) {
-        if (newTracks.length > 0) {
+        if (newUrls.length > 0) {
           // If we have tracks left, either stay at same index (if in bounds) or go to last track
-          setCurrentIndex(Math.min(currentIndex, newTracks.length - 1));
+          setCurrentIndex(Math.min(currentIndex, newUrls.length - 1));
         } else {
           // If no tracks left, reset to 0 and stop playback
           setCurrentIndex(0);
@@ -76,21 +79,21 @@ export const useMusicPlayer = () => {
         setCurrentIndex(currentIndex - 1);
       }
       
-      return newTracks;
+      return newUrls;
     });
   };
 
   // Skip to next track
   const handleSkipNext = () => {
-    if (tracks.length > 0) {
-      setCurrentIndex((prevIndex) => (prevIndex + 1) % tracks.length);
+    if (urls.length > 0) {
+      setCurrentIndex((prevIndex) => (prevIndex + 1) % urls.length);
     }
   };
 
   // Skip to previous track
   const handleSkipPrevious = () => {
-    if (tracks.length > 0) {
-      setCurrentIndex((prevIndex) => (prevIndex - 1 + tracks.length) % tracks.length);
+    if (urls.length > 0) {
+      setCurrentIndex((prevIndex) => (prevIndex - 1 + urls.length) % urls.length);
     }
   };
 
@@ -101,15 +104,13 @@ export const useMusicPlayer = () => {
   };
 
   return {
-    tracks,
+    urls,
     currentIndex,
     isPlaying,
-    addTrack,
-    removeTrack,
+    addUrl,
+    removeUrl,
     setCurrentIndex,
     setIsPlaying,
     updateTrackProgress,
-    handleSkipNext,
-    handleSkipPrevious,
   };
 };

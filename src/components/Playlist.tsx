@@ -1,28 +1,23 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Play, Trash2, Music, Radio } from "lucide-react";
+import { Play, Trash2 } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
-interface Track {
-  url: string;
-  name: string;
-}
-
 interface PlaylistProps {
-  tracks: Track[];
+  urls: string[];
   currentIndex: number;
   onSelectTrack: (index: number) => void;
   onRemoveTrack: (index: number) => void;
 }
 
 const Playlist: React.FC<PlaylistProps> = ({
-  tracks,
+  urls,
   currentIndex,
   onSelectTrack,
   onRemoveTrack,
 }) => {
-  if (tracks.length === 0) {
+  if (urls.length === 0) {
     return (
       <div className="text-center p-4 text-gray-500">
         No tracks added. Add a URL to get started.
@@ -33,10 +28,16 @@ const Playlist: React.FC<PlaylistProps> = ({
   return (
     <ScrollArea className="h-[250px] pr-4">
       <div className="space-y-2">
-        {tracks.map((track, index) => {
+        {urls.map((url, index) => {
           const isActive = index === currentIndex;
-          const isStreamUrl = track.url.includes('stream') || track.url.includes('radio');
-          const TrackIcon = isStreamUrl ? Radio : Music;
+          let displayUrl;
+          try {
+            const urlObj = new URL(url);
+            // Get the file name from the path
+            displayUrl = urlObj.pathname.split('/').pop() || url;
+          } catch (e) {
+            displayUrl = url;
+          }
 
           return (
             <div
@@ -56,9 +57,8 @@ const Playlist: React.FC<PlaylistProps> = ({
                 >
                   <Play className="h-4 w-4" />
                 </Button>
-                <TrackIcon className="h-4 w-4 text-primary" />
                 <span className="truncate text-sm">
-                  {index + 1}. {track.name}
+                  {index + 1}. {displayUrl}
                 </span>
               </div>
               <Button

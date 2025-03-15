@@ -9,21 +9,19 @@ import { useToast } from "@/components/ui/use-toast";
 
 const Index = () => {
   const {
-    tracks,
+    urls,
     currentIndex,
     isPlaying,
-    addTrack,
-    removeTrack,
+    addUrl,
+    removeUrl,
     setCurrentIndex,
     setIsPlaying,
-    handleSkipNext,
-    handleSkipPrevious,
   } = useMusicPlayer();
   
   const { toast } = useToast();
 
-  const handleAddTrack = (url: string, name: string) => {
-    addTrack(url, name);
+  const handleAddUrl = (url: string) => {
+    addUrl(url);
     toast({
       title: "Track added",
       description: "New track has been added to the playlist",
@@ -38,13 +36,11 @@ const Index = () => {
         </h1>
 
         <MusicPlayer
-          tracks={tracks}
+          urls={urls}
           currentIndex={currentIndex}
           setCurrentIndex={setCurrentIndex}
           isPlaying={isPlaying}
           setIsPlaying={setIsPlaying}
-          onSkipNext={handleSkipNext}
-          onSkipPrevious={handleSkipPrevious}
         />
 
         <Card className="bg-white/10 backdrop-blur-md border-none shadow-lg">
@@ -52,7 +48,7 @@ const Index = () => {
             <CardTitle className="text-xl">Add Music URL</CardTitle>
           </CardHeader>
           <CardContent>
-            <AddUrlForm onAddUrl={handleAddTrack} />
+            <AddUrlForm onAddUrl={handleAddUrl} />
           </CardContent>
         </Card>
 
@@ -62,13 +58,13 @@ const Index = () => {
           </CardHeader>
           <CardContent>
             <Playlist
-              tracks={tracks}
+              urls={urls}
               currentIndex={currentIndex}
               onSelectTrack={(index) => {
                 setCurrentIndex(index);
                 setIsPlaying(true);
               }}
-              onRemoveTrack={removeTrack}
+              onRemoveTrack={removeUrl}
             />
           </CardContent>
         </Card>
