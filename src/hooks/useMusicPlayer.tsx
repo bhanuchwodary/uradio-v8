@@ -42,7 +42,7 @@ export const useMusicPlayer = () => {
       
       androidAutoService.updateTrackInfo({
         title: currentTrack.name || `Track ${currentIndex + 1}`,
-        artist: "Music Streaming App",
+        artist: "Streamify Jukebox",
         duration: trackDuration,
         position: trackPosition,
       });
@@ -77,10 +77,25 @@ export const useMusicPlayer = () => {
       ...prevTracks, 
       { 
         url, 
-        name: name || `Track ${prevTracks.length + 1}`,
+        name: name || `Station ${prevTracks.length + 1}`,
         isFavorite: false
       }
     ]);
+  };
+
+  // Edit a track in the playlist
+  const editTrack = (index: number, data: { url: string; name: string }) => {
+    setTracks((prevTracks) => {
+      const newTracks = [...prevTracks];
+      if (newTracks[index]) {
+        newTracks[index] = {
+          ...newTracks[index],
+          url: data.url,
+          name: data.name || `Station ${index + 1}`
+        };
+      }
+      return newTracks;
+    });
   };
 
   // Remove a URL from the playlist
@@ -150,6 +165,7 @@ export const useMusicPlayer = () => {
     addUrl,
     removeUrl,
     toggleFavorite,
+    editTrack,
     setCurrentIndex,
     setIsPlaying,
     updateTrackProgress,

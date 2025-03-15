@@ -1,8 +1,9 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Play, Trash2, Heart } from "lucide-react";
+import { Play, Trash2, Heart, Edit } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import EditStationDialog from "./EditStationDialog";
 
 interface Track {
   url: string;
@@ -17,6 +18,7 @@ interface PlaylistProps {
   onSelectTrack: (index: number) => void;
   onRemoveTrack: (index: number) => void;
   onToggleFavorite?: (index: number) => void;
+  onEditTrack?: (index: number, data: { url: string; name: string }) => void;
 }
 
 const Playlist: React.FC<PlaylistProps> = ({
@@ -26,7 +28,10 @@ const Playlist: React.FC<PlaylistProps> = ({
   onSelectTrack,
   onRemoveTrack,
   onToggleFavorite,
+  onEditTrack,
 }) => {
+  const [editingTrack, setEditingTrack] = useState<{ index: number; data: { url: string; name: string } } | null>(null);
+
   if (urls.length === 0) {
     return (
       <div className="text-center p-4 text-gray-500">
@@ -34,6 +39,25 @@ const Playlist: React.FC<PlaylistProps> = ({
       </div>
     );
   }
+
+  const handleEdit = (index: number) => {
+    if (tracks && tracks[index]) {
+      setEditingTrack({
+        index,
+        data: {
+          url: tracks[index].url,
+          name: tracks[index].name
+        }
+      });
+    }
+  };
+
+  const handleSaveEdit = (data: { url: string; name: string }) => {
+    if (editingTrack !== null && onEditTrack) {
+      onEditTrack(editingTrack.index, data);
+    }
+    setEditingTrack(null);
+  };
 
   return (
     <ScrollArea className="h-[250px] pr-4">
@@ -73,6 +97,16 @@ const Playlist: React.FC<PlaylistProps> = ({
                       onClick={() => onToggleFavorite(index)}
                     >
                       <Heart className="h-4 w-4" fill={track.isFavorite ? "currentColor" : "none"} />
+                    </Button>
+                  )}
+                  {onEditTrack && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6 text-blue-500 hover:text-blue-700"
+                      onClick={() => handleEdit(index)}
+                    >
+                      <Edit className="h-4 w-4" />
                     </Button>
                   )}
                   <Button
@@ -135,6 +169,14 @@ const Playlist: React.FC<PlaylistProps> = ({
           })
         )}
       </div>
+      {editingTrack && (
+        <EditStationDialog
+          isOpen={editingTrack !== null}
+          onClose={() => setEditingTrack(null)}
+          onSave={handleSaveEdit}
+          initialValues={editingTrack.data}
+        />
+      )}
     </ScrollArea>
   );
 };

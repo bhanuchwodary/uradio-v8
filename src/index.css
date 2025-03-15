@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -97,5 +98,16 @@
 
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+/* Custom Glass Morphism Utilities */
+@layer utilities {
+  .glass {
+    @apply backdrop-blur-md bg-white/10 border-white/10;
+  }
+  
+  .dark-glass {
+    @apply backdrop-blur-md bg-black/30 border-white/10;
   }
 }
