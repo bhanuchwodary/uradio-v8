@@ -34,10 +34,16 @@ const AddUrlForm: React.FC<AddUrlFormProps> = ({ onAddUrl }) => {
       new URL(url);
       
       // Accept any URL that looks like a media URL or stream URL
-      // This includes URLs with audio file extensions or URLs containing "stream", "radio", etc.
+      // This includes URLs with audio file extensions, m3u8, or URLs containing "stream", "radio", etc.
       const fileExtension = url.split('.').pop()?.toLowerCase();
-      const validExtensions = ['mp3', 'wav', 'ogg', 'aac', 'm4a', 'flac'];
-      const isStreamUrl = url.includes('stream') || url.includes('radio') || url.includes('audio') || url.includes('music');
+      const validExtensions = ['mp3', 'wav', 'ogg', 'aac', 'm4a', 'flac', 'm3u8', 'pls', 'asx'];
+      const isStreamUrl = 
+        url.includes('stream') || 
+        url.includes('radio') || 
+        url.includes('audio') || 
+        url.includes('music') || 
+        url.includes('live') ||
+        url.includes('/hls/');
       
       if (validExtensions.includes(fileExtension || '') || isStreamUrl) {
         onAddUrl(url, name || `Station ${Date.now()}`);
@@ -45,7 +51,7 @@ const AddUrlForm: React.FC<AddUrlFormProps> = ({ onAddUrl }) => {
       } else {
         toast({
           title: "Unsupported URL format",
-          description: "Please enter a URL that points to an audio file or streaming service",
+          description: "Please enter a URL that points to an audio file or streaming service (mp3, m3u8, etc.)",
           variant: "destructive",
         });
       }
@@ -70,7 +76,7 @@ const AddUrlForm: React.FC<AddUrlFormProps> = ({ onAddUrl }) => {
               <FormControl>
                 <Input
                   type="url"
-                  placeholder="Enter audio URL or stream URL"
+                  placeholder="Enter audio URL or stream URL (mp3, m3u8)"
                   className="bg-white/20 backdrop-blur-sm border-none"
                   {...field}
                 />

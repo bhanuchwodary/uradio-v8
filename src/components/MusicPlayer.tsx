@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
+import Hls from "hls.js";
 
 interface MusicPlayerProps {
   urls: string[];
@@ -22,9 +23,11 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
   setIsPlaying,
 }) => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const hlsRef = useRef<Hls | null>(null);
   const [duration, setDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
   const [volume, setVolume] = useState(0.5);
+  const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -39,40 +42,109 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
     
     const handleLoadedMetadata = () => {
       setDuration(audio.duration);
+      setLoading(false);
     };
     
     const handleEnded = () => {
       handleNext();
     };
+
+    const handleCanPlay = () => {
+      setLoading(false);
+    };
     
     audio.addEventListener("timeupdate", handleTimeUpdate);
     audio.addEventListener("loadedmetadata", handleLoadedMetadata);
     audio.addEventListener("ended", handleEnded);
+    audio.addEventListener("canplay", handleCanPlay);
     
     return () => {
+      if (hlsRef.current) {
+        hlsRef.current.destroy();
+        hlsRef.current = null;
+      }
       audio.pause();
       audio.removeEventListener("timeupdate", handleTimeUpdate);
       audio.removeEventListener("loadedmetadata", handleLoadedMetadata);
       audio.removeEventListener("ended", handleEnded);
+      audio.removeEventListener("canplay", handleCanPlay);
     };
   }, []);
 
-  useEffect(() => {
-    if (audioRef.current) {
-      if (urls.length > 0 && currentIndex >= 0 && currentIndex < urls.length) {
-        audioRef.current.src = urls[currentIndex];
+  const loadMedia = (url: string) => {
+    if (!audioRef.current) return;
+    
+    setLoading(true);
+    
+    // Destroy previous HLS instance if exists
+    if (hlsRef.current) {
+      hlsRef.current.destroy();
+      hlsRef.current = null;
+    }
+    
+    const isHLS = url.includes('.m3u8');
+    
+    if (isHLS && Hls.isSupported()) {
+      // Use HLS.js for m3u8 streams
+      const hls = new Hls({
+        enableWorker: true,
+        lowLatencyMode: true,
+      });
+      
+      hls.loadSource(url);
+      hls.attachMedia(audioRef.current);
+      
+      hls.on(Hls.Events.MANIFEST_PARSED, () => {
         if (isPlaying) {
-          audioRef.current.play().catch(error => {
-            console.error("Error playing audio:", error);
+          audioRef.current?.play().catch(error => {
+            console.error("Error playing HLS stream:", error);
             toast({
               title: "Playback Error",
-              description: "Could not play this track. Please try another URL.",
+              description: "Could not play this stream. Please try another URL.",
               variant: "destructive",
             });
             setIsPlaying(false);
+            setLoading(false);
           });
         }
+      });
+      
+      hls.on(Hls.Events.ERROR, (_, data) => {
+        if (data.fatal) {
+          console.error("HLS fatal error:", data);
+          toast({
+            title: "Stream Error",
+            description: "Error loading the stream. Please try another URL.",
+            variant: "destructive",
+          });
+          setIsPlaying(false);
+          setLoading(false);
+          hls.destroy();
+        }
+      });
+      
+      hlsRef.current = hls;
+    } else {
+      // Standard audio playback for other formats
+      audioRef.current.src = url;
+      if (isPlaying) {
+        audioRef.current.play().catch(error => {
+          console.error("Error playing audio:", error);
+          toast({
+            title: "Playback Error",
+            description: "Could not play this track. Please try another URL.",
+            variant: "destructive",
+          });
+          setIsPlaying(false);
+          setLoading(false);
+        });
       }
+    }
+  };
+
+  useEffect(() => {
+    if (urls.length > 0 && currentIndex >= 0 && currentIndex < urls.length) {
+      loadMedia(urls[currentIndex]);
     }
   }, [currentIndex, urls]);
 
@@ -82,6 +154,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
         audioRef.current.play().catch(error => {
           console.error("Error playing audio:", error);
           setIsPlaying(false);
+          setLoading(false);
         });
       } else {
         audioRef.current.pause();
@@ -112,13 +185,14 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
   };
 
   const handleSeek = (value: number[]) => {
-    if (audioRef.current) {
+    if (audioRef.current && !isNaN(value[0])) {
       audioRef.current.currentTime = value[0];
       setCurrentTime(value[0]);
     }
   };
 
   const formatTime = (time: number) => {
+    if (isNaN(time)) return "0:00";
     const minutes = Math.floor(time / 60);
     const seconds = Math.floor(time % 60);
     return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
@@ -133,18 +207,22 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
               {urls.length > 0 ? `Track ${currentIndex + 1}` : "No track selected"}
             </h3>
             <p className="text-xs text-gray-500 truncate">
-              {urls[currentIndex] ? new URL(urls[currentIndex]).hostname : "Add a URL to begin"}
+              {urls[currentIndex] ? (new URL(urls[currentIndex])).hostname : "Add a URL to begin"}
             </p>
+            {loading && (
+              <p className="text-xs text-blue-400 animate-pulse mt-1">Loading stream...</p>
+            )}
           </div>
 
           <div className="flex items-center gap-2">
             <span className="text-xs">{formatTime(currentTime)}</span>
             <Slider
-              value={[currentTime]}
+              value={[currentTime || 0]}
               max={duration || 100}
               step={1}
               onValueChange={handleSeek}
               className="flex-1"
+              disabled={!duration || duration === Infinity}
             />
             <span className="text-xs">{formatTime(duration)}</span>
           </div>
