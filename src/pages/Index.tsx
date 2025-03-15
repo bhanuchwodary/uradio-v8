@@ -10,21 +10,32 @@ import { useToast } from "@/components/ui/use-toast";
 const Index = () => {
   const {
     urls,
+    tracks,
     currentIndex,
     isPlaying,
     addUrl,
     removeUrl,
+    toggleFavorite,
     setCurrentIndex,
     setIsPlaying,
   } = useMusicPlayer();
   
   const { toast } = useToast();
 
-  const handleAddUrl = (url: string) => {
-    addUrl(url);
+  const handleAddUrl = (url: string, name: string) => {
+    addUrl(url, name);
     toast({
-      title: "Track added",
-      description: "New track has been added to the playlist",
+      title: "Station added",
+      description: `"${name}" has been added to the playlist`,
+    });
+  };
+
+  const handleToggleFavorite = (index: number) => {
+    toggleFavorite(index);
+    const track = tracks[index];
+    toast({
+      title: track.isFavorite ? "Removed from favorites" : "Added to favorites",
+      description: `"${track.name}" ${track.isFavorite ? "removed from" : "added to"} favorites`,
     });
   };
 
@@ -45,7 +56,7 @@ const Index = () => {
 
         <Card className="bg-white/10 backdrop-blur-md border-none shadow-lg">
           <CardHeader>
-            <CardTitle className="text-xl">Add Music URL</CardTitle>
+            <CardTitle className="text-xl">Add Station</CardTitle>
           </CardHeader>
           <CardContent>
             <AddUrlForm onAddUrl={handleAddUrl} />
@@ -59,12 +70,14 @@ const Index = () => {
           <CardContent>
             <Playlist
               urls={urls}
+              tracks={tracks}
               currentIndex={currentIndex}
               onSelectTrack={(index) => {
                 setCurrentIndex(index);
                 setIsPlaying(true);
               }}
               onRemoveTrack={removeUrl}
+              onToggleFavorite={handleToggleFavorite}
             />
           </CardContent>
         </Card>

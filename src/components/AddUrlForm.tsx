@@ -4,17 +4,29 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PlusCircle } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
+import { useForm } from "react-hook-form";
 
 interface AddUrlFormProps {
-  onAddUrl: (url: string) => void;
+  onAddUrl: (url: string, name: string) => void;
+}
+
+interface FormValues {
+  url: string;
+  name: string;
 }
 
 const AddUrlForm: React.FC<AddUrlFormProps> = ({ onAddUrl }) => {
-  const [url, setUrl] = useState("");
   const { toast } = useToast();
+  const form = useForm<FormValues>({
+    defaultValues: {
+      url: "",
+      name: ""
+    }
+  });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = (values: FormValues) => {
+    const { url, name } = values;
     
     // Basic URL validation
     try {
@@ -28,8 +40,8 @@ const AddUrlForm: React.FC<AddUrlFormProps> = ({ onAddUrl }) => {
       const isStreamUrl = url.includes('stream') || url.includes('radio') || url.includes('audio') || url.includes('music');
       
       if (validExtensions.includes(fileExtension || '') || isStreamUrl) {
-        onAddUrl(url);
-        setUrl("");
+        onAddUrl(url, name || `Station ${Date.now()}`);
+        form.reset();
       } else {
         toast({
           title: "Unsupported URL format",
@@ -47,19 +59,50 @@ const AddUrlForm: React.FC<AddUrlFormProps> = ({ onAddUrl }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex gap-2">
-      <Input
-        type="url"
-        placeholder="Enter audio URL or stream URL"
-        value={url}
-        onChange={(e) => setUrl(e.target.value)}
-        className="flex-1 bg-white/20 backdrop-blur-sm border-none"
-      />
-      <Button type="submit" variant="outline" className="bg-white/20 backdrop-blur-sm border-none">
-        <PlusCircle className="w-4 h-4 mr-2" />
-        Add
-      </Button>
-    </form>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-3">
+        <FormField
+          control={form.control}
+          name="url"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>URL</FormLabel>
+              <FormControl>
+                <Input
+                  type="url"
+                  placeholder="Enter audio URL or stream URL"
+                  className="bg-white/20 backdrop-blur-sm border-none"
+                  {...field}
+                />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+        
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Station Name (optional)</FormLabel>
+              <FormControl>
+                <Input
+                  type="text"
+                  placeholder="Enter station name"
+                  className="bg-white/20 backdrop-blur-sm border-none"
+                  {...field}
+                />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+        
+        <Button type="submit" variant="outline" className="w-full bg-white/20 backdrop-blur-sm border-none">
+          <PlusCircle className="w-4 h-4 mr-2" />
+          Add Station
+        </Button>
+      </form>
+    </Form>
   );
 };
 

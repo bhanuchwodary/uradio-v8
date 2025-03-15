@@ -2,12 +2,21 @@
 import { useState, useEffect } from "react";
 import androidAutoService from "../services/androidAutoService";
 
+interface Track {
+  url: string;
+  name: string;
+  isFavorite: boolean;
+}
+
 export const useMusicPlayer = () => {
-  const [urls, setUrls] = useState<string[]>([]);
+  const [tracks, setTracks] = useState<Track[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [trackDuration, setTrackDuration] = useState(0);
   const [trackPosition, setTrackPosition] = useState(0);
+
+  // Get urls array for backward compatibility
+  const urls = tracks.map(track => track.url);
 
   // Initialize Android Auto service
   useEffect(() => {
@@ -28,47 +37,63 @@ export const useMusicPlayer = () => {
 
   // Update Android Auto with current track info
   useEffect(() => {
-    if (urls.length > 0) {
-      const currentUrl = urls[currentIndex];
-      let title;
+    if (tracks.length > 0) {
+      const currentTrack = tracks[currentIndex];
       
-      try {
-        // Try to extract a filename from the URL
-        title = new URL(currentUrl).pathname.split('/').pop() || `Track ${currentIndex + 1}`;
-      } catch {
-        title = `Track ${currentIndex + 1}`;
-      }
-
       androidAutoService.updateTrackInfo({
-        title,
+        title: currentTrack.name || `Track ${currentIndex + 1}`,
         artist: "Music Streaming App",
         duration: trackDuration,
         position: trackPosition,
       });
     }
-  }, [urls, currentIndex, trackDuration, trackPosition]);
+  }, [tracks, currentIndex, trackDuration, trackPosition]);
 
   // Update Android Auto with playback state
   useEffect(() => {
     androidAutoService.updatePlaybackState(isPlaying);
   }, [isPlaying]);
 
+  // Load tracks from localStorage on init
+  useEffect(() => {
+    const savedTracks = localStorage.getItem('musicTracks');
+    if (savedTracks) {
+      try {
+        setTracks(JSON.parse(savedTracks));
+      } catch (error) {
+        console.error("Error loading saved tracks:", error);
+      }
+    }
+  }, []);
+
+  // Save tracks to localStorage on change
+  useEffect(() => {
+    localStorage.setItem('musicTracks', JSON.stringify(tracks));
+  }, [tracks]);
+
   // Add a new URL to the playlist
-  const addUrl = (url: string) => {
-    setUrls((prevUrls) => [...prevUrls, url]);
+  const addUrl = (url: string, name: string = "") => {
+    setTracks((prevTracks) => [
+      ...prevTracks, 
+      { 
+        url, 
+        name: name || `Track ${prevTracks.length + 1}`,
+        isFavorite: false
+      }
+    ]);
   };
 
   // Remove a URL from the playlist
   const removeUrl = (index: number) => {
-    setUrls((prevUrls) => {
-      const newUrls = [...prevUrls];
-      newUrls.splice(index, 1);
+    setTracks((prevTracks) => {
+      const newTracks = [...prevTracks];
+      newTracks.splice(index, 1);
       
       // If we removed the current track
       if (index === currentIndex) {
-        if (newUrls.length > 0) {
+        if (newTracks.length > 0) {
           // If we have tracks left, either stay at same index (if in bounds) or go to last track
-          setCurrentIndex(Math.min(currentIndex, newUrls.length - 1));
+          setCurrentIndex(Math.min(currentIndex, newTracks.length - 1));
         } else {
           // If no tracks left, reset to 0 and stop playback
           setCurrentIndex(0);
@@ -79,21 +104,35 @@ export const useMusicPlayer = () => {
         setCurrentIndex(currentIndex - 1);
       }
       
-      return newUrls;
+      return newTracks;
+    });
+  };
+
+  // Toggle favorite status for a track
+  const toggleFavorite = (index: number) => {
+    setTracks((prevTracks) => {
+      const newTracks = [...prevTracks];
+      if (newTracks[index]) {
+        newTracks[index] = {
+          ...newTracks[index],
+          isFavorite: !newTracks[index].isFavorite
+        };
+      }
+      return newTracks;
     });
   };
 
   // Skip to next track
   const handleSkipNext = () => {
-    if (urls.length > 0) {
-      setCurrentIndex((prevIndex) => (prevIndex + 1) % urls.length);
+    if (tracks.length > 0) {
+      setCurrentIndex((prevIndex) => (prevIndex + 1) % tracks.length);
     }
   };
 
   // Skip to previous track
   const handleSkipPrevious = () => {
-    if (urls.length > 0) {
-      setCurrentIndex((prevIndex) => (prevIndex - 1 + urls.length) % urls.length);
+    if (tracks.length > 0) {
+      setCurrentIndex((prevIndex) => (prevIndex - 1 + tracks.length) % tracks.length);
     }
   };
 
@@ -104,11 +143,13 @@ export const useMusicPlayer = () => {
   };
 
   return {
-    urls,
+    tracks,
+    urls, // Keep for backward compatibility
     currentIndex,
     isPlaying,
     addUrl,
     removeUrl,
+    toggleFavorite,
     setCurrentIndex,
     setIsPlaying,
     updateTrackProgress,
