@@ -40,8 +40,8 @@ const PlaylistPage = () => {
   };
 
   return (
-    <div className="min-h-screen p-4 bg-gradient-to-br from-blue-900 via-purple-900 to-pink-700 dark:from-gray-900 dark:via-gray-800 dark:to-gray-700 flex flex-col items-center justify-center">
-      <div className="w-full max-w-2xl space-y-6">
+    <div className="min-h-screen p-3 md:p-4 bg-gradient-to-br from-blue-900 via-purple-900 to-pink-700 dark:from-gray-900 dark:via-gray-800 dark:to-gray-700 flex flex-col items-center">
+      <div className="w-full max-w-2xl space-y-4 md:space-y-6 flex flex-col">
         <Navigation />
         
         <MusicPlayer
@@ -53,10 +53,10 @@ const PlaylistPage = () => {
         />
 
         <Card className="bg-white/10 backdrop-blur-md border-none shadow-lg">
-          <CardHeader>
-            <CardTitle className="text-xl">Playlist</CardTitle>
+          <CardHeader className="p-3 md:p-4">
+            <CardTitle className="text-lg md:text-xl">Playlist</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-3 md:p-4 pt-0">
             <Playlist
               urls={urls}
               tracks={tracks}

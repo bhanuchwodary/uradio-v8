@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Play, Trash2, Heart, Edit } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import EditStationDialog from "./EditStationDialog";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface Track {
   url: string;
@@ -31,10 +32,13 @@ const Playlist: React.FC<PlaylistProps> = ({
   onEditTrack,
 }) => {
   const [editingTrack, setEditingTrack] = useState<{ index: number; data: { url: string; name: string } } | null>(null);
+  const isMobile = useIsMobile();
+  
+  const scrollAreaHeight = isMobile ? "200px" : "250px";
 
   if (urls.length === 0) {
     return (
-      <div className="text-center p-4 text-gray-500">
+      <div className="text-center p-3 text-gray-500">
         No tracks added. Add a URL to get started.
       </div>
     );
@@ -60,7 +64,7 @@ const Playlist: React.FC<PlaylistProps> = ({
   };
 
   return (
-    <ScrollArea className="h-[250px] pr-4">
+    <ScrollArea className={`h-[${scrollAreaHeight}] pr-4`}>
       <div className="space-y-2">
         {tracks ? (
           // New version using tracks with names and favorites
@@ -85,7 +89,7 @@ const Playlist: React.FC<PlaylistProps> = ({
                     <Play className="h-4 w-4" />
                   </Button>
                   <span className="truncate text-sm">
-                    {index + 1}. {track.name}
+                    {isMobile ? track.name : `${index + 1}. ${track.name}`}
                   </span>
                 </div>
                 <div className="flex items-center">
@@ -153,7 +157,7 @@ const Playlist: React.FC<PlaylistProps> = ({
                     <Play className="h-4 w-4" />
                   </Button>
                   <span className="truncate text-sm">
-                    {index + 1}. {displayUrl}
+                    {isMobile ? displayUrl : `${index + 1}. ${displayUrl}`}
                   </span>
                 </div>
                 <Button
