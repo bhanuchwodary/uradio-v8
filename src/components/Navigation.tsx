@@ -2,55 +2,61 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Home, Music, PlusCircle, Menu } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { Music, ListMusic, Plus, Home, FileAudio } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
 const Navigation = () => {
   const location = useLocation();
   const isMobile = useIsMobile();
-  
-  // Mobile menu
+  const isActive = (path: string) => location.pathname === path;
+
   if (isMobile) {
     return (
-      <div className="flex justify-between items-center mb-4">
+      <div className="flex justify-between items-center w-full mb-4">
         <Link to="/">
-          <h1 className="text-xl font-bold text-white">
-            Streamify Jukebox
-          </h1>
+          <div className="flex items-center">
+            <Music className="mr-2 h-6 w-6" />
+            <span className="font-bold text-lg">Streamify</span>
+          </div>
         </Link>
-        
         <div className="flex items-center gap-2">
           <ThemeToggle />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="icon" className="bg-white/20 backdrop-blur-sm border-none">
-                <Menu className="h-5 w-5" />
+              <Button variant="outline" size="icon">
+                <Music className="h-5 w-5" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48 bg-white/20 backdrop-blur-md border-none">
-              <DropdownMenuItem asChild className="focus:bg-white/20">
-                <Link to="/" className="w-full flex items-center">
-                  <Home className="w-4 h-4 mr-2" />
-                  Home
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem asChild>
+                <Link to="/" className="w-full">
+                  <Home className="mr-2 h-4 w-4" />
+                  <span>Home</span>
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem asChild className="focus:bg-white/20">
-                <Link to="/playlist" className="w-full flex items-center">
-                  <Music className="w-4 h-4 mr-2" />
-                  Playlist
+              <DropdownMenuItem asChild>
+                <Link to="/playlist" className="w-full">
+                  <ListMusic className="mr-2 h-4 w-4" />
+                  <span>Playlist</span>
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem asChild className="focus:bg-white/20">
-                <Link to="/add-station" className="w-full flex items-center">
-                  <PlusCircle className="w-4 h-4 mr-2" />
-                  Add Station
+              <DropdownMenuItem asChild>
+                <Link to="/add-station" className="w-full">
+                  <Plus className="mr-2 h-4 w-4" />
+                  <span>Add Station</span>
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/local-files" className="w-full">
+                  <FileAudio className="mr-2 h-4 w-4" />
+                  <span>Local Files</span>
                 </Link>
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -59,50 +65,44 @@ const Navigation = () => {
       </div>
     );
   }
-  
-  // Desktop menu
+
   return (
-    <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+    <div className="flex justify-between items-center w-full mb-4">
       <div className="flex items-center">
         <Link to="/">
-          <h1 className="text-2xl md:text-3xl font-bold text-white">
-            Streamify Jukebox
-          </h1>
+          <div className="flex items-center mr-6">
+            <Music className="mr-2 h-6 w-6" />
+            <span className="font-bold text-lg">Streamify</span>
+          </div>
         </Link>
+        <div className="flex gap-2">
+          <Link to="/">
+            <Button variant={isActive("/") ? "default" : "ghost"} size="sm">
+              <Home className="h-4 w-4 mr-1" />
+              Home
+            </Button>
+          </Link>
+          <Link to="/playlist">
+            <Button variant={isActive("/playlist") ? "default" : "ghost"} size="sm">
+              <ListMusic className="h-4 w-4 mr-1" />
+              Playlist
+            </Button>
+          </Link>
+          <Link to="/add-station">
+            <Button variant={isActive("/add-station") ? "default" : "ghost"} size="sm">
+              <Plus className="h-4 w-4 mr-1" />
+              Add Station
+            </Button>
+          </Link>
+          <Link to="/local-files">
+            <Button variant={isActive("/local-files") ? "default" : "ghost"} size="sm">
+              <FileAudio className="h-4 w-4 mr-1" />
+              Local Files
+            </Button>
+          </Link>
+        </div>
       </div>
-      <div className="flex items-center space-x-2">
-        <Link to="/">
-          <Button 
-            variant={location.pathname === "/" ? "default" : "outline"} 
-            size="sm"
-            className="bg-white/20 backdrop-blur-sm border-none"
-          >
-            <Home className="w-4 h-4 mr-2" />
-            Home
-          </Button>
-        </Link>
-        <Link to="/playlist">
-          <Button 
-            variant={location.pathname === "/playlist" ? "default" : "outline"} 
-            size="sm"
-            className="bg-white/20 backdrop-blur-sm border-none"
-          >
-            <Music className="w-4 h-4 mr-2" />
-            Playlist
-          </Button>
-        </Link>
-        <Link to="/add-station">
-          <Button 
-            variant={location.pathname === "/add-station" ? "default" : "outline"} 
-            size="sm"
-            className="bg-white/20 backdrop-blur-sm border-none"
-          >
-            <PlusCircle className="w-4 h-4 mr-2" />
-            Add Station
-          </Button>
-        </Link>
-        <ThemeToggle />
-      </div>
+      <ThemeToggle />
     </div>
   );
 };
