@@ -24,12 +24,10 @@ const LocalFilesPage = () => {
   const folderInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    // Load saved local files list from localStorage
     const savedFiles = localStorage.getItem('localFilesList');
     if (savedFiles) {
       try {
         const fileInfoList = JSON.parse(savedFiles);
-        // We can't restore File objects, but we can display their names
         setLocalFiles(fileInfoList.map((info: { name: string }) => ({ name: info.name } as unknown as File)));
       } catch (error) {
         console.error("Error loading saved local files:", error);
@@ -52,17 +50,14 @@ const LocalFilesPage = () => {
       }
     }
 
-    // Add files to the playlist
     audioFiles.forEach(file => {
       const url = URL.createObjectURL(file);
       addUrl(url, file.name);
     });
 
-    // Update local files list
     const updatedFiles = [...localFiles, ...newFiles];
     setLocalFiles(updatedFiles);
     
-    // Save file names to localStorage
     try {
       const fileInfoList = updatedFiles.map(file => ({ name: file.name }));
       localStorage.setItem('localFilesList', JSON.stringify(fileInfoList));
@@ -75,7 +70,6 @@ const LocalFilesPage = () => {
       description: `Added ${audioFiles.length} audio files to your playlist`,
     });
 
-    // Reset the file input
     if (event.target) {
       event.target.value = '';
     }
@@ -96,17 +90,14 @@ const LocalFilesPage = () => {
       }
     }
 
-    // Add files to the playlist
     audioFiles.forEach(file => {
       const url = URL.createObjectURL(file);
       addUrl(url, file.name);
     });
 
-    // Update local files list
     const updatedFiles = [...localFiles, ...newFiles];
     setLocalFiles(updatedFiles);
     
-    // Save file names to localStorage
     try {
       const fileInfoList = updatedFiles.map(file => ({ name: file.name }));
       localStorage.setItem('localFilesList', JSON.stringify(fileInfoList));
@@ -119,7 +110,6 @@ const LocalFilesPage = () => {
       description: `Added ${audioFiles.length} audio files from folder to your playlist`,
     });
 
-    // Reset the file input
     if (event.target) {
       event.target.value = '';
     }
@@ -167,7 +157,6 @@ const LocalFilesPage = () => {
                 className="hidden"
               />
               
-              {/* Using the properly typed attributes now */}
               <input
                 type="file"
                 ref={folderInputRef}
@@ -205,7 +194,6 @@ const LocalFilesPage = () => {
                       key={index}
                       className="flex items-center justify-between p-2 rounded-md bg-white/10 backdrop-blur-sm hover:bg-white/20 cursor-pointer"
                       onClick={() => {
-                        // Find this file in the tracks array
                         const trackIndex = tracks.findIndex(track => 
                           track.name === file.name
                         );
