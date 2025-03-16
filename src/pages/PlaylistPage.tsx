@@ -46,6 +46,7 @@ const PlaylistPage = () => {
         
         <MusicPlayer
           urls={urls}
+          tracks={tracks}
           currentIndex={currentIndex}
           setCurrentIndex={setCurrentIndex}
           isPlaying={isPlaying}

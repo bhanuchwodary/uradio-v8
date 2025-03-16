@@ -93,12 +93,16 @@ class AndroidAutoService {
     duration: number;
     position: number;
     artworkUrl?: string;
+    isLocalFile?: boolean;
   }) {
     if (!trackInfo) return;
     
+    // Add information about whether this is a local file
+    const sourceType = trackInfo.isLocalFile ? "Local File" : "Streaming";
+    
     // In a real implementation, this would update the media session metadata
     // which would show in notifications, lock screen, and Android Auto
-    console.log("Updated media session metadata:", trackInfo);
+    console.log(`Updated media session metadata (${sourceType}):`, trackInfo);
   }
 
   // Update the current playback state
