@@ -1,5 +1,5 @@
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
@@ -16,11 +16,24 @@ const LocalFilesPage = () => {
     addUrl,
     setCurrentIndex,
     setIsPlaying,
+    getAudioElement,
   } = useMusicPlayer();
   
   const { toast } = useToast();
   const [localFiles, setLocalFiles] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const savedFiles = localStorage.getItem('localFilesList');
+    if (savedFiles) {
+      try {
+        const fileInfoList = JSON.parse(savedFiles);
+        setLocalFiles(fileInfoList.map((info: { name: string }) => ({ name: info.name } as unknown as File)));
+      } catch (error) {
+        console.error("Error loading saved local files:", error);
+      }
+    }
+  }, []);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -37,23 +50,28 @@ const LocalFilesPage = () => {
       }
     }
 
-    // Add files to the playlist
     audioFiles.forEach(file => {
       const url = URL.createObjectURL(file);
       addUrl(url, file.name);
     });
 
-    // Update local files list
-    setLocalFiles(prev => [...prev, ...newFiles]);
+    const updatedFiles = [...localFiles, ...newFiles];
+    setLocalFiles(updatedFiles);
+    
+    try {
+      const fileInfoList = updatedFiles.map(file => ({ name: file.name }));
+      localStorage.setItem('localFilesList', JSON.stringify(fileInfoList));
+    } catch (error) {
+      console.error("Error saving local files list:", error);
+    }
 
     toast({
       title: "Files Added",
       description: `Added ${audioFiles.length} audio files to your playlist`,
     });
 
-    // Reset the file input
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+    if (event.target) {
+      event.target.value = '';
     }
   };
 
@@ -75,6 +93,7 @@ const LocalFilesPage = () => {
           setCurrentIndex={setCurrentIndex}
           isPlaying={isPlaying}
           setIsPlaying={setIsPlaying}
+          getAudioElement={getAudioElement}
         />
 
         <Card className="bg-white/10 backdrop-blur-md border-none shadow-lg">
@@ -92,36 +111,37 @@ const LocalFilesPage = () => {
                 className="hidden"
               />
               
-              <Button 
-                onClick={handleOpenFileDialog}
-                className="flex items-center gap-2"
-              >
-                <Upload size={16} />
-                Select Audio Files
-              </Button>
+              <div className="flex gap-2">
+                <Button 
+                  onClick={handleOpenFileDialog}
+                  className="flex items-center gap-2 flex-1"
+                >
+                  <Upload size={16} />
+                  Select Audio Files
+                </Button>
+              </div>
               
               <div className="mt-2 space-y-2">
                 {localFiles.length > 0 ? (
                   localFiles.map((file, index) => (
                     <div 
                       key={index}
-                      className="flex items-center justify-between p-2 rounded-md bg-white/10 backdrop-blur-sm hover:bg-white/20"
+                      className="flex items-center justify-between p-2 rounded-md bg-white/10 backdrop-blur-sm hover:bg-white/20 cursor-pointer"
+                      onClick={() => {
+                        const trackIndex = tracks.findIndex(track => 
+                          track.name === file.name
+                        );
+                        if (trackIndex !== -1) {
+                          setCurrentIndex(trackIndex);
+                          setIsPlaying(true);
+                        }
+                      }}
                     >
                       <span className="truncate text-sm">{file.name}</span>
                       <Button
                         variant="ghost"
                         size="sm"
                         className="h-6 w-6 text-white hover:text-white/80"
-                        onClick={() => {
-                          // Find this file in the tracks array
-                          const trackIndex = tracks.findIndex(track => 
-                            track.name === file.name
-                          );
-                          if (trackIndex !== -1) {
-                            setCurrentIndex(trackIndex);
-                            setIsPlaying(true);
-                          }
-                        }}
                       >
                         <Music className="h-4 w-4" />
                       </Button>

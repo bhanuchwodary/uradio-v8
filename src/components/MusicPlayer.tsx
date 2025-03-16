@@ -13,6 +13,7 @@ interface MusicPlayerProps {
   setCurrentIndex: (index: number) => void;
   isPlaying: boolean;
   setIsPlaying: (isPlaying: boolean) => void;
+  getAudioElement?: () => HTMLAudioElement | null;
 }
 
 const MusicPlayer: React.FC<MusicPlayerProps> = ({
@@ -22,8 +23,9 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
   setCurrentIndex,
   isPlaying,
   setIsPlaying,
+  getAudioElement,
 }) => {
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const localAudioRef = useRef<HTMLAudioElement | null>(null);
   const hlsRef = useRef<Hls | null>(null);
   const [duration, setDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
@@ -36,10 +38,24 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
   const trackUrl = urls[currentIndex] || '';
 
   useEffect(() => {
-    const audio = new Audio();
-    audioRef.current = audio;
+    const audio = getAudioElement ? getAudioElement() : new Audio();
+    if (!audio) return;
     
+    localAudioRef.current = audio;
     audio.volume = volume;
+    
+    if ('mediaSession' in navigator) {
+      navigator.mediaSession.setActionHandler('play', () => setIsPlaying(true));
+      navigator.mediaSession.setActionHandler('pause', () => setIsPlaying(false));
+      navigator.mediaSession.setActionHandler('previoustrack', handlePrevious);
+      navigator.mediaSession.setActionHandler('nexttrack', handleNext);
+      
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: trackName,
+        artist: 'Streamify Jukebox',
+        album: trackUrl.startsWith('file:') || trackUrl.startsWith('blob:') ? 'Local Files' : 'My Stations',
+      });
+    }
     
     const handleTimeUpdate = () => {
       setCurrentTime(audio.currentTime);
@@ -68,41 +84,39 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
         hlsRef.current.destroy();
         hlsRef.current = null;
       }
-      audio.pause();
+      
       audio.removeEventListener("timeupdate", handleTimeUpdate);
       audio.removeEventListener("loadedmetadata", handleLoadedMetadata);
       audio.removeEventListener("ended", handleEnded);
       audio.removeEventListener("canplay", handleCanPlay);
     };
-  }, []);
+  }, [trackName, trackUrl]);
 
   const loadMedia = (url: string) => {
-    if (!audioRef.current) return;
+    if (!localAudioRef.current) return;
     
     setLoading(true);
     
-    // Destroy previous HLS instance if exists
     if (hlsRef.current) {
       hlsRef.current.destroy();
       hlsRef.current = null;
     }
     
     const isHLS = url.includes('.m3u8');
-    const isLocalFile = url.startsWith('file:');
+    const isLocalFile = url.startsWith('file:') || url.startsWith('blob:');
     
     if (isHLS && Hls.isSupported() && !isLocalFile) {
-      // Use HLS.js for m3u8 streams
       const hls = new Hls({
         enableWorker: true,
         lowLatencyMode: true,
       });
       
       hls.loadSource(url);
-      hls.attachMedia(audioRef.current);
+      hls.attachMedia(localAudioRef.current);
       
       hls.on(Hls.Events.MANIFEST_PARSED, () => {
         if (isPlaying) {
-          audioRef.current?.play().catch(error => {
+          localAudioRef.current?.play().catch(error => {
             console.error("Error playing HLS stream:", error);
             toast({
               title: "Playback Error",
@@ -131,10 +145,9 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
       
       hlsRef.current = hls;
     } else {
-      // Standard audio playback for other formats
-      audioRef.current.src = url;
+      localAudioRef.current.src = url;
       if (isPlaying) {
-        audioRef.current.play().catch(error => {
+        localAudioRef.current.play().catch(error => {
           console.error("Error playing audio:", error);
           toast({
             title: "Playback Error",
@@ -151,26 +164,34 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
   useEffect(() => {
     if (urls.length > 0 && currentIndex >= 0 && currentIndex < urls.length) {
       loadMedia(urls[currentIndex]);
+      
+      if ('mediaSession' in navigator) {
+        navigator.mediaSession.metadata = new MediaMetadata({
+          title: trackName,
+          artist: 'Streamify Jukebox',
+          album: trackUrl.startsWith('file:') || trackUrl.startsWith('blob:') ? 'Local Files' : 'My Stations',
+        });
+      }
     }
-  }, [currentIndex, urls]);
+  }, [currentIndex, urls, trackName]);
 
   useEffect(() => {
-    if (audioRef.current) {
+    if (localAudioRef.current) {
       if (isPlaying) {
-        audioRef.current.play().catch(error => {
+        localAudioRef.current.play().catch(error => {
           console.error("Error playing audio:", error);
           setIsPlaying(false);
           setLoading(false);
         });
       } else {
-        audioRef.current.pause();
+        localAudioRef.current.pause();
       }
     }
   }, [isPlaying]);
 
   useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.volume = volume;
+    if (localAudioRef.current) {
+      localAudioRef.current.volume = volume;
     }
   }, [volume]);
 
@@ -191,8 +212,8 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
   };
 
   const handleSeek = (value: number[]) => {
-    if (audioRef.current && !isNaN(value[0])) {
-      audioRef.current.currentTime = value[0];
+    if (localAudioRef.current && !isNaN(value[0])) {
+      localAudioRef.current.currentTime = value[0];
       setCurrentTime(value[0]);
     }
   };
@@ -216,7 +237,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
               <p className="text-xs text-gray-500 truncate">
                 {(() => {
                   try {
-                    return trackUrl.startsWith('file:') 
+                    return trackUrl.startsWith('file:') || trackUrl.startsWith('blob:')
                       ? 'Local File' 
                       : (new URL(trackUrl)).hostname;
                   } catch (error) {
