@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -168,6 +167,7 @@ const LocalFilesPage = () => {
                 className="hidden"
               />
               
+              {/* Using the properly typed attributes now */}
               <input
                 type="file"
                 ref={folderInputRef}
