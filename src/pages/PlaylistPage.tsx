@@ -22,8 +22,6 @@ const PlaylistPage = () => {
     setCurrentIndex,
     setIsPlaying,
     addUrl,
-    getAudioElement,
-    updateTrackProgress,
   } = useMusicPlayer();
   
   const { toast } = useToast();
@@ -64,8 +62,6 @@ const PlaylistPage = () => {
           setCurrentIndex={setCurrentIndex}
           isPlaying={isPlaying}
           setIsPlaying={setIsPlaying}
-          getAudioElement={getAudioElement}
-          updateTrackProgress={updateTrackProgress}
         />
 
         <Card className="bg-white/10 backdrop-blur-md border-none shadow-lg">

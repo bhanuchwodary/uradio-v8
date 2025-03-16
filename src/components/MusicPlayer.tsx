@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from "react";
 import { Play, Pause, SkipForward, SkipBack, Volume2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -15,7 +14,6 @@ interface MusicPlayerProps {
   isPlaying: boolean;
   setIsPlaying: (isPlaying: boolean) => void;
   getAudioElement?: () => HTMLAudioElement | null;
-  updateTrackProgress?: (duration: number, position: number) => void;
 }
 
 const MusicPlayer: React.FC<MusicPlayerProps> = ({
@@ -26,33 +24,25 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
   isPlaying,
   setIsPlaying,
   getAudioElement,
-  updateTrackProgress,
 }) => {
+  const localAudioRef = useRef<HTMLAudioElement | null>(null);
   const hlsRef = useRef<Hls | null>(null);
   const [duration, setDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
   const [volume, setVolume] = useState(0.5);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
-  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const currentTrack = tracks && tracks[currentIndex];
   const trackName = currentTrack ? currentTrack.name : `Track ${currentIndex + 1}`;
   const trackUrl = urls[currentIndex] || '';
 
-  // Use the shared audio element if provided, otherwise use the local ref
   useEffect(() => {
-    const audio = getAudioElement ? getAudioElement() : null;
+    const audio = getAudioElement ? getAudioElement() : new Audio();
+    if (!audio) return;
     
-    // Only create a new audio element if one doesn't already exist
-    if (!audio && !audioRef.current) {
-      audioRef.current = new Audio();
-    }
-    
-    const currentAudio = audio || audioRef.current;
-    if (!currentAudio) return;
-    
-    currentAudio.volume = volume;
+    localAudioRef.current = audio;
+    audio.volume = volume;
     
     if ('mediaSession' in navigator) {
       navigator.mediaSession.setActionHandler('play', () => setIsPlaying(true));
@@ -68,18 +58,12 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
     }
     
     const handleTimeUpdate = () => {
-      setCurrentTime(currentAudio.currentTime);
-      if (updateTrackProgress) {
-        updateTrackProgress(currentAudio.duration || 0, currentAudio.currentTime);
-      }
+      setCurrentTime(audio.currentTime);
     };
     
     const handleLoadedMetadata = () => {
-      setDuration(currentAudio.duration);
+      setDuration(audio.duration);
       setLoading(false);
-      if (updateTrackProgress) {
-        updateTrackProgress(currentAudio.duration || 0, currentAudio.currentTime);
-      }
     };
     
     const handleEnded = () => {
@@ -90,10 +74,10 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
       setLoading(false);
     };
     
-    currentAudio.addEventListener("timeupdate", handleTimeUpdate);
-    currentAudio.addEventListener("loadedmetadata", handleLoadedMetadata);
-    currentAudio.addEventListener("ended", handleEnded);
-    currentAudio.addEventListener("canplay", handleCanPlay);
+    audio.addEventListener("timeupdate", handleTimeUpdate);
+    audio.addEventListener("loadedmetadata", handleLoadedMetadata);
+    audio.addEventListener("ended", handleEnded);
+    audio.addEventListener("canplay", handleCanPlay);
     
     return () => {
       if (hlsRef.current) {
@@ -101,17 +85,15 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
         hlsRef.current = null;
       }
       
-      // Only remove listeners, don't destroy the audio element
-      currentAudio.removeEventListener("timeupdate", handleTimeUpdate);
-      currentAudio.removeEventListener("loadedmetadata", handleLoadedMetadata);
-      currentAudio.removeEventListener("ended", handleEnded);
-      currentAudio.removeEventListener("canplay", handleCanPlay);
+      audio.removeEventListener("timeupdate", handleTimeUpdate);
+      audio.removeEventListener("loadedmetadata", handleLoadedMetadata);
+      audio.removeEventListener("ended", handleEnded);
+      audio.removeEventListener("canplay", handleCanPlay);
     };
-  }, [trackName, trackUrl, volume, updateTrackProgress]);
+  }, [trackName, trackUrl]);
 
   const loadMedia = (url: string) => {
-    const audio = getAudioElement ? getAudioElement() : audioRef.current;
-    if (!audio) return;
+    if (!localAudioRef.current) return;
     
     setLoading(true);
     
@@ -130,11 +112,11 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
       });
       
       hls.loadSource(url);
-      hls.attachMedia(audio);
+      hls.attachMedia(localAudioRef.current);
       
       hls.on(Hls.Events.MANIFEST_PARSED, () => {
         if (isPlaying) {
-          audio.play().catch(error => {
+          localAudioRef.current?.play().catch(error => {
             console.error("Error playing HLS stream:", error);
             toast({
               title: "Playback Error",
@@ -163,9 +145,9 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
       
       hlsRef.current = hls;
     } else {
-      audio.src = url;
+      localAudioRef.current.src = url;
       if (isPlaying) {
-        audio.play().catch(error => {
+        localAudioRef.current.play().catch(error => {
           console.error("Error playing audio:", error);
           toast({
             title: "Playback Error",
@@ -194,29 +176,24 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
   }, [currentIndex, urls, trackName]);
 
   useEffect(() => {
-    const audio = getAudioElement ? getAudioElement() : audioRef.current;
-    if (audio) {
+    if (localAudioRef.current) {
       if (isPlaying) {
-        const playPromise = audio.play();
-        if (playPromise !== undefined) {
-          playPromise.catch(error => {
-            console.error("Error playing audio:", error);
-            setIsPlaying(false);
-            setLoading(false);
-          });
-        }
+        localAudioRef.current.play().catch(error => {
+          console.error("Error playing audio:", error);
+          setIsPlaying(false);
+          setLoading(false);
+        });
       } else {
-        audio.pause();
+        localAudioRef.current.pause();
       }
     }
-  }, [isPlaying, getAudioElement]);
+  }, [isPlaying]);
 
   useEffect(() => {
-    const audio = getAudioElement ? getAudioElement() : audioRef.current;
-    if (audio) {
-      audio.volume = volume;
+    if (localAudioRef.current) {
+      localAudioRef.current.volume = volume;
     }
-  }, [volume, getAudioElement]);
+  }, [volume]);
 
   const handlePlayPause = () => {
     setIsPlaying(!isPlaying);
@@ -235,9 +212,8 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
   };
 
   const handleSeek = (value: number[]) => {
-    const audio = getAudioElement ? getAudioElement() : audioRef.current;
-    if (audio && !isNaN(value[0])) {
-      audio.currentTime = value[0];
+    if (localAudioRef.current && !isNaN(value[0])) {
+      localAudioRef.current.currentTime = value[0];
       setCurrentTime(value[0]);
     }
   };
@@ -285,7 +261,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
               className="flex-1"
               disabled={!duration || duration === Infinity}
             />
-            <span className="text-xs">{duration ? formatTime(duration) : "∞"}</span>
+            <span className="text-xs">{formatTime(duration)}</span>
           </div>
 
           <div className="flex justify-center gap-4">
