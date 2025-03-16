@@ -10,11 +10,14 @@ import MusicPlayer from "@/components/MusicPlayer";
 const AddStationPage = () => {
   const {
     urls,
+    tracks,
     addUrl,
     currentIndex,
     isPlaying,
     setCurrentIndex,
     setIsPlaying,
+    getAudioElement,
+    updateTrackProgress,
   } = useMusicPlayer();
   
   const { toast } = useToast();
@@ -34,10 +37,13 @@ const AddStationPage = () => {
         
         <MusicPlayer
           urls={urls}
+          tracks={tracks}
           currentIndex={currentIndex}
           setCurrentIndex={setCurrentIndex}
           isPlaying={isPlaying}
           setIsPlaying={setIsPlaying}
+          getAudioElement={getAudioElement}
+          updateTrackProgress={updateTrackProgress}
         />
 
         <Card className="bg-white/10 backdrop-blur-md border-none shadow-lg">
