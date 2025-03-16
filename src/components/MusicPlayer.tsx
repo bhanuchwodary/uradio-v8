@@ -9,77 +9,40 @@ import Hls from "hls.js";
 
 interface MusicPlayerProps {
   urls: string[];
-  tracks?: Array<{ name: string; url: string; isFavorite: boolean }>;
   currentIndex: number;
   setCurrentIndex: (index: number) => void;
   isPlaying: boolean;
   setIsPlaying: (isPlaying: boolean) => void;
-  getAudioElement?: () => HTMLAudioElement | null;
-  updateTrackProgress?: (duration: number, position: number) => void;
 }
 
 const MusicPlayer: React.FC<MusicPlayerProps> = ({
   urls,
-  tracks,
   currentIndex,
   setCurrentIndex,
   isPlaying,
   setIsPlaying,
-  getAudioElement,
-  updateTrackProgress,
 }) => {
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const hlsRef = useRef<Hls | null>(null);
   const [duration, setDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
   const [volume, setVolume] = useState(0.5);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
-  const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  const currentTrack = tracks && tracks[currentIndex];
-  const trackName = currentTrack ? currentTrack.name : `Track ${currentIndex + 1}`;
-  const trackUrl = urls[currentIndex] || '';
-
-  // Use the shared audio element if provided, otherwise use the local ref
   useEffect(() => {
-    const audio = getAudioElement ? getAudioElement() : null;
+    const audio = new Audio();
+    audioRef.current = audio;
     
-    // Only create a new audio element if one doesn't already exist
-    if (!audio && !audioRef.current) {
-      audioRef.current = new Audio();
-    }
-    
-    const currentAudio = audio || audioRef.current;
-    if (!currentAudio) return;
-    
-    currentAudio.volume = volume;
-    
-    if ('mediaSession' in navigator) {
-      navigator.mediaSession.setActionHandler('play', () => setIsPlaying(true));
-      navigator.mediaSession.setActionHandler('pause', () => setIsPlaying(false));
-      navigator.mediaSession.setActionHandler('previoustrack', handlePrevious);
-      navigator.mediaSession.setActionHandler('nexttrack', handleNext);
-      
-      navigator.mediaSession.metadata = new MediaMetadata({
-        title: trackName,
-        artist: 'Streamify Jukebox',
-        album: trackUrl.startsWith('file:') || trackUrl.startsWith('blob:') ? 'Local Files' : 'My Stations',
-      });
-    }
+    audio.volume = volume;
     
     const handleTimeUpdate = () => {
-      setCurrentTime(currentAudio.currentTime);
-      if (updateTrackProgress) {
-        updateTrackProgress(currentAudio.duration || 0, currentAudio.currentTime);
-      }
+      setCurrentTime(audio.currentTime);
     };
     
     const handleLoadedMetadata = () => {
-      setDuration(currentAudio.duration);
+      setDuration(audio.duration);
       setLoading(false);
-      if (updateTrackProgress) {
-        updateTrackProgress(currentAudio.duration || 0, currentAudio.currentTime);
-      }
     };
     
     const handleEnded = () => {
@@ -90,51 +53,50 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
       setLoading(false);
     };
     
-    currentAudio.addEventListener("timeupdate", handleTimeUpdate);
-    currentAudio.addEventListener("loadedmetadata", handleLoadedMetadata);
-    currentAudio.addEventListener("ended", handleEnded);
-    currentAudio.addEventListener("canplay", handleCanPlay);
+    audio.addEventListener("timeupdate", handleTimeUpdate);
+    audio.addEventListener("loadedmetadata", handleLoadedMetadata);
+    audio.addEventListener("ended", handleEnded);
+    audio.addEventListener("canplay", handleCanPlay);
     
     return () => {
       if (hlsRef.current) {
         hlsRef.current.destroy();
         hlsRef.current = null;
       }
-      
-      // Only remove listeners, don't destroy the audio element
-      currentAudio.removeEventListener("timeupdate", handleTimeUpdate);
-      currentAudio.removeEventListener("loadedmetadata", handleLoadedMetadata);
-      currentAudio.removeEventListener("ended", handleEnded);
-      currentAudio.removeEventListener("canplay", handleCanPlay);
+      audio.pause();
+      audio.removeEventListener("timeupdate", handleTimeUpdate);
+      audio.removeEventListener("loadedmetadata", handleLoadedMetadata);
+      audio.removeEventListener("ended", handleEnded);
+      audio.removeEventListener("canplay", handleCanPlay);
     };
-  }, [trackName, trackUrl, volume, updateTrackProgress]);
+  }, []);
 
   const loadMedia = (url: string) => {
-    const audio = getAudioElement ? getAudioElement() : audioRef.current;
-    if (!audio) return;
+    if (!audioRef.current) return;
     
     setLoading(true);
     
+    // Destroy previous HLS instance if exists
     if (hlsRef.current) {
       hlsRef.current.destroy();
       hlsRef.current = null;
     }
     
     const isHLS = url.includes('.m3u8');
-    const isLocalFile = url.startsWith('file:') || url.startsWith('blob:');
     
-    if (isHLS && Hls.isSupported() && !isLocalFile) {
+    if (isHLS && Hls.isSupported()) {
+      // Use HLS.js for m3u8 streams
       const hls = new Hls({
         enableWorker: true,
         lowLatencyMode: true,
       });
       
       hls.loadSource(url);
-      hls.attachMedia(audio);
+      hls.attachMedia(audioRef.current);
       
       hls.on(Hls.Events.MANIFEST_PARSED, () => {
         if (isPlaying) {
-          audio.play().catch(error => {
+          audioRef.current?.play().catch(error => {
             console.error("Error playing HLS stream:", error);
             toast({
               title: "Playback Error",
@@ -163,9 +125,10 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
       
       hlsRef.current = hls;
     } else {
-      audio.src = url;
+      // Standard audio playback for other formats
+      audioRef.current.src = url;
       if (isPlaying) {
-        audio.play().catch(error => {
+        audioRef.current.play().catch(error => {
           console.error("Error playing audio:", error);
           toast({
             title: "Playback Error",
@@ -182,41 +145,28 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
   useEffect(() => {
     if (urls.length > 0 && currentIndex >= 0 && currentIndex < urls.length) {
       loadMedia(urls[currentIndex]);
-      
-      if ('mediaSession' in navigator) {
-        navigator.mediaSession.metadata = new MediaMetadata({
-          title: trackName,
-          artist: 'Streamify Jukebox',
-          album: trackUrl.startsWith('file:') || trackUrl.startsWith('blob:') ? 'Local Files' : 'My Stations',
-        });
-      }
     }
-  }, [currentIndex, urls, trackName]);
+  }, [currentIndex, urls]);
 
   useEffect(() => {
-    const audio = getAudioElement ? getAudioElement() : audioRef.current;
-    if (audio) {
+    if (audioRef.current) {
       if (isPlaying) {
-        const playPromise = audio.play();
-        if (playPromise !== undefined) {
-          playPromise.catch(error => {
-            console.error("Error playing audio:", error);
-            setIsPlaying(false);
-            setLoading(false);
-          });
-        }
+        audioRef.current.play().catch(error => {
+          console.error("Error playing audio:", error);
+          setIsPlaying(false);
+          setLoading(false);
+        });
       } else {
-        audio.pause();
+        audioRef.current.pause();
       }
     }
-  }, [isPlaying, getAudioElement]);
+  }, [isPlaying]);
 
   useEffect(() => {
-    const audio = getAudioElement ? getAudioElement() : audioRef.current;
-    if (audio) {
-      audio.volume = volume;
+    if (audioRef.current) {
+      audioRef.current.volume = volume;
     }
-  }, [volume, getAudioElement]);
+  }, [volume]);
 
   const handlePlayPause = () => {
     setIsPlaying(!isPlaying);
@@ -235,9 +185,8 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
   };
 
   const handleSeek = (value: number[]) => {
-    const audio = getAudioElement ? getAudioElement() : audioRef.current;
-    if (audio && !isNaN(value[0])) {
-      audio.currentTime = value[0];
+    if (audioRef.current && !isNaN(value[0])) {
+      audioRef.current.currentTime = value[0];
       setCurrentTime(value[0]);
     }
   };
@@ -255,21 +204,11 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
         <div className="flex flex-col gap-4">
           <div className="text-center">
             <h3 className="font-bold text-lg truncate">
-              {trackName}
+              {urls.length > 0 ? `Track ${currentIndex + 1}` : "No track selected"}
             </h3>
-            {trackUrl && (
-              <p className="text-xs text-gray-500 truncate">
-                {(() => {
-                  try {
-                    return trackUrl.startsWith('file:') || trackUrl.startsWith('blob:')
-                      ? 'Local File' 
-                      : (new URL(trackUrl)).hostname;
-                  } catch (error) {
-                    return trackUrl;
-                  }
-                })()}
-              </p>
-            )}
+            <p className="text-xs text-gray-500 truncate">
+              {urls[currentIndex] ? (new URL(urls[currentIndex])).hostname : "Add a URL to begin"}
+            </p>
             {loading && (
               <p className="text-xs text-blue-400 animate-pulse mt-1">Loading stream...</p>
             )}
@@ -285,7 +224,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
               className="flex-1"
               disabled={!duration || duration === Infinity}
             />
-            <span className="text-xs">{duration ? formatTime(duration) : "∞"}</span>
+            <span className="text-xs">{formatTime(duration)}</span>
           </div>
 
           <div className="flex justify-center gap-4">

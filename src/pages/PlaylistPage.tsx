@@ -1,14 +1,11 @@
 
-import React, { useState } from "react";
+import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Playlist from "@/components/Playlist";
 import { useMusicPlayer } from "@/hooks/useMusicPlayer";
 import { useToast } from "@/components/ui/use-toast";
 import Navigation from "@/components/Navigation";
 import MusicPlayer from "@/components/MusicPlayer";
-import { Button } from "@/components/ui/button";
-import { FileSpreadsheet } from "lucide-react";
-import ImportCsvDialog from "@/components/ImportCsvDialog";
 
 const PlaylistPage = () => {
   const {
@@ -21,13 +18,9 @@ const PlaylistPage = () => {
     editTrack,
     setCurrentIndex,
     setIsPlaying,
-    addUrl,
-    getAudioElement,
-    updateTrackProgress,
   } = useMusicPlayer();
   
   const { toast } = useToast();
-  const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
 
   const handleToggleFavorite = (index: number) => {
     toggleFavorite(index);
@@ -46,12 +39,6 @@ const PlaylistPage = () => {
     });
   };
 
-  const handleImportStations = (stations: Array<{ name: string; url: string }>) => {
-    stations.forEach(station => {
-      addUrl(station.url, station.name);
-    });
-  };
-
   return (
     <div className="min-h-screen p-3 md:p-4 bg-gradient-to-br from-blue-900 via-purple-900 to-pink-700 dark:from-gray-900 dark:via-gray-800 dark:to-gray-700 flex flex-col items-center">
       <div className="w-full max-w-2xl space-y-4 md:space-y-6 flex flex-col">
@@ -59,27 +46,15 @@ const PlaylistPage = () => {
         
         <MusicPlayer
           urls={urls}
-          tracks={tracks}
           currentIndex={currentIndex}
           setCurrentIndex={setCurrentIndex}
           isPlaying={isPlaying}
           setIsPlaying={setIsPlaying}
-          getAudioElement={getAudioElement}
-          updateTrackProgress={updateTrackProgress}
         />
 
         <Card className="bg-white/10 backdrop-blur-md border-none shadow-lg">
-          <CardHeader className="p-3 md:p-4 flex flex-row items-center justify-between">
+          <CardHeader className="p-3 md:p-4">
             <CardTitle className="text-lg md:text-xl">Playlist</CardTitle>
-            <Button 
-              variant="outline" 
-              size="sm"
-              className="bg-white/10 hover:bg-white/20"
-              onClick={() => setIsImportDialogOpen(true)}
-            >
-              <FileSpreadsheet className="h-4 w-4 mr-2" />
-              Import CSV
-            </Button>
           </CardHeader>
           <CardContent className="p-3 md:p-4 pt-0">
             <Playlist
@@ -97,12 +72,6 @@ const PlaylistPage = () => {
           </CardContent>
         </Card>
       </div>
-      
-      <ImportCsvDialog 
-        isOpen={isImportDialogOpen}
-        onClose={() => setIsImportDialogOpen(false)}
-        onImport={handleImportStations}
-      />
     </div>
   );
 };

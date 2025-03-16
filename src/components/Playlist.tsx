@@ -1,7 +1,7 @@
 
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Trash2, Heart, Edit } from "lucide-react";
+import { Play, Trash2, Heart, Edit } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import EditStationDialog from "./EditStationDialog";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -44,8 +44,7 @@ const Playlist: React.FC<PlaylistProps> = ({
     );
   }
 
-  const handleEdit = (index: number, e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent row click
+  const handleEdit = (index: number) => {
     if (tracks && tracks[index]) {
       setEditingTrack({
         index,
@@ -64,18 +63,6 @@ const Playlist: React.FC<PlaylistProps> = ({
     setEditingTrack(null);
   };
 
-  const handleToggleFavorite = (index: number, e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent row click
-    if (onToggleFavorite) {
-      onToggleFavorite(index);
-    }
-  };
-
-  const handleRemoveTrack = (index: number, e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent row click
-    onRemoveTrack(index);
-  };
-
   return (
     <ScrollArea className={`h-[${scrollAreaHeight}] pr-4`}>
       <div className="space-y-2">
@@ -86,14 +73,21 @@ const Playlist: React.FC<PlaylistProps> = ({
             return (
               <div
                 key={index}
-                className={`flex items-center justify-between p-2 rounded-md cursor-pointer ${
+                className={`flex items-center justify-between p-2 rounded-md ${
                   isActive
                     ? "bg-primary/20 backdrop-blur-sm"
                     : "bg-white/10 backdrop-blur-sm hover:bg-white/20"
                 }`}
-                onClick={() => onSelectTrack(index)}
               >
                 <div className="flex items-center gap-2 flex-1 min-w-0">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6"
+                    onClick={() => onSelectTrack(index)}
+                  >
+                    <Play className="h-4 w-4" />
+                  </Button>
                   <span className="truncate text-sm">
                     {isMobile ? track.name : `${index + 1}. ${track.name}`}
                   </span>
@@ -104,7 +98,7 @@ const Playlist: React.FC<PlaylistProps> = ({
                       variant="ghost"
                       size="icon"
                       className={`h-6 w-6 ${track.isFavorite ? 'text-pink-500' : 'text-gray-400 hover:text-pink-400'}`}
-                      onClick={(e) => handleToggleFavorite(index, e)}
+                      onClick={() => onToggleFavorite(index)}
                     >
                       <Heart className="h-4 w-4" fill={track.isFavorite ? "currentColor" : "none"} />
                     </Button>
@@ -114,7 +108,7 @@ const Playlist: React.FC<PlaylistProps> = ({
                       variant="ghost"
                       size="icon"
                       className="h-6 w-6 text-blue-500 hover:text-blue-700"
-                      onClick={(e) => handleEdit(index, e)}
+                      onClick={() => handleEdit(index)}
                     >
                       <Edit className="h-4 w-4" />
                     </Button>
@@ -123,7 +117,7 @@ const Playlist: React.FC<PlaylistProps> = ({
                     variant="ghost"
                     size="icon"
                     className="h-6 w-6 text-red-500 hover:text-red-700"
-                    onClick={(e) => handleRemoveTrack(index, e)}
+                    onClick={() => onRemoveTrack(index)}
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
@@ -147,14 +141,21 @@ const Playlist: React.FC<PlaylistProps> = ({
             return (
               <div
                 key={index}
-                className={`flex items-center justify-between p-2 rounded-md cursor-pointer ${
+                className={`flex items-center justify-between p-2 rounded-md ${
                   isActive
                     ? "bg-primary/20 backdrop-blur-sm"
                     : "bg-white/10 backdrop-blur-sm hover:bg-white/20"
                 }`}
-                onClick={() => onSelectTrack(index)}
               >
                 <div className="flex items-center gap-2 flex-1 min-w-0">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6"
+                    onClick={() => onSelectTrack(index)}
+                  >
+                    <Play className="h-4 w-4" />
+                  </Button>
                   <span className="truncate text-sm">
                     {isMobile ? displayUrl : `${index + 1}. ${displayUrl}`}
                   </span>
@@ -163,7 +164,7 @@ const Playlist: React.FC<PlaylistProps> = ({
                   variant="ghost"
                   size="icon"
                   className="h-6 w-6 text-red-500 hover:text-red-700"
-                  onClick={(e) => handleRemoveTrack(index, e)}
+                  onClick={() => onRemoveTrack(index)}
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
