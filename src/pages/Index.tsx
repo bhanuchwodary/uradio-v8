@@ -18,6 +18,7 @@ const Index = () => {
     setCurrentIndex,
     setIsPlaying,
     getAudioElement,
+    updateTrackProgress,
   } = useMusicPlayer();
   
   const isMobile = useIsMobile();
@@ -38,6 +39,7 @@ const Index = () => {
           isPlaying={isPlaying}
           setIsPlaying={setIsPlaying}
           getAudioElement={getAudioElement}
+          updateTrackProgress={updateTrackProgress}
         />
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">

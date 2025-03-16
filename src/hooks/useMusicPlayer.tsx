@@ -43,16 +43,15 @@ export const useMusicPlayer = () => {
       onSkipPrevious: () => handleSkipPrevious(),
       onSeek: (position) => {
         setTrackPosition(position);
-        // The actual seeking is handled by the MusicPlayer component
-        // which watches for changes to trackPosition
         if (audioRef.current) {
           audioRef.current.currentTime = position;
         }
       }
     });
     
+    // This is a component mount effect, so we only want to clean up on unmount
     return () => {
-      // Clean up Android Auto but DON'T destroy the audio element
+      // Only clean up Android Auto integration, but preserve the audio element
       androidAutoService.cleanup();
     };
   }, []);
@@ -197,6 +196,9 @@ export const useMusicPlayer = () => {
   // Seek to a specific position
   const seekTo = (position: number) => {
     setTrackPosition(position);
+    if (audioRef.current) {
+      audioRef.current.currentTime = position;
+    }
   };
   
   // Get the persistent audio element
@@ -219,6 +221,6 @@ export const useMusicPlayer = () => {
     setIsPlaying,
     updateTrackProgress,
     seekTo,
-    getAudioElement, // New function to access the persistent audio element
+    getAudioElement,
   };
 };
