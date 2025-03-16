@@ -5,7 +5,7 @@ import MusicPlayer from "@/components/MusicPlayer";
 import { useMusicPlayer } from "@/hooks/useMusicPlayer";
 import Navigation from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
-import { Music, PlusCircle, FileAudio } from "lucide-react";
+import { Music, PlusCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -31,7 +31,6 @@ const Index = () => {
 
         <MusicPlayer
           urls={urls}
-          tracks={tracks}
           currentIndex={currentIndex}
           setCurrentIndex={setCurrentIndex}
           isPlaying={isPlaying}
@@ -49,14 +48,20 @@ const Index = () => {
                   {previewTracks.map((track, index) => (
                     <div 
                       key={index}
-                      className="flex items-center justify-between p-2 rounded-md bg-white/10 backdrop-blur-sm hover:bg-white/20 cursor-pointer"
-                      onClick={() => {
-                        setCurrentIndex(index);
-                        setIsPlaying(true);
-                      }}
+                      className="flex items-center justify-between p-2 rounded-md bg-white/10 backdrop-blur-sm hover:bg-white/20"
                     >
                       <span className="truncate text-sm mr-2">{track.name}</span>
-                      <Music className="h-4 w-4" />
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 w-6 text-white hover:text-white/80"
+                        onClick={() => {
+                          setCurrentIndex(index);
+                          setIsPlaying(true);
+                        }}
+                      >
+                        <Music className="h-4 w-4" />
+                      </Button>
                     </div>
                   ))}
                 </div>
@@ -93,13 +98,6 @@ const Index = () => {
                 <Button variant="outline" className="w-full bg-white/20 backdrop-blur-sm border-none">
                   <Music className="w-4 h-4 mr-2" />
                   Manage Playlist
-                </Button>
-              </Link>
-              
-              <Link to="/local-files" className="block mt-3">
-                <Button variant="outline" className="w-full bg-white/20 backdrop-blur-sm border-none">
-                  <FileAudio className="w-4 h-4 mr-2" />
-                  Local Audio Files
                 </Button>
               </Link>
             </CardContent>

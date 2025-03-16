@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from "react";
 import { Play, Pause, SkipForward, SkipBack, Volume2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -8,7 +9,6 @@ import Hls from "hls.js";
 
 interface MusicPlayerProps {
   urls: string[];
-  tracks?: Array<{ name: string; url: string; isFavorite: boolean }>;
   currentIndex: number;
   setCurrentIndex: (index: number) => void;
   isPlaying: boolean;
@@ -17,7 +17,6 @@ interface MusicPlayerProps {
 
 const MusicPlayer: React.FC<MusicPlayerProps> = ({
   urls,
-  tracks,
   currentIndex,
   setCurrentIndex,
   isPlaying,
@@ -30,10 +29,6 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
   const [volume, setVolume] = useState(0.5);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
-
-  const currentTrack = tracks && tracks[currentIndex];
-  const trackName = currentTrack ? currentTrack.name : `Track ${currentIndex + 1}`;
-  const trackUrl = urls[currentIndex] || '';
 
   useEffect(() => {
     const audio = new Audio();
@@ -88,9 +83,8 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
     }
     
     const isHLS = url.includes('.m3u8');
-    const isLocalFile = url.startsWith('file:');
     
-    if (isHLS && Hls.isSupported() && !isLocalFile) {
+    if (isHLS && Hls.isSupported()) {
       // Use HLS.js for m3u8 streams
       const hls = new Hls({
         enableWorker: true,
@@ -210,21 +204,11 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
         <div className="flex flex-col gap-4">
           <div className="text-center">
             <h3 className="font-bold text-lg truncate">
-              {trackName}
+              {urls.length > 0 ? `Track ${currentIndex + 1}` : "No track selected"}
             </h3>
-            {trackUrl && (
-              <p className="text-xs text-gray-500 truncate">
-                {(() => {
-                  try {
-                    return trackUrl.startsWith('file:') 
-                      ? 'Local File' 
-                      : (new URL(trackUrl)).hostname;
-                  } catch (error) {
-                    return trackUrl;
-                  }
-                })()}
-              </p>
-            )}
+            <p className="text-xs text-gray-500 truncate">
+              {urls[currentIndex] ? (new URL(urls[currentIndex])).hostname : "Add a URL to begin"}
+            </p>
             {loading && (
               <p className="text-xs text-blue-400 animate-pulse mt-1">Loading stream...</p>
             )}
