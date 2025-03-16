@@ -6,7 +6,7 @@ declare namespace JSX {
   }
 }
 
-interface HTMLInputElement {
+interface HTMLInputElement extends HTMLElement {
   webkitdirectory: boolean | string;
   directory: boolean | string;
 }
