@@ -3,7 +3,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
-import { Music, Upload, Folder } from "lucide-react";
+import { Music, Upload } from "lucide-react";
 import { useMusicPlayer } from "@/hooks/useMusicPlayer";
 import Navigation from "@/components/Navigation";
 import MusicPlayer from "@/components/MusicPlayer";
@@ -22,7 +22,6 @@ const LocalFilesPage = () => {
   const { toast } = useToast();
   const [localFiles, setLocalFiles] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const folderInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const savedFiles = localStorage.getItem('localFilesList');
@@ -76,55 +75,9 @@ const LocalFilesPage = () => {
     }
   };
 
-  const handleFolderChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
-    if (!files) return;
-
-    const newFiles: File[] = [];
-    const audioFiles: File[] = [];
-
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      if (file.type.startsWith('audio/')) {
-        newFiles.push(file);
-        audioFiles.push(file);
-      }
-    }
-
-    audioFiles.forEach(file => {
-      const url = URL.createObjectURL(file);
-      addUrl(url, file.name);
-    });
-
-    const updatedFiles = [...localFiles, ...newFiles];
-    setLocalFiles(updatedFiles);
-    
-    try {
-      const fileInfoList = updatedFiles.map(file => ({ name: file.name }));
-      localStorage.setItem('localFilesList', JSON.stringify(fileInfoList));
-    } catch (error) {
-      console.error("Error saving local files list:", error);
-    }
-
-    toast({
-      title: "Folder Files Added",
-      description: `Added ${audioFiles.length} audio files from folder to your playlist`,
-    });
-
-    if (event.target) {
-      event.target.value = '';
-    }
-  };
-
   const handleOpenFileDialog = () => {
     if (fileInputRef.current) {
       fileInputRef.current.click();
-    }
-  };
-  
-  const handleOpenFolderDialog = () => {
-    if (folderInputRef.current) {
-      folderInputRef.current.click();
     }
   };
 
@@ -158,33 +111,13 @@ const LocalFilesPage = () => {
                 className="hidden"
               />
               
-              <input
-                type="file"
-                ref={folderInputRef}
-                onChange={handleFolderChange}
-                accept="audio/*"
-                multiple
-                webkitdirectory="true"
-                directory="true"
-                className="hidden"
-              />
-              
               <div className="flex gap-2">
                 <Button 
                   onClick={handleOpenFileDialog}
                   className="flex items-center gap-2 flex-1"
                 >
                   <Upload size={16} />
-                  Select Files
-                </Button>
-                
-                <Button 
-                  onClick={handleOpenFolderDialog}
-                  className="flex items-center gap-2 flex-1"
-                  variant="secondary"
-                >
-                  <Folder size={16} />
-                  Import Folder
+                  Select Audio Files
                 </Button>
               </div>
               
@@ -216,7 +149,7 @@ const LocalFilesPage = () => {
                   ))
                 ) : (
                   <div className="text-center p-2 text-gray-400">
-                    No local files added yet. Click the buttons above to select audio files or import a folder.
+                    No local files added yet. Click the button above to select audio files.
                   </div>
                 )}
               </div>
