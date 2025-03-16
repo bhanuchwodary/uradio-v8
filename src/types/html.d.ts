@@ -1,5 +1,5 @@
 
 interface HTMLInputElement {
-  webkitdirectory?: string;
-  directory?: string;
+  webkitdirectory: boolean | string;
+  directory: boolean | string;
 }

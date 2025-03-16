@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -163,8 +164,9 @@ const LocalFilesPage = () => {
                 onChange={handleFolderChange}
                 accept="audio/*"
                 multiple
-                webkitdirectory=""
-                directory=""
+                // Use proper typings for these attributes
+                webkitdirectory={true}
+                directory={true}
                 className="hidden"
               />
               
