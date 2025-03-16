@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import androidAutoService from "../services/androidAutoService";
 
 interface Track {
@@ -14,12 +14,25 @@ export const useMusicPlayer = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [trackDuration, setTrackDuration] = useState(0);
   const [trackPosition, setTrackPosition] = useState(0);
+  
+  // Store audio instance in a ref so it persists across route changes
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   // Get urls array for backward compatibility
   const urls = tracks.map(track => track.url);
 
-  // Initialize Android Auto service
+  // Initialize Android Auto service and create persistent audio
   useEffect(() => {
+    // Create a single audio instance that persists for the app's lifetime
+    if (!audioRef.current) {
+      audioRef.current = new Audio();
+      // Set audio to continue playing when app is in background
+      if ('mediaSession' in navigator) {
+        audioRef.current.setAttribute('playsinline', '');
+        audioRef.current.setAttribute('autoplay', 'false');
+      }
+    }
+
     androidAutoService.initialize();
 
     // Register callbacks for Android Auto and media controls
@@ -32,14 +45,14 @@ export const useMusicPlayer = () => {
         setTrackPosition(position);
         // The actual seeking is handled by the MusicPlayer component
         // which watches for changes to trackPosition
+        if (audioRef.current) {
+          audioRef.current.currentTime = position;
+        }
       }
     });
-
-    // Enable background audio playback
-    // In a real native app, this would use the native Audio API
-    // with the appropriate permissions for background playback
     
     return () => {
+      // Clean up Android Auto but DON'T destroy the audio element
       androidAutoService.cleanup();
     };
   }, []);
@@ -48,14 +61,16 @@ export const useMusicPlayer = () => {
   useEffect(() => {
     if (tracks.length > 0 && currentIndex < tracks.length) {
       const currentTrack = tracks[currentIndex];
+      const isLocalFile = currentTrack.url.startsWith('file:') || 
+                          currentTrack.url.startsWith('blob:');
       
       androidAutoService.updateTrackInfo({
         title: currentTrack.name || `Track ${currentIndex + 1}`,
         artist: "Streamify Jukebox",
-        album: "My Stations",
+        album: isLocalFile ? "Local Files" : "My Stations",
         duration: trackDuration,
         position: trackPosition,
-        // In a real app, we would add artwork here
+        isLocalFile: isLocalFile,
       });
     }
   }, [tracks, currentIndex, trackDuration, trackPosition]);
@@ -75,12 +90,23 @@ export const useMusicPlayer = () => {
         console.error("Error loading saved tracks:", error);
       }
     }
+    
+    // Restore last playing state if available
+    const lastIndex = localStorage.getItem('lastPlayingIndex');
+    if (lastIndex) {
+      setCurrentIndex(parseInt(lastIndex, 10));
+    }
   }, []);
 
   // Save tracks to localStorage on change
   useEffect(() => {
     localStorage.setItem('musicTracks', JSON.stringify(tracks));
   }, [tracks]);
+  
+  // Save current index to localStorage
+  useEffect(() => {
+    localStorage.setItem('lastPlayingIndex', currentIndex.toString());
+  }, [currentIndex]);
 
   // Add a new URL to the playlist
   const addUrl = (url: string, name: string = "") => {
@@ -172,10 +198,15 @@ export const useMusicPlayer = () => {
   const seekTo = (position: number) => {
     setTrackPosition(position);
   };
+  
+  // Get the persistent audio element
+  const getAudioElement = () => {
+    return audioRef.current;
+  };
 
   return {
     tracks,
-    urls, // Keep for backward compatibility
+    urls,
     currentIndex,
     isPlaying,
     trackPosition,
@@ -188,5 +219,6 @@ export const useMusicPlayer = () => {
     setIsPlaying,
     updateTrackProgress,
     seekTo,
+    getAudioElement, // New function to access the persistent audio element
   };
 };

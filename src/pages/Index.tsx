@@ -17,6 +17,7 @@ const Index = () => {
     isPlaying,
     setCurrentIndex,
     setIsPlaying,
+    getAudioElement,
   } = useMusicPlayer();
   
   const isMobile = useIsMobile();
@@ -36,6 +37,7 @@ const Index = () => {
           setCurrentIndex={setCurrentIndex}
           isPlaying={isPlaying}
           setIsPlaying={setIsPlaying}
+          getAudioElement={getAudioElement}
         />
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
@@ -90,13 +92,13 @@ const Index = () => {
               </Link>
               
               <Link to="/playlist" className="block mt-3">
-                <Button variant="outline" className="w-full bg-white/20 backdrop-blur-sm border-none">
+                <Button variant="outline" className="w-full bg-white/20 backdrop-blur-sm border-none mb-3">
                   <Music className="w-4 h-4 mr-2" />
                   Manage Playlist
                 </Button>
               </Link>
               
-              <Link to="/local-files" className="block mt-3">
+              <Link to="/local-files" className="block">
                 <Button variant="outline" className="w-full bg-white/20 backdrop-blur-sm border-none">
                   <FileAudio className="w-4 h-4 mr-2" />
                   Local Audio Files
