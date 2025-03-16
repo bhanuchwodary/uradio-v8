@@ -94,7 +94,7 @@ const Index = () => {
                 </Button>
               </Link>
               
-              <Link to="/playlist">
+              <Link to="/playlist" className="block mt-3">
                 <Button variant="outline" className="w-full bg-white/20 backdrop-blur-sm border-none">
                   <Music className="w-4 h-4 mr-2" />
                   Manage Playlist

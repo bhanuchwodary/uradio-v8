@@ -22,14 +22,23 @@ export const useMusicPlayer = () => {
   useEffect(() => {
     androidAutoService.initialize();
 
-    // Register callbacks for Android Auto controls
+    // Register callbacks for Android Auto and media controls
     androidAutoService.registerCallbacks({
       onPlay: () => setIsPlaying(true),
       onPause: () => setIsPlaying(false),
       onSkipNext: () => handleSkipNext(),
       onSkipPrevious: () => handleSkipPrevious(),
+      onSeek: (position) => {
+        setTrackPosition(position);
+        // The actual seeking is handled by the MusicPlayer component
+        // which watches for changes to trackPosition
+      }
     });
 
+    // Enable background audio playback
+    // In a real native app, this would use the native Audio API
+    // with the appropriate permissions for background playback
+    
     return () => {
       androidAutoService.cleanup();
     };
@@ -37,14 +46,16 @@ export const useMusicPlayer = () => {
 
   // Update Android Auto with current track info
   useEffect(() => {
-    if (tracks.length > 0) {
+    if (tracks.length > 0 && currentIndex < tracks.length) {
       const currentTrack = tracks[currentIndex];
       
       androidAutoService.updateTrackInfo({
         title: currentTrack.name || `Track ${currentIndex + 1}`,
         artist: "Streamify Jukebox",
+        album: "My Stations",
         duration: trackDuration,
         position: trackPosition,
+        // In a real app, we would add artwork here
       });
     }
   }, [tracks, currentIndex, trackDuration, trackPosition]);
@@ -157,11 +168,18 @@ export const useMusicPlayer = () => {
     setTrackPosition(position);
   };
 
+  // Seek to a specific position
+  const seekTo = (position: number) => {
+    setTrackPosition(position);
+  };
+
   return {
     tracks,
     urls, // Keep for backward compatibility
     currentIndex,
     isPlaying,
+    trackPosition,
+    trackDuration,
     addUrl,
     removeUrl,
     toggleFavorite,
@@ -169,5 +187,6 @@ export const useMusicPlayer = () => {
     setCurrentIndex,
     setIsPlaying,
     updateTrackProgress,
+    seekTo,
   };
 };
