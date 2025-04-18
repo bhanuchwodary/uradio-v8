@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from "react";
 import { Play, Pause, SkipForward, SkipBack, Volume2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -35,6 +36,15 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
   const [volume, setVolume] = useState(0.5);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+
+  // Add the missing handleVisibilityChange function
+  const handleVisibilityChange = () => {
+    if (document.visibilityState === 'visible' && isPlaying && 
+        globalAudioRef.activePlayerInstance === playerInstanceRef && 
+        globalAudioRef.element && globalAudioRef.element.paused) {
+      globalAudioRef.element.play().catch(err => console.warn('Resume error:', err));
+    }
+  };
 
   useEffect(() => {
     if (!globalAudioRef.activePlayerInstance) {
