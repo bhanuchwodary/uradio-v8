@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from "react";
 import androidAutoService from "../services/androidAutoService";
+import audioWakeLockService from "../services/audioWakeLockService";
 
 interface Track {
   url: string;
@@ -34,13 +35,13 @@ export const useMusicPlayer = () => {
         // which watches for changes to trackPosition
       }
     });
-
-    // Enable background audio playback
-    // In a real native app, this would use the native Audio API
-    // with the appropriate permissions for background playback
+    
+    // Request wake lock when music player initializes
+    audioWakeLockService.requestWakeLock();
     
     return () => {
       androidAutoService.cleanup();
+      audioWakeLockService.releaseWakeLock();
     };
   }, []);
 
@@ -63,6 +64,11 @@ export const useMusicPlayer = () => {
   // Update Android Auto with playback state
   useEffect(() => {
     androidAutoService.updatePlaybackState(isPlaying);
+    
+    // Manage wake lock based on playback state
+    if (isPlaying) {
+      audioWakeLockService.requestWakeLock();
+    }
   }, [isPlaying]);
 
   // Load tracks from localStorage on init

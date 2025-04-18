@@ -31,10 +31,22 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
   const { toast } = useToast();
 
   useEffect(() => {
-    const audio = new Audio();
-    audioRef.current = audio;
+    // Create a new audio element if it doesn't exist
+    if (!audioRef.current) {
+      const audio = new Audio();
+      // Set audio attributes for background playback
+      audio.setAttribute('playsinline', '');
+      audio.setAttribute('webkit-playsinline', '');
+      audio.setAttribute('preload', 'auto');
+      
+      // This is crucial for Android background playback
+      audio.mozAudioChannelType = 'content';
+      audio.volume = volume;
+      
+      audioRef.current = audio;
+    }
     
-    audio.volume = volume;
+    const audio = audioRef.current;
     
     const handleTimeUpdate = () => {
       setCurrentTime(audio.currentTime);
@@ -52,24 +64,39 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
     const handleCanPlay = () => {
       setLoading(false);
     };
+
+    // When app goes to background
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden' && isPlaying && audio) {
+        // Make sure playback continues when app is in background
+        audio.play().catch(err => console.warn('Background play error:', err));
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
     
     audio.addEventListener("timeupdate", handleTimeUpdate);
     audio.addEventListener("loadedmetadata", handleLoadedMetadata);
     audio.addEventListener("ended", handleEnded);
     audio.addEventListener("canplay", handleCanPlay);
     
-    return () => {
-      if (hlsRef.current) {
-        hlsRef.current.destroy();
-        hlsRef.current = null;
+    // Prevent audio from stopping on mobile devices
+    audio.addEventListener("pause", (e) => {
+      // If we're still supposed to be playing but audio paused (e.g. by system)
+      // Try to resume playback if it wasn't user-initiated
+      if (isPlaying && !document.hasFocus()) {
+        audio.play().catch(err => console.warn('Resume error:', err));
       }
-      audio.pause();
+    });
+    
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
       audio.removeEventListener("timeupdate", handleTimeUpdate);
       audio.removeEventListener("loadedmetadata", handleLoadedMetadata);
       audio.removeEventListener("ended", handleEnded);
       audio.removeEventListener("canplay", handleCanPlay);
     };
-  }, []);
+  }, [isPlaying, volume]);
 
   const loadMedia = (url: string) => {
     if (!audioRef.current) return;
@@ -85,10 +112,14 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
     const isHLS = url.includes('.m3u8');
     
     if (isHLS && Hls.isSupported()) {
-      // Use HLS.js for m3u8 streams
+      // Use HLS.js for m3u8 streams with optimized config for mobile
       const hls = new Hls({
         enableWorker: true,
         lowLatencyMode: true,
+        backBufferLength: 90,
+        maxBufferLength: 30,
+        maxMaxBufferLength: 600,
+        maxBufferSize: 60 * 1000 * 1000, // 60MB buffer for uninterrupted playback
       });
       
       hls.loadSource(url);
@@ -151,11 +182,25 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
   useEffect(() => {
     if (audioRef.current) {
       if (isPlaying) {
-        audioRef.current.play().catch(error => {
-          console.error("Error playing audio:", error);
-          setIsPlaying(false);
-          setLoading(false);
-        });
+        // Use promise to ensure we catch any autoplay restriction errors
+        const playPromise = audioRef.current.play();
+        if (playPromise !== undefined) {
+          playPromise.catch(error => {
+            console.error("Error playing audio:", error);
+            setIsPlaying(false);
+            setLoading(false);
+            
+            // Try to enable audio context for mobile browsers
+            if (typeof document !== 'undefined' && 'ontouchstart' in document.documentElement) {
+              // iOS and some Android browsers require user interaction
+              toast({
+                title: "Audio Playback",
+                description: "Tap the play button again to start playback",
+                variant: "default",
+              });
+            }
+          });
+        }
       } else {
         audioRef.current.pause();
       }
