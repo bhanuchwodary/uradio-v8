@@ -16,6 +16,7 @@ interface MusicPlayerProps {
   tracks?: { name: string; url: string }[];
 }
 
+// Move globalAudioRef outside of the component to maintain state between route changes
 const globalAudioRef = {
   element: null as HTMLAudioElement | null,
   hls: null as Hls | null,
@@ -30,6 +31,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
   setIsPlaying,
   tracks = [],
 }) => {
+  // Create a unique identifier for this player instance
   const playerInstanceRef = useRef(Symbol("player-instance"));
   const [duration, setDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
@@ -37,7 +39,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
-  // Add the missing handleVisibilityChange function
+  // Handle visibility change to resume playback when tab becomes active
   const handleVisibilityChange = () => {
     if (document.visibilityState === 'visible' && isPlaying && 
         globalAudioRef.activePlayerInstance === playerInstanceRef && 
@@ -47,18 +49,22 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
   };
 
   useEffect(() => {
+    // Register this instance if no active instance exists
     if (!globalAudioRef.activePlayerInstance) {
       globalAudioRef.activePlayerInstance = playerInstanceRef;
     }
     
     return () => {
+      // Only clear the active instance if this component was the active one
       if (globalAudioRef.activePlayerInstance === playerInstanceRef) {
-        globalAudioRef.activePlayerInstance = null;
+        // Don't set to null when navigating between routes to maintain playback
+        // Instead we'll let the new instance pick up the playback
       }
     };
   }, []);
 
   useEffect(() => {
+    // Initialize audio element if it doesn't exist
     if (!globalAudioRef.element) {
       const audio = new Audio();
       audio.setAttribute('playsinline', '');
@@ -114,6 +120,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
       }
     });
     
+    // Cleanup function
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       audio.removeEventListener("timeupdate", handleTimeUpdate);
@@ -123,12 +130,23 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
     };
   }, [isPlaying, volume]);
 
+  // Set this instance as active when playing
   useEffect(() => {
     if (isPlaying) {
       globalAudioRef.activePlayerInstance = playerInstanceRef;
     }
   }, [isPlaying]);
 
+  // Use effect to sync with current time on component mount or when becoming active
+  useEffect(() => {
+    if (globalAudioRef.activePlayerInstance === playerInstanceRef && globalAudioRef.element) {
+      setCurrentTime(globalAudioRef.element.currentTime);
+      setDuration(globalAudioRef.element.duration || 0);
+      setVolume(globalAudioRef.element.volume);
+    }
+  }, []);
+
+  // Load media function
   const loadMedia = (url: string) => {
     if (!globalAudioRef.element) return;
     
@@ -203,6 +221,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
     }
   };
 
+  // Handle changes to current track
   useEffect(() => {
     if (urls.length > 0 && currentIndex >= 0 && currentIndex < urls.length && 
         (isPlaying || globalAudioRef.activePlayerInstance === playerInstanceRef)) {
@@ -210,6 +229,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
     }
   }, [currentIndex, urls, isPlaying]);
 
+  // Handle play/pause state changes
   useEffect(() => {
     if (globalAudioRef.element && globalAudioRef.activePlayerInstance === playerInstanceRef) {
       if (isPlaying) {
@@ -235,12 +255,14 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
     }
   }, [isPlaying]);
 
+  // Handle volume changes
   useEffect(() => {
     if (globalAudioRef.element && globalAudioRef.activePlayerInstance === playerInstanceRef) {
       globalAudioRef.element.volume = volume;
     }
   }, [volume]);
 
+  // Player control handlers
   const handlePlayPause = () => {
     if (!isPlaying) {
       globalAudioRef.activePlayerInstance = playerInstanceRef;
@@ -277,6 +299,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
     return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
   };
 
+  // Sync with global audio element's current time and duration
   useEffect(() => {
     if (globalAudioRef.activePlayerInstance === playerInstanceRef && globalAudioRef.element) {
       setCurrentTime(globalAudioRef.element.currentTime);
