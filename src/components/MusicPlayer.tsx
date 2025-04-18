@@ -15,6 +15,13 @@ interface MusicPlayerProps {
   setIsPlaying: (isPlaying: boolean) => void;
 }
 
+// Create a static audio reference to be shared across all instances
+const globalAudioRef = {
+  element: null as HTMLAudioElement | null,
+  hls: null as Hls | null,
+  activePlayerInstance: null as React.RefObject<symbol> | null
+};
+
 const MusicPlayer: React.FC<MusicPlayerProps> = ({
   urls,
   currentIndex,
@@ -22,17 +29,34 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
   isPlaying,
   setIsPlaying,
 }) => {
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const hlsRef = useRef<Hls | null>(null);
+  // Create a unique symbol to identify this player instance
+  const playerInstanceRef = useRef(Symbol("player-instance"));
   const [duration, setDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
   const [volume, setVolume] = useState(0.5);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
+  // Register this player instance when it mounts
   useEffect(() => {
-    // Create a new audio element if it doesn't exist
-    if (!audioRef.current) {
+    // If this is the first player or there's no active player, take control
+    if (!globalAudioRef.activePlayerInstance) {
+      globalAudioRef.activePlayerInstance = playerInstanceRef;
+    }
+    
+    return () => {
+      // If this player was the active one, release control when unmounting
+      if (globalAudioRef.activePlayerInstance === playerInstanceRef) {
+        // Don't destroy the audio element, just release active status
+        globalAudioRef.activePlayerInstance = null;
+      }
+    };
+  }, []);
+
+  // Create or reuse the audio element
+  useEffect(() => {
+    // Create a global audio element if it doesn't exist
+    if (!globalAudioRef.element) {
       const audio = new Audio();
       // Set audio attributes for background playback
       audio.setAttribute('playsinline', '');
@@ -45,31 +69,44 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
       }
       audio.volume = volume;
       
-      audioRef.current = audio;
+      globalAudioRef.element = audio;
     }
     
-    const audio = audioRef.current;
+    const audio = globalAudioRef.element;
     
     const handleTimeUpdate = () => {
-      setCurrentTime(audio.currentTime);
+      // Only update time if this instance is active
+      if (globalAudioRef.activePlayerInstance === playerInstanceRef) {
+        setCurrentTime(audio.currentTime);
+      }
     };
     
     const handleLoadedMetadata = () => {
-      setDuration(audio.duration);
-      setLoading(false);
+      // Only update duration if this instance is active
+      if (globalAudioRef.activePlayerInstance === playerInstanceRef) {
+        setDuration(audio.duration);
+        setLoading(false);
+      }
     };
     
     const handleEnded = () => {
-      handleNext();
+      // Only handle ended if this instance is active
+      if (globalAudioRef.activePlayerInstance === playerInstanceRef) {
+        handleNext();
+      }
     };
 
     const handleCanPlay = () => {
-      setLoading(false);
+      // Only update loading state if this instance is active
+      if (globalAudioRef.activePlayerInstance === playerInstanceRef) {
+        setLoading(false);
+      }
     };
 
     // When app goes to background
     const handleVisibilityChange = () => {
-      if (document.visibilityState === 'hidden' && isPlaying && audio) {
+      if (document.visibilityState === 'hidden' && isPlaying && audio && 
+          globalAudioRef.activePlayerInstance === playerInstanceRef) {
         // Make sure playback continues when app is in background
         audio.play().catch(err => console.warn('Background play error:', err));
       }
@@ -85,8 +122,9 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
     // Prevent audio from stopping on mobile devices
     audio.addEventListener("pause", (e) => {
       // If we're still supposed to be playing but audio paused (e.g. by system)
-      // Try to resume playback if it wasn't user-initiated
-      if (isPlaying && !document.hasFocus()) {
+      // Try to resume playback if it wasn't user-initiated and this instance is active
+      if (isPlaying && !document.hasFocus() && 
+          globalAudioRef.activePlayerInstance === playerInstanceRef) {
         audio.play().catch(err => console.warn('Resume error:', err));
       }
     });
@@ -100,15 +138,26 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
     };
   }, [isPlaying, volume]);
 
+  // Take control of the player when this instance becomes active
+  useEffect(() => {
+    // When this component starts playing, take control from other instances
+    if (isPlaying) {
+      globalAudioRef.activePlayerInstance = playerInstanceRef;
+    }
+  }, [isPlaying]);
+
   const loadMedia = (url: string) => {
-    if (!audioRef.current) return;
+    if (!globalAudioRef.element) return;
     
     setLoading(true);
     
+    // Take control of the player
+    globalAudioRef.activePlayerInstance = playerInstanceRef;
+    
     // Destroy previous HLS instance if exists
-    if (hlsRef.current) {
-      hlsRef.current.destroy();
-      hlsRef.current = null;
+    if (globalAudioRef.hls) {
+      globalAudioRef.hls.destroy();
+      globalAudioRef.hls = null;
     }
     
     const isHLS = url.includes('.m3u8');
@@ -125,11 +174,11 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
       });
       
       hls.loadSource(url);
-      hls.attachMedia(audioRef.current);
+      hls.attachMedia(globalAudioRef.element);
       
       hls.on(Hls.Events.MANIFEST_PARSED, () => {
-        if (isPlaying) {
-          audioRef.current?.play().catch(error => {
+        if (isPlaying && globalAudioRef.activePlayerInstance === playerInstanceRef) {
+          globalAudioRef.element?.play().catch(error => {
             console.error("Error playing HLS stream:", error);
             toast({
               title: "Playback Error",
@@ -143,7 +192,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
       });
       
       hls.on(Hls.Events.ERROR, (_, data) => {
-        if (data.fatal) {
+        if (data.fatal && globalAudioRef.activePlayerInstance === playerInstanceRef) {
           console.error("HLS fatal error:", data);
           toast({
             title: "Stream Error",
@@ -156,12 +205,12 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
         }
       });
       
-      hlsRef.current = hls;
+      globalAudioRef.hls = hls;
     } else {
       // Standard audio playback for other formats
-      audioRef.current.src = url;
-      if (isPlaying) {
-        audioRef.current.play().catch(error => {
+      globalAudioRef.element.src = url;
+      if (isPlaying && globalAudioRef.activePlayerInstance === playerInstanceRef) {
+        globalAudioRef.element.play().catch(error => {
           console.error("Error playing audio:", error);
           toast({
             title: "Playback Error",
@@ -176,16 +225,18 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
   };
 
   useEffect(() => {
-    if (urls.length > 0 && currentIndex >= 0 && currentIndex < urls.length) {
+    // Only load media if this instance is active or becoming active
+    if (urls.length > 0 && currentIndex >= 0 && currentIndex < urls.length && 
+        (isPlaying || globalAudioRef.activePlayerInstance === playerInstanceRef)) {
       loadMedia(urls[currentIndex]);
     }
-  }, [currentIndex, urls]);
+  }, [currentIndex, urls, isPlaying]);
 
   useEffect(() => {
-    if (audioRef.current) {
+    if (globalAudioRef.element && globalAudioRef.activePlayerInstance === playerInstanceRef) {
       if (isPlaying) {
         // Use promise to ensure we catch any autoplay restriction errors
-        const playPromise = audioRef.current.play();
+        const playPromise = globalAudioRef.element.play();
         if (playPromise !== undefined) {
           playPromise.catch(error => {
             console.error("Error playing audio:", error);
@@ -204,36 +255,45 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
           });
         }
       } else {
-        audioRef.current.pause();
+        globalAudioRef.element.pause();
       }
     }
   }, [isPlaying]);
 
   useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.volume = volume;
+    if (globalAudioRef.element && globalAudioRef.activePlayerInstance === playerInstanceRef) {
+      globalAudioRef.element.volume = volume;
     }
   }, [volume]);
 
   const handlePlayPause = () => {
+    // Take control when manually playing
+    if (!isPlaying) {
+      globalAudioRef.activePlayerInstance = playerInstanceRef;
+    }
     setIsPlaying(!isPlaying);
   };
 
   const handleNext = () => {
     if (urls.length > 0) {
+      // Take control when changing tracks manually
+      globalAudioRef.activePlayerInstance = playerInstanceRef;
       setCurrentIndex((currentIndex + 1) % urls.length);
     }
   };
 
   const handlePrevious = () => {
     if (urls.length > 0) {
+      // Take control when changing tracks manually
+      globalAudioRef.activePlayerInstance = playerInstanceRef;
       setCurrentIndex((currentIndex - 1 + urls.length) % urls.length);
     }
   };
 
   const handleSeek = (value: number[]) => {
-    if (audioRef.current && !isNaN(value[0])) {
-      audioRef.current.currentTime = value[0];
+    if (globalAudioRef.element && !isNaN(value[0]) && 
+        globalAudioRef.activePlayerInstance === playerInstanceRef) {
+      globalAudioRef.element.currentTime = value[0];
       setCurrentTime(value[0]);
     }
   };
@@ -244,6 +304,14 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
     const seconds = Math.floor(time % 60);
     return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
   };
+
+  // Sync with actual audio state for UI when this player becomes active
+  useEffect(() => {
+    if (globalAudioRef.activePlayerInstance === playerInstanceRef && globalAudioRef.element) {
+      setCurrentTime(globalAudioRef.element.currentTime);
+      setDuration(globalAudioRef.element.duration);
+    }
+  }, [globalAudioRef.activePlayerInstance === playerInstanceRef]);
 
   return (
     <Card className="w-full max-w-md mx-auto backdrop-blur-md bg-white/20 border-none shadow-lg">
