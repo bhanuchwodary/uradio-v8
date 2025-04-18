@@ -35,6 +35,7 @@ const Index = () => {
           setCurrentIndex={setCurrentIndex}
           isPlaying={isPlaying}
           setIsPlaying={setIsPlaying}
+          tracks={tracks}  // Add tracks prop
         />
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">

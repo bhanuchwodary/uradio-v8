@@ -1,4 +1,3 @@
-
 // This service provides integration with Android Auto and handles media controls
 // for notifications, lock screen, and background playback
 
@@ -22,7 +21,7 @@ class AndroidAutoService {
     // In a real app, this would initialize the native media session
     // which would show controls in notifications, lock screen, etc.
     
-    // Add event listeners for hardware media buttons
+    // Add event listeners for hardware media buttons and seeking
     this.setupMediaButtonEventListeners();
     
     this.isInitialized = true;
@@ -54,8 +53,26 @@ class AndroidAutoService {
         this.callbacks.onSkipPrevious();
       }
     });
+
+    // Add seek event listener for Android Auto
+    document.addEventListener('keydown', (event) => {
+      if (!this.callbacks?.onSeek) return;
+      
+      // Simulate seeking with left/right arrow keys (for testing)
+      if (event.code === 'ArrowLeft') {
+        event.preventDefault();
+        // Seek back 10 seconds
+        this.callbacks.onSeek(Math.max(0, this._currentPosition - 10));
+      } else if (event.code === 'ArrowRight') {
+        event.preventDefault();
+        // Seek forward 10 seconds
+        if (this._duration > 0) {
+          this.callbacks.onSeek(Math.min(this._duration, this._currentPosition + 10));
+        }
+      }
+    });
   }
-  
+
   // Toggle play/pause based on current state
   private triggerPlayPause() {
     if (!this.callbacks) return;
@@ -72,6 +89,8 @@ class AndroidAutoService {
   
   // Track the current playing state internally
   private _isPlaying = false;
+  private _currentPosition = 0;
+  private _duration = 0;
 
   // Register callbacks for media controls
   registerCallbacks(callbacks: {
@@ -96,8 +115,11 @@ class AndroidAutoService {
   }) {
     if (!trackInfo) return;
     
-    // In a real implementation, this would update the media session metadata
-    // which would show in notifications, lock screen, and Android Auto
+    this._currentPosition = trackInfo.position;
+    this._duration = trackInfo.duration;
+    
+    // Update media session metadata which shows in notifications, 
+    // lock screen, and Android Auto
     console.log("Updated media session metadata:", trackInfo);
   }
 

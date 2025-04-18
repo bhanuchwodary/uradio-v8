@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from "react";
 import { Play, Pause, SkipForward, SkipBack, Volume2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -13,9 +12,9 @@ interface MusicPlayerProps {
   setCurrentIndex: (index: number) => void;
   isPlaying: boolean;
   setIsPlaying: (isPlaying: boolean) => void;
+  tracks?: { name: string; url: string }[];
 }
 
-// Create a static audio reference to be shared across all instances
 const globalAudioRef = {
   element: null as HTMLAudioElement | null,
   hls: null as Hls | null,
@@ -28,8 +27,8 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
   setCurrentIndex,
   isPlaying,
   setIsPlaying,
+  tracks = [],
 }) => {
-  // Create a unique symbol to identify this player instance
   const playerInstanceRef = useRef(Symbol("player-instance"));
   const [duration, setDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
@@ -37,33 +36,25 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
-  // Register this player instance when it mounts
   useEffect(() => {
-    // If this is the first player or there's no active player, take control
     if (!globalAudioRef.activePlayerInstance) {
       globalAudioRef.activePlayerInstance = playerInstanceRef;
     }
     
     return () => {
-      // If this player was the active one, release control when unmounting
       if (globalAudioRef.activePlayerInstance === playerInstanceRef) {
-        // Don't destroy the audio element, just release active status
         globalAudioRef.activePlayerInstance = null;
       }
     };
   }, []);
 
-  // Create or reuse the audio element
   useEffect(() => {
-    // Create a global audio element if it doesn't exist
     if (!globalAudioRef.element) {
       const audio = new Audio();
-      // Set audio attributes for background playback
       audio.setAttribute('playsinline', '');
       audio.setAttribute('webkit-playsinline', '');
       audio.setAttribute('preload', 'auto');
       
-      // Fix for TypeScript error - use type assertion for Mozilla-specific property
       if ('mozAudioChannelType' in audio) {
         (audio as any).mozAudioChannelType = 'content';
       }
@@ -75,14 +66,12 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
     const audio = globalAudioRef.element;
     
     const handleTimeUpdate = () => {
-      // Only update time if this instance is active
       if (globalAudioRef.activePlayerInstance === playerInstanceRef) {
         setCurrentTime(audio.currentTime);
       }
     };
     
     const handleLoadedMetadata = () => {
-      // Only update duration if this instance is active
       if (globalAudioRef.activePlayerInstance === playerInstanceRef) {
         setDuration(audio.duration);
         setLoading(false);
@@ -90,25 +79,14 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
     };
     
     const handleEnded = () => {
-      // Only handle ended if this instance is active
       if (globalAudioRef.activePlayerInstance === playerInstanceRef) {
         handleNext();
       }
     };
 
     const handleCanPlay = () => {
-      // Only update loading state if this instance is active
       if (globalAudioRef.activePlayerInstance === playerInstanceRef) {
         setLoading(false);
-      }
-    };
-
-    // When app goes to background
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'hidden' && isPlaying && audio && 
-          globalAudioRef.activePlayerInstance === playerInstanceRef) {
-        // Make sure playback continues when app is in background
-        audio.play().catch(err => console.warn('Background play error:', err));
       }
     };
 
@@ -119,10 +97,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
     audio.addEventListener("ended", handleEnded);
     audio.addEventListener("canplay", handleCanPlay);
     
-    // Prevent audio from stopping on mobile devices
     audio.addEventListener("pause", (e) => {
-      // If we're still supposed to be playing but audio paused (e.g. by system)
-      // Try to resume playback if it wasn't user-initiated and this instance is active
       if (isPlaying && !document.hasFocus() && 
           globalAudioRef.activePlayerInstance === playerInstanceRef) {
         audio.play().catch(err => console.warn('Resume error:', err));
@@ -138,9 +113,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
     };
   }, [isPlaying, volume]);
 
-  // Take control of the player when this instance becomes active
   useEffect(() => {
-    // When this component starts playing, take control from other instances
     if (isPlaying) {
       globalAudioRef.activePlayerInstance = playerInstanceRef;
     }
@@ -151,10 +124,8 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
     
     setLoading(true);
     
-    // Take control of the player
     globalAudioRef.activePlayerInstance = playerInstanceRef;
     
-    // Destroy previous HLS instance if exists
     if (globalAudioRef.hls) {
       globalAudioRef.hls.destroy();
       globalAudioRef.hls = null;
@@ -163,14 +134,13 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
     const isHLS = url.includes('.m3u8');
     
     if (isHLS && Hls.isSupported()) {
-      // Use HLS.js for m3u8 streams with optimized config for mobile
       const hls = new Hls({
         enableWorker: true,
         lowLatencyMode: true,
         backBufferLength: 90,
         maxBufferLength: 30,
         maxMaxBufferLength: 600,
-        maxBufferSize: 60 * 1000 * 1000, // 60MB buffer for uninterrupted playback
+        maxBufferSize: 60 * 1000 * 1000,
       });
       
       hls.loadSource(url);
@@ -207,7 +177,6 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
       
       globalAudioRef.hls = hls;
     } else {
-      // Standard audio playback for other formats
       globalAudioRef.element.src = url;
       if (isPlaying && globalAudioRef.activePlayerInstance === playerInstanceRef) {
         globalAudioRef.element.play().catch(error => {
@@ -225,7 +194,6 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
   };
 
   useEffect(() => {
-    // Only load media if this instance is active or becoming active
     if (urls.length > 0 && currentIndex >= 0 && currentIndex < urls.length && 
         (isPlaying || globalAudioRef.activePlayerInstance === playerInstanceRef)) {
       loadMedia(urls[currentIndex]);
@@ -235,7 +203,6 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
   useEffect(() => {
     if (globalAudioRef.element && globalAudioRef.activePlayerInstance === playerInstanceRef) {
       if (isPlaying) {
-        // Use promise to ensure we catch any autoplay restriction errors
         const playPromise = globalAudioRef.element.play();
         if (playPromise !== undefined) {
           playPromise.catch(error => {
@@ -243,9 +210,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
             setIsPlaying(false);
             setLoading(false);
             
-            // Try to enable audio context for mobile browsers
             if (typeof document !== 'undefined' && 'ontouchstart' in document.documentElement) {
-              // iOS and some Android browsers require user interaction
               toast({
                 title: "Audio Playback",
                 description: "Tap the play button again to start playback",
@@ -267,7 +232,6 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
   }, [volume]);
 
   const handlePlayPause = () => {
-    // Take control when manually playing
     if (!isPlaying) {
       globalAudioRef.activePlayerInstance = playerInstanceRef;
     }
@@ -276,7 +240,6 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
 
   const handleNext = () => {
     if (urls.length > 0) {
-      // Take control when changing tracks manually
       globalAudioRef.activePlayerInstance = playerInstanceRef;
       setCurrentIndex((currentIndex + 1) % urls.length);
     }
@@ -284,7 +247,6 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
 
   const handlePrevious = () => {
     if (urls.length > 0) {
-      // Take control when changing tracks manually
       globalAudioRef.activePlayerInstance = playerInstanceRef;
       setCurrentIndex((currentIndex - 1 + urls.length) % urls.length);
     }
@@ -305,7 +267,6 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
     return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
   };
 
-  // Sync with actual audio state for UI when this player becomes active
   useEffect(() => {
     if (globalAudioRef.activePlayerInstance === playerInstanceRef && globalAudioRef.element) {
       setCurrentTime(globalAudioRef.element.currentTime);
@@ -319,7 +280,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
         <div className="flex flex-col gap-4">
           <div className="text-center">
             <h3 className="font-bold text-lg truncate">
-              {urls.length > 0 ? `Track ${currentIndex + 1}` : "No track selected"}
+              {tracks[currentIndex]?.name || `Track ${currentIndex + 1}`}
             </h3>
             <p className="text-xs text-gray-500 truncate">
               {urls[currentIndex] ? (new URL(urls[currentIndex])).hostname : "Add a URL to begin"}

@@ -51,7 +51,7 @@ export const useMusicPlayer = () => {
       const currentTrack = tracks[currentIndex];
       
       androidAutoService.updateTrackInfo({
-        title: currentTrack.name || `Track ${currentIndex + 1}`,
+        title: currentTrack.name,  // Use the station name directly
         artist: "Streamify Jukebox",
         album: "My Stations",
         duration: trackDuration,
