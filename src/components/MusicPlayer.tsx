@@ -39,8 +39,10 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
       audio.setAttribute('webkit-playsinline', '');
       audio.setAttribute('preload', 'auto');
       
-      // This is crucial for Android background playback
-      audio.mozAudioChannelType = 'content';
+      // Fix for TypeScript error - use type assertion for Mozilla-specific property
+      if ('mozAudioChannelType' in audio) {
+        (audio as any).mozAudioChannelType = 'content';
+      }
       audio.volume = volume;
       
       audioRef.current = audio;
