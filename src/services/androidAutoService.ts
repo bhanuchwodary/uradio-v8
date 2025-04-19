@@ -1,3 +1,7 @@
+
+import { Media } from '@capacitor-community/media';
+import { Capacitor } from '@capacitor/core';
+
 // This service provides integration with Android Auto and handles media controls
 // for notifications, lock screen, and background playback
 
@@ -13,16 +17,55 @@ class AndroidAutoService {
   private isInitialized = false;
   
   // Initialize the service and media session
-  initialize() {
+  async initialize() {
     if (this.isInitialized) return true;
     
-    console.log("Android Auto service initialized");
+    console.log("Android Auto service initializing");
     
-    // In a real app, this would initialize the native media session
-    // which would show controls in notifications, lock screen, etc.
-    
-    // Add event listeners for hardware media buttons and seeking
-    this.setupMediaButtonEventListeners();
+    // Initialize the native media session only on Android
+    if (Capacitor.getPlatform() === 'android') {
+      try {
+        await Media.initialize();
+        
+        // Add event listeners for media controls
+        Media.addListener('mediaAction', (action) => {
+          if (!this.callbacks) return;
+          
+          switch (action.action) {
+            case 'play':
+              this.callbacks.onPlay();
+              break;
+            case 'pause':
+              this.callbacks.onPause();
+              break;
+            case 'stop':
+              this.callbacks.onPause();
+              break;
+            case 'skipToNext':
+              this.callbacks.onSkipNext();
+              break;
+            case 'skipToPrevious':
+              this.callbacks.onSkipPrevious();
+              break;
+            case 'seekTo':
+              if (this.callbacks.onSeek && action.position !== undefined) {
+                this.callbacks.onSeek(action.position / 1000); // Convert from ms to seconds
+              }
+              break;
+          }
+        });
+        
+        console.log("Android Auto service initialized with native capabilities");
+      } catch (error) {
+        console.error("Failed to initialize media session:", error);
+        // Fall back to web implementation
+        this.setupMediaButtonEventListeners();
+      }
+    } else {
+      // For non-Android platforms, use web implementation
+      this.setupMediaButtonEventListeners();
+      console.log("Android Auto service initialized with web fallback");
+    }
     
     this.isInitialized = true;
     return true;
@@ -77,9 +120,6 @@ class AndroidAutoService {
   private triggerPlayPause() {
     if (!this.callbacks) return;
     
-    // This would check the actual playback state in a real implementation
-    // For now we just toggle based on the isPlaying state that will be passed
-    // from the music player component
     if (this._isPlaying) {
       this.callbacks.onPause();
     } else {
@@ -105,7 +145,7 @@ class AndroidAutoService {
   }
 
   // Update the currently playing track information
-  updateTrackInfo(trackInfo: {
+  async updateTrackInfo(trackInfo: {
     title: string;
     artist: string;
     album?: string;
@@ -120,33 +160,77 @@ class AndroidAutoService {
     
     // Update media session metadata which shows in notifications, 
     // lock screen, and Android Auto
+    if (Capacitor.getPlatform() === 'android') {
+      try {
+        await Media.setMediaInfo({
+          title: trackInfo.title,
+          artist: trackInfo.artist,
+          album: trackInfo.album || '',
+          duration: trackInfo.duration * 1000, // Convert to milliseconds
+          mediaType: 'audio',
+          artworkUri: trackInfo.artworkUrl || '',
+          playbackPosition: trackInfo.position * 1000 // Convert to milliseconds
+        });
+        console.log("Updated native media session metadata:", trackInfo);
+      } catch (error) {
+        console.error("Error updating media metadata:", error);
+      }
+    }
+    
     console.log("Updated media session metadata:", trackInfo);
   }
 
   // Update the current playback state
-  updatePlaybackState(isPlaying: boolean) {
+  async updatePlaybackState(isPlaying: boolean) {
     this._isPlaying = isPlaying;
     
-    // In a real implementation, this would update the media session playback state
-    // which controls the play/pause button in notifications, etc.
+    // Update native media session state on Android
+    if (Capacitor.getPlatform() === 'android') {
+      try {
+        if (isPlaying) {
+          await Media.play();
+        } else {
+          await Media.pause();
+        }
+      } catch (error) {
+        console.error("Error updating playback state:", error);
+      }
+    }
+    
     console.log("Updated Android Auto playback state:", isPlaying ? "playing" : "paused");
   }
 
   // Seek to a specific position
-  seekTo(position: number) {
+  async seekTo(position: number) {
+    if (Capacitor.getPlatform() === 'android') {
+      try {
+        await Media.setPlaybackPosition({
+          position: position * 1000 // Convert to milliseconds
+        });
+      } catch (error) {
+        console.error("Error seeking:", error);
+      }
+    }
+    
     if (this.callbacks?.onSeek) {
       this.callbacks.onSeek(position);
     }
   }
 
   // Clean up when the app is closed
-  cleanup() {
+  async cleanup() {
+    if (Capacitor.getPlatform() === 'android') {
+      try {
+        await Media.stop();
+        await Media.removeAllListeners();
+      } catch (error) {
+        console.error("Error cleaning up media session:", error);
+      }
+    }
+    
     this.callbacks = null;
     this.isInitialized = false;
     console.log("Android Auto service cleaned up");
-    
-    // Remove any event listeners we've added
-    // In a real implementation, this would also clean up the media session
   }
 }
 

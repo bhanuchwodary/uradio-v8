@@ -21,7 +21,10 @@ export const useMusicPlayer = () => {
 
   // Initialize Android Auto service
   useEffect(() => {
-    androidAutoService.initialize();
+    // Initialize async, but don't await since we don't need to block the UI
+    androidAutoService.initialize().catch(err => 
+      console.warn('Error initializing Android Auto service:', err)
+    );
 
     // Register callbacks for Android Auto and media controls
     androidAutoService.registerCallbacks({
@@ -40,7 +43,9 @@ export const useMusicPlayer = () => {
     audioWakeLockService.requestWakeLock();
     
     return () => {
-      androidAutoService.cleanup();
+      androidAutoService.cleanup().catch(err => 
+        console.warn('Error cleaning up Android Auto service:', err)
+      );
       audioWakeLockService.releaseWakeLock();
     };
   }, []);
@@ -51,13 +56,14 @@ export const useMusicPlayer = () => {
       const currentTrack = tracks[currentIndex];
       
       androidAutoService.updateTrackInfo({
-        title: currentTrack.name,  // Use the station name directly
+        title: currentTrack.name,
         artist: "Streamify Jukebox",
         album: "My Stations",
-        duration: trackDuration,
-        position: trackPosition,
-        // In a real app, we would add artwork here
-      });
+        duration: trackDuration || 0,
+        position: trackPosition || 0,
+        // You could add artwork here if available
+        artworkUrl: 'https://example.com/artwork.jpg', // Optional placeholder
+      }).catch(err => console.warn('Error updating track info:', err));
     }
   }, [tracks, currentIndex, trackDuration, trackPosition]);
 
