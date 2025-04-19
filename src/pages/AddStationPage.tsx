@@ -1,61 +1,77 @@
 
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import AddUrlForm from "@/components/AddUrlForm";
-import { useMusicPlayer } from "@/hooks/useMusicPlayer";
-import { useToast } from "@/components/ui/use-toast";
 import Navigation from "@/components/Navigation";
-import MusicPlayer from "@/components/MusicPlayer";
+import AddUrlForm from "@/components/AddUrlForm";
 import ImportStationsFromCsv from "@/components/ImportStationsFromCsv";
-import { Separator } from "@/components/ui/separator";
+import { prebuiltStations } from "@/data/prebuiltStations";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
+import { useMusicPlayer } from "@/hooks/useMusicPlayer";
+import { useNavigate } from "react-router-dom";
 
 const AddStationPage = () => {
-  const {
-    urls,
-    addUrl,
-    currentIndex,
-    isPlaying,
-    setCurrentIndex,
-    setIsPlaying,
-  } = useMusicPlayer();
-  
+  const { addUrl } = useMusicPlayer();
   const { toast } = useToast();
+  const navigate = useNavigate();
+
+  const handleAddPrebuiltStation = (name: string, url: string) => {
+    addUrl(url, name);
+    toast({
+      title: "Station added",
+      description: `${name} has been added to your playlist`,
+    });
+    navigate("/playlist");
+  };
 
   const handleAddUrl = (url: string, name: string) => {
     addUrl(url, name);
     toast({
       title: "Station added",
-      description: `"${name}" has been added to the playlist`,
+      description: `${name} has been added to your playlist`,
     });
+    navigate("/playlist");
   };
 
   const handleImportStations = (stations: Array<{ name: string; url: string }>) => {
     stations.forEach(station => {
       addUrl(station.url, station.name);
     });
+    navigate("/playlist");
   };
 
   return (
-    <div className="min-h-screen p-3 md:p-4 bg-gradient-to-br from-blue-900 via-purple-900 to-pink-700 dark:from-gray-900 dark:via-gray-800 dark:to-gray-700 flex flex-col items-center">
-      <div className="w-full max-w-2xl space-y-4 md:space-y-6 flex flex-col">
+    <div className="min-h-screen p-3 md:p-4 bg-gradient-to-br from-blue-900 via-purple-900 to-pink-700 dark:from-gray-900 dark:via-gray-800 dark:to-gray-700">
+      <div className="max-w-2xl mx-auto space-y-4">
         <Navigation />
         
-        <MusicPlayer
-          urls={urls}
-          currentIndex={currentIndex}
-          setCurrentIndex={setCurrentIndex}
-          isPlaying={isPlaying}
-          setIsPlaying={setIsPlaying}
-        />
+        <Card className="bg-white/10 backdrop-blur-md border-none shadow-lg">
+          <CardHeader>
+            <CardTitle>Add Station</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <AddUrlForm onAddUrl={handleAddUrl} />
+            <ImportStationsFromCsv onImport={handleImportStations} />
+          </CardContent>
+        </Card>
 
         <Card className="bg-white/10 backdrop-blur-md border-none shadow-lg">
-          <CardHeader className="p-3 md:p-4">
-            <CardTitle className="text-lg md:text-xl">Add Station</CardTitle>
+          <CardHeader>
+            <CardTitle>Prebuilt Stations</CardTitle>
           </CardHeader>
-          <CardContent className="p-3 md:p-4 pt-0 space-y-4">
-            <AddUrlForm onAddUrl={handleAddUrl} />
-            <Separator className="my-4" />
-            <ImportStationsFromCsv onImport={handleImportStations} />
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+              {prebuiltStations.map((station, index) => (
+                <Button
+                  key={index}
+                  variant="outline"
+                  className="justify-start bg-white/10 hover:bg-white/20 border-none"
+                  onClick={() => handleAddPrebuiltStation(station.name, station.url)}
+                >
+                  {station.name}
+                </Button>
+              ))}
+            </div>
           </CardContent>
         </Card>
       </div>

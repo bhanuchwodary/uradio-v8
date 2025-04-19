@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import MusicPlayer from "@/components/MusicPlayer";
@@ -8,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Music, PlusCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
+import TopStations from "@/components/TopStations";
 
 const Index = () => {
   const {
@@ -21,6 +21,11 @@ const Index = () => {
   
   const isMobile = useIsMobile();
   
+  const handleSelectTopStation = (index: number) => {
+    setCurrentIndex(index);
+    setIsPlaying(true);
+  };
+
   // Show only first 3 stations in the preview
   const previewTracks = tracks.slice(0, 3);
 
@@ -35,7 +40,12 @@ const Index = () => {
           setCurrentIndex={setCurrentIndex}
           isPlaying={isPlaying}
           setIsPlaying={setIsPlaying}
-          tracks={tracks}  // Add tracks prop
+          tracks={tracks}
+        />
+
+        <TopStations 
+          stations={tracks}
+          onSelectStation={handleSelectTopStation}
         />
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
