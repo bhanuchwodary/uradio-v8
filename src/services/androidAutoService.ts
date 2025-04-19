@@ -1,4 +1,3 @@
-
 import { Media } from '@capacitor-community/media';
 import { Capacitor } from '@capacitor/core';
 
@@ -25,10 +24,11 @@ class AndroidAutoService {
     // Initialize the native media session only on Android
     if (Capacitor.getPlatform() === 'android') {
       try {
-        await Media.initialize();
+        // Create media session instead of initialize
+        await Media.createMediaSession();
         
-        // Add event listeners for media controls
-        Media.addListener('mediaAction', (action) => {
+        // Set up event listeners for media controls
+        Media.addListener('mediaButtonsNotificationAction', (action) => {
           if (!this.callbacks) return;
           
           switch (action.action) {
@@ -41,10 +41,10 @@ class AndroidAutoService {
             case 'stop':
               this.callbacks.onPause();
               break;
-            case 'skipToNext':
+            case 'next':
               this.callbacks.onSkipNext();
               break;
-            case 'skipToPrevious':
+            case 'previous':
               this.callbacks.onSkipPrevious();
               break;
             case 'seekTo':
@@ -162,14 +162,14 @@ class AndroidAutoService {
     // lock screen, and Android Auto
     if (Capacitor.getPlatform() === 'android') {
       try {
+        // Use the correct method for setting media info
         await Media.setMediaInfo({
           title: trackInfo.title,
           artist: trackInfo.artist,
           album: trackInfo.album || '',
-          duration: trackInfo.duration * 1000, // Convert to milliseconds
-          mediaType: 'audio',
-          artworkUri: trackInfo.artworkUrl || '',
-          playbackPosition: trackInfo.position * 1000 // Convert to milliseconds
+          duration: Math.round(trackInfo.duration * 1000), // Convert to milliseconds
+          artwork: trackInfo.artworkUrl || '',
+          playbackPosition: Math.round(trackInfo.position * 1000) // Convert to milliseconds
         });
         console.log("Updated native media session metadata:", trackInfo);
       } catch (error) {
@@ -188,9 +188,17 @@ class AndroidAutoService {
     if (Capacitor.getPlatform() === 'android') {
       try {
         if (isPlaying) {
-          await Media.play();
+          // Set playback state to playing
+          await Media.setPlaybackState({ 
+            playbackState: 'playing',
+            position: Math.round(this._currentPosition * 1000) // Convert to milliseconds
+          });
         } else {
-          await Media.pause();
+          // Set playback state to paused
+          await Media.setPlaybackState({ 
+            playbackState: 'paused',
+            position: Math.round(this._currentPosition * 1000) // Convert to milliseconds
+          });
         }
       } catch (error) {
         console.error("Error updating playback state:", error);
@@ -204,8 +212,10 @@ class AndroidAutoService {
   async seekTo(position: number) {
     if (Capacitor.getPlatform() === 'android') {
       try {
-        await Media.setPlaybackPosition({
-          position: position * 1000 // Convert to milliseconds
+        // Use correct method for setting playback position
+        await Media.setPlaybackState({
+          playbackState: this._isPlaying ? 'playing' : 'paused',
+          position: Math.round(position * 1000) // Convert to milliseconds
         });
       } catch (error) {
         console.error("Error seeking:", error);
@@ -221,7 +231,9 @@ class AndroidAutoService {
   async cleanup() {
     if (Capacitor.getPlatform() === 'android') {
       try {
-        await Media.stop();
+        // Remove the media session entirely
+        await Media.destroyMediaSession();
+        // Remove event listeners
         await Media.removeAllListeners();
       } catch (error) {
         console.error("Error cleaning up media session:", error);
