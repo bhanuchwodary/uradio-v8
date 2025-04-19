@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Track } from "@/types/track";
 
@@ -6,6 +7,7 @@ export const useTrackState = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
 
+  // Load tracks from localStorage on init
   useEffect(() => {
     const savedTracks = localStorage.getItem('musicTracks');
     if (savedTracks) {
@@ -17,6 +19,7 @@ export const useTrackState = () => {
     }
   }, []);
 
+  // Save tracks to localStorage on change
   useEffect(() => {
     localStorage.setItem('musicTracks', JSON.stringify(tracks));
   }, [tracks]);
@@ -27,29 +30,9 @@ export const useTrackState = () => {
       { 
         url, 
         name: name || `Station ${prevTracks.length + 1}`,
-        isFavorite: false,
-        playTime: 0
+        isFavorite: false
       }
     ]);
-  };
-
-  const updatePlayTime = (index: number, seconds: number) => {
-    setTracks((prevTracks) => {
-      const newTracks = [...prevTracks];
-      if (newTracks[index]) {
-        newTracks[index] = {
-          ...newTracks[index],
-          playTime: (newTracks[index].playTime || 0) + seconds
-        };
-      }
-      return newTracks;
-    });
-  };
-
-  const getTopStations = () => {
-    return [...tracks]
-      .sort((a, b) => (b.playTime || 0) - (a.playTime || 0))
-      .slice(0, 5);
   };
 
   const editTrack = (index: number, data: { url: string; name: string }) => {
@@ -71,14 +54,18 @@ export const useTrackState = () => {
       const newTracks = [...prevTracks];
       newTracks.splice(index, 1);
       
+      // If we removed the current track
       if (index === currentIndex) {
         if (newTracks.length > 0) {
+          // If we have tracks left, either stay at same index (if in bounds) or go to last track
           setCurrentIndex(Math.min(currentIndex, newTracks.length - 1));
         } else {
+          // If no tracks left, reset to 0 and stop playback
           setCurrentIndex(0);
           setIsPlaying(false);
         }
       } else if (index < currentIndex) {
+        // If we removed a track before the current one, adjust index
         setCurrentIndex(currentIndex - 1);
       }
       
@@ -109,7 +96,5 @@ export const useTrackState = () => {
     removeUrl,
     toggleFavorite,
     editTrack,
-    updatePlayTime,
-    getTopStations,
   };
 };
