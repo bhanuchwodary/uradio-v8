@@ -27,6 +27,48 @@ export const useMediaSession = ({
   onSkipPrevious,
   onSeek,
 }: UseMediaSessionProps) => {
+  // Set up media session controls
+  useEffect(() => {
+    if ('mediaSession' in navigator) {
+      // Set metadata
+      if (tracks.length > 0 && currentIndex < tracks.length) {
+        const currentTrack = tracks[currentIndex];
+        
+        navigator.mediaSession.metadata = new MediaMetadata({
+          title: currentTrack.name,
+          artist: 'Streamify Jukebox',
+          album: 'My Stations',
+          artwork: [
+            { src: '/og-image.png', sizes: '512x512', type: 'image/png' }
+          ]
+        });
+      }
+
+      // Set playback state
+      navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused';
+
+      // Set action handlers
+      navigator.mediaSession.setActionHandler('play', () => setIsPlaying(true));
+      navigator.mediaSession.setActionHandler('pause', () => setIsPlaying(false));
+      navigator.mediaSession.setActionHandler('previoustrack', onSkipPrevious);
+      navigator.mediaSession.setActionHandler('nexttrack', onSkipNext);
+      navigator.mediaSession.setActionHandler('seekto', (details) => {
+        if (details.seekTime) {
+          onSeek(details.seekTime);
+        }
+      });
+
+      // Update position state
+      if (trackDuration) {
+        navigator.mediaSession.setPositionState({
+          duration: trackDuration,
+          position: trackPosition,
+          playbackRate: 1,
+        });
+      }
+    }
+  }, [tracks, currentIndex, isPlaying, trackDuration, trackPosition]);
+
   // Initialize Android Auto service
   useEffect(() => {
     androidAutoService.initialize().catch(err => 
@@ -78,3 +120,4 @@ export const useMediaSession = ({
     }
   }, [isPlaying]);
 };
+
