@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Play, Trash2, Heart, Edit } from "lucide-react";
@@ -62,11 +63,13 @@ const Playlist: React.FC<PlaylistProps> = ({
     setEditingTrack(null);
   };
 
+  // Safely get display URL from a URL string
   const getDisplayUrl = (url: string): string => {
     if (!url) return "No URL";
     
     try {
       const urlObj = new URL(url);
+      // Get the file name from the path
       return urlObj.pathname.split('/').pop() || url;
     } catch (e) {
       return url;
@@ -77,6 +80,7 @@ const Playlist: React.FC<PlaylistProps> = ({
     <ScrollArea className={`h-[${scrollAreaHeight}] pr-4`}>
       <div className="space-y-2">
         {tracks ? (
+          // New version using tracks with names and favorites
           tracks.map((track, index) => {
             const isActive = index === currentIndex;
             return (
@@ -97,12 +101,9 @@ const Playlist: React.FC<PlaylistProps> = ({
                   >
                     <Play className="h-4 w-4" />
                   </Button>
-                  <button
-                    className="truncate text-sm text-left hover:text-primary transition-colors"
-                    onClick={() => onSelectTrack(index)}
-                  >
+                  <span className="truncate text-sm">
                     {isMobile ? track.name : `${index + 1}. ${track.name}`}
-                  </button>
+                  </span>
                 </div>
                 <div className="flex items-center">
                   {onToggleFavorite && (
@@ -138,6 +139,7 @@ const Playlist: React.FC<PlaylistProps> = ({
             );
           })
         ) : (
+          // Legacy version using just URLs
           urls.map((url, index) => {
             const isActive = index === currentIndex;
             const displayUrl = getDisplayUrl(url);
@@ -160,12 +162,9 @@ const Playlist: React.FC<PlaylistProps> = ({
                   >
                     <Play className="h-4 w-4" />
                   </Button>
-                  <button
-                    className="truncate text-sm text-left hover:text-primary transition-colors"
-                    onClick={() => onSelectTrack(index)}
-                  >
+                  <span className="truncate text-sm">
                     {isMobile ? displayUrl : `${index + 1}. ${displayUrl}`}
-                  </button>
+                  </span>
                 </div>
                 <Button
                   variant="ghost"
