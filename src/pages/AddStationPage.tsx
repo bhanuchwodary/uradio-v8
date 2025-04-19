@@ -24,6 +24,22 @@ const AddStationPage = () => {
     navigate("/playlist");
   };
 
+  const handleAddUrl = (url: string, name: string) => {
+    addUrl(url, name);
+    toast({
+      title: "Station added",
+      description: `${name} has been added to your playlist`,
+    });
+    navigate("/playlist");
+  };
+
+  const handleImportStations = (stations: Array<{ name: string; url: string }>) => {
+    stations.forEach(station => {
+      addUrl(station.url, station.name);
+    });
+    navigate("/playlist");
+  };
+
   return (
     <div className="min-h-screen p-3 md:p-4 bg-gradient-to-br from-blue-900 via-purple-900 to-pink-700 dark:from-gray-900 dark:via-gray-800 dark:to-gray-700">
       <div className="max-w-2xl mx-auto space-y-4">
@@ -34,8 +50,8 @@ const AddStationPage = () => {
             <CardTitle>Add Station</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <AddUrlForm />
-            <ImportStationsFromCsv />
+            <AddUrlForm onAddUrl={handleAddUrl} />
+            <ImportStationsFromCsv onImport={handleImportStations} />
           </CardContent>
         </Card>
 
