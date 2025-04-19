@@ -299,6 +299,19 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
     return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
   };
 
+  // Safely get hostname from URL or return a fallback string
+  const getHostnameFromUrl = (url: string): string => {
+    if (!url) return "No URL";
+    
+    try {
+      const urlObj = new URL(url);
+      return urlObj.hostname;
+    } catch (error) {
+      console.warn("Invalid URL:", url);
+      return "Invalid URL";
+    }
+  };
+
   // Sync with global audio element's current time and duration
   useEffect(() => {
     if (globalAudioRef.activePlayerInstance === playerInstanceRef && globalAudioRef.element) {
@@ -316,7 +329,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
               {tracks[currentIndex]?.name || `Track ${currentIndex + 1}`}
             </h3>
             <p className="text-xs text-gray-500 truncate">
-              {urls[currentIndex] ? (new URL(urls[currentIndex])).hostname : "Add a URL to begin"}
+              {urls[currentIndex] ? getHostnameFromUrl(urls[currentIndex]) : "Add a URL to begin"}
             </p>
             {loading && (
               <p className="text-xs text-blue-400 animate-pulse mt-1">Loading stream...</p>

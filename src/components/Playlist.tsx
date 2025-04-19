@@ -63,6 +63,19 @@ const Playlist: React.FC<PlaylistProps> = ({
     setEditingTrack(null);
   };
 
+  // Safely get display URL from a URL string
+  const getDisplayUrl = (url: string): string => {
+    if (!url) return "No URL";
+    
+    try {
+      const urlObj = new URL(url);
+      // Get the file name from the path
+      return urlObj.pathname.split('/').pop() || url;
+    } catch (e) {
+      return url;
+    }
+  };
+
   return (
     <ScrollArea className={`h-[${scrollAreaHeight}] pr-4`}>
       <div className="space-y-2">
@@ -129,14 +142,7 @@ const Playlist: React.FC<PlaylistProps> = ({
           // Legacy version using just URLs
           urls.map((url, index) => {
             const isActive = index === currentIndex;
-            let displayUrl;
-            try {
-              const urlObj = new URL(url);
-              // Get the file name from the path
-              displayUrl = urlObj.pathname.split('/').pop() || url;
-            } catch (e) {
-              displayUrl = url;
-            }
+            const displayUrl = getDisplayUrl(url);
 
             return (
               <div
