@@ -6,6 +6,8 @@ import { useMusicPlayer } from "@/hooks/useMusicPlayer";
 import { useToast } from "@/components/ui/use-toast";
 import Navigation from "@/components/Navigation";
 import MusicPlayer from "@/components/MusicPlayer";
+import ImportStationsFromCsv from "@/components/ImportStationsFromCsv";
+import { Separator } from "@/components/ui/separator";
 
 const AddStationPage = () => {
   const {
@@ -27,6 +29,12 @@ const AddStationPage = () => {
     });
   };
 
+  const handleImportStations = (stations: Array<{ name: string; url: string }>) => {
+    stations.forEach(station => {
+      addUrl(station.url, station.name);
+    });
+  };
+
   return (
     <div className="min-h-screen p-3 md:p-4 bg-gradient-to-br from-blue-900 via-purple-900 to-pink-700 dark:from-gray-900 dark:via-gray-800 dark:to-gray-700 flex flex-col items-center">
       <div className="w-full max-w-2xl space-y-4 md:space-y-6 flex flex-col">
@@ -44,8 +52,10 @@ const AddStationPage = () => {
           <CardHeader className="p-3 md:p-4">
             <CardTitle className="text-lg md:text-xl">Add Station</CardTitle>
           </CardHeader>
-          <CardContent className="p-3 md:p-4 pt-0">
+          <CardContent className="p-3 md:p-4 pt-0 space-y-4">
             <AddUrlForm onAddUrl={handleAddUrl} />
+            <Separator className="my-4" />
+            <ImportStationsFromCsv onImport={handleImportStations} />
           </CardContent>
         </Card>
       </div>
