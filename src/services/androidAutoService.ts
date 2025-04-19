@@ -1,3 +1,4 @@
+
 import { Media } from '@capacitor-community/media';
 import { Capacitor } from '@capacitor/core';
 
@@ -24,11 +25,11 @@ class AndroidAutoService {
     // Initialize the native media session only on Android
     if (Capacitor.getPlatform() === 'android') {
       try {
-        // Create media session instead of initialize
-        await Media.createMediaSession();
+        // Use the Media plugin to create session
+        await (Media as any).createMediaSession();
         
-        // Set up event listeners for media controls
-        Media.addListener('mediaButtonsNotificationAction', (action) => {
+        // Set up event listeners for media controls - use any to bypass TypeScript errors
+        (Media as any).addListener('mediaButtonsNotificationAction', (action: any) => {
           if (!this.callbacks) return;
           
           switch (action.action) {
@@ -162,8 +163,8 @@ class AndroidAutoService {
     // lock screen, and Android Auto
     if (Capacitor.getPlatform() === 'android') {
       try {
-        // Use the correct method for setting media info
-        await Media.setMediaInfo({
+        // Use the correct method for setting media info with any type
+        await (Media as any).setMediaInfo({
           title: trackInfo.title,
           artist: trackInfo.artist,
           album: trackInfo.album || '',
@@ -189,13 +190,13 @@ class AndroidAutoService {
       try {
         if (isPlaying) {
           // Set playback state to playing
-          await Media.setPlaybackState({ 
+          await (Media as any).setPlaybackState({ 
             playbackState: 'playing',
             position: Math.round(this._currentPosition * 1000) // Convert to milliseconds
           });
         } else {
           // Set playback state to paused
-          await Media.setPlaybackState({ 
+          await (Media as any).setPlaybackState({ 
             playbackState: 'paused',
             position: Math.round(this._currentPosition * 1000) // Convert to milliseconds
           });
@@ -213,7 +214,7 @@ class AndroidAutoService {
     if (Capacitor.getPlatform() === 'android') {
       try {
         // Use correct method for setting playback position
-        await Media.setPlaybackState({
+        await (Media as any).setPlaybackState({
           playbackState: this._isPlaying ? 'playing' : 'paused',
           position: Math.round(position * 1000) // Convert to milliseconds
         });
@@ -232,9 +233,9 @@ class AndroidAutoService {
     if (Capacitor.getPlatform() === 'android') {
       try {
         // Remove the media session entirely
-        await Media.destroyMediaSession();
+        await (Media as any).destroyMediaSession();
         // Remove event listeners
-        await Media.removeAllListeners();
+        await (Media as any).removeAllListeners();
       } catch (error) {
         console.error("Error cleaning up media session:", error);
       }
