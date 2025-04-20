@@ -2,7 +2,7 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Music } from "lucide-react";
+import { Radio, Music, Heart } from "lucide-react";
 import { Track } from "@/types/track";
 
 interface FavoriteStationsProps {
@@ -11,32 +11,34 @@ interface FavoriteStationsProps {
 }
 
 const FavoriteStations: React.FC<FavoriteStationsProps> = ({ stations, onSelectStation }) => {
+  if (stations.length === 0) {
+    return null;
+  }
+
   return (
     <Card className="bg-white/10 backdrop-blur-md border-none shadow-lg">
       <CardHeader>
         <CardTitle>Favorite Stations</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-2">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {stations.map((station, index) => (
             <div
               key={station.url}
-              className="flex items-center justify-between p-2 rounded-md bg-white/10 backdrop-blur-sm hover:bg-white/20"
+              className="flex flex-col p-4 rounded-lg bg-white/10 backdrop-blur-sm hover:bg-white/20"
             >
+              <div className="flex justify-center mb-3">
+                <Radio className="w-12 h-12 text-primary" />
+              </div>
               <button
-                className="flex-1 text-left truncate text-sm hover:text-primary transition-colors"
+                className="text-sm font-medium text-center mb-3 hover:text-primary transition-colors line-clamp-2"
                 onClick={() => onSelectStation(index)}
               >
                 {station.name}
               </button>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="ml-2"
-                onClick={() => onSelectStation(index)}
-              >
-                <Music className="h-4 w-4" />
-              </Button>
+              <div className="flex justify-center">
+                <Heart className="h-5 w-5 text-pink-500" fill="currentColor" />
+              </div>
             </div>
           ))}
         </div>
@@ -46,3 +48,4 @@ const FavoriteStations: React.FC<FavoriteStationsProps> = ({ stations, onSelectS
 };
 
 export default FavoriteStations;
+
