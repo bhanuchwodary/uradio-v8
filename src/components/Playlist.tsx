@@ -4,12 +4,7 @@ import { Play, Trash2, Heart, Edit } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import EditStationDialog from "./EditStationDialog";
 import { useIsMobile } from "@/hooks/use-mobile";
-
-interface Track {
-  url: string;
-  name: string;
-  isFavorite: boolean;
-}
+import { Track } from "@/types/track";
 
 interface PlaylistProps {
   urls: string[];
@@ -89,22 +84,14 @@ const Playlist: React.FC<PlaylistProps> = ({
                 }`}
               >
                 <div className="flex items-center gap-2 flex-1 min-w-0">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-6 w-6"
-                    onClick={() => onSelectTrack(index)}
-                  >
-                    <Play className="h-4 w-4" />
-                  </Button>
                   <button
-                    className="truncate text-sm text-left hover:text-primary transition-colors"
+                    className="truncate text-sm text-left hover:text-primary transition-colors flex-1"
                     onClick={() => onSelectTrack(index)}
                   >
                     {isMobile ? track.name : `${index + 1}. ${track.name}`}
                   </button>
                 </div>
-                <div className="flex items-center">
+                <div className="flex items-center gap-1">
                   {onToggleFavorite && (
                     <Button
                       variant="ghost"
@@ -115,6 +102,14 @@ const Playlist: React.FC<PlaylistProps> = ({
                       <Heart className="h-4 w-4" fill={track.isFavorite ? "currentColor" : "none"} />
                     </Button>
                   )}
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6"
+                    onClick={() => onSelectTrack(index)}
+                  >
+                    <Play className="h-4 w-4" />
+                  </Button>
                   {onEditTrack && (
                     <Button
                       variant="ghost"
@@ -152,16 +147,8 @@ const Playlist: React.FC<PlaylistProps> = ({
                 }`}
               >
                 <div className="flex items-center gap-2 flex-1 min-w-0">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-6 w-6"
-                    onClick={() => onSelectTrack(index)}
-                  >
-                    <Play className="h-4 w-4" />
-                  </Button>
                   <button
-                    className="truncate text-sm text-left hover:text-primary transition-colors"
+                    className="truncate text-sm text-left hover:text-primary transition-colors flex-1"
                     onClick={() => onSelectTrack(index)}
                   >
                     {isMobile ? displayUrl : `${index + 1}. ${displayUrl}`}

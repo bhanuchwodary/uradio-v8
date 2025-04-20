@@ -6,8 +6,8 @@ import Navigation from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
 import { Music, PlusCircle } from "lucide-react";
 import { Link } from "react-router-dom";
+import FavoriteStations from "@/components/FavoriteStations";
 import { useIsMobile } from "@/hooks/use-mobile";
-import TopStations from "@/components/TopStations";
 
 const Index = () => {
   const {
@@ -21,10 +21,13 @@ const Index = () => {
   
   const isMobile = useIsMobile();
   
-  const handleSelectTopStation = (index: number) => {
+  const handleSelectStation = (index: number) => {
     setCurrentIndex(index);
     setIsPlaying(true);
   };
+
+  // Get favorite stations
+  const favoriteStations = tracks.filter(track => track.isFavorite);
 
   // Show only first 3 stations in the preview
   const previewTracks = tracks.slice(0, 3);
@@ -34,6 +37,18 @@ const Index = () => {
       <div className="w-full max-w-2xl space-y-4 md:space-y-6 flex flex-col">
         <Navigation />
 
+        {favoriteStations.length > 0 && (
+          <FavoriteStations 
+            stations={favoriteStations}
+            onSelectStation={(index) => {
+              const mainIndex = tracks.findIndex(t => t.url === favoriteStations[index].url);
+              if (mainIndex !== -1) {
+                handleSelectStation(mainIndex);
+              }
+            }}
+          />
+        )}
+
         <MusicPlayer
           urls={urls}
           currentIndex={currentIndex}
@@ -41,11 +56,6 @@ const Index = () => {
           isPlaying={isPlaying}
           setIsPlaying={setIsPlaying}
           tracks={tracks}
-        />
-
-        <TopStations 
-          stations={tracks}
-          onSelectStation={handleSelectTopStation}
         />
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
