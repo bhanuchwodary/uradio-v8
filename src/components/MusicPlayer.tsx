@@ -321,7 +321,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
   }, [globalAudioRef.activePlayerInstance === playerInstanceRef]);
 
   return (
-    <Card className="w-full max-w-md mx-auto backdrop-blur-md bg-white/20 border-none shadow-lg">
+    <Card className="w-full max-w-2xl mx-auto backdrop-blur-md bg-white/20 border-none shadow-lg">
       <CardContent className="p-4">
         <div className="flex flex-col gap-4">
           <div className="text-center">

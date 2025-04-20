@@ -16,7 +16,7 @@ const FavoriteStations: React.FC<FavoriteStationsProps> = ({ stations, onSelectS
   }
 
   return (
-    <Card className="bg-white/10 backdrop-blur-md border-none shadow-lg">
+    <Card className="bg-white/10 backdrop-blur-md border-none shadow-lg w-full max-w-2xl mx-auto">
       <CardHeader>
         <CardTitle>Favorite Stations</CardTitle>
       </CardHeader>
@@ -27,16 +27,16 @@ const FavoriteStations: React.FC<FavoriteStationsProps> = ({ stations, onSelectS
               key={station.url}
               className="flex flex-col p-4 rounded-lg bg-white/10 backdrop-blur-sm hover:bg-white/20"
             >
-              <div className="flex justify-center mb-3">
-                <Radio className="w-12 h-12 text-primary" />
-              </div>
               <button
-                className="text-sm font-medium text-center mb-3 hover:text-primary transition-colors line-clamp-2"
+                className="flex flex-col items-center gap-3 w-full"
                 onClick={() => onSelectStation(index)}
               >
-                {station.name}
+                <Radio className="w-12 h-12 text-primary hover:scale-110 transition-transform" />
+                <span className="text-sm font-medium text-center hover:text-primary transition-colors line-clamp-2">
+                  {station.name}
+                </span>
               </button>
-              <div className="flex justify-center">
+              <div className="flex justify-center mt-3">
                 <Heart className="h-5 w-5 text-pink-500" fill="currentColor" />
               </div>
             </div>
@@ -48,4 +48,3 @@ const FavoriteStations: React.FC<FavoriteStationsProps> = ({ stations, onSelectS
 };
 
 export default FavoriteStations;
-
