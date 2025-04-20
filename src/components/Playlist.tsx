@@ -1,6 +1,7 @@
+
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Play, Trash2, Heart, Edit } from "lucide-react";
+import { Radio, Heart, Edit, Trash2 } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import EditStationDialog from "./EditStationDialog";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -27,8 +28,6 @@ const Playlist: React.FC<PlaylistProps> = ({
 }) => {
   const [editingTrack, setEditingTrack] = useState<{ index: number; data: { url: string; name: string } } | null>(null);
   const isMobile = useIsMobile();
-  
-  const scrollAreaHeight = isMobile ? "200px" : "250px";
 
   if (urls.length === 0) {
     return (
@@ -57,64 +56,49 @@ const Playlist: React.FC<PlaylistProps> = ({
     setEditingTrack(null);
   };
 
-  const getDisplayUrl = (url: string): string => {
-    if (!url) return "No URL";
-    
-    try {
-      const urlObj = new URL(url);
-      return urlObj.pathname.split('/').pop() || url;
-    } catch (e) {
-      return url;
-    }
-  };
-
   return (
-    <ScrollArea className={`h-[${scrollAreaHeight}] pr-4`}>
-      <div className="space-y-2">
+    <ScrollArea className={`h-[${isMobile ? "200px" : "500px"}] pr-4`}>
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {tracks ? (
           tracks.map((track, index) => {
             const isActive = index === currentIndex;
             return (
               <div
                 key={index}
-                className={`flex items-center justify-between p-2 rounded-md ${
+                className={`flex flex-col p-4 rounded-lg ${
                   isActive
                     ? "bg-primary/20 backdrop-blur-sm"
                     : "bg-white/10 backdrop-blur-sm hover:bg-white/20"
                 }`}
               >
-                <div className="flex items-center gap-2 flex-1 min-w-0">
-                  <button
-                    className="truncate text-sm text-left hover:text-primary transition-colors flex-1"
+                <div className="flex justify-center mb-3">
+                  <Radio
+                    className={`w-12 h-12 ${isActive ? "text-primary animate-pulse" : "text-gray-400"}`}
                     onClick={() => onSelectTrack(index)}
-                  >
-                    {isMobile ? track.name : `${index + 1}. ${track.name}`}
-                  </button>
+                  />
                 </div>
-                <div className="flex items-center gap-1">
+                <button
+                  className="text-sm font-medium text-center mb-3 hover:text-primary transition-colors line-clamp-2"
+                  onClick={() => onSelectTrack(index)}
+                >
+                  {track.name}
+                </button>
+                <div className="flex justify-center gap-2">
                   {onToggleFavorite && (
                     <Button
                       variant="ghost"
                       size="icon"
-                      className={`h-6 w-6 ${track.isFavorite ? 'text-pink-500' : 'text-gray-400 hover:text-pink-400'}`}
+                      className={`h-8 w-8 ${track.isFavorite ? 'text-pink-500' : 'text-gray-400 hover:text-pink-400'}`}
                       onClick={() => onToggleFavorite(index)}
                     >
                       <Heart className="h-4 w-4" fill={track.isFavorite ? "currentColor" : "none"} />
                     </Button>
                   )}
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-6 w-6"
-                    onClick={() => onSelectTrack(index)}
-                  >
-                    <Play className="h-4 w-4" />
-                  </Button>
                   {onEditTrack && (
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-6 w-6 text-blue-500 hover:text-blue-700"
+                      className="h-8 w-8 text-blue-500 hover:text-blue-700"
                       onClick={() => handleEdit(index)}
                     >
                       <Edit className="h-4 w-4" />
@@ -123,7 +107,7 @@ const Playlist: React.FC<PlaylistProps> = ({
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-6 w-6 text-red-500 hover:text-red-700"
+                    className="h-8 w-8 text-red-500 hover:text-red-700"
                     onClick={() => onRemoveTrack(index)}
                   >
                     <Trash2 className="h-4 w-4" />
@@ -135,33 +119,37 @@ const Playlist: React.FC<PlaylistProps> = ({
         ) : (
           urls.map((url, index) => {
             const isActive = index === currentIndex;
-            const displayUrl = getDisplayUrl(url);
-
             return (
               <div
                 key={index}
-                className={`flex items-center justify-between p-2 rounded-md ${
+                className={`flex flex-col p-4 rounded-lg ${
                   isActive
                     ? "bg-primary/20 backdrop-blur-sm"
                     : "bg-white/10 backdrop-blur-sm hover:bg-white/20"
                 }`}
               >
-                <div className="flex items-center gap-2 flex-1 min-w-0">
-                  <button
-                    className="truncate text-sm text-left hover:text-primary transition-colors flex-1"
+                <div className="flex justify-center mb-3">
+                  <Radio
+                    className={`w-12 h-12 ${isActive ? "text-primary animate-pulse" : "text-gray-400"}`}
                     onClick={() => onSelectTrack(index)}
-                  >
-                    {isMobile ? displayUrl : `${index + 1}. ${displayUrl}`}
-                  </button>
+                  />
                 </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-6 w-6 text-red-500 hover:text-red-700"
-                  onClick={() => onRemoveTrack(index)}
+                <button
+                  className="text-sm font-medium text-center mb-3 hover:text-primary transition-colors line-clamp-2"
+                  onClick={() => onSelectTrack(index)}
                 >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
+                  {url}
+                </button>
+                <div className="flex justify-center">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-red-500 hover:text-red-700"
+                    onClick={() => onRemoveTrack(index)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             );
           })
