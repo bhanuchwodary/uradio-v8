@@ -1,14 +1,13 @@
-
 // Refactored MusicPlayer to use subcomponents and audioInstance util.
 import React, { useEffect, useRef, useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { useToast } from "@/components/ui/use-toast";
 import Hls from "hls.js";
-import TrackInfo from "@/components/music-player/TrackInfo";
-import SliderWithLabels from "@/components/music-player/SliderWithLabels";
-import PlayerControls from "@/components/music-player/PlayerControls";
-import VolumeControl from "@/components/music-player/VolumeControl";
+import { useToast } from "@/components/ui/use-toast";
 import { globalAudioRef } from "@/components/music-player/audioInstance";
+import PlayerLayout from "@/components/music-player/PlayerLayout";
+import PlayerTrackInfo from "@/components/music-player/PlayerTrackInfo";
+import PlayerSlider from "@/components/music-player/PlayerSlider";
+import PlayerControlsRow from "@/components/music-player/PlayerControlsRow";
+import PlayerVolume from "@/components/music-player/PlayerVolume";
 
 interface MusicPlayerProps {
   urls: string[];
@@ -254,34 +253,30 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
   }, [globalAudioRef.activePlayerInstance === playerInstanceRef]);
 
   return (
-    <Card className="w-full max-w-2xl mx-auto backdrop-blur-md bg-white/20 border-none shadow-lg">
-      <CardContent className="p-4">
-        <div className="flex flex-col gap-4">
-          <TrackInfo
-            title={tracks[currentIndex]?.name || `Track ${currentIndex + 1}`}
-            url={urls[currentIndex]}
-            loading={loading}
-          />
-          <SliderWithLabels
-            currentTime={currentTime}
-            duration={duration}
-            onSeek={handleSeek}
-            disabled={!duration || duration === Infinity}
-          />
-          <PlayerControls
-            isPlaying={isPlaying}
-            onPlayPause={handlePlayPause}
-            onNext={handleNext}
-            onPrev={handlePrevious}
-            disabled={urls.length === 0}
-          />
-          <VolumeControl
-            volume={volume}
-            setVolume={setVolume}
-          />
-        </div>
-      </CardContent>
-    </Card>
+    <PlayerLayout>
+      <PlayerTrackInfo
+        title={tracks[currentIndex]?.name || `Track ${currentIndex + 1}`}
+        url={urls[currentIndex]}
+        loading={loading}
+      />
+      <PlayerSlider
+        currentTime={currentTime}
+        duration={duration}
+        onSeek={handleSeek}
+        disabled={!duration || duration === Infinity}
+      />
+      <PlayerControlsRow
+        isPlaying={isPlaying}
+        onPlayPause={handlePlayPause}
+        onNext={handleNext}
+        onPrev={handlePrevious}
+        disabled={urls.length === 0}
+      />
+      <PlayerVolume
+        volume={volume}
+        setVolume={setVolume}
+      />
+    </PlayerLayout>
   );
 };
 
