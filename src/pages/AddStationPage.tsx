@@ -29,12 +29,21 @@ const AddStationPage = () => {
       return;
     }
     
-    addUrl(url, name);
-    toast({
-      title: "Station added",
-      description: `${name} has been added to your playlist`,
-    });
-    navigate("/playlist");
+    try {
+      addUrl(url, name);
+      toast({
+        title: "Station added",
+        description: `${name} has been added to your playlist`,
+      });
+      // We'll stay on the page so users can add multiple stations
+    } catch (error) {
+      console.error("Error adding station:", error);
+      toast({
+        title: "Error adding station",
+        description: "There was a problem adding the station",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleAddUrl = (url: string, name: string) => {
@@ -47,12 +56,21 @@ const AddStationPage = () => {
       return;
     }
     
-    addUrl(url, name);
-    toast({
-      title: "Station added",
-      description: `${name} has been added to your playlist`,
-    });
-    navigate("/playlist");
+    try {
+      addUrl(url, name);
+      toast({
+        title: "Station added",
+        description: `${name} has been added to your playlist`,
+      });
+      navigate("/playlist");
+    } catch (error) {
+      console.error("Error adding station:", error);
+      toast({
+        title: "Error adding station",
+        description: "There was a problem adding the station",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleImportStations = (stations: Array<{ name: string; url: string }>) => {
@@ -61,8 +79,13 @@ const AddStationPage = () => {
     
     stations.forEach(station => {
       if (!isUrlExisting(station.url)) {
-        addUrl(station.url, station.name);
-        addedStations.push(station.name);
+        try {
+          addUrl(station.url, station.name);
+          addedStations.push(station.name);
+        } catch (error) {
+          console.error(`Error adding station ${station.name}:`, error);
+          skippedStations.push(station.name);
+        }
       } else {
         skippedStations.push(station.name);
       }

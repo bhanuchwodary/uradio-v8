@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Track } from "@/types/track";
 
@@ -22,6 +23,11 @@ export const useTrackState = () => {
   }, [tracks]);
 
   const addUrl = (url: string, name: string = "") => {
+    if (!url) {
+      console.error("Cannot add empty URL");
+      return;
+    }
+    
     const newTrack = { 
       url, 
       name: name || `Station ${tracks.length + 1}`,
@@ -29,7 +35,11 @@ export const useTrackState = () => {
       playTime: 0
     };
     
-    setTracks(prevTracks => [...prevTracks, newTrack]);
+    setTracks(prevTracks => {
+      const updatedTracks = [...prevTracks, newTrack];
+      console.log("Tracks after adding:", updatedTracks);
+      return updatedTracks;
+    });
     console.log("Track added:", newTrack);
   };
 
