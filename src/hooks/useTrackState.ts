@@ -22,15 +22,15 @@ export const useTrackState = () => {
   }, [tracks]);
 
   const addUrl = (url: string, name: string = "") => {
-    setTracks((prevTracks) => [
-      ...prevTracks, 
-      { 
-        url, 
-        name: name || `Station ${prevTracks.length + 1}`,
-        isFavorite: false,
-        playTime: 0
-      }
-    ]);
+    const newTrack = { 
+      url, 
+      name: name || `Station ${tracks.length + 1}`,
+      isFavorite: false,
+      playTime: 0
+    };
+    
+    setTracks(prevTracks => [...prevTracks, newTrack]);
+    console.log("Track added:", newTrack);
   };
 
   const updatePlayTime = (index: number, seconds: number) => {
