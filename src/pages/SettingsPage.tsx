@@ -37,7 +37,6 @@ const SettingsPage = () => {
         {/* Theme Toggle */}
         <div className="w-full flex items-center justify-center">
           <ThemeToggle />
-          <span className="ml-3 text-base font-medium text-white/80">Theme</span>
         </div>
       </div>
     </div>
