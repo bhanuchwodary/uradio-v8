@@ -11,11 +11,24 @@ import { useMusicPlayer } from "@/hooks/useMusicPlayer";
 import { useNavigate } from "react-router-dom";
 
 const AddStationPage = () => {
-  const { addUrl } = useMusicPlayer();
+  const { tracks, addUrl } = useMusicPlayer();
   const { toast } = useToast();
   const navigate = useNavigate();
 
+  const isUrlExisting = (url: string) => {
+    return tracks.some(track => track.url === url);
+  };
+
   const handleAddPrebuiltStation = (name: string, url: string) => {
+    if (isUrlExisting(url)) {
+      const existingTrack = tracks.find(track => track.url === url);
+      toast({
+        title: "Station already exists",
+        description: `"${existingTrack?.name}" is already in your playlist`,
+      });
+      return;
+    }
+    
     addUrl(url, name);
     toast({
       title: "Station added",
@@ -25,6 +38,15 @@ const AddStationPage = () => {
   };
 
   const handleAddUrl = (url: string, name: string) => {
+    if (isUrlExisting(url)) {
+      const existingTrack = tracks.find(track => track.url === url);
+      toast({
+        title: "Station already exists",
+        description: `"${existingTrack?.name}" is already in your playlist`,
+      });
+      return;
+    }
+    
     addUrl(url, name);
     toast({
       title: "Station added",
@@ -34,9 +56,32 @@ const AddStationPage = () => {
   };
 
   const handleImportStations = (stations: Array<{ name: string; url: string }>) => {
+    const addedStations = [];
+    const skippedStations = [];
+    
     stations.forEach(station => {
-      addUrl(station.url, station.name);
+      if (!isUrlExisting(station.url)) {
+        addUrl(station.url, station.name);
+        addedStations.push(station.name);
+      } else {
+        skippedStations.push(station.name);
+      }
     });
+    
+    if (addedStations.length > 0) {
+      toast({
+        title: `Added ${addedStations.length} stations`,
+        description: skippedStations.length > 0 ? 
+          `Skipped ${skippedStations.length} duplicate stations` : 
+          "All stations were added successfully",
+      });
+    } else if (skippedStations.length > 0) {
+      toast({
+        title: "No stations added",
+        description: "All stations already exist in your playlist",
+      });
+    }
+    
     navigate("/playlist");
   };
 
@@ -65,7 +110,7 @@ const AddStationPage = () => {
                 <Button
                   key={index}
                   variant="outline"
-                  className="justify-start bg-white/10 hover:bg-white/20 border-none"
+                  className="justify-start bg-white/20 hover:bg-white/30 border-none"
                   onClick={() => handleAddPrebuiltStation(station.name, station.url)}
                 >
                   {station.name}
