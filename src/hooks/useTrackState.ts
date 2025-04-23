@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Track } from "@/types/track";
 
@@ -22,7 +21,7 @@ export const useTrackState = () => {
     localStorage.setItem('musicTracks', JSON.stringify(tracks));
   }, [tracks]);
 
-  const addUrl = (url: string, name: string = "") => {
+  const addUrl = (url: string, name: string = "", isPrebuilt: boolean = false) => {
     if (!url) {
       console.error("Cannot add empty URL");
       return;
@@ -32,15 +31,19 @@ export const useTrackState = () => {
       url, 
       name: name || `Station ${tracks.length + 1}`,
       isFavorite: false,
-      playTime: 0
+      playTime: 0,
+      isPrebuilt
     };
     
     setTracks(prevTracks => {
       const updatedTracks = [...prevTracks, newTrack];
-      console.log("Tracks after adding:", updatedTracks);
+      console.log("Track added:", newTrack);
       return updatedTracks;
     });
-    console.log("Track added:", newTrack);
+  };
+
+  const getUserStations = () => {
+    return tracks.filter(track => !track.isPrebuilt);
   };
 
   const updatePlayTime = (index: number, seconds: number) => {
@@ -121,5 +124,6 @@ export const useTrackState = () => {
     editTrack,
     updatePlayTime,
     getTopStations,
+    getUserStations,
   };
 };

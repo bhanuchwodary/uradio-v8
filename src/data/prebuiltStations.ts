@@ -51,5 +51,10 @@ export const prebuiltStations = [
   {
     name: "TamilFM",
     url: "https://centova.aarenworld.com/proxy/894tamilfm/stream"
+  },
+  {
+    name: "Big FM",
+    url: "https://funasia.streamguys1.com/live4"
   }
 ];
+

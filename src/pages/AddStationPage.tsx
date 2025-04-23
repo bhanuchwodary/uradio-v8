@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Navigation from "@/components/Navigation";
@@ -30,12 +29,11 @@ const AddStationPage = () => {
     }
     
     try {
-      addUrl(url, name);
+      addUrl(url, name, true);
       toast({
         title: "Station added",
         description: `${name} has been added to your playlist`,
       });
-      // We'll stay on the page so users can add multiple stations
     } catch (error) {
       console.error("Error adding station:", error);
       toast({
@@ -57,7 +55,7 @@ const AddStationPage = () => {
     }
     
     try {
-      addUrl(url, name);
+      addUrl(url, name, false);
       toast({
         title: "Station added",
         description: `${name} has been added to your playlist`,
@@ -80,7 +78,7 @@ const AddStationPage = () => {
     stations.forEach(station => {
       if (!isUrlExisting(station.url)) {
         try {
-          addUrl(station.url, station.name);
+          addUrl(station.url, station.name, false);
           addedStations.push(station.name);
         } catch (error) {
           console.error(`Error adding station ${station.name}:`, error);
