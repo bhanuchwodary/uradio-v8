@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Track } from "@/types/track";
 
@@ -20,6 +19,7 @@ export const useTrackState = () => {
 
   useEffect(() => {
     localStorage.setItem('musicTracks', JSON.stringify(tracks));
+    console.log("Tracks state updated and saved to localStorage:", tracks);
   }, [tracks]);
 
   const addUrl = (url: string, name: string = "", isPrebuilt: boolean = false) => {
@@ -36,11 +36,13 @@ export const useTrackState = () => {
       isPrebuilt
     };
     
-    // Debug logging
     console.log("Adding new track to playlist:", newTrack);
     
-    // Update the tracks state with the new track
-    setTracks(prevTracks => [...prevTracks, newTrack]);
+    setTracks(prevTracks => {
+      const updatedTracks = [...prevTracks, newTrack];
+      console.log("State updated with new tracks:", updatedTracks);
+      return updatedTracks;
+    });
   };
 
   const getUserStations = () => {

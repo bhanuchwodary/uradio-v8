@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Radio, Heart, Edit, Trash2 } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -28,6 +28,11 @@ const Playlist: React.FC<PlaylistProps> = ({
 }) => {
   const [editingTrack, setEditingTrack] = useState<{ index: number; data: { url: string; name: string } } | null>(null);
   const isMobile = useIsMobile();
+  
+  // Debug log to ensure tracks are being received
+  useEffect(() => {
+    console.log("Playlist component received tracks:", tracks);
+  }, [tracks]);
 
   if (!tracks || tracks.length === 0) {
     return (
@@ -37,8 +42,11 @@ const Playlist: React.FC<PlaylistProps> = ({
     );
   }
 
-  const userStations = tracks.filter(track => !track.isPrebuilt);
-  const prebuiltStations = tracks.filter(track => track.isPrebuilt);
+  const userStations = tracks.filter(track => track.isPrebuilt === false);
+  const prebuiltStations = tracks.filter(track => track.isPrebuilt === true);
+  
+  console.log("User stations:", userStations);
+  console.log("Prebuilt stations:", prebuiltStations);
 
   const renderStationsList = (stationsList: Track[], title: string) => {
     if (stationsList.length === 0) return null;

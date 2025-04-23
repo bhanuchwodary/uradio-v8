@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Navigation from "@/components/Navigation";
 import AddUrlForm from "@/components/AddUrlForm";
@@ -66,7 +66,11 @@ const AddStationPage = () => {
         title: "Station added",
         description: `${name} has been added to your playlist`,
       });
-      navigate("/playlist");
+      
+      // Small delay to ensure state is updated before navigating
+      setTimeout(() => {
+        navigate("/playlist");
+      }, 100);
     } catch (error) {
       console.error("Error adding station:", error);
       toast({
@@ -109,7 +113,10 @@ const AddStationPage = () => {
       });
     }
     
-    navigate("/playlist");
+    // Small delay to ensure state is updated before navigating
+    setTimeout(() => {
+      navigate("/playlist");
+    }, 100);
   };
 
   return (
