@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Navigation from "@/components/Navigation";
@@ -45,6 +46,8 @@ const AddStationPage = () => {
   };
 
   const handleAddUrl = (url: string, name: string) => {
+    console.log("AddStationPage handleAddUrl called with:", { url, name });
+    
     if (isUrlExisting(url)) {
       const existingTrack = tracks.find(track => track.url === url);
       toast({
@@ -55,7 +58,10 @@ const AddStationPage = () => {
     }
     
     try {
+      // Pass false for isPrebuilt to mark it as a user station
       addUrl(url, name, false);
+      console.log("Station added to playlist:", { url, name, isPrebuilt: false });
+      
       toast({
         title: "Station added",
         description: `${name} has been added to your playlist`,

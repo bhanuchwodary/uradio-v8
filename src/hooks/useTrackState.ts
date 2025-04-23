@@ -36,9 +36,11 @@ export const useTrackState = () => {
       isPrebuilt
     };
     
+    // Debug logging
+    console.log("Adding new track to playlist:", newTrack);
+    
+    // Update the tracks state with the new track
     setTracks(prevTracks => [...prevTracks, newTrack]);
-    // Log for debugging
-    console.log("Track added:", newTrack);
   };
 
   const getUserStations = () => {
