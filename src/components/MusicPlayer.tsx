@@ -1,4 +1,3 @@
-
 // Streamlined MusicPlayer component that uses usePlayerCore for logic.
 import React from "react";
 import PlayerLayout from "@/components/music-player/PlayerLayout";
@@ -7,6 +6,7 @@ import PlayerSlider from "@/components/music-player/PlayerSlider";
 import PlayerControlsRow from "@/components/music-player/PlayerControlsRow";
 import PlayerVolume from "@/components/music-player/PlayerVolume";
 import { usePlayerCore } from "@/hooks/usePlayerCore";
+import { usePhoneCallHandling } from "@/hooks/usePhoneCallHandling";
 
 interface MusicPlayerProps {
   urls: string[];
@@ -42,6 +42,9 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
     isPlaying,
     setIsPlaying,
   });
+
+  // Add phone call handling
+  usePhoneCallHandling(isPlaying, setIsPlaying);
 
   return (
     <PlayerLayout>
