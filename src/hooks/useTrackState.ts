@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Track } from "@/types/track";
 
@@ -35,11 +36,9 @@ export const useTrackState = () => {
       isPrebuilt
     };
     
-    setTracks(prevTracks => {
-      const updatedTracks = [...prevTracks, newTrack];
-      console.log("Track added:", newTrack);
-      return updatedTracks;
-    });
+    setTracks(prevTracks => [...prevTracks, newTrack]);
+    // Log for debugging
+    console.log("Track added:", newTrack);
   };
 
   const getUserStations = () => {
