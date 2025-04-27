@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Track } from "@/types/track";
 
@@ -39,9 +40,13 @@ export const useTrackState = () => {
     console.log("Adding or updating track in playlist:", newTrack);
     
     setTracks(prevTracks => {
+      // Check if the station already exists in the playlist
       const existingIndex = prevTracks.findIndex(track => track.url === url);
+      console.log("Checking for existing track with URL:", url);
+      console.log("Existing track index:", existingIndex);
       
       if (existingIndex !== -1) {
+        // Station exists, update it while preserving favorite status and play time
         const updatedTracks = [...prevTracks];
         updatedTracks[existingIndex] = {
           ...newTrack,
@@ -51,9 +56,9 @@ export const useTrackState = () => {
         console.log("Overwriting existing track at index:", existingIndex);
         return updatedTracks;
       } else {
-        const updatedTracks = [...prevTracks, newTrack];
+        // Station doesn't exist, add it as a new station
         console.log("Adding new track to playlist");
-        return updatedTracks;
+        return [...prevTracks, newTrack];
       }
     });
   };
