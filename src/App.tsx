@@ -44,7 +44,7 @@ const App = () => {
   };
   
   const handleAddToPlaylist = (station: Track) => {
-    // We're allowing duplicates as per requirements, so just add it
+    // Simply call addUrl which now handles overwriting if the station already exists
     addUrl(station.url, station.name, station.isPrebuilt);
   };
 

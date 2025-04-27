@@ -36,12 +36,25 @@ export const useTrackState = () => {
       isPrebuilt
     };
     
-    console.log("Adding new track to playlist:", newTrack);
+    console.log("Adding or updating track in playlist:", newTrack);
     
     setTracks(prevTracks => {
-      const updatedTracks = [...prevTracks, newTrack];
-      console.log("State updated with new tracks:", updatedTracks);
-      return updatedTracks;
+      const existingIndex = prevTracks.findIndex(track => track.url === url);
+      
+      if (existingIndex !== -1) {
+        const updatedTracks = [...prevTracks];
+        updatedTracks[existingIndex] = {
+          ...newTrack,
+          isFavorite: prevTracks[existingIndex].isFavorite,
+          playTime: prevTracks[existingIndex].playTime
+        };
+        console.log("Overwriting existing track at index:", existingIndex);
+        return updatedTracks;
+      } else {
+        const updatedTracks = [...prevTracks, newTrack];
+        console.log("Adding new track to playlist");
+        return updatedTracks;
+      }
     });
   };
 
