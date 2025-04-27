@@ -44,10 +44,11 @@ const App = () => {
   };
   
   const handleAddToPlaylist = (station: Track) => {
-    // Call addUrl and explicitly pass the track properties to ensure proper overwriting
-    console.log("Attempting to add/update station:", station);
+    // Ensure we're properly passing all required properties
+    console.log("Attempting to add/update station to playlist:", station);
+    // Make sure we pass all three parameters to addUrl
     addUrl(station.url, station.name, station.isPrebuilt);
-    console.log("Added/Updated station in playlist:", station);
+    console.log("Added/Updated station in playlist");
   };
 
   return (

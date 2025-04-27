@@ -39,25 +39,30 @@ export const useTrackState = () => {
     
     console.log("Adding or updating track in playlist:", newTrack);
     
+    // Important: Use a callback with the previous state to ensure we're working with the latest state
     setTracks(prevTracks => {
-      // Check if the station already exists in the playlist
-      const existingIndex = prevTracks.findIndex(track => track.url === url);
+      // First, check for duplicates by URL (case insensitive comparison for robustness)
+      const existingIndex = prevTracks.findIndex(
+        track => track.url.toLowerCase() === url.toLowerCase()
+      );
+      
       console.log("Checking for existing track with URL:", url);
       console.log("Existing track index:", existingIndex);
       
       if (existingIndex !== -1) {
-        // Station exists, update it while preserving favorite status and play time
+        // If found, create a new array and update the existing station
+        console.log("Station already exists, updating at index:", existingIndex);
         const updatedTracks = [...prevTracks];
         updatedTracks[existingIndex] = {
           ...newTrack,
+          // Preserve favorite status and play time from existing track
           isFavorite: prevTracks[existingIndex].isFavorite,
           playTime: prevTracks[existingIndex].playTime
         };
-        console.log("Overwriting existing track at index:", existingIndex);
         return updatedTracks;
       } else {
-        // Station doesn't exist, add it as a new station
-        console.log("Adding new track to playlist");
+        // If not found, add as a new station
+        console.log("Station doesn't exist, adding as new");
         return [...prevTracks, newTrack];
       }
     });

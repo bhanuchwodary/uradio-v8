@@ -35,7 +35,8 @@ const StationListPage: React.FC<StationListPageProps> = ({
           size="icon"
           className="h-8 w-8"
           onClick={() => {
-            onAddToPlaylist(station);
+            console.log("Adding station to playlist:", station);
+            onAddToPlaylist({...station}); // Use spread operator to create a new object
             toast({
               title: "Station Added",
               description: "The station has been added to your playlist.",
