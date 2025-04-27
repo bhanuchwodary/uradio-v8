@@ -2,7 +2,7 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Home, Settings, List, Plus } from "lucide-react";
+import { Home, Settings, List, Plus, ListMusic } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const Navigation = () => {
@@ -16,6 +16,12 @@ const Navigation = () => {
           <Button variant="ghost" size="icon" className="bg-white/20 hover:bg-white/30 dark:bg-black/20 dark:hover:bg-black/30 border-none">
             <Home className="h-6 w-6" />
             <span className="sr-only">Home</span>
+          </Button>
+        </Link>
+        <Link to="/playlist">
+          <Button variant="ghost" size="icon" className="bg-white/20 hover:bg-white/30 dark:bg-black/20 dark:hover:bg-black/30 border-none">
+            <ListMusic className="h-6 w-6" />
+            <span className="sr-only">Playlist</span>
           </Button>
         </Link>
         <Link to="/station-list">
