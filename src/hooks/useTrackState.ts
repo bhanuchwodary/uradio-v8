@@ -29,16 +29,7 @@ export const useTrackState = () => {
       return;
     }
     
-    const newTrack = { 
-      url, 
-      name: name || `Station ${tracks.length + 1}`,
-      isFavorite: isFavorite === undefined ? false : isFavorite,
-      playTime: 0,
-      isPrebuilt
-    };
-    
-    console.log("Adding or updating track in playlist:", newTrack);
-    console.log("Adding with explicit isFavorite value:", isFavorite);
+    console.log(`Adding URL: ${url}, Name: ${name}, IsPrebuilt: ${isPrebuilt}, Explicit isFavorite: ${isFavorite !== undefined ? isFavorite : 'not provided'}`);
     
     // Important: Use a callback with the previous state to ensure we're working with the latest state
     setTracks(prevTracks => {
@@ -56,7 +47,7 @@ export const useTrackState = () => {
         console.log("Current station favorite status:", prevTracks[existingIndex].isFavorite);
         
         const updatedTracks = [...prevTracks];
-        // The critical fix: Only update specific properties, NEVER touch isFavorite unless explicitly provided
+        // CRITICAL FIX: Only update specific properties, NEVER change isFavorite unless explicitly provided
         updatedTracks[existingIndex] = {
           ...updatedTracks[existingIndex],  // Keep all existing properties first
           url: url,  // Then update what we need to update
@@ -71,6 +62,14 @@ export const useTrackState = () => {
       } else {
         // If not found, add as a new station
         console.log("Station doesn't exist, adding as new");
+        const newTrack = { 
+          url, 
+          name: name || `Station ${prevTracks.length + 1}`,
+          isFavorite: isFavorite !== undefined ? isFavorite : false,
+          playTime: 0,
+          isPrebuilt
+        };
+        console.log("New track being added:", newTrack);
         return [...prevTracks, newTrack];
       }
     });
@@ -137,11 +136,13 @@ export const useTrackState = () => {
     setTracks((prevTracks) => {
       const newTracks = [...prevTracks];
       if (newTracks[index]) {
+        const newFavoriteStatus = !newTracks[index].isFavorite;
         newTracks[index] = {
           ...newTracks[index],
-          isFavorite: !newTracks[index].isFavorite
+          isFavorite: newFavoriteStatus
         };
-        console.log(`Toggled favorite status for station at index ${index} to ${newTracks[index].isFavorite}`);
+        console.log(`Toggled favorite status for station at index ${index} to ${newFavoriteStatus}`);
+        console.log("Updated tracks array:", newTracks);
       }
       return newTracks;
     });

@@ -23,41 +23,45 @@ const StationListPage: React.FC<StationListPageProps> = ({
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const renderStationCard = (station: Track, isPrebuilt: boolean = false) => (
-    <div key={`${station.url}-${isPrebuilt ? 'prebuilt' : 'user'}`} className="flex flex-col p-4 rounded-lg bg-white/10 backdrop-blur-sm hover:bg-white/20">
-      <div className="flex justify-center mb-3">
-        <Radio className="w-12 h-12 text-primary" />
+  const renderStationCard = (station: Track, isPrebuilt: boolean = false) => {
+    // Generate a truly unique key for each station card
+    const uniqueKey = `${station.url}-${isPrebuilt ? 'prebuilt' : 'user'}-${station.name}`;
+    
+    return (
+      <div key={uniqueKey} className="flex flex-col p-4 rounded-lg bg-white/10 backdrop-blur-sm hover:bg-white/20">
+        <div className="flex justify-center mb-3">
+          <Radio className="w-12 h-12 text-primary" />
+        </div>
+        <h3 className="text-sm font-medium text-center mb-3 line-clamp-2">{station.name}</h3>
+        <div className="flex justify-center gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8"
+            onClick={() => {
+              console.log("Adding station to playlist:", station);
+              // Create a complete copy with EXPLICIT favorite status
+              onAddToPlaylist({...station});
+              toast({
+                title: "Station Added",
+                description: "The station has been added to your playlist.",
+              });
+            }}
+          >
+            <Plus className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className={`h-8 w-8 ${station.isFavorite ? 'text-pink-500' : ''}`}
+            onClick={() => onToggleFavorite(station)}
+          >
+            <Heart className="h-4 w-4" fill={station.isFavorite ? "currentColor" : "none"} />
+          </Button>
+        </div>
       </div>
-      <h3 className="text-sm font-medium text-center mb-3 line-clamp-2">{station.name}</h3>
-      <div className="flex justify-center gap-2">
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-8 w-8"
-          onClick={() => {
-            console.log("Adding station to playlist:", station);
-            // Create a complete copy with EXPLICIT favorite status
-            const stationToAdd = {...station};
-            onAddToPlaylist(stationToAdd);
-            toast({
-              title: "Station Added",
-              description: "The station has been added to your playlist.",
-            });
-          }}
-        >
-          <Plus className="h-4 w-4" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          className={`h-8 w-8 ${station.isFavorite ? 'text-pink-500' : ''}`}
-          onClick={() => onToggleFavorite(station)}
-        >
-          <Heart className="h-4 w-4" fill={station.isFavorite ? "currentColor" : "none"} />
-        </Button>
-      </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <div className="container mx-auto p-4 max-w-6xl">
@@ -92,12 +96,16 @@ const StationListPage: React.FC<StationListPageProps> = ({
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {prebuiltStations.map(station => renderStationCard({
-                ...station,
-                isFavorite: false,
-                isPrebuilt: true,
-                playTime: 0
-              }, true))}
+              {prebuiltStations.map(station => {
+                // Create a proper unique key with the -prebuilt suffix
+                const prebuiltStation = {
+                  ...station,
+                  isFavorite: false,
+                  isPrebuilt: true,
+                  playTime: 0
+                };
+                return renderStationCard(prebuiltStation, true);
+              })}
             </div>
           </CardContent>
         </Card>

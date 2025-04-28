@@ -43,6 +43,7 @@ const App = () => {
     // Find the index of the station in tracks array
     const index = tracks.findIndex(t => t.url === station.url);
     if (index !== -1) {
+      console.log(`Toggling favorite for station ${station.name} at index ${index}, current value: ${tracks[index].isFavorite}`);
       toggleFavorite(index);
     }
   };
