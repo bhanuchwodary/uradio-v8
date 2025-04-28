@@ -23,7 +23,7 @@ export const useTrackState = () => {
     console.log("Tracks state updated and saved to localStorage:", tracks);
   }, [tracks]);
 
-  const addUrl = (url: string, name: string = "", isPrebuilt: boolean = false) => {
+  const addUrl = (url: string, name: string = "", isPrebuilt: boolean = false, isFavorite: boolean = false) => {
     if (!url) {
       console.error("Cannot add empty URL");
       return;
@@ -32,7 +32,7 @@ export const useTrackState = () => {
     const newTrack = { 
       url, 
       name: name || `Station ${tracks.length + 1}`,
-      isFavorite: false,
+      isFavorite: isFavorite,
       playTime: 0,
       isPrebuilt
     };
@@ -55,10 +55,11 @@ export const useTrackState = () => {
         const updatedTracks = [...prevTracks];
         updatedTracks[existingIndex] = {
           ...newTrack,
-          // Preserve favorite status and play time from existing track
-          isFavorite: prevTracks[existingIndex].isFavorite,
+          // Preserve favorite status from existing track unless explicitly provided
+          isFavorite: isFavorite !== undefined ? isFavorite : prevTracks[existingIndex].isFavorite,
           playTime: prevTracks[existingIndex].playTime
         };
+        console.log("Updated track:", updatedTracks[existingIndex]);
         return updatedTracks;
       } else {
         // If not found, add as a new station

@@ -50,6 +50,7 @@ const PlaylistPage = () => {
           setCurrentIndex={setCurrentIndex}
           isPlaying={isPlaying}
           setIsPlaying={setIsPlaying}
+          tracks={tracks} // Pass the tracks to ensure proper track name display
         />
 
         <Card className="bg-white/10 backdrop-blur-md border-none shadow-lg">

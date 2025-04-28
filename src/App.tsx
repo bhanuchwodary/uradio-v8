@@ -44,10 +44,12 @@ const App = () => {
   };
   
   const handleAddToPlaylist = (station: Track) => {
-    // Ensure we're properly passing all required properties
+    // Important: Make a complete copy of the station to ensure all properties are preserved
     console.log("Attempting to add/update station to playlist:", station);
-    // Make sure we pass all three parameters to addUrl
-    addUrl(station.url, station.name, station.isPrebuilt);
+    
+    // Pass a complete station object to preserve all properties including isFavorite
+    addUrl(station.url, station.name, station.isPrebuilt, station.isFavorite);
+    
     console.log("Added/Updated station in playlist");
   };
 
