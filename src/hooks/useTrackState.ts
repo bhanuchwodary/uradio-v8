@@ -54,10 +54,12 @@ export const useTrackState = () => {
         console.log("Station already exists, updating at index:", existingIndex);
         const updatedTracks = [...prevTracks];
         updatedTracks[existingIndex] = {
-          ...newTrack,
-          // Preserve favorite status from existing track unless explicitly provided
-          isFavorite: isFavorite !== undefined ? isFavorite : prevTracks[existingIndex].isFavorite,
-          playTime: prevTracks[existingIndex].playTime
+          ...updatedTracks[existingIndex],  // Keep all existing properties first
+          url: url,  // Then update what we need to update
+          name: name || updatedTracks[existingIndex].name,
+          isPrebuilt: isPrebuilt !== undefined ? isPrebuilt : updatedTracks[existingIndex].isPrebuilt,
+          // Only update isFavorite if it's explicitly provided as true
+          isFavorite: isFavorite === true ? true : updatedTracks[existingIndex].isFavorite
         };
         console.log("Updated track:", updatedTracks[existingIndex]);
         return updatedTracks;

@@ -7,17 +7,25 @@ import { useToast } from "@/components/ui/use-toast";
 import Navigation from "@/components/Navigation";
 import MusicPlayer from "@/components/MusicPlayer";
 
-const PlaylistPage = () => {
+interface PlaylistPageProps {
+  currentIndex: number;
+  isPlaying: boolean;
+  setCurrentIndex: (index: number) => void;
+  setIsPlaying: (playing: boolean) => void;
+}
+
+const PlaylistPage: React.FC<PlaylistPageProps> = ({
+  currentIndex: appCurrentIndex,
+  isPlaying: appIsPlaying,
+  setCurrentIndex: appSetCurrentIndex,
+  setIsPlaying: appSetIsPlaying
+}) => {
   const {
     urls,
     tracks,
-    currentIndex,
-    isPlaying,
     removeUrl,
     toggleFavorite,
     editTrack,
-    setCurrentIndex,
-    setIsPlaying,
   } = useMusicPlayer();
   
   const { toast } = useToast();
@@ -46,11 +54,11 @@ const PlaylistPage = () => {
         
         <MusicPlayer
           urls={urls}
-          currentIndex={currentIndex}
-          setCurrentIndex={setCurrentIndex}
-          isPlaying={isPlaying}
-          setIsPlaying={setIsPlaying}
-          tracks={tracks} // Pass the tracks to ensure proper track name display
+          currentIndex={appCurrentIndex}
+          setCurrentIndex={appSetCurrentIndex}
+          isPlaying={appIsPlaying}
+          setIsPlaying={appSetIsPlaying}
+          tracks={tracks}
         />
 
         <Card className="bg-white/10 backdrop-blur-md border-none shadow-lg">
@@ -61,10 +69,10 @@ const PlaylistPage = () => {
             <Playlist
               urls={urls}
               tracks={tracks}
-              currentIndex={currentIndex}
+              currentIndex={appCurrentIndex}
               onSelectTrack={(index) => {
-                setCurrentIndex(index);
-                setIsPlaying(true);
+                appSetCurrentIndex(index);
+                appSetIsPlaying(true);
               }}
               onRemoveTrack={removeUrl}
               onToggleFavorite={handleToggleFavorite}

@@ -22,7 +22,11 @@ const App = () => {
     tracks, 
     addUrl, 
     toggleFavorite,
-    getUserStations 
+    getUserStations,
+    currentIndex,
+    isPlaying,
+    setCurrentIndex,
+    setIsPlaying
   } = useTrackState();
   
   const handleAddStation = (url: string, name: string) => {
@@ -61,8 +65,28 @@ const App = () => {
           <Sonner />
           <BrowserRouter>
             <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/playlist" element={<PlaylistPage />} />
+              <Route 
+                path="/" 
+                element={
+                  <Index 
+                    currentIndex={currentIndex}
+                    isPlaying={isPlaying}
+                    setCurrentIndex={setCurrentIndex}
+                    setIsPlaying={setIsPlaying}
+                  />
+                } 
+              />
+              <Route 
+                path="/playlist" 
+                element={
+                  <PlaylistPage 
+                    currentIndex={currentIndex}
+                    isPlaying={isPlaying}
+                    setCurrentIndex={setCurrentIndex}
+                    setIsPlaying={setIsPlaying}
+                  />
+                } 
+              />
               <Route 
                 path="/add-station" 
                 element={
