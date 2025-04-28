@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -23,7 +24,7 @@ const StationListPage: React.FC<StationListPageProps> = ({
   const { toast } = useToast();
 
   const renderStationCard = (station: Track, isPrebuilt: boolean = false) => (
-    <div key={station.url} className="flex flex-col p-4 rounded-lg bg-white/10 backdrop-blur-sm hover:bg-white/20">
+    <div key={`${station.url}-${isPrebuilt ? 'prebuilt' : 'user'}`} className="flex flex-col p-4 rounded-lg bg-white/10 backdrop-blur-sm hover:bg-white/20">
       <div className="flex justify-center mb-3">
         <Radio className="w-12 h-12 text-primary" />
       </div>
@@ -35,6 +36,7 @@ const StationListPage: React.FC<StationListPageProps> = ({
           className="h-8 w-8"
           onClick={() => {
             console.log("Adding station to playlist:", station);
+            // Create a complete copy with EXPLICIT favorite status
             const stationToAdd = {...station};
             onAddToPlaylist(stationToAdd);
             toast({

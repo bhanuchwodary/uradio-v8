@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Track } from "@/types/track";
 
@@ -22,7 +23,7 @@ export const useTrackState = () => {
     console.log("Tracks state updated and saved to localStorage:", tracks);
   }, [tracks]);
 
-  const addUrl = (url: string, name: string = "", isPrebuilt: boolean = false, isFavorite: boolean = false) => {
+  const addUrl = (url: string, name: string = "", isPrebuilt: boolean = false, isFavorite?: boolean) => {
     if (!url) {
       console.error("Cannot add empty URL");
       return;
@@ -31,12 +32,13 @@ export const useTrackState = () => {
     const newTrack = { 
       url, 
       name: name || `Station ${tracks.length + 1}`,
-      isFavorite: isFavorite,
+      isFavorite: isFavorite === undefined ? false : isFavorite,
       playTime: 0,
       isPrebuilt
     };
     
     console.log("Adding or updating track in playlist:", newTrack);
+    console.log("Adding with explicit isFavorite value:", isFavorite);
     
     // Important: Use a callback with the previous state to ensure we're working with the latest state
     setTracks(prevTracks => {
@@ -51,19 +53,20 @@ export const useTrackState = () => {
       if (existingIndex !== -1) {
         // If found, create a new array and update the existing station
         console.log("Station already exists, updating at index:", existingIndex);
+        console.log("Current station favorite status:", prevTracks[existingIndex].isFavorite);
+        
         const updatedTracks = [...prevTracks];
-        // The critical fix: We must preserve the existing isFavorite status unless explicitly changing it
+        // The critical fix: Only update specific properties, NEVER touch isFavorite unless explicitly provided
         updatedTracks[existingIndex] = {
           ...updatedTracks[existingIndex],  // Keep all existing properties first
           url: url,  // Then update what we need to update
           name: name || updatedTracks[existingIndex].name,
           isPrebuilt: isPrebuilt !== undefined ? isPrebuilt : updatedTracks[existingIndex].isPrebuilt,
-          // The bug was here - we were potentially overwriting isFavorite with false
-          // We should only update isFavorite if it's explicitly provided as true
-          // Otherwise keep the existing value
-          isFavorite: updatedTracks[existingIndex].isFavorite
+          // ONLY update isFavorite if it's explicitly provided
+          isFavorite: isFavorite !== undefined ? isFavorite : updatedTracks[existingIndex].isFavorite
         };
-        console.log("Updated track:", updatedTracks[existingIndex]);
+        
+        console.log("Updated track with favorite status:", updatedTracks[existingIndex].isFavorite);
         return updatedTracks;
       } else {
         // If not found, add as a new station
@@ -138,6 +141,7 @@ export const useTrackState = () => {
           ...newTracks[index],
           isFavorite: !newTracks[index].isFavorite
         };
+        console.log(`Toggled favorite status for station at index ${index} to ${newTracks[index].isFavorite}`);
       }
       return newTracks;
     });
