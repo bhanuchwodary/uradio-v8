@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -51,8 +50,9 @@ const App = () => {
     // Important: Make a complete copy of the station to ensure all properties are preserved
     console.log("Attempting to add/update station to playlist:", station);
     
-    // Pass a complete station object to preserve all properties including isFavorite
-    addUrl(station.url, station.name, station.isPrebuilt, station.isFavorite);
+    // Pass URL and name only, not the isFavorite property
+    // This ensures we don't override the favorite status in useTrackState
+    addUrl(station.url, station.name, station.isPrebuilt);
     
     console.log("Added/Updated station in playlist");
   };

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Track } from "@/types/track";
 
@@ -53,13 +52,16 @@ export const useTrackState = () => {
         // If found, create a new array and update the existing station
         console.log("Station already exists, updating at index:", existingIndex);
         const updatedTracks = [...prevTracks];
+        // The critical fix: We must preserve the existing isFavorite status unless explicitly changing it
         updatedTracks[existingIndex] = {
           ...updatedTracks[existingIndex],  // Keep all existing properties first
           url: url,  // Then update what we need to update
           name: name || updatedTracks[existingIndex].name,
           isPrebuilt: isPrebuilt !== undefined ? isPrebuilt : updatedTracks[existingIndex].isPrebuilt,
-          // Only update isFavorite if it's explicitly provided as true
-          isFavorite: isFavorite === true ? true : updatedTracks[existingIndex].isFavorite
+          // The bug was here - we were potentially overwriting isFavorite with false
+          // We should only update isFavorite if it's explicitly provided as true
+          // Otherwise keep the existing value
+          isFavorite: updatedTracks[existingIndex].isFavorite
         };
         console.log("Updated track:", updatedTracks[existingIndex]);
         return updatedTracks;

@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -36,8 +35,8 @@ const StationListPage: React.FC<StationListPageProps> = ({
           className="h-8 w-8"
           onClick={() => {
             console.log("Adding station to playlist:", station);
-            // Make sure we're preserving all properties, especially isFavorite
-            onAddToPlaylist({...station});
+            const stationToAdd = {...station};
+            onAddToPlaylist(stationToAdd);
             toast({
               title: "Station Added",
               description: "The station has been added to your playlist.",
