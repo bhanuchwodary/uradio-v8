@@ -3,10 +3,9 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { useState, useEffect } from "react";
-import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import PlaylistPage from "./pages/PlaylistPage";
 import AddStationPage from "./pages/AddStationPage";
@@ -69,7 +68,7 @@ const App = () => {
               <Route 
                 path="/" 
                 element={
-                  <Index 
+                  <PlaylistPage 
                     currentIndex={currentIndex}
                     isPlaying={isPlaying}
                     setCurrentIndex={setCurrentIndex}
@@ -80,12 +79,7 @@ const App = () => {
               <Route 
                 path="/playlist" 
                 element={
-                  <PlaylistPage 
-                    currentIndex={currentIndex}
-                    isPlaying={isPlaying}
-                    setCurrentIndex={setCurrentIndex}
-                    setIsPlaying={setIsPlaying}
-                  />
+                  <Navigate to="/" replace />
                 } 
               />
               <Route 

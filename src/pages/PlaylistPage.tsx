@@ -63,7 +63,7 @@ const PlaylistPage: React.FC<PlaylistPageProps> = ({
 
         <Card className="bg-white/10 backdrop-blur-md border-none shadow-lg">
           <CardHeader className="p-3 md:p-4">
-            <CardTitle className="text-lg md:text-xl">Playlist</CardTitle>
+            <CardTitle className="text-lg md:text-xl">My Stations</CardTitle>
           </CardHeader>
           <CardContent className="p-3 md:p-4 pt-0">
             <Playlist
