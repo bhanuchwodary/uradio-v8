@@ -3,7 +3,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Radio, Heart, Plus } from "lucide-react";
+import { Radio, Plus } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import { useToast } from "@/hooks/use-toast";
 import { Track } from "@/types/track";
@@ -30,10 +30,10 @@ const StationListPage: React.FC<StationListPageProps> = ({
     return (
       <div key={uniqueKey} className="flex flex-col p-4 rounded-lg bg-white/10 backdrop-blur-sm hover:bg-white/20">
         <div className="flex justify-center mb-3">
-          <Radio className="w-12 h-12 text-primary" />
+          <Radio className={`w-12 h-12 text-primary`} />
         </div>
         <h3 className="text-sm font-medium text-center mb-3 line-clamp-2">{station.name}</h3>
-        <div className="flex justify-center gap-2">
+        <div className="flex justify-center">
           <Button
             variant="ghost"
             size="icon"
@@ -49,14 +49,6 @@ const StationListPage: React.FC<StationListPageProps> = ({
             }}
           >
             <Plus className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className={`h-8 w-8 ${station.isFavorite ? 'text-pink-500' : ''}`}
-            onClick={() => onToggleFavorite(station)}
-          >
-            <Heart className="h-4 w-4" fill={station.isFavorite ? "currentColor" : "none"} />
           </Button>
         </div>
       </div>
@@ -97,7 +89,6 @@ const StationListPage: React.FC<StationListPageProps> = ({
           <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {prebuiltStations.map(station => {
-                // Create a proper unique key with the -prebuilt suffix
                 const prebuiltStation = {
                   ...station,
                   isFavorite: false,

@@ -24,20 +24,10 @@ const PlaylistPage: React.FC<PlaylistPageProps> = ({
     urls,
     tracks,
     removeUrl,
-    toggleFavorite,
     editTrack,
   } = useMusicPlayer();
   
   const { toast } = useToast();
-
-  const handleToggleFavorite = (index: number) => {
-    toggleFavorite(index);
-    const track = tracks[index];
-    toast({
-      title: track.isFavorite ? "Removed from favorites" : "Added to favorites",
-      description: `"${track.name}" ${track.isFavorite ? "removed from" : "added to"} favorites`,
-    });
-  };
 
   const handleEditTrack = (index: number, data: { url: string; name: string }) => {
     editTrack(index, data);
@@ -75,7 +65,6 @@ const PlaylistPage: React.FC<PlaylistPageProps> = ({
                 appSetIsPlaying(true);
               }}
               onRemoveTrack={removeUrl}
-              onToggleFavorite={handleToggleFavorite}
               onEditTrack={handleEditTrack}
             />
           </CardContent>
