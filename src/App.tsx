@@ -22,6 +22,9 @@ const App = () => {
     addUrl, 
     toggleFavorite,
     getUserStations,
+    removeStationByValue,
+    editStationByValue,
+    checkIfStationExists,
     currentIndex,
     isPlaying,
     setCurrentIndex,
@@ -29,7 +32,15 @@ const App = () => {
   } = useTrackState();
   
   const handleAddStation = (url: string, name: string) => {
-    addUrl(url, name);
+    const stationCheck = checkIfStationExists(url);
+    if (stationCheck.exists && !stationCheck.isUserStation) {
+      return { success: false, message: "This station already exists in the prebuilt stations" };
+    } else if (stationCheck.exists && stationCheck.isUserStation) {
+      return { success: false, message: "This station already exists in your stations" };
+    }
+    
+    const result = addUrl(url, name);
+    return result;
   };
   
   const handleImportStations = (stations: Array<{ name: string; url: string }>) => {
@@ -52,9 +63,10 @@ const App = () => {
     console.log("Attempting to add/update station to playlist:", station);
     
     // Critical fix: EXPLICITLY pass the isFavorite status to preserve it
-    addUrl(station.url, station.name, station.isPrebuilt, station.isFavorite);
+    const result = addUrl(station.url, station.name, station.isPrebuilt, station.isFavorite);
     
     console.log("Added/Updated station in playlist with favorite status:", station.isFavorite);
+    return result;
   };
 
   return (
@@ -97,7 +109,9 @@ const App = () => {
                   <StationListPage 
                     userStations={getUserStations()} 
                     onAddToPlaylist={handleAddToPlaylist} 
-                    onToggleFavorite={handleToggleFavorite} 
+                    onToggleFavorite={handleToggleFavorite}
+                    onRemoveStation={removeStationByValue}
+                    onEditStation={editStationByValue}
                   />
                 } 
               />

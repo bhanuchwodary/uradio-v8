@@ -1,13 +1,13 @@
 
 import React from "react";
-import { useNavigate } from "react-router-dom";
-import Navigation from "@/components/Navigation";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import AddUrlForm from "@/components/AddUrlForm";
 import ImportStationsFromCsv from "@/components/ImportStationsFromCsv";
-import { Track } from "@/types/track";
+import Navigation from "@/components/Navigation";
+import { useToast } from "@/hooks/use-toast";
 
 interface AddStationPageProps {
-  onAddStation: (url: string, name: string) => void;
+  onAddStation: (url: string, name: string) => {success: boolean, message: string};
   onImportStations: (stations: Array<{ name: string; url: string }>) => void;
 }
 
@@ -15,37 +15,58 @@ const AddStationPage: React.FC<AddStationPageProps> = ({
   onAddStation,
   onImportStations,
 }) => {
-  const navigate = useNavigate();
+  const { toast } = useToast();
 
-  const handleAddStation = (url: string, name: string) => {
-    onAddStation(url, name);
-    navigate("/station-list");
+  const handleAddUrl = (url: string, name: string) => {
+    const result = onAddStation(url, name);
+    if (result.success) {
+      toast({
+        title: "Station Added",
+        description: name
+          ? `${name} has been added to your stations.`
+          : "The station has been added to your stations.",
+      });
+      return true;
+    } else {
+      toast({
+        title: "Station Not Added",
+        description: result.message || "Failed to add station.",
+        variant: "destructive"
+      });
+      return false;
+    }
   };
-
-  const handleImportStations = (stations: Array<{ name: string; url: string }>) => {
+  
+  const handleImport = (stations: Array<{ name: string; url: string }>) => {
     onImportStations(stations);
-    navigate("/station-list");
+    toast({
+      title: "Stations Imported",
+      description: `${stations.length} stations have been imported.`,
+    });
   };
 
   return (
-    <div className="container mx-auto p-4 max-w-xl">
-      <Navigation />
-      <div className="space-y-6">
-        <h1 className="text-2xl font-bold text-center mb-6">Add New Station</h1>
-        <div className="space-y-6">
-          <AddUrlForm onAddUrl={handleAddStation} />
-          <div className="relative py-4">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-white/10"></div>
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">
-                Or import multiple stations
-              </span>
-            </div>
-          </div>
-          <ImportStationsFromCsv onImport={handleImportStations} />
-        </div>
+    <div className="min-h-screen p-3 md:p-4 bg-gradient-to-br from-blue-900 via-purple-900 to-pink-700 dark:from-gray-900 dark:via-gray-800 dark:to-gray-700">
+      <div className="w-full max-w-2xl mx-auto space-y-4 md:space-y-6">
+        <Navigation />
+        
+        <Card className="bg-white/10 backdrop-blur-md border-none shadow-lg">
+          <CardHeader className="p-3 md:p-4">
+            <CardTitle className="text-lg md:text-xl">Add Radio Station</CardTitle>
+          </CardHeader>
+          <CardContent className="p-3 md:p-4 pt-0">
+            <AddUrlForm onAddUrl={handleAddUrl} />
+          </CardContent>
+        </Card>
+
+        <Card className="bg-white/10 backdrop-blur-md border-none shadow-lg">
+          <CardHeader className="p-3 md:p-4">
+            <CardTitle className="text-lg md:text-xl">Import Stations</CardTitle>
+          </CardHeader>
+          <CardContent className="p-3 md:p-4 pt-0">
+            <ImportStationsFromCsv onImport={handleImport} />
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

@@ -1,27 +1,33 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Radio, Plus } from "lucide-react";
+import { Radio, Plus, Edit, Trash2 } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import { useToast } from "@/hooks/use-toast";
 import { Track } from "@/types/track";
 import { prebuiltStations } from "@/data/prebuiltStations";
+import EditStationDialog from "@/components/EditStationDialog";
 
 interface StationListPageProps {
   userStations: Track[];
   onAddToPlaylist: (station: Track) => void;
   onToggleFavorite: (station: Track) => void;
+  onRemoveStation?: (station: Track) => void;
+  onEditStation?: (station: Track, data: { url: string; name: string }) => void;
 }
 
 const StationListPage: React.FC<StationListPageProps> = ({
   userStations,
   onAddToPlaylist,
   onToggleFavorite,
+  onRemoveStation,
+  onEditStation,
 }) => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [editingStation, setEditingStation] = useState<Track | null>(null);
 
   const renderStationCard = (station: Track, isPrebuilt: boolean = false) => {
     // Generate a truly unique key for each station card
@@ -33,14 +39,14 @@ const StationListPage: React.FC<StationListPageProps> = ({
           <Radio className={`w-12 h-12 text-primary`} />
         </div>
         <h3 className="text-sm font-medium text-center mb-3 line-clamp-2">{station.name}</h3>
-        <div className="flex justify-center">
+        <div className="flex justify-center space-x-1">
           <Button
             variant="ghost"
             size="icon"
             className="h-8 w-8"
             onClick={() => {
               console.log("Adding station to playlist:", station);
-              // Create a complete copy with EXPLICIT favorite status
+              // Check if station already exists in playlist
               onAddToPlaylist({...station});
               toast({
                 title: "Station Added",
@@ -50,9 +56,48 @@ const StationListPage: React.FC<StationListPageProps> = ({
           >
             <Plus className="h-4 w-4" />
           </Button>
+          
+          {!isPrebuilt && onEditStation && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 text-blue-500 hover:text-blue-700"
+              onClick={() => setEditingStation(station)}
+            >
+              <Edit className="h-4 w-4" />
+            </Button>
+          )}
+          
+          {!isPrebuilt && onRemoveStation && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 text-red-500 hover:text-red-700"
+              onClick={() => {
+                onRemoveStation(station);
+                toast({
+                  title: "Station Removed",
+                  description: `${station.name} has been removed from your stations.`,
+                });
+              }}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          )}
         </div>
       </div>
     );
+  };
+
+  const handleSaveEdit = (data: { url: string; name: string }) => {
+    if (editingStation && onEditStation) {
+      onEditStation(editingStation, data);
+      toast({
+        title: "Station Updated",
+        description: `${data.name} has been updated.`,
+      });
+    }
+    setEditingStation(null);
   };
 
   return (
@@ -101,6 +146,18 @@ const StationListPage: React.FC<StationListPageProps> = ({
           </CardContent>
         </Card>
       </div>
+      
+      {editingStation && (
+        <EditStationDialog
+          isOpen={!!editingStation}
+          onClose={() => setEditingStation(null)}
+          onSave={handleSaveEdit}
+          initialValues={{
+            url: editingStation.url,
+            name: editingStation.name,
+          }}
+        />
+      )}
     </div>
   );
 };

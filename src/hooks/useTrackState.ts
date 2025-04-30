@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { Track } from "@/types/track";
+import { prebuiltStations } from "@/data/prebuiltStations";
 
 export const useTrackState = () => {
   const [tracks, setTracks] = useState<Track[]>([]);
@@ -23,29 +24,54 @@ export const useTrackState = () => {
     console.log("Tracks state updated and saved to localStorage:", tracks);
   }, [tracks]);
 
+  const checkIfStationExists = (url: string): { exists: boolean, isUserStation: boolean } => {
+    // Check in user tracks
+    const existsInUserTracks = tracks.some(track => 
+      track.url.toLowerCase() === url.toLowerCase() && !track.isPrebuilt
+    );
+    
+    if (existsInUserTracks) {
+      return { exists: true, isUserStation: true };
+    }
+    
+    // Check in prebuilt stations
+    const existsInPrebuilt = prebuiltStations.some(
+      station => station.url.toLowerCase() === url.toLowerCase()
+    );
+    
+    return { exists: existsInPrebuilt, isUserStation: false };
+  };
+
   const addUrl = (url: string, name: string = "", isPrebuilt: boolean = false, isFavorite?: boolean) => {
     if (!url) {
       console.error("Cannot add empty URL");
-      return;
+      return { success: false, message: "URL cannot be empty" };
     }
     
     console.log(`Adding URL: ${url}, Name: ${name}, IsPrebuilt: ${isPrebuilt}, Explicit isFavorite: ${isFavorite !== undefined ? isFavorite : 'not provided'}`);
     
     // Important: Use a callback with the previous state to ensure we're working with the latest state
-    setTracks(prevTracks => {
-      // First, check for duplicates by URL (case insensitive comparison for robustness)
-      const existingIndex = prevTracks.findIndex(
-        track => track.url.toLowerCase() === url.toLowerCase()
-      );
+    const stationExists = checkIfStationExists(url);
+    
+    if (stationExists.exists && stationExists.isUserStation && !isPrebuilt) {
+      console.log("Station already exists in user stations:", url);
+      return { success: false, message: "Station already exists in your stations" };
+    }
+    
+    // First, check for duplicates by URL in current playlist (case insensitive comparison for robustness)
+    const existingIndex = tracks.findIndex(
+      track => track.url.toLowerCase() === url.toLowerCase()
+    );
+    
+    console.log("Checking for existing track in playlist with URL:", url);
+    console.log("Existing track index:", existingIndex);
+    
+    if (existingIndex !== -1) {
+      // If found, create a new array and update the existing station
+      console.log("Station already exists in playlist, updating at index:", existingIndex);
+      console.log("Current station favorite status:", tracks[existingIndex].isFavorite);
       
-      console.log("Checking for existing track with URL:", url);
-      console.log("Existing track index:", existingIndex);
-      
-      if (existingIndex !== -1) {
-        // If found, create a new array and update the existing station
-        console.log("Station already exists, updating at index:", existingIndex);
-        console.log("Current station favorite status:", prevTracks[existingIndex].isFavorite);
-        
+      setTracks(prevTracks => {
         const updatedTracks = [...prevTracks];
         // CRITICAL FIX: Only update specific properties, NEVER change isFavorite unless explicitly provided
         updatedTracks[existingIndex] = {
@@ -59,20 +85,22 @@ export const useTrackState = () => {
         
         console.log("Updated track with favorite status:", updatedTracks[existingIndex].isFavorite);
         return updatedTracks;
-      } else {
-        // If not found, add as a new station
-        console.log("Station doesn't exist, adding as new");
-        const newTrack = { 
-          url, 
-          name: name || `Station ${prevTracks.length + 1}`,
-          isFavorite: isFavorite !== undefined ? isFavorite : false,
-          playTime: 0,
-          isPrebuilt
-        };
-        console.log("New track being added:", newTrack);
-        return [...prevTracks, newTrack];
-      }
-    });
+      });
+      return { success: true, message: "Station updated in playlist" };
+    } else {
+      // If not found, add as a new station
+      console.log("Station doesn't exist in playlist, adding as new");
+      const newTrack = { 
+        url, 
+        name: name || `Station ${tracks.length + 1}`,
+        isFavorite: isFavorite !== undefined ? isFavorite : false,
+        playTime: 0,
+        isPrebuilt
+      };
+      console.log("New track being added:", newTrack);
+      setTracks(prevTracks => [...prevTracks, newTrack]);
+      return { success: true, message: "Station added to playlist" };
+    }
   };
 
   const getUserStations = () => {
@@ -109,6 +137,42 @@ export const useTrackState = () => {
         };
       }
       return newTracks;
+    });
+  };
+  
+  const editStationByValue = (station: Track, data: { url: string; name: string }) => {
+    setTracks((prevTracks) => {
+      const index = prevTracks.findIndex(
+        track => track.url === station.url && track.name === station.name
+      );
+      
+      if (index !== -1) {
+        const newTracks = [...prevTracks];
+        newTracks[index] = {
+          ...newTracks[index],
+          url: data.url,
+          name: data.name
+        };
+        return newTracks;
+      }
+      
+      return prevTracks;
+    });
+  };
+  
+  const removeStationByValue = (station: Track) => {
+    setTracks((prevTracks) => {
+      const index = prevTracks.findIndex(
+        track => track.url === station.url && track.name === station.name
+      );
+      
+      if (index !== -1) {
+        const newTracks = [...prevTracks];
+        newTracks.splice(index, 1);
+        return newTracks;
+      }
+      
+      return prevTracks;
     });
   };
 
@@ -161,5 +225,8 @@ export const useTrackState = () => {
     updatePlayTime,
     getTopStations,
     getUserStations,
+    checkIfStationExists,
+    editStationByValue,
+    removeStationByValue
   };
 };
