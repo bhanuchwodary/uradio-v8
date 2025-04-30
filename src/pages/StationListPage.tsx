@@ -13,7 +13,6 @@ import EditStationDialog from "@/components/EditStationDialog";
 interface StationListPageProps {
   userStations: Track[];
   onAddToPlaylist: (station: Track) => void;
-  onToggleFavorite: (station: Track) => void;
   onRemoveStation?: (station: Track) => void;
   onEditStation?: (station: Track, data: { url: string; name: string }) => void;
 }
@@ -21,7 +20,6 @@ interface StationListPageProps {
 const StationListPage: React.FC<StationListPageProps> = ({
   userStations,
   onAddToPlaylist,
-  onToggleFavorite,
   onRemoveStation,
   onEditStation,
 }) => {

@@ -50,12 +50,15 @@ export const useTrackState = () => {
     
     console.log(`Adding URL: ${url}, Name: ${name}, IsPrebuilt: ${isPrebuilt}, Explicit isFavorite: ${isFavorite !== undefined ? isFavorite : 'not provided'}`);
     
-    // Important: Use a callback with the previous state to ensure we're working with the latest state
+    // Check if the station already exists in user stations or prebuilt stations
     const stationExists = checkIfStationExists(url);
     
     if (stationExists.exists && stationExists.isUserStation && !isPrebuilt) {
       console.log("Station already exists in user stations:", url);
       return { success: false, message: "Station already exists in your stations" };
+    } else if (stationExists.exists && !stationExists.isUserStation && !isPrebuilt) {
+      console.log("Station already exists in prebuilt stations:", url);
+      return { success: false, message: "Station already exists in prebuilt stations" };
     }
     
     // First, check for duplicates by URL in current playlist (case insensitive comparison for robustness)

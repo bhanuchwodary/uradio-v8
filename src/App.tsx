@@ -109,7 +109,6 @@ const App = () => {
                   <StationListPage 
                     userStations={getUserStations()} 
                     onAddToPlaylist={handleAddToPlaylist} 
-                    onToggleFavorite={handleToggleFavorite}
                     onRemoveStation={removeStationByValue}
                     onEditStation={editStationByValue}
                   />
