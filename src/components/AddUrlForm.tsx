@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PlusCircle } from "lucide-react";
@@ -46,6 +46,8 @@ const AddUrlForm: React.FC<AddUrlFormProps> = ({ onAddUrl }) => {
         url.includes('/hls/');
       
       if (validExtensions.includes(fileExtension || '') || isStreamUrl) {
+        // Debug check to ensure values are passed correctly
+        console.log("AddUrlForm submitting:", { url, name });
         onAddUrl(url, name || `Station ${Date.now()}`);
         form.reset();
       } else {

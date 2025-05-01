@@ -19,18 +19,34 @@ export const useTrackState = () => {
 
   useEffect(() => {
     localStorage.setItem('musicTracks', JSON.stringify(tracks));
+    console.log("Tracks state updated and saved to localStorage:", tracks);
   }, [tracks]);
 
-  const addUrl = (url: string, name: string = "") => {
-    setTracks((prevTracks) => [
-      ...prevTracks, 
-      { 
-        url, 
-        name: name || `Station ${prevTracks.length + 1}`,
-        isFavorite: false,
-        playTime: 0
-      }
-    ]);
+  const addUrl = (url: string, name: string = "", isPrebuilt: boolean = false) => {
+    if (!url) {
+      console.error("Cannot add empty URL");
+      return;
+    }
+    
+    const newTrack = { 
+      url, 
+      name: name || `Station ${tracks.length + 1}`,
+      isFavorite: false,
+      playTime: 0,
+      isPrebuilt
+    };
+    
+    console.log("Adding new track to playlist:", newTrack);
+    
+    setTracks(prevTracks => {
+      const updatedTracks = [...prevTracks, newTrack];
+      console.log("State updated with new tracks:", updatedTracks);
+      return updatedTracks;
+    });
+  };
+
+  const getUserStations = () => {
+    return tracks.filter(track => !track.isPrebuilt);
   };
 
   const updatePlayTime = (index: number, seconds: number) => {
@@ -111,5 +127,6 @@ export const useTrackState = () => {
     editTrack,
     updatePlayTime,
     getTopStations,
+    getUserStations,
   };
 };

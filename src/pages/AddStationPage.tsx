@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Navigation from "@/components/Navigation";
 import AddUrlForm from "@/components/AddUrlForm";
@@ -11,33 +11,112 @@ import { useMusicPlayer } from "@/hooks/useMusicPlayer";
 import { useNavigate } from "react-router-dom";
 
 const AddStationPage = () => {
-  const { addUrl } = useMusicPlayer();
+  const { tracks, addUrl } = useMusicPlayer();
   const { toast } = useToast();
   const navigate = useNavigate();
 
+  const isUrlExisting = (url: string) => {
+    return tracks.some(track => track.url === url);
+  };
+
   const handleAddPrebuiltStation = (name: string, url: string) => {
-    addUrl(url, name);
-    toast({
-      title: "Station added",
-      description: `${name} has been added to your playlist`,
-    });
-    navigate("/playlist");
+    if (isUrlExisting(url)) {
+      const existingTrack = tracks.find(track => track.url === url);
+      toast({
+        title: "Station already exists",
+        description: `"${existingTrack?.name}" is already in your playlist`,
+      });
+      return;
+    }
+    
+    try {
+      addUrl(url, name, true);
+      toast({
+        title: "Station added",
+        description: `${name} has been added to your playlist`,
+      });
+    } catch (error) {
+      console.error("Error adding station:", error);
+      toast({
+        title: "Error adding station",
+        description: "There was a problem adding the station",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleAddUrl = (url: string, name: string) => {
-    addUrl(url, name);
-    toast({
-      title: "Station added",
-      description: `${name} has been added to your playlist`,
-    });
-    navigate("/playlist");
+    console.log("AddStationPage handleAddUrl called with:", { url, name });
+    
+    if (isUrlExisting(url)) {
+      const existingTrack = tracks.find(track => track.url === url);
+      toast({
+        title: "Station already exists",
+        description: `"${existingTrack?.name}" is already in your playlist`,
+      });
+      return;
+    }
+    
+    try {
+      // Pass false for isPrebuilt to mark it as a user station
+      addUrl(url, name, false);
+      console.log("Station added to playlist:", { url, name, isPrebuilt: false });
+      
+      toast({
+        title: "Station added",
+        description: `${name} has been added to your playlist`,
+      });
+      
+      // Small delay to ensure state is updated before navigating
+      setTimeout(() => {
+        navigate("/playlist");
+      }, 100);
+    } catch (error) {
+      console.error("Error adding station:", error);
+      toast({
+        title: "Error adding station",
+        description: "There was a problem adding the station",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleImportStations = (stations: Array<{ name: string; url: string }>) => {
+    const addedStations = [];
+    const skippedStations = [];
+    
     stations.forEach(station => {
-      addUrl(station.url, station.name);
+      if (!isUrlExisting(station.url)) {
+        try {
+          addUrl(station.url, station.name, false);
+          addedStations.push(station.name);
+        } catch (error) {
+          console.error(`Error adding station ${station.name}:`, error);
+          skippedStations.push(station.name);
+        }
+      } else {
+        skippedStations.push(station.name);
+      }
     });
-    navigate("/playlist");
+    
+    if (addedStations.length > 0) {
+      toast({
+        title: `Added ${addedStations.length} stations`,
+        description: skippedStations.length > 0 ? 
+          `Skipped ${skippedStations.length} duplicate stations` : 
+          "All stations were added successfully",
+      });
+    } else if (skippedStations.length > 0) {
+      toast({
+        title: "No stations added",
+        description: "All stations already exist in your playlist",
+      });
+    }
+    
+    // Small delay to ensure state is updated before navigating
+    setTimeout(() => {
+      navigate("/playlist");
+    }, 100);
   };
 
   return (
@@ -65,7 +144,7 @@ const AddStationPage = () => {
                 <Button
                   key={index}
                   variant="outline"
-                  className="justify-start bg-white/10 hover:bg-white/20 border-none"
+                  className="justify-start bg-white/20 hover:bg-white/30 border-none"
                   onClick={() => handleAddPrebuiltStation(station.name, station.url)}
                 >
                   {station.name}
