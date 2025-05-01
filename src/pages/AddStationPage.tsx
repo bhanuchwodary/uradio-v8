@@ -1,70 +1,77 @@
 
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import Navigation from "@/components/Navigation";
 import AddUrlForm from "@/components/AddUrlForm";
 import ImportStationsFromCsv from "@/components/ImportStationsFromCsv";
-import Navigation from "@/components/Navigation";
-import { useToast } from "@/hooks/use-toast";
+import { prebuiltStations } from "@/data/prebuiltStations";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
+import { useMusicPlayer } from "@/hooks/useMusicPlayer";
+import { useNavigate } from "react-router-dom";
 
-interface AddStationPageProps {
-  onAddStation: (url: string, name: string) => {success: boolean, message: string};
-  onImportStations: (stations: Array<{ name: string; url: string }>) => void;
-}
-
-const AddStationPage: React.FC<AddStationPageProps> = ({
-  onAddStation,
-  onImportStations,
-}) => {
+const AddStationPage = () => {
+  const { addUrl } = useMusicPlayer();
   const { toast } = useToast();
+  const navigate = useNavigate();
+
+  const handleAddPrebuiltStation = (name: string, url: string) => {
+    addUrl(url, name);
+    toast({
+      title: "Station added",
+      description: `${name} has been added to your playlist`,
+    });
+    navigate("/playlist");
+  };
 
   const handleAddUrl = (url: string, name: string) => {
-    const result = onAddStation(url, name);
-    if (result.success) {
-      toast({
-        title: "Station Added",
-        description: name
-          ? `${name} has been added to your stations.`
-          : "The station has been added to your stations.",
-      });
-      return true;
-    } else {
-      toast({
-        title: "Station Not Added",
-        description: result.message || "Failed to add station.",
-        variant: "destructive"
-      });
-      return false;
-    }
-  };
-  
-  const handleImport = (stations: Array<{ name: string; url: string }>) => {
-    onImportStations(stations);
+    addUrl(url, name);
     toast({
-      title: "Stations Imported",
-      description: `${stations.length} stations have been imported.`,
+      title: "Station added",
+      description: `${name} has been added to your playlist`,
     });
+    navigate("/playlist");
+  };
+
+  const handleImportStations = (stations: Array<{ name: string; url: string }>) => {
+    stations.forEach(station => {
+      addUrl(station.url, station.name);
+    });
+    navigate("/playlist");
   };
 
   return (
     <div className="min-h-screen p-3 md:p-4 bg-gradient-to-br from-blue-900 via-purple-900 to-pink-700 dark:from-gray-900 dark:via-gray-800 dark:to-gray-700">
-      <div className="w-full max-w-2xl mx-auto space-y-4 md:space-y-6">
+      <div className="max-w-2xl mx-auto space-y-4">
         <Navigation />
         
         <Card className="bg-white/10 backdrop-blur-md border-none shadow-lg">
-          <CardHeader className="p-3 md:p-4">
-            <CardTitle className="text-lg md:text-xl">Add Radio Station</CardTitle>
+          <CardHeader>
+            <CardTitle>Add Station</CardTitle>
           </CardHeader>
-          <CardContent className="p-3 md:p-4 pt-0">
+          <CardContent className="space-y-4">
             <AddUrlForm onAddUrl={handleAddUrl} />
+            <ImportStationsFromCsv onImport={handleImportStations} />
           </CardContent>
         </Card>
 
         <Card className="bg-white/10 backdrop-blur-md border-none shadow-lg">
-          <CardHeader className="p-3 md:p-4">
-            <CardTitle className="text-lg md:text-xl">Import Stations</CardTitle>
+          <CardHeader>
+            <CardTitle>Prebuilt Stations</CardTitle>
           </CardHeader>
-          <CardContent className="p-3 md:p-4 pt-0">
-            <ImportStationsFromCsv onImport={handleImport} />
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+              {prebuiltStations.map((station, index) => (
+                <Button
+                  key={index}
+                  variant="outline"
+                  className="justify-start bg-white/10 hover:bg-white/20 border-none"
+                  onClick={() => handleAddPrebuiltStation(station.name, station.url)}
+                >
+                  {station.name}
+                </Button>
+              ))}
+            </div>
           </CardContent>
         </Card>
       </div>

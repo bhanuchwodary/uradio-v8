@@ -1,7 +1,7 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Radio, Edit, Trash2 } from "lucide-react";
+import { Radio, Heart, Edit, Trash2 } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import EditStationDialog from "./EditStationDialog";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -13,6 +13,7 @@ interface PlaylistProps {
   currentIndex: number;
   onSelectTrack: (index: number) => void;
   onRemoveTrack: (index: number) => void;
+  onToggleFavorite?: (index: number) => void;
   onEditTrack?: (index: number, data: { url: string; name: string }) => void;
 }
 
@@ -22,17 +23,13 @@ const Playlist: React.FC<PlaylistProps> = ({
   currentIndex,
   onSelectTrack,
   onRemoveTrack,
+  onToggleFavorite,
   onEditTrack,
 }) => {
   const [editingTrack, setEditingTrack] = useState<{ index: number; data: { url: string; name: string } } | null>(null);
   const isMobile = useIsMobile();
-  
-  // Debug log to ensure tracks are being received
-  useEffect(() => {
-    console.log("Playlist component received tracks:", tracks);
-  }, [tracks]);
 
-  if (!tracks || tracks.length === 0) {
+  if (urls.length === 0) {
     return (
       <div className="text-center p-3 text-gray-500">
         No tracks added. Add a URL to get started.
@@ -40,21 +37,30 @@ const Playlist: React.FC<PlaylistProps> = ({
     );
   }
 
-  const userStations = tracks.filter(track => track.isPrebuilt === false);
-  const prebuiltStations = tracks.filter(track => track.isPrebuilt === true);
-  
-  console.log("User stations:", userStations);
-  console.log("Prebuilt stations:", prebuiltStations);
+  const handleEdit = (index: number) => {
+    if (tracks && tracks[index]) {
+      setEditingTrack({
+        index,
+        data: {
+          url: tracks[index].url,
+          name: tracks[index].name
+        }
+      });
+    }
+  };
 
-  const renderStationsList = (stationsList: Track[], title: string) => {
-    if (stationsList.length === 0) return null;
+  const handleSaveEdit = (data: { url: string; name: string }) => {
+    if (editingTrack !== null && onEditTrack) {
+      onEditTrack(editingTrack.index, data);
+    }
+    setEditingTrack(null);
+  };
 
-    return (
-      <div className="space-y-4 mb-6">
-        <h3 className="text-lg font-semibold mb-2">{title}</h3>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {stationsList.map((track, i) => {
-            const index = tracks.indexOf(track);
+  return (
+    <ScrollArea className={`h-[${isMobile ? "200px" : "500px"}] pr-4`}>
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        {tracks ? (
+          tracks.map((track, index) => {
             const isActive = index === currentIndex;
             return (
               <div
@@ -78,7 +84,17 @@ const Playlist: React.FC<PlaylistProps> = ({
                   {track.name}
                 </button>
                 <div className="flex justify-center gap-2">
-                  {onEditTrack && !track.isPrebuilt && (
+                  {onToggleFavorite && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className={`h-8 w-8 ${track.isFavorite ? 'text-pink-500' : 'text-gray-400 hover:text-pink-400'}`}
+                      onClick={() => onToggleFavorite(index)}
+                    >
+                      <Heart className="h-4 w-4" fill={track.isFavorite ? "currentColor" : "none"} />
+                    </Button>
+                  )}
+                  {onEditTrack && (
                     <Button
                       variant="ghost"
                       size="icon"
@@ -99,35 +115,46 @@ const Playlist: React.FC<PlaylistProps> = ({
                 </div>
               </div>
             );
-          })}
-        </div>
+          })
+        ) : (
+          urls.map((url, index) => {
+            const isActive = index === currentIndex;
+            return (
+              <div
+                key={index}
+                className={`flex flex-col p-4 rounded-lg ${
+                  isActive
+                    ? "bg-primary/20 backdrop-blur-sm"
+                    : "bg-white/10 backdrop-blur-sm hover:bg-white/20"
+                }`}
+              >
+                <div className="flex justify-center mb-3">
+                  <Radio
+                    className={`w-12 h-12 ${isActive ? "text-primary animate-pulse" : "text-gray-400"}`}
+                    onClick={() => onSelectTrack(index)}
+                  />
+                </div>
+                <button
+                  className="text-sm font-medium text-center mb-3 hover:text-primary transition-colors line-clamp-2"
+                  onClick={() => onSelectTrack(index)}
+                >
+                  {url}
+                </button>
+                <div className="flex justify-center">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-red-500 hover:text-red-700"
+                    onClick={() => onRemoveTrack(index)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            );
+          })
+        )}
       </div>
-    );
-  };
-
-  const handleEdit = (index: number) => {
-    if (tracks && tracks[index]) {
-      setEditingTrack({
-        index,
-        data: {
-          url: tracks[index].url,
-          name: tracks[index].name
-        }
-      });
-    }
-  };
-
-  const handleSaveEdit = (data: { url: string; name: string }) => {
-    if (editingTrack !== null && onEditTrack) {
-      onEditTrack(editingTrack.index, data);
-    }
-    setEditingTrack(null);
-  };
-
-  return (
-    <ScrollArea className={`h-[${isMobile ? "200px" : "500px"}] pr-4`}>
-      {renderStationsList(userStations, "My Stations")}
-      {renderStationsList(prebuiltStations, "Prebuilt Stations")}
       {editingTrack && (
         <EditStationDialog
           isOpen={editingTrack !== null}

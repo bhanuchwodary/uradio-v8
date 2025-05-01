@@ -6,27 +6,20 @@ import Navigation from "@/components/Navigation";
 import FavoriteStations from "@/components/FavoriteStations";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-interface IndexProps {
-  currentIndex: number;
-  isPlaying: boolean;
-  setCurrentIndex: (index: number) => void;
-  setIsPlaying: (playing: boolean) => void;
-}
-
-const Index: React.FC<IndexProps> = ({ 
-  currentIndex: appCurrentIndex,
-  isPlaying: appIsPlaying,
-  setCurrentIndex: appSetCurrentIndex,
-  setIsPlaying: appSetIsPlaying 
-}) => {
+const Index = () => {
   const {
     urls,
     tracks,
+    currentIndex,
+    isPlaying,
+    setCurrentIndex,
+    setIsPlaying,
   } = useMusicPlayer();
   
   const isMobile = useIsMobile();
   const favoriteStations = tracks.filter(track => track.isFavorite);
 
+  // Sleek Player Card Shadow, transparent, borders removed
   return (
     <div className="min-h-screen w-full p-3 md:p-6 bg-gradient-to-br from-blue-900 via-purple-900 to-pink-700 dark:from-gray-900 dark:via-gray-800 dark:to-gray-700">
       <div className="container mx-auto max-w-5xl space-y-5">
@@ -38,10 +31,10 @@ const Index: React.FC<IndexProps> = ({
           <div className="mb-2">
             <MusicPlayer
               urls={urls}
-              currentIndex={appCurrentIndex}
-              setCurrentIndex={appSetCurrentIndex}
-              isPlaying={appIsPlaying}
-              setIsPlaying={appSetIsPlaying}
+              currentIndex={currentIndex}
+              setCurrentIndex={setCurrentIndex}
+              isPlaying={isPlaying}
+              setIsPlaying={setIsPlaying}
               tracks={tracks}
             />
           </div>
@@ -53,8 +46,8 @@ const Index: React.FC<IndexProps> = ({
               onSelectStation={(index) => {
                 const mainIndex = tracks.findIndex(t => t.url === favoriteStations[index].url);
                 if (mainIndex !== -1) {
-                  appSetCurrentIndex(mainIndex);
-                  appSetIsPlaying(true);
+                  setCurrentIndex(mainIndex);
+                  setIsPlaying(true);
                 }
               }}
             />
