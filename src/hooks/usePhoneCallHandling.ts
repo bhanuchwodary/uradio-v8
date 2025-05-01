@@ -1,5 +1,12 @@
 
 import { useEffect } from "react";
+import { registerPlugin } from "@capacitor/core";
+
+// Create a custom interface for our call state plugin
+interface CallStatePlugin {
+  addListener: (eventName: string, callback: (data: { state: string }) => void) => void;
+  removeAllListeners: () => void;
+}
 
 export const usePhoneCallHandling = (
   isPlaying: boolean,
@@ -21,14 +28,11 @@ export const usePhoneCallHandling = (
       // We'll use a more generic approach to avoid TypeScript errors
       const setupCallListener = async () => {
         try {
-          // Safely check for the Capacitor environment
-          const capacitor = await import('@capacitor/core');
+          // Try to register the plugin dynamically
+          const CallState = registerPlugin<CallStatePlugin>('CallState');
           
-          // Check if there's a plugin related to call state
-          if (capacitor && capacitor.Plugins && 'CallState' in capacitor.Plugins) {
-            // @ts-ignore - Using dynamic access to avoid TypeScript errors
-            const CallStatePlugin = capacitor.Plugins.CallState;
-            CallStatePlugin.addListener('callStateChanged', ({ state }: { state: string }) => {
+          if (CallState) {
+            CallState.addListener('callStateChanged', ({ state }) => {
               handleCallStateChanged(state);
             });
           }
@@ -43,11 +47,9 @@ export const usePhoneCallHandling = (
         // Clean up listeners if needed
         try {
           const cleanup = async () => {
-            const capacitor = await import('@capacitor/core');
-            if (capacitor && capacitor.Plugins && 'CallState' in capacitor.Plugins) {
-              // @ts-ignore - Using dynamic access to avoid TypeScript errors
-              const CallStatePlugin = capacitor.Plugins.CallState;
-              CallStatePlugin.removeAllListeners();
+            const CallState = registerPlugin<CallStatePlugin>('CallState');
+            if (CallState) {
+              CallState.removeAllListeners();
             }
           };
           cleanup();
