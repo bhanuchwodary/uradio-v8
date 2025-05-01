@@ -1,41 +1,52 @@
 
-import { useEffect } from 'react';
-import { globalAudioRef } from '@/components/music-player/audioInstance';
+import { useEffect } from "react";
 
-export const usePhoneCallHandling = (isPlaying: boolean, setIsPlaying: (playing: boolean) => void) => {
+export const usePhoneCallHandling = (
+  isPlaying: boolean,
+  setIsPlaying: (isPlaying: boolean) => void
+) => {
+  // Handle phone call interruptions
   useEffect(() => {
-    let wasPlayingBeforeInterruption = false;
-
-    // Function to handle audio interruptions (like phone calls)
-    const handleAudioInterruption = () => {
-      if (globalAudioRef.element) {
-        wasPlayingBeforeInterruption = !globalAudioRef.element.paused;
-        if (wasPlayingBeforeInterruption) {
+    const handleCallStateChanged = (state: string) => {
+      if (state === "RINGING" || state === "OFFHOOK") {
+        if (isPlaying) {
           setIsPlaying(false);
-          console.log('Audio paused due to interruption');
         }
       }
     };
 
-    // Function to handle audio resume after interruption
-    const handleAudioResume = () => {
-      if (wasPlayingBeforeInterruption && globalAudioRef.element) {
-        setIsPlaying(true);
-        console.log('Audio resumed after interruption');
-        wasPlayingBeforeInterruption = false;
-      }
-    };
+    // Try to use Capacitor plugin if available
+    try {
+      // This is a placeholder for potential Capacitor implementation
+      // Actual implementation would depend on the specific Capacitor plugin
+      const setupCallListener = async () => {
+        try {
+          const { CallState } = await import('@capacitor/core');
+          CallState.addListener('callStateChanged', ({ state }) => {
+            handleCallStateChanged(state);
+          });
+        } catch (err) {
+          console.log('CallState plugin not available:', err);
+        }
+      };
 
-    if (typeof document !== 'undefined') {
-      document.addEventListener('pause', handleAudioInterruption);
-      document.addEventListener('resume', handleAudioResume);
+      setupCallListener();
+      
+      return () => {
+        // Clean up listeners if needed
+        try {
+          const cleanup = async () => {
+            const { CallState } = await import('@capacitor/core');
+            CallState.removeAllListeners();
+          };
+          cleanup();
+        } catch (err) {
+          // Ignore cleanup errors
+        }
+      };
+    } catch (err) {
+      // No Capacitor environment, no need for phone call handling
+      console.log('Not in a Capacitor environment, phone call handling disabled');
     }
-
-    return () => {
-      if (typeof document !== 'undefined') {
-        document.removeEventListener('pause', handleAudioInterruption);
-        document.removeEventListener('resume', handleAudioResume);
-      }
-    };
-  }, [setIsPlaying]);
+  }, [isPlaying, setIsPlaying]);
 };
