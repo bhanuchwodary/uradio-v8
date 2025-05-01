@@ -18,13 +18,20 @@ export const usePhoneCallHandling = (
     // Try to use Capacitor plugin if available
     try {
       // This is a placeholder for potential Capacitor implementation
-      // Actual implementation would depend on the specific Capacitor plugin
+      // We'll use a more generic approach to avoid TypeScript errors
       const setupCallListener = async () => {
         try {
-          const { CallState } = await import('@capacitor/core');
-          CallState.addListener('callStateChanged', ({ state }) => {
-            handleCallStateChanged(state);
-          });
+          // Safely check for the Capacitor environment
+          const capacitor = await import('@capacitor/core');
+          
+          // Check if there's a plugin related to call state
+          if (capacitor && capacitor.Plugins && 'CallState' in capacitor.Plugins) {
+            // @ts-ignore - Using dynamic access to avoid TypeScript errors
+            const CallStatePlugin = capacitor.Plugins.CallState;
+            CallStatePlugin.addListener('callStateChanged', ({ state }: { state: string }) => {
+              handleCallStateChanged(state);
+            });
+          }
         } catch (err) {
           console.log('CallState plugin not available:', err);
         }
@@ -36,8 +43,12 @@ export const usePhoneCallHandling = (
         // Clean up listeners if needed
         try {
           const cleanup = async () => {
-            const { CallState } = await import('@capacitor/core');
-            CallState.removeAllListeners();
+            const capacitor = await import('@capacitor/core');
+            if (capacitor && capacitor.Plugins && 'CallState' in capacitor.Plugins) {
+              // @ts-ignore - Using dynamic access to avoid TypeScript errors
+              const CallStatePlugin = capacitor.Plugins.CallState;
+              CallStatePlugin.removeAllListeners();
+            }
           };
           cleanup();
         } catch (err) {

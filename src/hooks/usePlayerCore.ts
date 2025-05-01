@@ -11,6 +11,20 @@ interface UsePlayerCoreProps {
   tracks?: Track[];
 }
 
-export const usePlayerCore = (props: UsePlayerCoreProps) => {
-  return useMusicPlayer(props);
+export const usePlayerCore = ({
+  urls,
+  currentIndex,
+  setCurrentIndex,
+  isPlaying,
+  setIsPlaying,
+  tracks = []
+}: UsePlayerCoreProps) => {
+  return useMusicPlayer({
+    urls,
+    currentIndex,
+    setCurrentIndex,
+    isPlaying,
+    setIsPlaying,
+    tracks
+  });
 };

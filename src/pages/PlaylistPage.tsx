@@ -2,10 +2,10 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Playlist from "@/components/Playlist";
-import { useMusicPlayer } from "@/hooks/useMusicPlayer";
 import { useToast } from "@/components/ui/use-toast";
 import Navigation from "@/components/Navigation";
 import MusicPlayer from "@/components/MusicPlayer";
+import { useTrackState } from "@/hooks/useTrackState";
 
 interface PlaylistPageProps {
   currentIndex: number;
@@ -20,12 +20,10 @@ const PlaylistPage: React.FC<PlaylistPageProps> = ({
   setCurrentIndex: appSetCurrentIndex,
   setIsPlaying: appSetIsPlaying
 }) => {
-  const {
-    urls,
-    tracks,
-    removeUrl,
-    editTrack,
-  } = useMusicPlayer();
+  const { tracks, removeUrl, editTrack } = useTrackState();
+  
+  // Derive URLs from tracks
+  const urls = tracks.map(track => track.url);
   
   const { toast } = useToast();
 

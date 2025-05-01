@@ -14,14 +14,17 @@ interface UseMusicPlayerProps {
   tracks?: Track[];
 }
 
-export const useMusicPlayer = ({
-  urls,
-  currentIndex,
-  setCurrentIndex,
-  isPlaying,
-  setIsPlaying,
-  tracks = [],
-}: UseMusicPlayerProps) => {
+export const useMusicPlayer = (props?: UseMusicPlayerProps) => {
+  // If we don't have props, provide default values
+  const {
+    urls = [],
+    currentIndex = 0,
+    setCurrentIndex = () => {},
+    isPlaying = false,
+    setIsPlaying = () => {},
+    tracks = [],
+  } = props || {};
+
   const [duration, setDuration] = useState<number>(0);
   const [currentTime, setCurrentTime] = useState<number>(0);
   const [volume, setVolume] = useState<number>(0.7);
@@ -33,14 +36,16 @@ export const useMusicPlayer = ({
 
   // Handle next track
   const handleNext = () => {
-    // Fixed: Using a direct number instead of a callback function
+    // Using a direct number instead of a callback function
+    if (urls.length === 0) return;
     const nextIndex = (currentIndex + 1) % urls.length;
     setCurrentIndex(nextIndex);
   };
 
   // Handle previous track
   const handlePrevious = () => {
-    // Fixed: Using a direct number instead of a callback function
+    // Using a direct number instead of a callback function
+    if (urls.length === 0) return;
     const prevIndex = (currentIndex - 1 + urls.length) % urls.length;
     setCurrentIndex(prevIndex);
   };
@@ -296,5 +301,11 @@ export const useMusicPlayer = ({
     handleNext,
     handlePrevious,
     handleSeek,
+    // Include these properties for compatibility with existing code
+    urls,
+    tracks,
+    removeUrl: (index: number) => console.warn("removeUrl not implemented"),
+    editTrack: (index: number, data: { url: string; name: string }) => 
+      console.warn("editTrack not implemented"),
   };
 };

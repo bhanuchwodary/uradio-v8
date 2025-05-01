@@ -1,10 +1,10 @@
 
 import React from "react";
 import MusicPlayer from "@/components/MusicPlayer";
-import { useMusicPlayer } from "@/hooks/useMusicPlayer";
 import Navigation from "@/components/Navigation";
 import FavoriteStations from "@/components/FavoriteStations";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useTrackState } from "@/hooks/useTrackState";
 
 interface IndexProps {
   currentIndex: number;
@@ -19,10 +19,10 @@ const Index: React.FC<IndexProps> = ({
   setCurrentIndex: appSetCurrentIndex,
   setIsPlaying: appSetIsPlaying 
 }) => {
-  const {
-    urls,
-    tracks,
-  } = useMusicPlayer();
+  const { tracks } = useTrackState();
+  
+  // Derive URLs from tracks
+  const urls = tracks.map(track => track.url);
   
   const isMobile = useIsMobile();
   const favoriteStations = tracks.filter(track => track.isFavorite);
