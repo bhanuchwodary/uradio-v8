@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Radio, Heart, Edit, Trash2 } from "lucide-react";
+import { Radio, Edit, Trash2 } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import EditStationDialog from "./EditStationDialog";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -13,7 +13,6 @@ interface PlaylistProps {
   currentIndex: number;
   onSelectTrack: (index: number) => void;
   onRemoveTrack: (index: number) => void;
-  onToggleFavorite?: (index: number) => void;
   onEditTrack?: (index: number, data: { url: string; name: string }) => void;
 }
 
@@ -23,7 +22,6 @@ const Playlist: React.FC<PlaylistProps> = ({
   currentIndex,
   onSelectTrack,
   onRemoveTrack,
-  onToggleFavorite,
   onEditTrack,
 }) => {
   const [editingTrack, setEditingTrack] = useState<{ index: number; data: { url: string; name: string } } | null>(null);
@@ -80,16 +78,6 @@ const Playlist: React.FC<PlaylistProps> = ({
                   {track.name}
                 </button>
                 <div className="flex justify-center gap-2">
-                  {onToggleFavorite && (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className={`h-8 w-8 ${track.isFavorite ? 'text-pink-500' : 'text-gray-400 hover:text-pink-400'}`}
-                      onClick={() => onToggleFavorite(index)}
-                    >
-                      <Heart className="h-4 w-4" fill={track.isFavorite ? "currentColor" : "none"} />
-                    </Button>
-                  )}
                   {onEditTrack && !track.isPrebuilt && (
                     <Button
                       variant="ghost"

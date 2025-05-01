@@ -7,29 +7,27 @@ import { useToast } from "@/components/ui/use-toast";
 import Navigation from "@/components/Navigation";
 import MusicPlayer from "@/components/MusicPlayer";
 
-const PlaylistPage = () => {
+interface PlaylistPageProps {
+  currentIndex: number;
+  isPlaying: boolean;
+  setCurrentIndex: (index: number) => void;
+  setIsPlaying: (playing: boolean) => void;
+}
+
+const PlaylistPage: React.FC<PlaylistPageProps> = ({
+  currentIndex: appCurrentIndex,
+  isPlaying: appIsPlaying,
+  setCurrentIndex: appSetCurrentIndex,
+  setIsPlaying: appSetIsPlaying
+}) => {
   const {
     urls,
     tracks,
-    currentIndex,
-    isPlaying,
     removeUrl,
-    toggleFavorite,
     editTrack,
-    setCurrentIndex,
-    setIsPlaying,
   } = useMusicPlayer();
   
   const { toast } = useToast();
-
-  const handleToggleFavorite = (index: number) => {
-    toggleFavorite(index);
-    const track = tracks[index];
-    toast({
-      title: track.isFavorite ? "Removed from favorites" : "Added to favorites",
-      description: `"${track.name}" ${track.isFavorite ? "removed from" : "added to"} favorites`,
-    });
-  };
 
   const handleEditTrack = (index: number, data: { url: string; name: string }) => {
     editTrack(index, data);
@@ -46,27 +44,27 @@ const PlaylistPage = () => {
         
         <MusicPlayer
           urls={urls}
-          currentIndex={currentIndex}
-          setCurrentIndex={setCurrentIndex}
-          isPlaying={isPlaying}
-          setIsPlaying={setIsPlaying}
+          currentIndex={appCurrentIndex}
+          setCurrentIndex={appSetCurrentIndex}
+          isPlaying={appIsPlaying}
+          setIsPlaying={appSetIsPlaying}
+          tracks={tracks}
         />
 
         <Card className="bg-white/10 backdrop-blur-md border-none shadow-lg">
           <CardHeader className="p-3 md:p-4">
-            <CardTitle className="text-lg md:text-xl">Playlist</CardTitle>
+            <CardTitle className="text-lg md:text-xl">My Stations</CardTitle>
           </CardHeader>
           <CardContent className="p-3 md:p-4 pt-0">
             <Playlist
               urls={urls}
               tracks={tracks}
-              currentIndex={currentIndex}
+              currentIndex={appCurrentIndex}
               onSelectTrack={(index) => {
-                setCurrentIndex(index);
-                setIsPlaying(true);
+                appSetCurrentIndex(index);
+                appSetIsPlaying(true);
               }}
               onRemoveTrack={removeUrl}
-              onToggleFavorite={handleToggleFavorite}
               onEditTrack={handleEditTrack}
             />
           </CardContent>
