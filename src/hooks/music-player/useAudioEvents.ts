@@ -2,7 +2,7 @@
 import { useEffect, useRef } from "react";
 
 interface UseAudioEventsProps {
-  audioRef: React.RefObject<HTMLAudioElement>;
+  audioRef: React.MutableRefObject<HTMLAudioElement | null>;
   setCurrentTime: (time: number) => void;
   setDuration: (duration: number) => void;
   onEnded: () => void;

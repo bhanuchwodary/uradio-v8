@@ -4,7 +4,7 @@ import Hls from "hls.js";
 type AudioInstanceType = {
   element: HTMLAudioElement | null;
   hls: Hls | null;
-  activePlayerInstance: React.RefObject<symbol> | null;
+  activePlayerInstance: React.MutableRefObject<symbol> | null;
 };
 
 // Maintains a shared audio and HLS context across the app

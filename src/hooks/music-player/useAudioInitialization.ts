@@ -3,8 +3,8 @@ import { useEffect } from "react";
 import { globalAudioRef } from "@/components/music-player/audioInstance";
 
 interface UseAudioInitializationProps {
-  audioRef: React.RefObject<HTMLAudioElement>;
-  playerInstanceRef: React.MutableRefObject<Symbol>;
+  audioRef: React.MutableRefObject<HTMLAudioElement | null>;
+  playerInstanceRef: React.MutableRefObject<symbol>;
   volume: number;
 }
 
@@ -21,6 +21,7 @@ export const useAudioInitialization = ({
       globalAudioRef.element.crossOrigin = "anonymous";
     }
 
+    // Set reference to the global audio element
     audioRef.current = globalAudioRef.element;
     
     // Set this instance as the active instance

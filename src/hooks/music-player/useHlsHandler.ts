@@ -3,7 +3,7 @@ import { useRef, useEffect } from "react";
 import Hls from "hls.js";
 
 interface UseHlsHandlerProps {
-  audioRef: React.RefObject<HTMLAudioElement>;
+  audioRef: React.MutableRefObject<HTMLAudioElement | null>;
   url: string | undefined;
   isPlaying: boolean;
   setIsPlaying: (playing: boolean) => void;

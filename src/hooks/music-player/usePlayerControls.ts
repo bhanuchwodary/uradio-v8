@@ -2,7 +2,7 @@
 import { useEffect } from "react";
 
 interface UsePlayerControlsProps {
-  audioRef: React.RefObject<HTMLAudioElement>;
+  audioRef: React.MutableRefObject<HTMLAudioElement | null>;
   isPlaying: boolean;
   setIsPlaying: (playing: boolean) => void;
   urls: string[];

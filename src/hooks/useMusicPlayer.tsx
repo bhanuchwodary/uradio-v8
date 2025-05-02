@@ -32,7 +32,10 @@ export const useMusicPlayer = (props?: UseMusicPlayerProps) => {
   const [currentTime, setCurrentTime] = useState<number>(0);
   const [volume, setVolume] = useState<number>(0.7);
   const [loading, setLoading] = useState<boolean>(false);
+  
+  // Updated to use MutableRefObject since we need to assign to audioRef.current
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  // Updated to use lowercase symbol primitive type instead of Symbol object
   const playerInstanceRef = useRef<symbol>(Symbol("playerInstance"));
 
   // Initialize audio
