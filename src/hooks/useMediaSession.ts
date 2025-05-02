@@ -35,12 +35,18 @@ export const useMediaSession = ({
         const currentTrack = tracks[currentIndex];
         
         navigator.mediaSession.metadata = new MediaMetadata({
-          title: currentTrack.name,
+          title: currentTrack?.name || 'Unknown Station',
           artist: 'Streamify Jukebox',
           album: 'My Stations',
           artwork: [
             { src: '/og-image.png', sizes: '512x512', type: 'image/png' }
           ]
+        });
+
+        // Log media session metadata update
+        console.log("Updated media session metadata:", {
+          title: currentTrack?.name,
+          stationUrl: currentTrack?.url
         });
       }
 
@@ -67,7 +73,7 @@ export const useMediaSession = ({
         });
       }
     }
-  }, [tracks, currentIndex, isPlaying, trackDuration, trackPosition]);
+  }, [tracks, currentIndex, isPlaying, trackDuration, trackPosition, tracks[currentIndex]?.name]);
 
   // Initialize Android Auto service
   useEffect(() => {
@@ -100,16 +106,24 @@ export const useMediaSession = ({
     if (tracks.length > 0 && currentIndex < tracks.length) {
       const currentTrack = tracks[currentIndex];
       
-      androidAutoService.updateTrackInfo({
-        title: currentTrack.name,
-        artist: "Streamify Jukebox",
-        album: "My Stations",
-        duration: trackDuration || 0,
-        position: trackPosition || 0,
-        artworkUrl: 'https://example.com/artwork.jpg',
-      }).catch(err => console.warn('Error updating track info:', err));
+      if (currentTrack) {
+        const trackInfo = {
+          title: currentTrack.name || 'Unknown Station',
+          artist: "Streamify Jukebox",
+          album: "My Stations",
+          duration: trackDuration || 0,
+          position: trackPosition || 0,
+          artworkUrl: 'https://example.com/artwork.jpg',
+        };
+        
+        console.log("Updating track info for notifications:", trackInfo);
+        
+        androidAutoService.updateTrackInfo(trackInfo).catch(err => 
+          console.warn('Error updating track info:', err)
+        );
+      }
     }
-  }, [tracks, currentIndex, trackDuration, trackPosition]);
+  }, [tracks, currentIndex, trackDuration, trackPosition, tracks[currentIndex]?.name]);
 
   // Update Android Auto with playback state
   useEffect(() => {
@@ -120,4 +134,3 @@ export const useMediaSession = ({
     }
   }, [isPlaying]);
 };
-

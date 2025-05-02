@@ -19,7 +19,8 @@ export const usePlayerCore = ({
   setIsPlaying,
   tracks = []
 }: UsePlayerCoreProps) => {
-  return useMusicPlayer({
+  // Pass all props to useMusicPlayer
+  const playerProps = useMusicPlayer({
     urls,
     currentIndex,
     setCurrentIndex,
@@ -27,4 +28,7 @@ export const usePlayerCore = ({
     setIsPlaying,
     tracks
   });
+
+  // Return all properties from useMusicPlayer for use in components
+  return playerProps;
 };
