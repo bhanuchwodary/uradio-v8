@@ -5,7 +5,7 @@ import Playlist from "@/components/Playlist";
 import { useToast } from "@/components/ui/use-toast";
 import Navigation from "@/components/Navigation";
 import MusicPlayer from "@/components/MusicPlayer";
-import { useTrackState } from "@/hooks/useTrackState";
+import { useTrackStateContext } from "@/context/TrackStateContext";
 
 interface PlaylistPageProps {
   currentIndex: number;
@@ -20,7 +20,7 @@ const PlaylistPage: React.FC<PlaylistPageProps> = ({
   setCurrentIndex: appSetCurrentIndex,
   setIsPlaying: appSetIsPlaying
 }) => {
-  const { tracks, removeUrl, editTrack } = useTrackState();
+  const { tracks, removeUrl, editTrack } = useTrackStateContext();
   
   // Derive URLs from tracks
   const urls = tracks.map(track => track.url);

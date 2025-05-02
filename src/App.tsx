@@ -5,18 +5,37 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "@/components/ThemeProvider";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import NotFound from "./pages/NotFound";
 import PlaylistPage from "./pages/PlaylistPage";
 import AddStationPage from "./pages/AddStationPage";
 import StationListPage from "./pages/StationListPage";
 import SettingsPage from "./pages/SettingsPage";
+import Index from "./pages/Index";
 import { Track } from "@/types/track";
 import { useTrackState } from "./hooks/useTrackState";
+import { TrackStateProvider } from "./context/TrackStateContext";
 
 const queryClient = new QueryClient();
 
 const App = () => {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider defaultTheme="system">
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <TrackStateProvider>
+            <AppRoutes />
+          </TrackStateProvider>
+        </TooltipProvider>
+      </ThemeProvider>
+    </QueryClientProvider>
+  );
+};
+
+// Separate component to use the context inside the provider
+const AppRoutes = () => {
   const { 
     tracks, 
     addUrl, 
@@ -70,57 +89,54 @@ const App = () => {
   };
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider defaultTheme="system">
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-              <Route 
-                path="/" 
-                element={
-                  <PlaylistPage 
-                    currentIndex={currentIndex}
-                    isPlaying={isPlaying}
-                    setCurrentIndex={setCurrentIndex}
-                    setIsPlaying={setIsPlaying}
-                  />
-                } 
-              />
-              <Route 
-                path="/playlist" 
-                element={
-                  <Navigate to="/" replace />
-                } 
-              />
-              <Route 
-                path="/add-station" 
-                element={
-                  <AddStationPage 
-                    onAddStation={handleAddStation} 
-                    onImportStations={handleImportStations} 
-                  />
-                } 
-              />
-              <Route 
-                path="/station-list" 
-                element={
-                  <StationListPage 
-                    userStations={getUserStations()} 
-                    onAddToPlaylist={handleAddToPlaylist} 
-                    onRemoveStation={removeStationByValue}
-                    onEditStation={editStationByValue}
-                  />
-                } 
-              />
-              <Route path="/settings" element={<SettingsPage />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-        </TooltipProvider>
-      </ThemeProvider>
-    </QueryClientProvider>
+    <BrowserRouter>
+      <Routes>
+        <Route 
+          path="/" 
+          element={
+            <Index 
+              currentIndex={currentIndex}
+              isPlaying={isPlaying}
+              setCurrentIndex={setCurrentIndex}
+              setIsPlaying={setIsPlaying}
+            />
+          } 
+        />
+        <Route 
+          path="/playlist" 
+          element={
+            <PlaylistPage 
+              currentIndex={currentIndex}
+              isPlaying={isPlaying}
+              setCurrentIndex={setCurrentIndex}
+              setIsPlaying={setIsPlaying}
+            />
+          } 
+        />
+        <Route 
+          path="/add-station" 
+          element={
+            <AddStationPage 
+              onAddStation={handleAddStation} 
+              onImportStations={handleImportStations} 
+            />
+          } 
+        />
+        <Route 
+          path="/station-list" 
+          element={
+            <StationListPage 
+              userStations={getUserStations()} 
+              onAddToPlaylist={handleAddToPlaylist} 
+              onRemoveStation={removeStationByValue}
+              onEditStation={editStationByValue}
+            />
+          } 
+        />
+        <Route path="/settings" element={<SettingsPage />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </BrowserRouter>
   );
 };
 

@@ -29,7 +29,7 @@ const Playlist: React.FC<PlaylistProps> = ({
   
   // Debug log to ensure tracks are being received
   useEffect(() => {
-    console.log("Playlist component received tracks:", tracks);
+    console.log("Playlist component received tracks:", tracks?.length);
   }, [tracks]);
 
   if (!tracks || tracks.length === 0) {
@@ -43,8 +43,8 @@ const Playlist: React.FC<PlaylistProps> = ({
   const userStations = tracks.filter(track => track.isPrebuilt === false);
   const prebuiltStations = tracks.filter(track => track.isPrebuilt === true);
   
-  console.log("User stations:", userStations);
-  console.log("Prebuilt stations:", prebuiltStations);
+  console.log("User stations:", userStations.length);
+  console.log("Prebuilt stations:", prebuiltStations.length);
 
   const renderStationsList = (stationsList: Track[], title: string) => {
     if (stationsList.length === 0) return null;
@@ -58,7 +58,7 @@ const Playlist: React.FC<PlaylistProps> = ({
             const isActive = index === currentIndex;
             return (
               <div
-                key={index}
+                key={`${title}-${index}-${track.url}`}
                 className={`flex flex-col p-4 rounded-lg ${
                   isActive
                     ? "bg-primary/20 backdrop-blur-sm"

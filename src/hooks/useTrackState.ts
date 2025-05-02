@@ -25,16 +25,24 @@ export const useTrackState = (): TrackStateResult => {
   const [tracks, setTracks] = useState<Track[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
 
-  // Load tracks from localStorage on initial render
+  // Load tracks from localStorage only once on initial render
   useEffect(() => {
-    setTracks(loadTracksFromLocalStorage());
-  }, []);
+    if (!isInitialized) {
+      console.log("useTrackState - Loading tracks from localStorage");
+      setTracks(loadTracksFromLocalStorage());
+      setIsInitialized(true);
+    }
+  }, [isInitialized]);
 
   // Save tracks to localStorage whenever they change
   useEffect(() => {
-    saveTracksToLocalStorage(tracks);
-  }, [tracks]);
+    if (isInitialized) {
+      console.log("useTrackState - Saving tracks to localStorage:", tracks.length);
+      saveTracksToLocalStorage(tracks);
+    }
+  }, [tracks, isInitialized]);
 
   const checkIfStationExists = (url: string) => {
     return checkExists(url, tracks);

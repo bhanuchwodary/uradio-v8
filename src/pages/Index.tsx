@@ -4,7 +4,7 @@ import MusicPlayer from "@/components/MusicPlayer";
 import Navigation from "@/components/Navigation";
 import FavoriteStations from "@/components/FavoriteStations";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useTrackState } from "@/hooks/useTrackState";
+import { useTrackStateContext } from "@/context/TrackStateContext";
 
 interface IndexProps {
   currentIndex: number;
@@ -19,7 +19,7 @@ const Index: React.FC<IndexProps> = ({
   setCurrentIndex: appSetCurrentIndex,
   setIsPlaying: appSetIsPlaying 
 }) => {
-  const { tracks } = useTrackState();
+  const { tracks } = useTrackStateContext();
   
   // Derive URLs from tracks
   const urls = tracks.map(track => track.url);
