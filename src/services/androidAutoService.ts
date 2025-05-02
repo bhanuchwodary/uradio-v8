@@ -16,6 +16,19 @@ interface AndroidAutoCallbacks {
   onSeek: (position: number) => void;
 }
 
+// Define an interface for the Media plugin
+interface MediaPlugin {
+  updateMediaNotification(options: {
+    title: string;
+    artist: string;
+    album: string;
+    artwork: string;
+    duration: number;
+    position: number;
+  }): Promise<void>;
+  updatePlaybackState(options: { isPlaying: boolean }): Promise<void>;
+}
+
 class AndroidAutoService {
   private initialized = false;
   private callbacks: AndroidAutoCallbacks | null = null;
@@ -64,8 +77,8 @@ class AndroidAutoService {
       
       if (Capacitor.isPluginAvailable('Media')) {
         try {
-          const MediaPlugin = registerPlugin('Media');
-          if (MediaPlugin && MediaPlugin.updateMediaNotification) {
+          const MediaPlugin = registerPlugin<MediaPlugin>('Media');
+          if (MediaPlugin) {
             await MediaPlugin.updateMediaNotification({
               title: trackInfo.title,
               artist: trackInfo.artist,
@@ -107,8 +120,8 @@ class AndroidAutoService {
       
       if (Capacitor.isPluginAvailable('Media')) {
         try {
-          const MediaPlugin = registerPlugin('Media');
-          if (MediaPlugin && MediaPlugin.updatePlaybackState) {
+          const MediaPlugin = registerPlugin<MediaPlugin>('Media');
+          if (MediaPlugin) {
             await MediaPlugin.updatePlaybackState({
               isPlaying: isPlaying
             });
