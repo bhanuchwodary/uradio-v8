@@ -46,13 +46,23 @@ const StationListPage: React.FC = () => {
               const stationCopy = {...station};
               console.log("Station copy being added:", stationCopy);
               
-              const result = addUrl(stationCopy.url, stationCopy.name, stationCopy.isPrebuilt, stationCopy.isFavorite);
+              // Ensure we're passing all required properties explicitly
+              const result = addUrl(
+                stationCopy.url, 
+                stationCopy.name, 
+                stationCopy.isPrebuilt || false, 
+                stationCopy.isFavorite || false
+              );
+              
               console.log("Result of adding station to playlist:", result);
               
               toast({
                 title: "Station Added",
                 description: "The station has been added to your playlist.",
               });
+              
+              // Go to playlist page automatically after adding
+              navigate("/playlist");
             }}
           >
             <Plus className="h-4 w-4" />

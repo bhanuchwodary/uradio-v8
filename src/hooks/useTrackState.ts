@@ -1,5 +1,4 @@
-
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Track } from "@/types/track";
 import { TrackStateResult } from "./track-state/types";
 import { 
@@ -40,6 +39,9 @@ export const useTrackState = (): TrackStateResult => {
       if (storageAvailable) {
         const loadedTracks = loadTracksFromLocalStorage();
         console.log("Tracks loaded from localStorage:", loadedTracks.length);
+        if (loadedTracks.length > 0) {
+          console.log("First track:", loadedTracks[0].name);
+        }
         setTracks(loadedTracks);
       }
       setIsInitialized(true);
@@ -54,18 +56,24 @@ export const useTrackState = (): TrackStateResult => {
     }
   }, [tracks, isInitialized]);
 
-  const checkIfStationExists = (url: string) => {
+  const checkIfStationExists = useCallback((url: string) => {
     return checkExists(url, tracks);
-  };
+  }, [tracks]);
 
-  const addUrl = (url: string, name: string = "", isPrebuilt: boolean = false, isFavorite?: boolean) => {
-    console.log("Adding URL:", url, "Name:", name, "IsPrebuilt:", isPrebuilt, "IsFavorite:", isFavorite);
+  const addUrl = useCallback((url: string, name: string = "", isPrebuilt: boolean = false, isFavorite: boolean = false) => {
+    console.log("addUrl called with:", url, name, isPrebuilt, isFavorite);
     const { tracks: updatedTracks, result } = addStationUrl(url, name, isPrebuilt, isFavorite, tracks);
+    
     console.log("Result of addStationUrl:", result.success, result.message);
     console.log("Updated tracks count:", updatedTracks.length);
-    setTracks(updatedTracks);
+    
+    // Only update state if there was actually a change
+    if (updatedTracks !== tracks) {
+      setTracks(updatedTracks);
+    }
+    
     return result;
-  };
+  }, [tracks]);
 
   const updatePlayTime = (index: number, seconds: number) => {
     setTracks(currentTracks => updateTrackPlayTime(currentTracks, index, seconds));
@@ -83,21 +91,23 @@ export const useTrackState = (): TrackStateResult => {
     setTracks(currentTracks => removeByValue(currentTracks, station));
   };
 
-  const removeUrl = (index: number) => {
+  const removeUrl = useCallback((index: number) => {
+    console.log("Removing track at index:", index);
     const { tracks: updatedTracks, newCurrentIndex, shouldStopPlaying } = 
       removeTrackByIndex(tracks, index, currentIndex);
     
+    console.log("Tracks after removal:", updatedTracks.length);
     setTracks(updatedTracks);
     setCurrentIndex(newCurrentIndex);
     
     if (shouldStopPlaying) {
       setIsPlaying(false);
     }
-  };
+  }, [tracks, currentIndex]);
 
-  const toggleFavorite = (index: number) => {
+  const toggleFavorite = useCallback((index: number) => {
     setTracks(currentTracks => toggleTrackFavorite(currentTracks, index));
-  };
+  }, []);
 
   return {
     tracks,

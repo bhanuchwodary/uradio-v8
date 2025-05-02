@@ -1,3 +1,4 @@
+
 import { Track } from "@/types/track";
 import { checkIfStationExists } from "./trackUtils";
 
@@ -5,7 +6,7 @@ export const addStationUrl = (
   url: string, 
   name: string = "", 
   isPrebuilt: boolean = false, 
-  isFavorite: boolean | undefined, 
+  isFavorite: boolean = false, 
   tracks: Track[]
 ): { tracks: Track[], result: { success: boolean, message: string } } => {
   if (!url) {
@@ -13,7 +14,7 @@ export const addStationUrl = (
     return { tracks, result: { success: false, message: "URL cannot be empty" } };
   }
   
-  console.log(`Adding URL: ${url}, Name: ${name}, IsPrebuilt: ${isPrebuilt}, Explicit isFavorite: ${isFavorite !== undefined ? isFavorite : 'not provided'}`);
+  console.log(`Adding URL: ${url}, Name: ${name}, IsPrebuilt: ${isPrebuilt}, isFavorite: ${isFavorite}`);
   
   // First, check for duplicates by URL in current playlist (case insensitive comparison for robustness)
   const existingIndex = tracks.findIndex(
@@ -47,16 +48,21 @@ export const addStationUrl = (
   } else {
     // If not found, add as a new station
     console.log("Station doesn't exist in playlist, adding as new");
-    const newTrack = { 
+    const newTrack: Track = { 
       url, 
       name: name || `Station ${tracks.length + 1}`,
-      isFavorite: isFavorite !== undefined ? isFavorite : false,
+      isFavorite: isFavorite,
       playTime: 0,
-      isPrebuilt: isPrebuilt || false
+      isPrebuilt: isPrebuilt
     };
     console.log("New track being added:", newTrack);
+    
+    // Critical fix: create a fresh array to ensure state change detection
+    const newTracks = [...tracks, newTrack];
+    console.log("Updated tracks array now has", newTracks.length, "tracks");
+    
     return { 
-      tracks: [...tracks, newTrack], 
+      tracks: newTracks, 
       result: { success: true, message: "Station added to playlist" } 
     };
   }

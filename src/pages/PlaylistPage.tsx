@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Playlist from "@/components/Playlist";
 import { useToast } from "@/components/ui/use-toast";
@@ -28,7 +28,14 @@ const PlaylistPage: React.FC = () => {
   
   const { toast } = useToast();
 
+  // Add this debugging useEffect to help track when the component renders
+  useEffect(() => {
+    console.log("PlaylistPage rendered with tracks:", tracks.length);
+    console.log("Current tracks in PlaylistPage:", JSON.stringify(tracks));
+  }, [tracks]);
+
   const handleEditTrack = (index: number, data: { url: string; name: string }) => {
+    console.log("Editing track at index:", index, "with data:", data);
     editTrack(index, data);
     toast({
       title: "Station updated",
@@ -60,10 +67,14 @@ const PlaylistPage: React.FC = () => {
               tracks={tracks}
               currentIndex={currentIndex}
               onSelectTrack={(index) => {
+                console.log("Selected track at index:", index);
                 setCurrentIndex(index);
                 setIsPlaying(true);
               }}
-              onRemoveTrack={removeUrl}
+              onRemoveTrack={(index) => {
+                console.log("Removing track at index:", index);
+                removeUrl(index);
+              }}
               onEditTrack={handleEditTrack}
             />
           </CardContent>
