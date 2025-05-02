@@ -6,20 +6,16 @@ import FavoriteStations from "@/components/FavoriteStations";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useTrackStateContext } from "@/context/TrackStateContext";
 
-interface IndexProps {
-  currentIndex: number;
-  isPlaying: boolean;
-  setCurrentIndex: (index: number) => void;
-  setIsPlaying: (playing: boolean) => void;
-}
-
-const Index: React.FC<IndexProps> = ({ 
-  currentIndex: appCurrentIndex,
-  isPlaying: appIsPlaying,
-  setCurrentIndex: appSetCurrentIndex,
-  setIsPlaying: appSetIsPlaying 
-}) => {
-  const { tracks } = useTrackStateContext();
+const Index: React.FC = () => {
+  const { 
+    tracks, 
+    currentIndex,
+    isPlaying,
+    setCurrentIndex,
+    setIsPlaying 
+  } = useTrackStateContext();
+  
+  console.log("Index page - Current tracks count:", tracks.length);
   
   // Derive URLs from tracks
   const urls = tracks.map(track => track.url);
@@ -38,10 +34,10 @@ const Index: React.FC<IndexProps> = ({
           <div className="mb-2">
             <MusicPlayer
               urls={urls}
-              currentIndex={appCurrentIndex}
-              setCurrentIndex={appSetCurrentIndex}
-              isPlaying={appIsPlaying}
-              setIsPlaying={appSetIsPlaying}
+              currentIndex={currentIndex}
+              setCurrentIndex={setCurrentIndex}
+              isPlaying={isPlaying}
+              setIsPlaying={setIsPlaying}
               tracks={tracks}
             />
           </div>
@@ -53,8 +49,8 @@ const Index: React.FC<IndexProps> = ({
               onSelectStation={(index) => {
                 const mainIndex = tracks.findIndex(t => t.url === favoriteStations[index].url);
                 if (mainIndex !== -1) {
-                  appSetCurrentIndex(mainIndex);
-                  appSetIsPlaying(true);
+                  setCurrentIndex(mainIndex);
+                  setIsPlaying(true);
                 }
               }}
             />

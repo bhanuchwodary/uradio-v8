@@ -7,20 +7,21 @@ import Navigation from "@/components/Navigation";
 import MusicPlayer from "@/components/MusicPlayer";
 import { useTrackStateContext } from "@/context/TrackStateContext";
 
-interface PlaylistPageProps {
-  currentIndex: number;
-  isPlaying: boolean;
-  setCurrentIndex: (index: number) => void;
-  setIsPlaying: (playing: boolean) => void;
-}
-
-const PlaylistPage: React.FC<PlaylistPageProps> = ({
-  currentIndex: appCurrentIndex,
-  isPlaying: appIsPlaying,
-  setCurrentIndex: appSetCurrentIndex,
-  setIsPlaying: appSetIsPlaying
-}) => {
-  const { tracks, removeUrl, editTrack } = useTrackStateContext();
+const PlaylistPage: React.FC = () => {
+  const { 
+    tracks, 
+    removeUrl, 
+    editTrack, 
+    currentIndex, 
+    isPlaying, 
+    setCurrentIndex, 
+    setIsPlaying 
+  } = useTrackStateContext();
+  
+  console.log("PlaylistPage - Current tracks count:", tracks.length);
+  if (tracks.length > 0) {
+    console.log("First track in playlist:", tracks[0].name);
+  }
   
   // Derive URLs from tracks
   const urls = tracks.map(track => track.url);
@@ -42,10 +43,10 @@ const PlaylistPage: React.FC<PlaylistPageProps> = ({
         
         <MusicPlayer
           urls={urls}
-          currentIndex={appCurrentIndex}
-          setCurrentIndex={appSetCurrentIndex}
-          isPlaying={appIsPlaying}
-          setIsPlaying={appSetIsPlaying}
+          currentIndex={currentIndex}
+          setCurrentIndex={setCurrentIndex}
+          isPlaying={isPlaying}
+          setIsPlaying={setIsPlaying}
           tracks={tracks}
         />
 
@@ -57,10 +58,10 @@ const PlaylistPage: React.FC<PlaylistPageProps> = ({
             <Playlist
               urls={urls}
               tracks={tracks}
-              currentIndex={appCurrentIndex}
+              currentIndex={currentIndex}
               onSelectTrack={(index) => {
-                appSetCurrentIndex(index);
-                appSetIsPlaying(true);
+                setCurrentIndex(index);
+                setIsPlaying(true);
               }}
               onRemoveTrack={removeUrl}
               onEditTrack={handleEditTrack}

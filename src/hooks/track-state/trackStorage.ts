@@ -10,6 +10,9 @@ export const loadTracksFromLocalStorage = (): Track[] => {
     if (savedTracks) {
       const parsedTracks = JSON.parse(savedTracks);
       console.log("Loaded tracks from localStorage:", parsedTracks.length);
+      if (parsedTracks.length > 0) {
+        console.log("Sample track from localStorage:", parsedTracks[0]);
+      }
       return parsedTracks;
     }
   } catch (error) {
@@ -27,6 +30,9 @@ export const saveTracksToLocalStorage = (tracks: Track[]): void => {
     
     localStorage.setItem(TRACKS_STORAGE_KEY, JSON.stringify(tracks));
     console.log("Tracks state updated and saved to localStorage:", tracks.length);
+    if (tracks.length > 0) {
+      console.log("First track saved:", tracks[0].name);
+    }
   } catch (error) {
     console.error("Error saving tracks to localStorage:", error);
   }

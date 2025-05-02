@@ -5,20 +5,17 @@ import AddUrlForm from "@/components/AddUrlForm";
 import ImportStationsFromCsv from "@/components/ImportStationsFromCsv";
 import Navigation from "@/components/Navigation";
 import { useToast } from "@/hooks/use-toast";
+import { useTrackStateContext } from "@/context/TrackStateContext";
 
-interface AddStationPageProps {
-  onAddStation: (url: string, name: string) => {success: boolean, message: string};
-  onImportStations: (stations: Array<{ name: string; url: string }>) => void;
-}
-
-const AddStationPage: React.FC<AddStationPageProps> = ({
-  onAddStation,
-  onImportStations,
-}) => {
+const AddStationPage: React.FC = () => {
+  const { addUrl } = useTrackStateContext();
   const { toast } = useToast();
 
   const handleAddUrl = (url: string, name: string) => {
-    const result = onAddStation(url, name);
+    console.log("HandleAddUrl called with:", url, name);
+    const result = addUrl(url, name, false);
+    console.log("Result from handleAddStation:", result);
+    
     if (result.success) {
       toast({
         title: "Station Added",
@@ -38,7 +35,10 @@ const AddStationPage: React.FC<AddStationPageProps> = ({
   };
   
   const handleImport = (stations: Array<{ name: string; url: string }>) => {
-    onImportStations(stations);
+    console.log("Importing stations:", stations.length);
+    stations.forEach(station => {
+      addUrl(station.url, station.name);
+    });
     toast({
       title: "Stations Imported",
       description: `${stations.length} stations have been imported.`,

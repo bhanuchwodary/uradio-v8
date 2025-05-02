@@ -10,7 +10,10 @@ const TrackStateContext = createContext<TrackStateResult | undefined>(undefined)
 export const TrackStateProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const trackState = useTrackState();
   
-  console.log("TrackStateProvider - Current tracks:", trackState.tracks.length);
+  console.log("TrackStateProvider - Current tracks count:", trackState.tracks.length);
+  if (trackState.tracks.length > 0) {
+    console.log("First track in context:", trackState.tracks[0].name);
+  }
   
   return (
     <TrackStateContext.Provider value={trackState}>

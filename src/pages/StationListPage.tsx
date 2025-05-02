@@ -9,23 +9,21 @@ import { useToast } from "@/hooks/use-toast";
 import { Track } from "@/types/track";
 import { prebuiltStations } from "@/data/prebuiltStations";
 import EditStationDialog from "@/components/EditStationDialog";
+import { useTrackStateContext } from "@/context/TrackStateContext";
 
-interface StationListPageProps {
-  userStations: Track[];
-  onAddToPlaylist: (station: Track) => void;
-  onRemoveStation?: (station: Track) => void;
-  onEditStation?: (station: Track, data: { url: string; name: string }) => void;
-}
-
-const StationListPage: React.FC<StationListPageProps> = ({
-  userStations,
-  onAddToPlaylist,
-  onRemoveStation,
-  onEditStation,
-}) => {
+const StationListPage: React.FC = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [editingStation, setEditingStation] = useState<Track | null>(null);
+  const { 
+    getUserStations, 
+    addUrl, 
+    removeStationByValue, 
+    editStationByValue 
+  } = useTrackStateContext();
+  
+  const userStations = getUserStations();
+  console.log("StationListPage - User stations count:", userStations.length);
 
   const renderStationCard = (station: Track, isPrebuilt: boolean = false) => {
     // Generate a truly unique key for each station card
@@ -48,7 +46,9 @@ const StationListPage: React.FC<StationListPageProps> = ({
               const stationCopy = {...station};
               console.log("Station copy being added:", stationCopy);
               
-              onAddToPlaylist(stationCopy);
+              const result = addUrl(stationCopy.url, stationCopy.name, stationCopy.isPrebuilt, stationCopy.isFavorite);
+              console.log("Result of adding station to playlist:", result);
+              
               toast({
                 title: "Station Added",
                 description: "The station has been added to your playlist.",
@@ -58,7 +58,7 @@ const StationListPage: React.FC<StationListPageProps> = ({
             <Plus className="h-4 w-4" />
           </Button>
           
-          {!isPrebuilt && onEditStation && (
+          {!isPrebuilt && (
             <Button
               variant="ghost"
               size="icon"
@@ -69,13 +69,13 @@ const StationListPage: React.FC<StationListPageProps> = ({
             </Button>
           )}
           
-          {!isPrebuilt && onRemoveStation && (
+          {!isPrebuilt && (
             <Button
               variant="ghost"
               size="icon"
               className="h-8 w-8 text-red-500 hover:text-red-700"
               onClick={() => {
-                onRemoveStation(station);
+                removeStationByValue(station);
                 toast({
                   title: "Station Removed",
                   description: `${station.name} has been removed from your stations.`,
@@ -91,8 +91,8 @@ const StationListPage: React.FC<StationListPageProps> = ({
   };
 
   const handleSaveEdit = (data: { url: string; name: string }) => {
-    if (editingStation && onEditStation) {
-      onEditStation(editingStation, data);
+    if (editingStation) {
+      editStationByValue(editingStation, data);
       toast({
         title: "Station Updated",
         description: `${data.name} has been updated.`,
