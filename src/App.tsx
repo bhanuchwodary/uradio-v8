@@ -51,21 +51,18 @@ const AppRoutes = () => {
   } = useTrackState();
   
   const handleAddStation = (url: string, name: string) => {
-    const stationCheck = checkIfStationExists(url);
-    if (stationCheck.exists && !stationCheck.isUserStation) {
-      return { success: false, message: "This station already exists in the prebuilt stations" };
-    } else if (stationCheck.exists && stationCheck.isUserStation) {
-      return { success: false, message: "This station already exists in your stations" };
-    }
-    
-    const result = addUrl(url, name);
+    console.log("handleAddStation called with:", url, name);
+    const result = addUrl(url, name, false);
+    console.log("Result from handleAddStation:", result);
     return result;
   };
   
   const handleImportStations = (stations: Array<{ name: string; url: string }>) => {
+    console.log("Importing stations:", stations.length);
     stations.forEach(station => {
       addUrl(station.url, station.name);
     });
+    console.log("Import complete, total tracks:", tracks.length);
   };
   
   const handleToggleFavorite = (station: Track) => {
@@ -78,13 +75,12 @@ const AppRoutes = () => {
   };
   
   const handleAddToPlaylist = (station: Track) => {
-    // Important: Make a complete copy of the station to ensure all properties are preserved
-    console.log("Attempting to add/update station to playlist:", station);
+    console.log("handleAddToPlaylist called with station:", station.name, station.url);
     
     // Critical fix: EXPLICITLY pass the isFavorite status to preserve it
     const result = addUrl(station.url, station.name, station.isPrebuilt, station.isFavorite);
     
-    console.log("Added/Updated station in playlist with favorite status:", station.isFavorite);
+    console.log("Added/Updated station in playlist with result:", result);
     return result;
   };
 

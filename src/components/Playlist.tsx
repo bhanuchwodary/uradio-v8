@@ -30,6 +30,9 @@ const Playlist: React.FC<PlaylistProps> = ({
   // Debug log to ensure tracks are being received
   useEffect(() => {
     console.log("Playlist component received tracks:", tracks?.length);
+    if (tracks?.length) {
+      console.log("First track:", tracks[0].name);
+    }
   }, [tracks]);
 
   if (!tracks || tracks.length === 0) {
@@ -125,7 +128,7 @@ const Playlist: React.FC<PlaylistProps> = ({
   };
 
   return (
-    <ScrollArea className={`h-[${isMobile ? "200px" : "500px"}] pr-4`}>
+    <ScrollArea className={`h-[${isMobile ? "300px" : "500px"}] pr-4`}>
       {renderStationsList(userStations, "My Stations")}
       {renderStationsList(prebuiltStations, "Prebuilt Stations")}
       {editingTrack && (

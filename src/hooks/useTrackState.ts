@@ -18,7 +18,8 @@ import {
 } from "./track-state/trackModifications";
 import {
   loadTracksFromLocalStorage,
-  saveTracksToLocalStorage
+  saveTracksToLocalStorage,
+  testLocalStorage
 } from "./track-state/trackStorage";
 
 export const useTrackState = (): TrackStateResult => {
@@ -31,7 +32,16 @@ export const useTrackState = (): TrackStateResult => {
   useEffect(() => {
     if (!isInitialized) {
       console.log("useTrackState - Loading tracks from localStorage");
-      setTracks(loadTracksFromLocalStorage());
+      
+      // Test if localStorage is working properly
+      const storageAvailable = testLocalStorage();
+      console.log("LocalStorage is available:", storageAvailable);
+      
+      if (storageAvailable) {
+        const loadedTracks = loadTracksFromLocalStorage();
+        console.log("Tracks loaded from localStorage:", loadedTracks.length);
+        setTracks(loadedTracks);
+      }
       setIsInitialized(true);
     }
   }, [isInitialized]);
@@ -49,7 +59,10 @@ export const useTrackState = (): TrackStateResult => {
   };
 
   const addUrl = (url: string, name: string = "", isPrebuilt: boolean = false, isFavorite?: boolean) => {
+    console.log("Adding URL:", url, "Name:", name, "IsPrebuilt:", isPrebuilt, "IsFavorite:", isFavorite);
     const { tracks: updatedTracks, result } = addStationUrl(url, name, isPrebuilt, isFavorite, tracks);
+    console.log("Result of addStationUrl:", result.success, result.message);
+    console.log("Updated tracks count:", updatedTracks.length);
     setTracks(updatedTracks);
     return result;
   };

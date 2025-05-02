@@ -44,8 +44,11 @@ const StationListPage: React.FC<StationListPageProps> = ({
             className="h-8 w-8"
             onClick={() => {
               console.log("Adding station to playlist:", station);
-              // Check if station already exists in playlist
-              onAddToPlaylist({...station});
+              // Create a complete copy of the station to preserve all properties
+              const stationCopy = {...station};
+              console.log("Station copy being added:", stationCopy);
+              
+              onAddToPlaylist(stationCopy);
               toast({
                 title: "Station Added",
                 description: "The station has been added to your playlist.",
@@ -119,7 +122,13 @@ const StationListPage: React.FC<StationListPageProps> = ({
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {userStations.map(station => renderStationCard(station))}
+              {userStations.length > 0 ? (
+                userStations.map(station => renderStationCard(station))
+              ) : (
+                <p className="col-span-full text-center text-gray-400">
+                  No custom stations added yet. Add one to see it here!
+                </p>
+              )}
             </div>
           </CardContent>
         </Card>

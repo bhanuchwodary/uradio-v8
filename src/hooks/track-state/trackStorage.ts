@@ -31,3 +31,17 @@ export const saveTracksToLocalStorage = (tracks: Track[]): void => {
     console.error("Error saving tracks to localStorage:", error);
   }
 };
+
+// Function to check if localStorage is working properly
+export const testLocalStorage = (): boolean => {
+  try {
+    const testKey = "test_storage";
+    localStorage.setItem(testKey, "test");
+    const result = localStorage.getItem(testKey);
+    localStorage.removeItem(testKey);
+    return result === "test";
+  } catch (error) {
+    console.error("LocalStorage is not available:", error);
+    return false;
+  }
+};

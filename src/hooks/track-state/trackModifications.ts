@@ -1,4 +1,3 @@
-
 import { Track } from "@/types/track";
 import { checkIfStationExists } from "./trackUtils";
 
@@ -15,17 +14,6 @@ export const addStationUrl = (
   }
   
   console.log(`Adding URL: ${url}, Name: ${name}, IsPrebuilt: ${isPrebuilt}, Explicit isFavorite: ${isFavorite !== undefined ? isFavorite : 'not provided'}`);
-  
-  // Check if the station already exists in user stations or prebuilt stations
-  const stationExists = checkIfStationExists(url, tracks);
-  
-  if (stationExists.exists && stationExists.isUserStation && !isPrebuilt) {
-    console.log("Station already exists in user stations:", url);
-    return { tracks, result: { success: false, message: "Station already exists in your stations" } };
-  } else if (stationExists.exists && !stationExists.isUserStation && !isPrebuilt) {
-    console.log("Station already exists in prebuilt stations:", url);
-    return { tracks, result: { success: false, message: "Station already exists in prebuilt stations" } };
-  }
   
   // First, check for duplicates by URL in current playlist (case insensitive comparison for robustness)
   const existingIndex = tracks.findIndex(
@@ -64,7 +52,7 @@ export const addStationUrl = (
       name: name || `Station ${tracks.length + 1}`,
       isFavorite: isFavorite !== undefined ? isFavorite : false,
       playTime: 0,
-      isPrebuilt
+      isPrebuilt: isPrebuilt || false
     };
     console.log("New track being added:", newTrack);
     return { 
