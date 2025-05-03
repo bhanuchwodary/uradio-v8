@@ -3,7 +3,7 @@ import { Track } from "@/types/track";
 
 // Storage key for consistency
 const TRACKS_STORAGE_KEY = 'musicTracks';
-const STORAGE_VERSION = 'v1'; // For future migrations
+const STORAGE_VERSION = 'v2'; // Updated version for better stability
 
 // Helper to create a structured storage format
 const createStorageStructure = (tracks: Track[]) => ({
@@ -40,8 +40,11 @@ export const loadTracksFromLocalStorage = (): Track[] => {
     
     console.log("Loaded tracks from localStorage:", tracksArray.length);
     
+    // Deep clone to avoid reference issues
+    const deepClonedTracks = JSON.parse(JSON.stringify(tracksArray));
+    
     // Ensure all required properties are present and properly typed
-    const validatedTracks = tracksArray.filter((track: any) => {
+    const validatedTracks = deepClonedTracks.filter((track: any) => {
       const isValid = track && 
                       typeof track.url === 'string' && 
                       typeof track.name === 'string';
@@ -72,15 +75,15 @@ export const loadTracksFromLocalStorage = (): Track[] => {
   }
 };
 
-export const saveTracksToLocalStorage = (tracks: Track[]): void => {
+export const saveTracksToLocalStorage = (tracks: Track[]): boolean => {
   try {
     if (!tracks || !Array.isArray(tracks)) {
       console.error("Cannot save invalid tracks to localStorage:", tracks);
-      return;
+      return false;
     }
     
     // Deep clone tracks to avoid reference issues
-    const tracksToSave = tracks.map(track => ({...track}));
+    const tracksToSave = JSON.parse(JSON.stringify(tracks));
     
     // Use the structured storage format
     const storageData = createStorageStructure(tracksToSave);
@@ -98,7 +101,7 @@ export const saveTracksToLocalStorage = (tracks: Track[]): void => {
       const savedJson = localStorage.getItem(TRACKS_STORAGE_KEY);
       if (!savedJson) {
         console.error("Failed to verify saved tracks - no data found");
-        return;
+        return false;
       }
       
       const parsedData = JSON.parse(savedJson);
@@ -109,12 +112,16 @@ export const saveTracksToLocalStorage = (tracks: Track[]): void => {
       if (savedTracks.length !== tracks.length) {
         console.warn("Track count mismatch after saving:", 
                     {original: tracks.length, saved: savedTracks.length});
+        return false;
       }
+      return true;
     } catch (verifyError) {
       console.error("Error verifying saved tracks:", verifyError);
+      return false;
     }
   } catch (error) {
     console.error("Error saving tracks to localStorage:", error);
+    return false;
   }
 };
 
@@ -130,16 +137,6 @@ export const testLocalStorage = (): boolean => {
   } catch (error) {
     console.error("LocalStorage is not available:", error);
     return false;
-  }
-};
-
-// Helper to clear all tracks (for debugging/testing)
-export const clearAllTracks = (): void => {
-  try {
-    localStorage.removeItem(TRACKS_STORAGE_KEY);
-    console.log("All tracks cleared from localStorage");
-  } catch (error) {
-    console.error("Error clearing tracks:", error);
   }
 };
 
@@ -167,4 +164,14 @@ export const verifySyncStatus = (tracks: Track[]): boolean => {
     console.error("Error verifying sync status:", error);
     return false;
   }
-}
+};
+
+// Helper to clear all tracks (for debugging/testing)
+export const clearAllTracks = (): void => {
+  try {
+    localStorage.removeItem(TRACKS_STORAGE_KEY);
+    console.log("All tracks cleared from localStorage");
+  } catch (error) {
+    console.error("Error clearing tracks:", error);
+  }
+};

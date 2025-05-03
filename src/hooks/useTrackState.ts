@@ -32,6 +32,7 @@ export const useTrackState = (): TrackStateResult => {
   
   // Ref to track whether the current state has been saved to localStorage
   const needsSaving = useRef(false);
+  const stateVersion = useRef(0);
   
   // Debug counter to track render cycles
   const renderCount = useRef(0);
@@ -63,7 +64,10 @@ export const useTrackState = (): TrackStateResult => {
   // Save tracks to localStorage whenever they change (but after initialization)
   useEffect(() => {
     renderCount.current++;
-    console.log("Tracks state changed - render count:", renderCount.current);
+    stateVersion.current++;
+    const currentVersion = stateVersion.current;
+    
+    console.log(`Tracks state changed - render count: ${renderCount.current}, state version: ${currentVersion}`);
     
     if (isInitialized) {
       console.log("useTrackState - Saving tracks to localStorage:", tracks.length);
@@ -71,24 +75,14 @@ export const useTrackState = (): TrackStateResult => {
       // Mark that we need to save
       needsSaving.current = true;
       
-      // Set a small timeout to batch potential rapid updates
-      const saveTimeout = setTimeout(() => {
-        if (needsSaving.current) {
-          saveTracksToLocalStorage(tracks);
-          needsSaving.current = false;
-        }
-      }, 100);
-      
-      return () => {
-        clearTimeout(saveTimeout);
-        
-        // If component is unmounting and changes weren't saved, save them now
-        if (needsSaving.current) {
-          console.log("Saving tracks on unmount");
-          saveTracksToLocalStorage(tracks);
-          needsSaving.current = false;
-        }
-      };
+      // Save immediately to prevent losing data during navigation
+      const saveSuccess = saveTracksToLocalStorage(tracks);
+      if (saveSuccess) {
+        needsSaving.current = false;
+        console.log(`Successfully saved tracks (version ${currentVersion}) to localStorage`);
+      } else {
+        console.error(`Failed to save tracks (version ${currentVersion}) to localStorage`);
+      }
     }
   }, [tracks, isInitialized]);
 
@@ -133,10 +127,15 @@ export const useTrackState = (): TrackStateResult => {
     // Only update state if there was actually a change
     if (updatedTracks !== tracks) {
       console.log("Setting new tracks state with", updatedTracks.length, "tracks");
+      
+      // Update state with new tracks
       setTracks(updatedTracks);
       
       // Force an immediate save to localStorage
-      saveTracksToLocalStorage(updatedTracks);
+      const saveSuccess = saveTracksToLocalStorage(updatedTracks);
+      if (!saveSuccess) {
+        console.error("Failed to save tracks to localStorage after adding URL");
+      }
       needsSaving.current = false;
     } else {
       console.log("No change to tracks state");
@@ -146,7 +145,10 @@ export const useTrackState = (): TrackStateResult => {
   }, [tracks]);
 
   const updatePlayTime = useCallback((index: number, seconds: number) => {
-    setTracks(currentTracks => updateTrackPlayTime(currentTracks, index, seconds));
+    setTracks(currentTracks => {
+      const updatedTracks = updateTrackPlayTime(currentTracks, index, seconds);
+      return updatedTracks;
+    });
   }, []);
 
   const editTrack = useCallback((index: number, data: { url: string; name: string }) => {
@@ -216,6 +218,7 @@ export const useTrackState = (): TrackStateResult => {
     console.log("Is playing:", isPlaying);
     console.log("Is initialized:", isInitialized);
     console.log("Need saving:", needsSaving.current);
+    console.log("State version:", stateVersion.current);
     
     if (tracks.length > 0) {
       console.log("First few tracks:");
@@ -236,7 +239,8 @@ export const useTrackState = (): TrackStateResult => {
     return {
       tracksCount: tracks.length,
       isInitialized,
-      localStorageWorking: localStorageStatus
+      localStorageWorking: localStorageStatus,
+      stateVersion: stateVersion.current
     };
   }, [tracks, currentIndex, isPlaying, isInitialized]);
 

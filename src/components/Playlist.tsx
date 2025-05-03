@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Radio, Edit, Trash2 } from "lucide-react";
@@ -31,7 +32,7 @@ const Playlist: React.FC<PlaylistProps> = ({
   useEffect(() => {
     console.log("Playlist component received tracks:", tracks.length);
     if (tracks?.length > 0) {
-      console.log("First track:", JSON.stringify(tracks[0]));
+      console.log("First track in Playlist component:", JSON.stringify(tracks[0]));
       // Force re-render when tracks change
       setRenderKey(Date.now());
     }
@@ -50,8 +51,8 @@ const Playlist: React.FC<PlaylistProps> = ({
   const userStations = tracks.filter(track => !track.isPrebuilt);
   const prebuiltStations = tracks.filter(track => track.isPrebuilt === true);
   
-  console.log("User stations:", userStations.length);
-  console.log("Prebuilt stations:", prebuiltStations.length);
+  console.log("User stations count in Playlist component:", userStations.length);
+  console.log("Prebuilt stations count in Playlist component:", prebuiltStations.length);
 
   const renderStationsList = (stationsList: Track[], title: string) => {
     if (stationsList.length === 0) return null;
@@ -60,11 +61,19 @@ const Playlist: React.FC<PlaylistProps> = ({
       <div className="space-y-4 mb-6" key={`${title}-${renderKey}`}>
         <h3 className="text-lg font-semibold mb-2">{title}</h3>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {stationsList.map((track, i) => {
-            const index = tracks.indexOf(track);
+          {stationsList.map((station) => {
+            const index = tracks.findIndex(t => 
+              t.url === station.url && t.name === station.name
+            );
+            
+            if (index === -1) {
+              console.error("Station not found in tracks array:", station);
+              return null;
+            }
+            
             const isActive = index === currentIndex;
             // Create a unique key for this card
-            const cardKey = `${title}-${index}-${track.url}-${track.name}-${isActive}`;
+            const cardKey = `${title}-${index}-${station.url}-${station.name}-${isActive}`;
             
             return (
               <div
@@ -85,10 +94,10 @@ const Playlist: React.FC<PlaylistProps> = ({
                   className="text-sm font-medium text-center mb-3 hover:text-primary transition-colors line-clamp-2"
                   onClick={() => onSelectTrack(index)}
                 >
-                  {track.name}
+                  {station.name}
                 </button>
                 <div className="flex justify-center gap-2">
-                  {onEditTrack && !track.isPrebuilt && (
+                  {onEditTrack && !station.isPrebuilt && (
                     <Button
                       variant="ghost"
                       size="icon"

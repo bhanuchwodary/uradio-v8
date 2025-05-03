@@ -15,6 +15,7 @@ const StationListPage: React.FC = () => {
   const { toast } = useToast();
   const [editingStation, setEditingStation] = useState<Track | null>(null);
   const [lastAddedStation, setLastAddedStation] = useState<Track | null>(null);
+  const [operationSuccessful, setOperationSuccessful] = useState<boolean | null>(null);
   
   const { 
     getUserStations, 
@@ -34,48 +35,57 @@ const StationListPage: React.FC = () => {
     
     // Use debug function if available
     if (debugState) {
-      debugState();
+      const debugInfo = debugState();
+      console.log("Debug state version:", debugInfo.stateVersion);
     }
   }, [userStations.length, tracks.length, debugState]);
 
   // Effect to validate that stations were added correctly
   useEffect(() => {
-    if (lastAddedStation) {
+    if (lastAddedStation && operationSuccessful !== null) {
       // Check if the station exists in the current tracks
       const stationExists = tracks.some(
-        track => track.url === lastAddedStation.url && track.name === lastAddedStation.name
+        track => track.url === lastAddedStation.url
       );
       
       console.log("Validating last added station:", lastAddedStation.name);
       console.log("Station exists in tracks:", stationExists);
       
-      if (!stationExists) {
+      if (operationSuccessful && !stationExists) {
         console.warn("Station was not properly added to tracks:", lastAddedStation);
+        toast({
+          title: "Sync Error",
+          description: "The station was not properly added. Please try again.",
+          variant: "destructive"
+        });
+      } else if (operationSuccessful && stationExists) {
+        toast({
+          title: "Station Added",
+          description: `${lastAddedStation.name} has been added to your playlist.`,
+        });
         
-        // Try to add it again if it's not there
+        // Navigate to playlist after successful add
         setTimeout(() => {
-          console.log("Re-attempting to add station:", lastAddedStation.name);
-          addUrl(
-            lastAddedStation.url,
-            lastAddedStation.name,
-            lastAddedStation.isPrebuilt,
-            lastAddedStation.isFavorite
-          );
+          navigate("/playlist");
         }, 500);
       }
       
       // Reset after check
       setLastAddedStation(null);
+      setOperationSuccessful(null);
     }
-  }, [lastAddedStation, tracks, addUrl]);
+  }, [lastAddedStation, operationSuccessful, tracks, toast, navigate]);
 
   const handleAddStation = (station: Track) => {
     console.log("Adding station to playlist:", JSON.stringify(station));
     
-    // Keep a reference to the last added station to validate it was added correctly
-    setLastAddedStation({...station});
-    
     // Create a complete copy of the station to preserve all properties
+    const stationCopy = JSON.parse(JSON.stringify(station));
+    
+    // Keep a reference to the last added station to validate it was added correctly
+    setLastAddedStation(stationCopy);
+    
+    // Add the station
     const result = addUrl(
       station.url, 
       station.name, 
@@ -84,19 +94,9 @@ const StationListPage: React.FC = () => {
     );
     
     console.log("Result of adding station to playlist:", result);
+    setOperationSuccessful(result.success);
     
-    if (result.success) {
-      toast({
-        title: "Station Added",
-        description: `${station.name} has been added to your playlist.`,
-      });
-      
-      // Pre-fetch the updated tracks before navigating
-      setTimeout(() => {
-        console.log("Verifying tracks before navigation:", tracks.length);
-        navigate("/playlist");
-      }, 300);
-    } else {
+    if (!result.success) {
       toast({
         title: "Failed to Add Station",
         description: result.message || "There was an error adding the station.",

@@ -1,5 +1,5 @@
+
 import { Track } from "@/types/track";
-import { checkIfStationExists } from "./trackUtils";
 
 export const addStationUrl = (
   url: string, 
@@ -17,11 +17,11 @@ export const addStationUrl = (
   console.log("Current tracks count before add:", tracks.length);
   
   // Create a deep clone of the tracks array to ensure we don't modify the original
-  const tracksClone = tracks.map(track => ({...track}));
+  const tracksClone = JSON.parse(JSON.stringify(tracks));
   
   // First, check for duplicates by URL in current playlist (case insensitive comparison)
   const existingIndex = tracksClone.findIndex(
-    track => track.url.toLowerCase() === url.toLowerCase()
+    (track: Track) => track.url.toLowerCase() === url.toLowerCase()
   );
   
   console.log("Existing track index:", existingIndex);
@@ -34,7 +34,7 @@ export const addStationUrl = (
     console.log("Station already exists in playlist, updating at index:", existingIndex);
     console.log("Current station data:", JSON.stringify(tracksClone[existingIndex]));
     
-    // Create a new array to ensure React detects the state change
+    // Create a completely new array to ensure React detects the state change
     updatedTracks = [...tracksClone];
     
     // Update all properties explicitly
@@ -70,7 +70,7 @@ export const addStationUrl = (
   console.log("Updated tracks array now has", updatedTracks.length, "tracks");
   
   // Sanity check our data before returning
-  const hasInvalidTracks = updatedTracks.some(track => !track.url || !track.name);
+  const hasInvalidTracks = updatedTracks.some((track: Track) => !track.url || !track.name);
   if (hasInvalidTracks) {
     console.error("Invalid tracks detected after adding/updating station");
     return { 
@@ -85,20 +85,30 @@ export const addStationUrl = (
   };
 };
 
-export const updateTrackPlayTime = (
+export const removeTrackByIndex = (
   tracks: Track[], 
   index: number, 
-  seconds: number
-): Track[] => {
+  currentIndex: number
+): { tracks: Track[], newCurrentIndex: number, shouldStopPlaying: boolean } => {
   // Create a new array to ensure state updates are detected
-  const newTracks = tracks.map(track => ({...track}));
-  if (newTracks[index]) {
-    newTracks[index] = {
-      ...newTracks[index],
-      playTime: (newTracks[index].playTime || 0) + seconds
-    };
+  const newTracks = [...tracks];
+  newTracks.splice(index, 1);
+  
+  let newCurrentIndex = currentIndex;
+  let shouldStopPlaying = false;
+  
+  if (index === currentIndex) {
+    if (newTracks.length > 0) {
+      newCurrentIndex = Math.min(currentIndex, newTracks.length - 1);
+    } else {
+      newCurrentIndex = 0;
+      shouldStopPlaying = true;
+    }
+  } else if (index < currentIndex) {
+    newCurrentIndex = currentIndex - 1;
   }
-  return newTracks;
+  
+  return { tracks: newTracks, newCurrentIndex, shouldStopPlaying };
 };
 
 export const editTrackInfo = (
@@ -107,7 +117,7 @@ export const editTrackInfo = (
   data: { url: string; name: string }
 ): Track[] => {
   // Create a new array to ensure state updates are detected
-  const newTracks = tracks.map(track => ({...track}));
+  const newTracks = JSON.parse(JSON.stringify(tracks));
   if (newTracks[index]) {
     newTracks[index] = {
       ...newTracks[index],
@@ -129,7 +139,7 @@ export const editStationByValue = (
   
   if (index !== -1) {
     // Create a new array to ensure state updates are detected
-    const newTracks = tracks.map(track => ({...track}));
+    const newTracks = JSON.parse(JSON.stringify(tracks));
     newTracks[index] = {
       ...newTracks[index],
       url: data.url,
@@ -159,38 +169,12 @@ export const removeStationByValue = (
   return tracks;
 };
 
-export const removeTrackByIndex = (
-  tracks: Track[], 
-  index: number, 
-  currentIndex: number
-): { tracks: Track[], newCurrentIndex: number, shouldStopPlaying: boolean } => {
-  // Create a new array to ensure state updates are detected
-  const newTracks = [...tracks];
-  newTracks.splice(index, 1);
-  
-  let newCurrentIndex = currentIndex;
-  let shouldStopPlaying = false;
-  
-  if (index === currentIndex) {
-    if (newTracks.length > 0) {
-      newCurrentIndex = Math.min(currentIndex, newTracks.length - 1);
-    } else {
-      newCurrentIndex = 0;
-      shouldStopPlaying = true;
-    }
-  } else if (index < currentIndex) {
-    newCurrentIndex = currentIndex - 1;
-  }
-  
-  return { tracks: newTracks, newCurrentIndex, shouldStopPlaying };
-};
-
 export const toggleTrackFavorite = (
   tracks: Track[], 
   index: number
 ): Track[] => {
   // Create a new array to ensure state updates are detected
-  const newTracks = tracks.map(track => ({...track}));
+  const newTracks = JSON.parse(JSON.stringify(tracks));
   if (newTracks[index]) {
     const newFavoriteStatus = !newTracks[index].isFavorite;
     newTracks[index] = {
@@ -198,6 +182,22 @@ export const toggleTrackFavorite = (
       isFavorite: newFavoriteStatus
     };
     console.log(`Toggled favorite status for station at index ${index} to ${newFavoriteStatus}`);
+  }
+  return newTracks;
+};
+
+export const updateTrackPlayTime = (
+  tracks: Track[], 
+  index: number, 
+  seconds: number
+): Track[] => {
+  // Create a new array to ensure state updates are detected
+  const newTracks = JSON.parse(JSON.stringify(tracks));
+  if (newTracks[index]) {
+    newTracks[index] = {
+      ...newTracks[index],
+      playTime: (newTracks[index].playTime || 0) + seconds
+    };
   }
   return newTracks;
 };

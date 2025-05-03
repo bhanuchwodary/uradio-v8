@@ -33,7 +33,8 @@ const PlaylistPage: React.FC = () => {
     
     // If debug function is available, use it for extended information
     if (debugState) {
-      debugState();
+      const debugInfo = debugState();
+      console.log("PlaylistPage debug - state version:", debugInfo.stateVersion);
     }
   }, [tracks, debugState]);
   
@@ -49,6 +50,25 @@ const PlaylistPage: React.FC = () => {
       title: "Station updated",
       description: `"${data.name}" has been updated`,
     });
+  };
+
+  const handlePlayTrack = (index: number) => {
+    console.log("Selected track at index:", index);
+    setCurrentIndex(index);
+    setIsPlaying(true);
+  };
+
+  const handleRemoveTrack = (index: number) => {
+    console.log("Removing track at index:", index);
+    removeUrl(index);
+    
+    toast({
+      title: "Station removed",
+      description: "The station has been removed from your playlist"
+    });
+    
+    // Force a re-render
+    setTracksKey(Date.now() + 1);
   };
 
   return (
@@ -76,15 +96,8 @@ const PlaylistPage: React.FC = () => {
               urls={urls}
               tracks={tracks}
               currentIndex={currentIndex}
-              onSelectTrack={(index) => {
-                console.log("Selected track at index:", index);
-                setCurrentIndex(index);
-                setIsPlaying(true);
-              }}
-              onRemoveTrack={(index) => {
-                console.log("Removing track at index:", index);
-                removeUrl(index);
-              }}
+              onSelectTrack={handlePlayTrack}
+              onRemoveTrack={handleRemoveTrack}
               onEditTrack={handleEditTrack}
             />
           </CardContent>
