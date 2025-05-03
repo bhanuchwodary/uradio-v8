@@ -1,4 +1,3 @@
-
 import { Track } from "@/types/track";
 import { checkIfStationExists } from "./trackUtils";
 
@@ -14,58 +13,76 @@ export const addStationUrl = (
     return { tracks, result: { success: false, message: "URL cannot be empty" } };
   }
   
-  console.log(`Adding URL: ${url}, Name: ${name}, IsPrebuilt: ${isPrebuilt}, isFavorite: ${isFavorite}`);
+  console.log(`Adding URL: ${url}, Name: ${name}, IsPrebuilt: ${isPrebuilt}, IsFavorite: ${isFavorite}`);
+  console.log("Current tracks count before add:", tracks.length);
   
-  // First, check for duplicates by URL in current playlist (case insensitive comparison for robustness)
-  const existingIndex = tracks.findIndex(
+  // Create a deep clone of the tracks array to ensure we don't modify the original
+  const tracksClone = tracks.map(track => ({...track}));
+  
+  // First, check for duplicates by URL in current playlist (case insensitive comparison)
+  const existingIndex = tracksClone.findIndex(
     track => track.url.toLowerCase() === url.toLowerCase()
   );
   
-  console.log("Checking for existing track in playlist with URL:", url);
   console.log("Existing track index:", existingIndex);
+  
+  let updatedTracks;
+  let resultMessage;
   
   if (existingIndex !== -1) {
     // If found, create a new array and update the existing station
     console.log("Station already exists in playlist, updating at index:", existingIndex);
-    console.log("Current station favorite status:", tracks[existingIndex].isFavorite);
+    console.log("Current station data:", JSON.stringify(tracksClone[existingIndex]));
     
-    const updatedTracks = [...tracks];
-    // CRITICAL FIX: Only update specific properties, NEVER change isFavorite unless explicitly provided
+    // Create a new array to ensure React detects the state change
+    updatedTracks = [...tracksClone];
+    
+    // Update all properties explicitly
     updatedTracks[existingIndex] = {
-      ...updatedTracks[existingIndex],  // Keep all existing properties first
+      ...updatedTracks[existingIndex],  // Keep existing properties first
       url: url,  // Then update what we need to update
       name: name || updatedTracks[existingIndex].name,
       isPrebuilt: isPrebuilt !== undefined ? isPrebuilt : updatedTracks[existingIndex].isPrebuilt,
-      // ONLY update isFavorite if it's explicitly provided
-      isFavorite: isFavorite !== undefined ? isFavorite : updatedTracks[existingIndex].isFavorite
+      isFavorite: isFavorite !== undefined ? isFavorite : updatedTracks[existingIndex].isFavorite,
+      playTime: updatedTracks[existingIndex].playTime || 0
     };
     
-    console.log("Updated track with favorite status:", updatedTracks[existingIndex].isFavorite);
-    return { 
-      tracks: updatedTracks, 
-      result: { success: true, message: "Station updated in playlist" } 
-    };
+    console.log("Updated station data:", JSON.stringify(updatedTracks[existingIndex]));
+    resultMessage = "Station updated in playlist";
   } else {
     // If not found, add as a new station
     console.log("Station doesn't exist in playlist, adding as new");
     const newTrack: Track = { 
       url, 
-      name: name || `Station ${tracks.length + 1}`,
-      isFavorite: isFavorite,
+      name: name || `Station ${tracksClone.length + 1}`,
+      isFavorite: !!isFavorite,
       playTime: 0,
-      isPrebuilt: isPrebuilt
+      isPrebuilt: !!isPrebuilt
     };
-    console.log("New track being added:", newTrack);
+    
+    console.log("New track being added:", JSON.stringify(newTrack));
     
     // Critical fix: create a fresh array to ensure state change detection
-    const newTracks = [...tracks, newTrack];
-    console.log("Updated tracks array now has", newTracks.length, "tracks");
-    
+    updatedTracks = [...tracksClone, newTrack];
+    resultMessage = "Station added to playlist";
+  }
+  
+  console.log("Updated tracks array now has", updatedTracks.length, "tracks");
+  
+  // Sanity check our data before returning
+  const hasInvalidTracks = updatedTracks.some(track => !track.url || !track.name);
+  if (hasInvalidTracks) {
+    console.error("Invalid tracks detected after adding/updating station");
     return { 
-      tracks: newTracks, 
-      result: { success: true, message: "Station added to playlist" } 
+      tracks: tracksClone, // Return original if something went wrong
+      result: { success: false, message: "Error processing station data" } 
     };
   }
+  
+  return { 
+    tracks: updatedTracks, 
+    result: { success: true, message: resultMessage } 
+  };
 };
 
 export const updateTrackPlayTime = (
@@ -73,7 +90,8 @@ export const updateTrackPlayTime = (
   index: number, 
   seconds: number
 ): Track[] => {
-  const newTracks = [...tracks];
+  // Create a new array to ensure state updates are detected
+  const newTracks = tracks.map(track => ({...track}));
   if (newTracks[index]) {
     newTracks[index] = {
       ...newTracks[index],
@@ -88,7 +106,8 @@ export const editTrackInfo = (
   index: number, 
   data: { url: string; name: string }
 ): Track[] => {
-  const newTracks = [...tracks];
+  // Create a new array to ensure state updates are detected
+  const newTracks = tracks.map(track => ({...track}));
   if (newTracks[index]) {
     newTracks[index] = {
       ...newTracks[index],
@@ -109,7 +128,8 @@ export const editStationByValue = (
   );
   
   if (index !== -1) {
-    const newTracks = [...tracks];
+    // Create a new array to ensure state updates are detected
+    const newTracks = tracks.map(track => ({...track}));
     newTracks[index] = {
       ...newTracks[index],
       url: data.url,
@@ -130,6 +150,7 @@ export const removeStationByValue = (
   );
   
   if (index !== -1) {
+    // Create a new array to ensure state updates are detected
     const newTracks = [...tracks];
     newTracks.splice(index, 1);
     return newTracks;
@@ -143,6 +164,7 @@ export const removeTrackByIndex = (
   index: number, 
   currentIndex: number
 ): { tracks: Track[], newCurrentIndex: number, shouldStopPlaying: boolean } => {
+  // Create a new array to ensure state updates are detected
   const newTracks = [...tracks];
   newTracks.splice(index, 1);
   
@@ -167,7 +189,8 @@ export const toggleTrackFavorite = (
   tracks: Track[], 
   index: number
 ): Track[] => {
-  const newTracks = [...tracks];
+  // Create a new array to ensure state updates are detected
+  const newTracks = tracks.map(track => ({...track}));
   if (newTracks[index]) {
     const newFavoriteStatus = !newTracks[index].isFavorite;
     newTracks[index] = {
@@ -175,7 +198,6 @@ export const toggleTrackFavorite = (
       isFavorite: newFavoriteStatus
     };
     console.log(`Toggled favorite status for station at index ${index} to ${newFavoriteStatus}`);
-    console.log("Updated tracks array:", newTracks);
   }
   return newTracks;
 };

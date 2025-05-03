@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Radio, Edit, Trash2 } from "lucide-react";
@@ -18,32 +17,37 @@ interface PlaylistProps {
 
 const Playlist: React.FC<PlaylistProps> = ({
   urls,
-  tracks,
+  tracks = [],
   currentIndex,
   onSelectTrack,
   onRemoveTrack,
   onEditTrack,
 }) => {
   const [editingTrack, setEditingTrack] = useState<{ index: number; data: { url: string; name: string } } | null>(null);
+  const [renderKey, setRenderKey] = useState(Date.now());
   const isMobile = useIsMobile();
   
   // Debug log to ensure tracks are being received
   useEffect(() => {
-    console.log("Playlist component received tracks:", tracks?.length);
-    if (tracks?.length) {
-      console.log("First track:", tracks[0].name);
+    console.log("Playlist component received tracks:", tracks.length);
+    if (tracks?.length > 0) {
+      console.log("First track:", JSON.stringify(tracks[0]));
+      // Force re-render when tracks change
+      setRenderKey(Date.now());
     }
   }, [tracks]);
 
+  // We'll keep this check to handle empty playlists gracefully
   if (!tracks || tracks.length === 0) {
     return (
       <div className="text-center p-3 text-gray-500">
-        No tracks added. Add a URL to get started.
+        No stations added. Add a URL to get started.
       </div>
     );
   }
 
-  const userStations = tracks.filter(track => track.isPrebuilt === false);
+  // Filter tracks by type
+  const userStations = tracks.filter(track => !track.isPrebuilt);
   const prebuiltStations = tracks.filter(track => track.isPrebuilt === true);
   
   console.log("User stations:", userStations.length);
@@ -53,15 +57,18 @@ const Playlist: React.FC<PlaylistProps> = ({
     if (stationsList.length === 0) return null;
 
     return (
-      <div className="space-y-4 mb-6">
+      <div className="space-y-4 mb-6" key={`${title}-${renderKey}`}>
         <h3 className="text-lg font-semibold mb-2">{title}</h3>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {stationsList.map((track, i) => {
             const index = tracks.indexOf(track);
             const isActive = index === currentIndex;
+            // Create a unique key for this card
+            const cardKey = `${title}-${index}-${track.url}-${track.name}-${isActive}`;
+            
             return (
               <div
-                key={`${title}-${index}-${track.url}`}
+                key={cardKey}
                 className={`flex flex-col p-4 rounded-lg ${
                   isActive
                     ? "bg-primary/20 backdrop-blur-sm"
@@ -127,8 +134,10 @@ const Playlist: React.FC<PlaylistProps> = ({
     setEditingTrack(null);
   };
 
+  const scrollHeight = isMobile ? "300px" : "500px";
+
   return (
-    <ScrollArea className={`h-[${isMobile ? "300px" : "500px"}] pr-4`}>
+    <ScrollArea className={`h-[${scrollHeight}] pr-4`}>
       {renderStationsList(userStations, "My Stations")}
       {renderStationsList(prebuiltStations, "Prebuilt Stations")}
       {editingTrack && (

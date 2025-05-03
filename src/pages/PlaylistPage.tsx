@@ -1,5 +1,5 @@
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Playlist from "@/components/Playlist";
 import { useToast } from "@/components/ui/use-toast";
@@ -15,27 +15,35 @@ const PlaylistPage: React.FC = () => {
     currentIndex, 
     isPlaying, 
     setCurrentIndex, 
-    setIsPlaying 
+    setIsPlaying,
+    debugState
   } = useTrackStateContext();
   
-  console.log("PlaylistPage - Current tracks count:", tracks.length);
-  if (tracks.length > 0) {
-    console.log("First track in playlist:", tracks[0].name);
-  }
+  // State to track if we need to re-render due to track changes
+  const [tracksKey, setTracksKey] = useState(Date.now());
+  
+  useEffect(() => {
+    console.log("PlaylistPage - Current tracks count:", tracks.length);
+    if (tracks.length > 0) {
+      console.log("First track in playlist:", JSON.stringify(tracks[0]));
+    }
+    
+    // Force a re-render when tracks change
+    setTracksKey(Date.now());
+    
+    // If debug function is available, use it for extended information
+    if (debugState) {
+      debugState();
+    }
+  }, [tracks, debugState]);
   
   // Derive URLs from tracks
   const urls = tracks.map(track => track.url);
   
   const { toast } = useToast();
 
-  // Add this debugging useEffect to help track when the component renders
-  useEffect(() => {
-    console.log("PlaylistPage rendered with tracks:", tracks.length);
-    console.log("Current tracks in PlaylistPage:", JSON.stringify(tracks));
-  }, [tracks]);
-
   const handleEditTrack = (index: number, data: { url: string; name: string }) => {
-    console.log("Editing track at index:", index, "with data:", data);
+    console.log("Editing track at index:", index, "with data:", JSON.stringify(data));
     editTrack(index, data);
     toast({
       title: "Station updated",
@@ -62,7 +70,9 @@ const PlaylistPage: React.FC = () => {
             <CardTitle className="text-lg md:text-xl">My Stations</CardTitle>
           </CardHeader>
           <CardContent className="p-3 md:p-4 pt-0">
+            {/* Use key to force re-render when tracks change */}
             <Playlist
+              key={tracksKey}
               urls={urls}
               tracks={tracks}
               currentIndex={currentIndex}

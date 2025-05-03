@@ -1,9 +1,8 @@
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Radio, Plus, Edit, Trash2 } from "lucide-react";
+import { Radio, Plus, Edit, Trash2, Info } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import { useToast } from "@/hooks/use-toast";
 import { Track } from "@/types/track";
@@ -15,15 +14,96 @@ const StationListPage: React.FC = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [editingStation, setEditingStation] = useState<Track | null>(null);
+  const [lastAddedStation, setLastAddedStation] = useState<Track | null>(null);
+  
   const { 
     getUserStations, 
     addUrl, 
     removeStationByValue, 
-    editStationByValue 
+    editStationByValue,
+    tracks,
+    debugState
   } = useTrackStateContext();
   
   const userStations = getUserStations();
-  console.log("StationListPage - User stations count:", userStations.length);
+  
+  // Debug information
+  useEffect(() => {
+    console.log("StationListPage - User stations count:", userStations.length);
+    console.log("StationListPage - Total tracks in context:", tracks.length);
+    
+    // Use debug function if available
+    if (debugState) {
+      debugState();
+    }
+  }, [userStations.length, tracks.length, debugState]);
+
+  // Effect to validate that stations were added correctly
+  useEffect(() => {
+    if (lastAddedStation) {
+      // Check if the station exists in the current tracks
+      const stationExists = tracks.some(
+        track => track.url === lastAddedStation.url && track.name === lastAddedStation.name
+      );
+      
+      console.log("Validating last added station:", lastAddedStation.name);
+      console.log("Station exists in tracks:", stationExists);
+      
+      if (!stationExists) {
+        console.warn("Station was not properly added to tracks:", lastAddedStation);
+        
+        // Try to add it again if it's not there
+        setTimeout(() => {
+          console.log("Re-attempting to add station:", lastAddedStation.name);
+          addUrl(
+            lastAddedStation.url,
+            lastAddedStation.name,
+            lastAddedStation.isPrebuilt,
+            lastAddedStation.isFavorite
+          );
+        }, 500);
+      }
+      
+      // Reset after check
+      setLastAddedStation(null);
+    }
+  }, [lastAddedStation, tracks, addUrl]);
+
+  const handleAddStation = (station: Track) => {
+    console.log("Adding station to playlist:", JSON.stringify(station));
+    
+    // Keep a reference to the last added station to validate it was added correctly
+    setLastAddedStation({...station});
+    
+    // Create a complete copy of the station to preserve all properties
+    const result = addUrl(
+      station.url, 
+      station.name, 
+      station.isPrebuilt || false, 
+      station.isFavorite || false
+    );
+    
+    console.log("Result of adding station to playlist:", result);
+    
+    if (result.success) {
+      toast({
+        title: "Station Added",
+        description: `${station.name} has been added to your playlist.`,
+      });
+      
+      // Pre-fetch the updated tracks before navigating
+      setTimeout(() => {
+        console.log("Verifying tracks before navigation:", tracks.length);
+        navigate("/playlist");
+      }, 300);
+    } else {
+      toast({
+        title: "Failed to Add Station",
+        description: result.message || "There was an error adding the station.",
+        variant: "destructive"
+      });
+    }
+  };
 
   const renderStationCard = (station: Track, isPrebuilt: boolean = false) => {
     // Generate a truly unique key for each station card
@@ -40,30 +120,7 @@ const StationListPage: React.FC = () => {
             variant="ghost"
             size="icon"
             className="h-8 w-8"
-            onClick={() => {
-              console.log("Adding station to playlist:", station);
-              // Create a complete copy of the station to preserve all properties
-              const stationCopy = {...station};
-              console.log("Station copy being added:", stationCopy);
-              
-              // Ensure we're passing all required properties explicitly
-              const result = addUrl(
-                stationCopy.url, 
-                stationCopy.name, 
-                stationCopy.isPrebuilt || false, 
-                stationCopy.isFavorite || false
-              );
-              
-              console.log("Result of adding station to playlist:", result);
-              
-              toast({
-                title: "Station Added",
-                description: "The station has been added to your playlist.",
-              });
-              
-              // Go to playlist page automatically after adding
-              navigate("/playlist");
-            }}
+            onClick={() => handleAddStation(station)}
           >
             <Plus className="h-4 w-4" />
           </Button>
@@ -124,6 +181,16 @@ const StationListPage: React.FC = () => {
             Add New Station
           </Button>
         </div>
+
+        {/* Station Status Debug (only in development) */}
+        {process.env.NODE_ENV === 'development' && (
+          <div className="p-2 bg-gray-800 text-white text-xs rounded">
+            <div className="flex items-center gap-2">
+              <Info size={16} />
+              <span>Tracks in memory: {tracks.length}</span>
+            </div>
+          </div>
+        )}
 
         {/* User Stations */}
         <Card className="bg-white/10 backdrop-blur-md border-none">
