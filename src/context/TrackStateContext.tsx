@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
 import { useTrackState } from '@/hooks/useTrackState';
 import { TrackStateResult } from '@/hooks/track-state/types';
 import { Track } from '@/types/track';
@@ -11,22 +11,35 @@ const TrackStateContext = createContext<TrackStateResult | undefined>(undefined)
 export const TrackStateProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const trackState = useTrackState();
   const [initialized, setInitialized] = useState(false);
+  const renderCount = useRef(0);
   
   // Enhanced logging to track state changes across renders
   useEffect(() => {
+    renderCount.current++;
+    console.log(`TrackStateProvider rendered ${renderCount.current} times`);
     console.log("TrackStateProvider - Current tracks count:", trackState.tracks.length);
+    
     if (trackState.tracks.length > 0) {
       console.log("First track in context provider:", JSON.stringify(trackState.tracks[0]));
+      console.log("All tracks in provider:", JSON.stringify(trackState.tracks));
     }
     
     // Mark as initialized after first render
     if (!initialized && trackState.tracks.length >= 0) {
       setInitialized(true);
+      console.log("TrackState provider initialized");
     }
   }, [trackState.tracks, initialized]);
   
+  // Memoize the context value to prevent unnecessary re-renders
+  const contextValue = React.useMemo(() => trackState, [
+    trackState.tracks,
+    trackState.currentIndex,
+    trackState.isPlaying
+  ]);
+  
   return (
-    <TrackStateContext.Provider value={trackState}>
+    <TrackStateContext.Provider value={contextValue}>
       {children}
     </TrackStateContext.Provider>
   );

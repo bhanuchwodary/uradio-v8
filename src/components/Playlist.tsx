@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Radio, Edit, Trash2 } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -27,15 +27,29 @@ const Playlist: React.FC<PlaylistProps> = ({
   const [editingTrack, setEditingTrack] = useState<{ index: number; data: { url: string; name: string } } | null>(null);
   const [renderKey, setRenderKey] = useState(Date.now());
   const isMobile = useIsMobile();
-  
-  // Debug log to ensure tracks are being received
+
+  // Debug logging - moved outside of effect for immediate feedback
+  console.log("Playlist component rendered with tracks:", tracks.length);
+  if (tracks?.length > 0) {
+    console.log("First track in Playlist component:", JSON.stringify(tracks[0]));
+    console.log("All tracks in Playlist component:", JSON.stringify(tracks));
+  }
+
+  // Force re-render when tracks change
   useEffect(() => {
-    console.log("Playlist component received tracks:", tracks.length);
-    if (tracks?.length > 0) {
-      console.log("First track in Playlist component:", JSON.stringify(tracks[0]));
-      // Force re-render when tracks change
-      setRenderKey(Date.now());
-    }
+    console.log("Tracks changed in Playlist - forcing re-render");
+    setRenderKey(Date.now());
+  }, [tracks.length, JSON.stringify(tracks)]);
+
+  // Memoize the filtered tracks to prevent unnecessary re-rendering
+  const { userStations, prebuiltStations } = useMemo(() => {
+    const user = tracks.filter(track => !track.isPrebuilt);
+    const prebuilt = tracks.filter(track => track.isPrebuilt === true);
+    
+    console.log("User stations count in Playlist component:", user.length);
+    console.log("Prebuilt stations count in Playlist component:", prebuilt.length);
+    
+    return { userStations: user, prebuiltStations: prebuilt };
   }, [tracks]);
 
   // We'll keep this check to handle empty playlists gracefully
@@ -47,21 +61,15 @@ const Playlist: React.FC<PlaylistProps> = ({
     );
   }
 
-  // Filter tracks by type
-  const userStations = tracks.filter(track => !track.isPrebuilt);
-  const prebuiltStations = tracks.filter(track => track.isPrebuilt === true);
-  
-  console.log("User stations count in Playlist component:", userStations.length);
-  console.log("Prebuilt stations count in Playlist component:", prebuiltStations.length);
-
   const renderStationsList = (stationsList: Track[], title: string) => {
     if (stationsList.length === 0) return null;
 
     return (
-      <div className="space-y-4 mb-6" key={`${title}-${renderKey}`}>
+      <div className="space-y-4 mb-6" key={`${title}-${renderKey}-${stationsList.length}`}>
         <h3 className="text-lg font-semibold mb-2">{title}</h3>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {stationsList.map((station) => {
+          {stationsList.map((station, idx) => {
+            // Find the original index in the full tracks array
             const index = tracks.findIndex(t => 
               t.url === station.url && t.name === station.name
             );
@@ -72,8 +80,8 @@ const Playlist: React.FC<PlaylistProps> = ({
             }
             
             const isActive = index === currentIndex;
-            // Create a unique key for this card
-            const cardKey = `${title}-${index}-${station.url}-${station.name}-${isActive}`;
+            // Create a truly unique key for this card
+            const cardKey = `${title}-${index}-${station.url}-${station.name}-${isActive}-${renderKey}`;
             
             return (
               <div

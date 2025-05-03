@@ -3,7 +3,7 @@ import { Track } from "@/types/track";
 
 // Storage key for consistency
 const TRACKS_STORAGE_KEY = 'musicTracks';
-const STORAGE_VERSION = 'v2'; // Updated version for better stability
+const STORAGE_VERSION = 'v3'; // Updated version for better stability
 
 // Helper to create a structured storage format
 const createStorageStructure = (tracks: Track[]) => ({
@@ -65,7 +65,7 @@ export const loadTracksFromLocalStorage = (): Track[] => {
     
     console.log("Normalized tracks:", normalizedTracks.length);
     if (normalizedTracks.length > 0) {
-      console.log("Sample track:", JSON.stringify(normalizedTracks[0]));
+      console.log("All loaded tracks:", JSON.stringify(normalizedTracks));
     }
     
     return normalizedTracks;
@@ -91,7 +91,7 @@ export const saveTracksToLocalStorage = (tracks: Track[]): boolean => {
     // Log before saving
     console.log("About to save tracks to localStorage:", tracksToSave.length);
     if (tracksToSave.length > 0) {
-      console.log("First track to save:", JSON.stringify(tracksToSave[0]));
+      console.log("All tracks to save:", JSON.stringify(tracksToSave));
     }
     
     localStorage.setItem(TRACKS_STORAGE_KEY, JSON.stringify(storageData));

@@ -15,6 +15,7 @@ export const addStationUrl = (
   
   console.log(`Adding URL: ${url}, Name: ${name}, IsPrebuilt: ${isPrebuilt}, IsFavorite: ${isFavorite}`);
   console.log("Current tracks count before add:", tracks.length);
+  console.log("Current tracks before add:", JSON.stringify(tracks));
   
   // Create a deep clone of the tracks array to ensure we don't modify the original
   const tracksClone = JSON.parse(JSON.stringify(tracks));
@@ -68,6 +69,7 @@ export const addStationUrl = (
   }
   
   console.log("Updated tracks array now has", updatedTracks.length, "tracks");
+  console.log("All tracks after modification:", JSON.stringify(updatedTracks));
   
   // Sanity check our data before returning
   const hasInvalidTracks = updatedTracks.some((track: Track) => !track.url || !track.name);

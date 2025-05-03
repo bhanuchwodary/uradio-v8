@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Track } from "@/types/track";
 import { TrackStateResult } from "./track-state/types";
@@ -51,8 +52,11 @@ export const useTrackState = (): TrackStateResult => {
         console.log("Initial tracks loaded from localStorage:", loadedTracks.length);
         if (loadedTracks.length > 0) {
           console.log("First loaded track:", JSON.stringify(loadedTracks[0]));
+          console.log("All loaded tracks:", JSON.stringify(loadedTracks));
         }
-        setTracks(loadedTracks);
+        
+        // CRITICAL FIX: Use functional update to ensure we're using the latest state
+        setTracks(() => [...loadedTracks]);
       }
       
       setIsInitialized(true);
@@ -67,6 +71,7 @@ export const useTrackState = (): TrackStateResult => {
     const currentVersion = stateVersion.current;
     
     console.log(`Tracks state changed - render count: ${renderCount.current}, state version: ${currentVersion}`);
+    console.log(`Current tracks in state (${tracks.length}):`, JSON.stringify(tracks));
     
     if (isInitialized) {
       console.log("useTrackState - Saving tracks to localStorage:", tracks.length);
@@ -85,7 +90,7 @@ export const useTrackState = (): TrackStateResult => {
     }
   }, [tracks, isInitialized]);
 
-  // Check state integrity periodically
+  // Check state integrity periodically and on route changes
   useEffect(() => {
     if (!isInitialized) return;
     
@@ -95,9 +100,28 @@ export const useTrackState = (): TrackStateResult => {
         console.warn("Track state and localStorage are out of sync - forcing save");
         saveTracksToLocalStorage(tracks);
       }
-    }, 2000);
+    }, 1000);
     
-    return () => clearTimeout(integrityCheck);
+    // Check integrity on component mount and route changes
+    const handleRouteChange = () => {
+      console.log("Route change detected - checking track state integrity");
+      const isInSync = verifySyncStatus(tracks);
+      if (!isInSync) {
+        console.warn("Track state and localStorage are out of sync after route change - reloading from storage");
+        const loadedTracks = loadTracksFromLocalStorage();
+        if (loadedTracks.length > 0) {
+          setTracks(loadedTracks);
+        }
+      }
+    };
+    
+    // Listen for history changes as a proxy for route changes
+    window.addEventListener('popstate', handleRouteChange);
+    
+    return () => {
+      clearTimeout(integrityCheck);
+      window.removeEventListener('popstate', handleRouteChange);
+    };
   }, [tracks, isInitialized]);
 
   const checkIfStationExists = useCallback((url: string) => {
@@ -121,14 +145,15 @@ export const useTrackState = (): TrackStateResult => {
     
     if (updatedTracks.length > 0) {
       console.log("First track after update:", JSON.stringify(updatedTracks[0]));
+      console.log("All tracks after update:", JSON.stringify(updatedTracks));
     }
     
     // Only update state if there was actually a change
-    if (updatedTracks !== tracks) {
+    if (updatedTracks.length !== tracks.length || JSON.stringify(updatedTracks) !== JSON.stringify(tracks)) {
       console.log("Setting new tracks state with", updatedTracks.length, "tracks");
       
-      // Update state with new tracks
-      setTracks(updatedTracks);
+      // Use functional update to ensure we're using the latest state
+      setTracks(() => [...updatedTracks]);
       
       // Force an immediate save to localStorage
       const saveSuccess = saveTracksToLocalStorage(updatedTracks);
@@ -220,10 +245,8 @@ export const useTrackState = (): TrackStateResult => {
     console.log("State version:", stateVersion.current);
     
     if (tracks.length > 0) {
-      console.log("First few tracks:");
-      tracks.slice(0, Math.min(3, tracks.length)).forEach((track, idx) => {
-        console.log(`[${idx}]`, JSON.stringify(track));
-      });
+      console.log("All tracks in state:");
+      console.log(JSON.stringify(tracks));
     }
     
     const localStorageStatus = testLocalStorage();

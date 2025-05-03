@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Playlist from "@/components/Playlist";
 import { useToast } from "@/components/ui/use-toast";
@@ -20,23 +20,30 @@ const PlaylistPage: React.FC = () => {
   } = useTrackStateContext();
   
   // State to track if we need to re-render due to track changes
-  const [tracksKey, setTracksKey] = useState(Date.now());
+  const [tracksKey, setTracksKey] = useState(() => Date.now());
+  
+  // Use a callback to force re-render with the latest tracks
+  const forceRefresh = useCallback(() => {
+    console.log("Forcing playlist refresh");
+    setTracksKey(Date.now());
+  }, []);
   
   useEffect(() => {
     console.log("PlaylistPage - Current tracks count:", tracks.length);
     if (tracks.length > 0) {
       console.log("First track in playlist:", JSON.stringify(tracks[0]));
+      console.log("All tracks in playlist:", JSON.stringify(tracks));
     }
     
     // Force a re-render when tracks change
-    setTracksKey(Date.now());
+    forceRefresh();
     
     // If debug function is available, use it for extended information
     if (debugState) {
       const debugInfo = debugState();
       console.log("PlaylistPage debug - state version:", debugInfo?.stateVersion);
     }
-  }, [tracks, debugState]);
+  }, [tracks, debugState, forceRefresh]);
   
   // Derive URLs from tracks
   const urls = tracks.map(track => track.url);
@@ -50,6 +57,7 @@ const PlaylistPage: React.FC = () => {
       title: "Station updated",
       description: `"${data.name}" has been updated`,
     });
+    forceRefresh();
   };
 
   const handlePlayTrack = (index: number) => {
@@ -68,7 +76,7 @@ const PlaylistPage: React.FC = () => {
     });
     
     // Force a re-render
-    setTracksKey(Date.now() + 1);
+    forceRefresh();
   };
 
   return (
