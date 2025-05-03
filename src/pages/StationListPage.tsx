@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -36,7 +37,7 @@ const StationListPage: React.FC = () => {
     // Use debug function if available
     if (debugState) {
       const debugInfo = debugState();
-      console.log("Debug state version:", debugInfo.stateVersion);
+      console.log("Debug state version:", debugInfo?.stateVersion);
     }
   }, [userStations.length, tracks.length, debugState]);
 

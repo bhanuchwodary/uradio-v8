@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Track } from "@/types/track";
 import { TrackStateResult } from "./track-state/types";

@@ -34,7 +34,7 @@ const PlaylistPage: React.FC = () => {
     // If debug function is available, use it for extended information
     if (debugState) {
       const debugInfo = debugState();
-      console.log("PlaylistPage debug - state version:", debugInfo.stateVersion);
+      console.log("PlaylistPage debug - state version:", debugInfo?.stateVersion);
     }
   }, [tracks, debugState]);
   
