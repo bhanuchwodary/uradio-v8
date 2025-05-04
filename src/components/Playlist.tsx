@@ -26,16 +26,17 @@ const Playlist: React.FC<PlaylistProps> = ({
 }) => {
   const [editingTrack, setEditingTrack] = useState<{ index: number; data: { url: string; name: string } } | null>(null);
   const [renderKey, setRenderKey] = useState(Date.now());
+  const [mountTime] = useState(Date.now());
   const isMobile = useIsMobile();
 
   // Debug logging - moved outside of effect for immediate feedback
-  console.log("Playlist component rendered with tracks:", tracks.length);
+  console.log(`Playlist component rendered at ${new Date().toISOString()} with tracks:`, tracks.length);
   if (tracks?.length > 0) {
     console.log("First track in Playlist component:", JSON.stringify(tracks[0]));
     console.log("All tracks in Playlist component:", JSON.stringify(tracks));
   }
 
-  // CRITICAL FIX: Force re-render when tracks change
+  // Force re-render when tracks change, including their content
   useEffect(() => {
     console.log("Tracks changed in Playlist - forcing re-render");
     setRenderKey(Date.now());
@@ -43,11 +44,12 @@ const Playlist: React.FC<PlaylistProps> = ({
 
   // Memoize the filtered tracks to prevent unnecessary re-rendering
   const { userStations, prebuiltStations } = useMemo(() => {
+    console.log(`Recomputing stations at ${new Date().toISOString()} with ${tracks.length} tracks`);
     const user = tracks.filter(track => !track.isPrebuilt);
     const prebuilt = tracks.filter(track => track.isPrebuilt === true);
     
-    console.log("User stations count in Playlist component:", user.length);
-    console.log("Prebuilt stations count in Playlist component:", prebuilt.length);
+    console.log("User stations count:", user.length);
+    console.log("Prebuilt stations count:", prebuilt.length);
     
     return { userStations: user, prebuiltStations: prebuilt };
   }, [tracks]);
@@ -64,8 +66,11 @@ const Playlist: React.FC<PlaylistProps> = ({
   const renderStationsList = (stationsList: Track[], title: string) => {
     if (stationsList.length === 0) return null;
 
+    const uniqueKey = `${title}-${renderKey}-${mountTime}-${stationsList.length}`;
+    console.log(`Rendering station list: ${title} with key ${uniqueKey}`);
+
     return (
-      <div className="space-y-4 mb-6" key={`${title}-${renderKey}-${stationsList.length}`}>
+      <div className="space-y-4 mb-6" key={uniqueKey}>
         <h3 className="text-lg font-semibold mb-2">{title}</h3>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {stationsList.map((station, idx) => {
@@ -81,7 +86,7 @@ const Playlist: React.FC<PlaylistProps> = ({
             
             const isActive = index === currentIndex;
             // Create a truly unique key for this card
-            const cardKey = `${title}-${index}-${station.url}-${station.name}-${isActive}-${renderKey}`;
+            const cardKey = `${title}-${index}-${station.url}-${station.name}-${isActive}-${renderKey}-${mountTime}`;
             
             return (
               <div

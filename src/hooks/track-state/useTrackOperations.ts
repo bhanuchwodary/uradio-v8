@@ -17,11 +17,14 @@ export const useTrackOperations = (
   setTracks: (tracks: Track[] | ((prev: Track[]) => Track[])) => void,
   currentIndex: number,
   setCurrentIndex: (index: number) => void,
-  setIsPlaying: (playing: boolean) => void
+  setIsPlaying: (playing: boolean) => void,
+  tracksRef?: React.MutableRefObject<Track[]>
 ) => {
   const checkIfStationExists = useCallback((url: string) => {
-    return tracks.some(track => track.url.toLowerCase() === url.toLowerCase());
-  }, [tracks]);
+    // Use tracksRef for most up-to-date value when available
+    const currentTracks = tracksRef?.current || tracks;
+    return currentTracks.some(track => track.url.toLowerCase() === url.toLowerCase());
+  }, [tracks, tracksRef]);
 
   const addUrl = useCallback((
     url: string, 
@@ -30,9 +33,13 @@ export const useTrackOperations = (
     isFavorite: boolean = false
   ) => {
     console.log("addUrl called with:", url, name, isPrebuilt, isFavorite);
+    console.log("Current tracks count:", tracks.length);
+    
+    // Use tracksRef for most up-to-date value when available
+    const currentTracks = tracksRef?.current || tracks;
     
     const { tracks: updatedTracks, result } = addStationUrl(
-      url, name, isPrebuilt, isFavorite, tracks
+      url, name, isPrebuilt, isFavorite, currentTracks
     );
     
     console.log("Result of addStationUrl:", result.success, result.message);
@@ -43,71 +50,98 @@ export const useTrackOperations = (
       console.log("All tracks after update:", JSON.stringify(updatedTracks));
     }
     
-    // Only update state if there was actually a change
-    if (updatedTracks.length !== tracks.length || JSON.stringify(updatedTracks) !== JSON.stringify(tracks)) {
-      console.log("Setting new tracks state with", updatedTracks.length, "tracks");
-      
-      // Use functional update to ensure we're using the latest state
-      setTracks(() => [...updatedTracks]);
-      
-      // Force an immediate save to localStorage
-      const saveSuccess = saveTracksToLocalStorage(updatedTracks);
-      if (!saveSuccess) {
-        console.error("Failed to save tracks to localStorage after adding URL");
-      }
-    } else {
-      console.log("No change to tracks state");
+    // Always update state with a completely fresh array
+    setTracks([...updatedTracks]);
+    
+    // Force an immediate save to localStorage
+    const saveSuccess = saveTracksToLocalStorage(updatedTracks);
+    if (!saveSuccess) {
+      console.error("Failed to save tracks to localStorage after adding URL");
+    }
+    
+    if (tracksRef) {
+      tracksRef.current = updatedTracks;
     }
     
     return result;
-  }, [tracks, setTracks]);
+  }, [tracks, setTracks, tracksRef]);
 
   const updatePlayTime = useCallback((index: number, seconds: number) => {
     setTracks(currentTracks => {
       const updatedTracks = updateTrackPlayTime(currentTracks, index, seconds);
+      
+      // Force an immediate save to localStorage
+      saveTracksToLocalStorage(updatedTracks);
+      
+      if (tracksRef) {
+        tracksRef.current = updatedTracks;
+      }
+      
       return updatedTracks;
     });
-  }, [setTracks]);
+  }, [setTracks, tracksRef]);
 
   const editTrack = useCallback((index: number, data: { url: string; name: string }) => {
     console.log("Editing track at index:", index, "with data:", JSON.stringify(data));
     setTracks(currentTracks => {
       const updatedTracks = editTrackInfo(currentTracks, index, data);
+      
       // Force an immediate save to localStorage
       saveTracksToLocalStorage(updatedTracks);
+      
+      if (tracksRef) {
+        tracksRef.current = updatedTracks;
+      }
+      
       return updatedTracks;
     });
-  }, [setTracks]);
+  }, [setTracks, tracksRef]);
   
   const editStationByValue = useCallback((station: Track, data: { url: string; name: string }) => {
     console.log("Editing station by value:", JSON.stringify(station), "with data:", JSON.stringify(data));
     setTracks(currentTracks => {
       const updatedTracks = editByValue(currentTracks, station, data);
+      
       // Force an immediate save to localStorage
       saveTracksToLocalStorage(updatedTracks);
+      
+      if (tracksRef) {
+        tracksRef.current = updatedTracks;
+      }
+      
       return updatedTracks;
     });
-  }, [setTracks]);
+  }, [setTracks, tracksRef]);
   
   const removeStationByValue = useCallback((station: Track) => {
     console.log("Removing station by value:", JSON.stringify(station));
     setTracks(currentTracks => {
       const updatedTracks = removeByValue(currentTracks, station);
+      
       // Force an immediate save to localStorage
       saveTracksToLocalStorage(updatedTracks);
+      
+      if (tracksRef) {
+        tracksRef.current = updatedTracks;
+      }
+      
       return updatedTracks;
     });
-  }, [setTracks]);
+  }, [setTracks, tracksRef]);
 
   const removeUrl = useCallback((index: number) => {
     console.log("Removing track at index:", index);
+    
+    // Use tracksRef for most up-to-date value when available
+    const currentTracks = tracksRef?.current || tracks;
+    
     const { tracks: updatedTracks, newCurrentIndex, shouldStopPlaying } = 
-      removeTrackByIndex(tracks, index, currentIndex);
+      removeTrackByIndex(currentTracks, index, currentIndex);
     
     console.log("Tracks after removal:", updatedTracks.length);
     console.log("New current index:", newCurrentIndex);
     
-    setTracks(updatedTracks);
+    setTracks([...updatedTracks]);
     setCurrentIndex(newCurrentIndex);
     
     if (shouldStopPlaying) {
@@ -116,17 +150,27 @@ export const useTrackOperations = (
     
     // Force an immediate save to localStorage
     saveTracksToLocalStorage(updatedTracks);
-  }, [tracks, currentIndex, setTracks, setCurrentIndex, setIsPlaying]);
+    
+    if (tracksRef) {
+      tracksRef.current = updatedTracks;
+    }
+  }, [tracks, currentIndex, setTracks, setCurrentIndex, setIsPlaying, tracksRef]);
 
   const toggleFavorite = useCallback((index: number) => {
     console.log("Toggling favorite for index:", index);
     setTracks(currentTracks => {
       const updatedTracks = toggleTrackFavorite(currentTracks, index);
+      
       // Force an immediate save to localStorage
       saveTracksToLocalStorage(updatedTracks);
+      
+      if (tracksRef) {
+        tracksRef.current = updatedTracks;
+      }
+      
       return updatedTracks;
     });
-  }, [setTracks]);
+  }, [setTracks, tracksRef]);
 
   return {
     addUrl,

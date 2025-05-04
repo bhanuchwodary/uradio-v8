@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
+import React, { createContext, useContext, useEffect, useState, useRef, useMemo } from 'react';
 import { useTrackState } from '@/hooks/useTrackState';
 import { TrackStateResult } from '@/hooks/track-state/types';
 import { Track } from '@/types/track';
@@ -31,10 +31,19 @@ export const TrackStateProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     }
   }, [trackState.tracks, initialized]);
   
-  // CRITICAL FIX: Memoize the context value to prevent unnecessary re-renders
-  // but make sure we update when important state values change
-  const contextValue = React.useMemo(() => trackState, [
-    trackState.tracks,
+  // CRITICAL FIX: Create a truly stable memoized context value that will not cause unnecessary rerenders
+  // but will update when the essential parts of the state change
+  const contextValue = useMemo(() => {
+    console.log("Recreating context value with", trackState.tracks.length, "tracks");
+    return {
+      ...trackState,
+      // Ensure tracks is always a new reference when content changes
+      tracks: [...trackState.tracks]  
+    };
+  }, [
+    trackState.tracks.length,
+    // Stringify tracks to detect content changes
+    JSON.stringify(trackState.tracks),
     trackState.currentIndex,
     trackState.isPlaying
   ]);

@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Playlist from "@/components/Playlist";
 import { useToast } from "@/components/ui/use-toast";
@@ -19,6 +19,9 @@ const PlaylistPage: React.FC = () => {
     debugState
   } = useTrackStateContext();
   
+  // Use a ref to track if this is the first render
+  const initialRenderRef = useRef(true);
+  
   // State to track if we need to re-render due to track changes
   const [tracksKey, setTracksKey] = useState(() => Date.now());
   
@@ -28,6 +31,7 @@ const PlaylistPage: React.FC = () => {
     setTracksKey(Date.now());
   }, []);
   
+  // Log details on every render for debugging
   useEffect(() => {
     console.log("PlaylistPage - Current tracks count:", tracks.length);
     if (tracks.length > 0) {
@@ -35,7 +39,7 @@ const PlaylistPage: React.FC = () => {
       console.log("All tracks in playlist:", JSON.stringify(tracks));
     }
     
-    // CRITICAL FIX: Force a re-render when tracks change
+    // Always force a refresh when tracks change
     forceRefresh();
     
     // If debug function is available, use it for extended information
@@ -44,6 +48,15 @@ const PlaylistPage: React.FC = () => {
       console.log("PlaylistPage debug - state version:", debugInfo?.stateVersion);
     }
   }, [tracks, debugState, forceRefresh]);
+  
+  // Force an initial refresh after component mounts
+  useEffect(() => {
+    if (initialRenderRef.current) {
+      console.log("PlaylistPage - Initial mount refresh");
+      initialRenderRef.current = false;
+      setTimeout(forceRefresh, 100);
+    }
+  }, [forceRefresh]);
   
   // Derive URLs from tracks
   const urls = tracks.map(track => track.url);
@@ -98,7 +111,7 @@ const PlaylistPage: React.FC = () => {
             <CardTitle className="text-lg md:text-xl">My Stations</CardTitle>
           </CardHeader>
           <CardContent className="p-3 md:p-4 pt-0">
-            {/* Use key to force re-render when tracks change */}
+            {/* Critical Fix: Use key to force re-render when tracks change */}
             <Playlist
               key={tracksKey}
               urls={urls}

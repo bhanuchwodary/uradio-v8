@@ -6,10 +6,11 @@ import { useTrackDebug } from "./track-state/useTrackDebug";
 import { TrackStateResult } from "./track-state/types";
 
 export const useTrackState = (): TrackStateResult => {
-  // Get core state management
+  // Get core state management with the tracksRef for direct access
   const {
     tracks,
     setTracks,
+    tracksRef,
     currentIndex,
     setCurrentIndex,
     isPlaying,
@@ -20,17 +21,18 @@ export const useTrackState = (): TrackStateResult => {
     isInitialized
   } = useTrackStateCore();
 
-  // Get track operations
+  // Get track operations with tracksRef for consistent state access
   const operations = useTrackOperations(
     tracks,
     setTracks,
     currentIndex,
     setCurrentIndex,
-    setIsPlaying
+    setIsPlaying,
+    tracksRef
   );
 
-  // Get track management functions
-  const management = useTrackManagement(tracks);
+  // Get track management functions with consistent access to latest tracks
+  const management = useTrackManagement(tracks, tracksRef);
 
   // Get debug functions
   const debug = useTrackDebug(
