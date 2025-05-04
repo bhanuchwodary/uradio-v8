@@ -5,11 +5,13 @@ type AudioInstanceType = {
   element: HTMLAudioElement | null;
   hls: Hls | null;
   activePlayerInstance: React.MutableRefObject<symbol> | null;
+  isInitialized: boolean;
 };
 
 // Maintains a shared audio and HLS context across the app
 export const globalAudioRef: AudioInstanceType = {
   element: null,
   hls: null,
-  activePlayerInstance: null
+  activePlayerInstance: null,
+  isInitialized: false
 };

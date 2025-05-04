@@ -1,6 +1,7 @@
 
 import { useRef, useEffect } from "react";
 import Hls from "hls.js";
+import { globalAudioRef } from "@/components/music-player/audioInstance";
 
 interface UseHlsHandlerProps {
   audioRef: React.MutableRefObject<HTMLAudioElement | null>;
@@ -18,18 +19,33 @@ export const useHlsHandler = ({
   setLoading
 }: UseHlsHandlerProps) => {
   const hlsRef = useRef<Hls | null>(null);
+  const lastUrlRef = useRef<string | undefined>(undefined);
 
   useEffect(() => {
     if (!audioRef.current || !url) {
       return;
     }
 
+    // Skip if URL hasn't changed and audio is already set up
+    if (url === lastUrlRef.current && globalAudioRef.isInitialized) {
+      console.log("URL hasn't changed, maintaining current playback");
+      return;
+    }
+
+    // Remember the URL for future reference
+    lastUrlRef.current = url;
+    
     setLoading(true);
     
     // Clean up previous HLS instance if exists
     if (hlsRef.current) {
       hlsRef.current.destroy();
       hlsRef.current = null;
+    }
+    
+    if (globalAudioRef.hls) {
+      globalAudioRef.hls.destroy();
+      globalAudioRef.hls = null;
     }
 
     // Check if the URL is an HLS stream
@@ -78,6 +94,7 @@ export const useHlsHandler = ({
       });
       
       hlsRef.current = hls;
+      globalAudioRef.hls = hls;
     } else {
       // Regular audio stream
       console.log("Loading regular audio stream:", url);
@@ -94,10 +111,8 @@ export const useHlsHandler = ({
     }
 
     return () => {
-      if (hlsRef.current) {
-        hlsRef.current.destroy();
-        hlsRef.current = null;
-      }
+      // Don't destroy HLS instance on component unmount to maintain playback
+      // The global HLS instance will be cleaned up when we load a new URL
     };
   }, [url, isPlaying, setIsPlaying, setLoading]);
 

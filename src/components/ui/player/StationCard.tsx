@@ -46,7 +46,7 @@ export const StationCard: React.FC<StationCardProps> = ({
           className={cn(
             "w-16 h-16 rounded-full flex items-center justify-center transition-all duration-300",
             isPlaying 
-              ? "bg-primary text-primary-foreground animate-pulse" 
+              ? "bg-primary text-primary-foreground" 
               : "bg-background/50 text-muted-foreground group-hover:bg-primary/20"
           )}
         >

@@ -1,3 +1,4 @@
+
 import { useEffect } from "react";
 import { globalAudioRef } from "@/components/music-player/audioInstance";
 
@@ -23,6 +24,7 @@ export const useAudioInitialization = ({
       globalAudioRef.element.addEventListener('canplay', () => {
         // This empty handler helps keep the audio element alive
       });
+      globalAudioRef.isInitialized = true;
     }
 
     // Set reference to the global audio element
@@ -41,5 +43,5 @@ export const useAudioInitialization = ({
       // but keep the global audio element playing
       console.log("Component unmounting, audio reference removed but playback continues");
     };
-  }, [audioRef, playerInstanceRef, volume]);
+  }, []);  // Remove dependencies to prevent recreation of audio element
 };
