@@ -44,7 +44,7 @@ export const useTrackState = (): TrackStateResult => {
     stateVersion
   );
 
-  // Return the public interface
+  // Return the public interface with explicit mapping of management functions
   return {
     tracks,
     currentIndex,
@@ -52,7 +52,13 @@ export const useTrackState = (): TrackStateResult => {
     setCurrentIndex,
     setIsPlaying,
     ...operations,
-    ...management,
+    // Explicitly map the management functions to match TrackStateResult interface
+    getMyStations: management.getMyStations,
+    getPopularStations: management.getPopularStations,
+    stationExists: management.stationExists,
+    // These are the functions that were missing according to the error
+    getUserStations: management.getMyStations, // Map to existing function
+    getTopStations: management.getPopularStations, // Map to existing function
     ...debug
   };
 };
