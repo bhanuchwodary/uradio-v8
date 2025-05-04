@@ -13,6 +13,7 @@ export const getTopStations = (tracks: Track[]): Track[] => {
 };
 
 export const checkIfStationExists = (url: string, tracks: Track[]): { exists: boolean, isUserStation: boolean } => {
+  // CRITICAL FIX: Ensure case-insensitive comparison
   // Check in user tracks
   const existsInUserTracks = tracks.some(track => 
     track.url.toLowerCase() === url.toLowerCase() && !track.isPrebuilt

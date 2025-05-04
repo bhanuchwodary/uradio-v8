@@ -35,7 +35,7 @@ const PlaylistPage: React.FC = () => {
       console.log("All tracks in playlist:", JSON.stringify(tracks));
     }
     
-    // Force a re-render when tracks change
+    // CRITICAL FIX: Force a re-render when tracks change
     forceRefresh();
     
     // If debug function is available, use it for extended information

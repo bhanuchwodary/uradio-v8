@@ -31,7 +31,8 @@ export const TrackStateProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     }
   }, [trackState.tracks, initialized]);
   
-  // Memoize the context value to prevent unnecessary re-renders
+  // CRITICAL FIX: Memoize the context value to prevent unnecessary re-renders
+  // but make sure we update when important state values change
   const contextValue = React.useMemo(() => trackState, [
     trackState.tracks,
     trackState.currentIndex,

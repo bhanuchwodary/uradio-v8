@@ -35,7 +35,7 @@ const Playlist: React.FC<PlaylistProps> = ({
     console.log("All tracks in Playlist component:", JSON.stringify(tracks));
   }
 
-  // Force re-render when tracks change
+  // CRITICAL FIX: Force re-render when tracks change
   useEffect(() => {
     console.log("Tracks changed in Playlist - forcing re-render");
     setRenderKey(Date.now());
@@ -69,7 +69,7 @@ const Playlist: React.FC<PlaylistProps> = ({
         <h3 className="text-lg font-semibold mb-2">{title}</h3>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {stationsList.map((station, idx) => {
-            // Find the original index in the full tracks array
+            // CRITICAL FIX: Find the original index in the full tracks array
             const index = tracks.findIndex(t => 
               t.url === station.url && t.name === station.name
             );

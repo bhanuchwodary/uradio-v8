@@ -2,9 +2,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Track } from "@/types/track";
 import { loadTracksFromLocalStorage, saveTracksToLocalStorage, testLocalStorage, verifySyncStatus } from "./trackStorage";
-import { useTrackManagement } from "./useTrackManagement";
-import { useTrackOperations } from "./useTrackOperations";
-import { useTrackDebug } from "./useTrackDebug";
 
 export const useTrackStateCore = () => {
   // Track state
@@ -22,29 +19,28 @@ export const useTrackStateCore = () => {
 
   // Initialization effect - runs only once
   useEffect(() => {
-    if (!isInitialized) {
-      console.log("useTrackState - Initial load from localStorage");
-      renderCount.current++;
-      
-      // Test if localStorage is working properly
-      const storageAvailable = testLocalStorage();
-      console.log("LocalStorage is available:", storageAvailable);
-      
-      if (storageAvailable) {
-        const loadedTracks = loadTracksFromLocalStorage();
-        console.log("Initial tracks loaded from localStorage:", loadedTracks.length);
-        if (loadedTracks.length > 0) {
-          console.log("First loaded track:", JSON.stringify(loadedTracks[0]));
-          console.log("All loaded tracks:", JSON.stringify(loadedTracks));
-        }
+    console.log("useTrackState - Initial load from localStorage");
+    renderCount.current++;
+    
+    // Test if localStorage is working properly
+    const storageAvailable = testLocalStorage();
+    console.log("LocalStorage is available:", storageAvailable);
+    
+    if (storageAvailable) {
+      const loadedTracks = loadTracksFromLocalStorage();
+      console.log("Initial tracks loaded from localStorage:", loadedTracks.length);
+      if (loadedTracks.length > 0) {
+        console.log("First loaded track:", JSON.stringify(loadedTracks[0]));
+        console.log("All loaded tracks:", JSON.stringify(loadedTracks));
         
         // CRITICAL FIX: Use functional update to ensure we're using the latest state
+        // and explicitly create a new array to ensure React detects the change
         setTracks(() => [...loadedTracks]);
       }
-      
-      setIsInitialized(true);
-      console.log("Track state initialized - render count:", renderCount.current);
     }
+    
+    setIsInitialized(true);
+    console.log("Track state initialized - render count:", renderCount.current);
   }, []);
 
   // Save tracks to localStorage whenever they change (but after initialization)
