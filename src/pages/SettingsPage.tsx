@@ -19,8 +19,7 @@ const SettingsPage: React.FC = () => {
             <CardTitle className="text-lg">Appearance</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center justify-between">
-              <span>Theme</span>
+            <div className="flex items-center justify-center">
               <ThemeToggle />
             </div>
           </CardContent>

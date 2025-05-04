@@ -1,15 +1,15 @@
 
 import React from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Play, Star, Edit, Trash2 } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { Play, Pause, Edit, Trash2, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Track } from "@/types/track";
 import { cn } from "@/lib/utils";
 
 interface StationCardProps {
   station: Track;
-  isPlaying?: boolean;
-  isSelected?: boolean;
+  isPlaying: boolean;
+  isSelected: boolean;
   onPlay: () => void;
   onEdit?: () => void;
   onDelete?: () => void;
@@ -18,92 +18,90 @@ interface StationCardProps {
 
 export const StationCard: React.FC<StationCardProps> = ({
   station,
-  isPlaying = false,
-  isSelected = false,
+  isPlaying,
+  isSelected,
   onPlay,
   onEdit,
   onDelete,
   onToggleFavorite
 }) => {
-  const isEditable = !station.isPrebuilt && onEdit;
-  const canDelete = onDelete !== undefined;
-  const canFavorite = onToggleFavorite !== undefined;
+  // Prevent event bubbling for control buttons
+  const handleButtonClick = (e: React.MouseEvent, callback?: () => void) => {
+    e.stopPropagation();
+    if (callback) callback();
+  };
 
   return (
     <Card 
       className={cn(
-        "overflow-hidden transition-all duration-300 border-none shadow",
+        "relative overflow-hidden group transition-all duration-200 cursor-pointer",
         isSelected 
-          ? "bg-primary/10 dark:bg-primary/20" 
-          : "bg-background/50 hover:bg-background/80"
+          ? "bg-primary/10 border-primary/50 shadow-lg" 
+          : "bg-background/30 hover:bg-background/50 border-border/50"
       )}
+      onClick={onPlay} // Make entire card clickable
     >
-      <CardContent className="p-4 flex flex-col items-center">
-        {/* Station Image/Icon */}
+      <div className="px-3 py-4 flex flex-col items-center space-y-2">
         <div 
           className={cn(
-            "w-12 h-12 flex items-center justify-center rounded-full mb-3",
+            "w-16 h-16 rounded-full flex items-center justify-center transition-all duration-300",
             isPlaying 
               ? "bg-primary text-primary-foreground animate-pulse" 
-              : "bg-muted"
+              : "bg-background/50 text-muted-foreground group-hover:bg-primary/20"
           )}
         >
-          <Play className="h-6 w-6" />
+          {isPlaying ? (
+            <Pause className="w-8 h-8" />
+          ) : (
+            <Play className="w-8 h-8 ml-1" />
+          )}
         </div>
         
-        {/* Station Name */}
-        <h3 className="text-sm font-medium text-center mb-2 line-clamp-2">
+        <h3 className="font-medium text-sm truncate w-full text-center pt-1">
           {station.name}
         </h3>
         
-        {/* Action Buttons */}
-        <div className="flex justify-center space-x-1 mt-1">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-8 w-8 p-0"
-            onClick={onPlay}
-          >
-            <Play className="h-4 w-4" />
-          </Button>
-          
-          {canFavorite && (
-            <Button
-              variant="ghost"
-              size="sm"
+        <div className="flex justify-center space-x-1 mt-auto">
+          {onToggleFavorite && (
+            <Button 
+              size="icon" 
+              variant="ghost" 
               className={cn(
-                "h-8 w-8 p-0",
-                station.isFavorite && "text-yellow-500"
+                "h-8 w-8", 
+                station.isFavorite ? "text-yellow-500" : "text-muted-foreground"
               )}
-              onClick={onToggleFavorite}
+              onClick={(e) => handleButtonClick(e, onToggleFavorite)}
             >
-              <Star className="h-4 w-4" />
+              <Star className={cn(
+                "h-4 w-4",
+                station.isFavorite && "fill-yellow-500"
+              )} />
             </Button>
           )}
           
-          {isEditable && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-8 w-8 p-0 text-blue-500"
-              onClick={onEdit}
+          {onEdit && !station.isPrebuilt && (
+            <Button 
+              size="icon" 
+              variant="ghost" 
+              className="h-8 w-8 text-blue-500"
+              onClick={(e) => handleButtonClick(e, onEdit)}
             >
               <Edit className="h-4 w-4" />
             </Button>
           )}
           
-          {canDelete && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-8 w-8 p-0 text-red-500"
-              onClick={onDelete}
+          {onDelete && (
+            <Button 
+              size="icon" 
+              variant="ghost" 
+              className="h-8 w-8 text-destructive"
+              onClick={(e) => handleButtonClick(e, onDelete)}
             >
               <Trash2 className="h-4 w-4" />
             </Button>
           )}
         </div>
-      </CardContent>
+      </div>
     </Card>
   );
 };
