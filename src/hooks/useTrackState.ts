@@ -44,7 +44,7 @@ export const useTrackState = (): TrackStateResult => {
     stateVersion
   );
 
-  // Return the public interface with explicit mapping to match TrackStateResult interface
+  // Return the public interface with properties that match TrackStateResult interface exactly
   return {
     tracks,
     currentIndex,
@@ -52,14 +52,14 @@ export const useTrackState = (): TrackStateResult => {
     setCurrentIndex,
     setIsPlaying,
     ...operations,
-    // Map the management functions to match TrackStateResult interface
+    // Map management functions to match TrackStateResult interface
     getUserStations: management.getMyStations,
     getTopStations: management.getPopularStations,
-    stationExists: management.stationExists,
-    checkIfStationExists: (url: string) => {
-      const result = management.stationExists(url);
-      return result; // Should match the return type in TrackStateResult
-    },
+    // Map stationExists to checkIfStationExists as required by TrackStateResult
+    checkIfStationExists: management.stationExists,
+    // Include other operations from operations interface
+    editStationByValue: operations.editStationByValue,
+    removeStationByValue: operations.removeStationByValue,
     ...debug
   };
 };
