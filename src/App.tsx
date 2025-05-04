@@ -13,7 +13,14 @@ import SettingsPage from "./pages/SettingsPage";
 import Index from "./pages/Index";
 import { TrackStateProvider } from "./context/TrackStateContext";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+      refetchOnWindowFocus: false
+    }
+  }
+});
 
 const App = () => {
   return (
@@ -27,10 +34,7 @@ const App = () => {
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/playlist" element={<PlaylistPage />} />
-                <Route 
-                  path="/add-station" 
-                  element={<AddStationPage />} 
-                />
+                <Route path="/add-station" element={<AddStationPage />} />
                 <Route path="/station-list" element={<StationListPage />} />
                 <Route path="/settings" element={<SettingsPage />} />
                 <Route path="*" element={<NotFound />} />

@@ -21,7 +21,6 @@ export const TrackStateProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     
     if (trackState.tracks.length > 0) {
       console.log("First track in context provider:", JSON.stringify(trackState.tracks[0]));
-      console.log("All tracks in provider:", JSON.stringify(trackState.tracks));
     }
     
     // Mark as initialized after first render
@@ -31,19 +30,11 @@ export const TrackStateProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     }
   }, [trackState.tracks, initialized]);
   
-  // CRITICAL FIX: Create a truly stable memoized context value that will not cause unnecessary rerenders
-  // but will update when the essential parts of the state change
+  // Create a stable context value that won't cause unnecessary rerenders
   const contextValue = useMemo(() => {
-    console.log("Recreating context value with", trackState.tracks.length, "tracks");
-    return {
-      ...trackState,
-      // Ensure tracks is always a new reference when content changes
-      tracks: [...trackState.tracks]  
-    };
+    return trackState;
   }, [
-    trackState.tracks.length,
-    // Stringify tracks to detect content changes
-    JSON.stringify(trackState.tracks),
+    trackState.tracks,
     trackState.currentIndex,
     trackState.isPlaying
   ]);

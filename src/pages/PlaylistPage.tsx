@@ -1,130 +1,172 @@
 
-import React, { useEffect, useState, useCallback, useRef } from "react";
+import React, { useState } from "react";
+import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import Playlist from "@/components/Playlist";
-import { useToast } from "@/components/ui/use-toast";
-import Navigation from "@/components/Navigation";
-import MusicPlayer from "@/components/MusicPlayer";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { StationGrid } from "@/components/ui/player/StationGrid";
+import { MusicPlayer } from "@/components/ui/player/MusicPlayer";
 import { useTrackStateContext } from "@/context/TrackStateContext";
+import { usePlayerCore } from "@/hooks/usePlayerCore";
+import { Track } from "@/types/track";
+import EditStationDialog from "@/components/EditStationDialog";
+import { useToast } from "@/hooks/use-toast";
 
 const PlaylistPage: React.FC = () => {
+  const { toast } = useToast();
+  const [editingStation, setEditingStation] = useState<Track | null>(null);
+  
   const { 
-    tracks, 
-    removeUrl, 
-    editTrack, 
-    currentIndex, 
-    isPlaying, 
-    setCurrentIndex, 
+    tracks,
+    currentIndex,
+    isPlaying,
+    setCurrentIndex,
     setIsPlaying,
-    debugState
+    editStationByValue,
+    removeStationByValue,
+    toggleFavorite,
+    getUserStations
   } = useTrackStateContext();
   
-  // Use a ref to track if this is the first render
-  const initialRenderRef = useRef(true);
-  
-  // State to track if we need to re-render due to track changes
-  const [tracksKey, setTracksKey] = useState(() => Date.now());
-  
-  // Use a callback to force re-render with the latest tracks
-  const forceRefresh = useCallback(() => {
-    console.log("Forcing playlist refresh");
-    setTracksKey(Date.now());
-  }, []);
-  
-  // Log details on every render for debugging
-  useEffect(() => {
-    console.log("PlaylistPage - Current tracks count:", tracks.length);
-    if (tracks.length > 0) {
-      console.log("First track in playlist:", JSON.stringify(tracks[0]));
-      console.log("All tracks in playlist:", JSON.stringify(tracks));
-    }
-    
-    // Always force a refresh when tracks change
-    forceRefresh();
-    
-    // If debug function is available, use it for extended information
-    if (debugState) {
-      const debugInfo = debugState();
-      console.log("PlaylistPage debug - state version:", debugInfo?.stateVersion);
-    }
-  }, [tracks, debugState, forceRefresh]);
-  
-  // Force an initial refresh after component mounts
-  useEffect(() => {
-    if (initialRenderRef.current) {
-      console.log("PlaylistPage - Initial mount refresh");
-      initialRenderRef.current = false;
-      setTimeout(forceRefresh, 100);
-    }
-  }, [forceRefresh]);
+  // Split stations into user and prebuilt
+  const userStations = getUserStations();
+  const prebuiltStations = tracks.filter(track => track.isPrebuilt);
   
   // Derive URLs from tracks
   const urls = tracks.map(track => track.url);
   
-  const { toast } = useToast();
-
-  const handleEditTrack = (index: number, data: { url: string; name: string }) => {
-    console.log("Editing track at index:", index, "with data:", JSON.stringify(data));
-    editTrack(index, data);
-    toast({
-      title: "Station updated",
-      description: `"${data.name}" has been updated`,
-    });
-    forceRefresh();
+  // Use player core for player functionality
+  const {
+    volume,
+    setVolume,
+    loading,
+    handlePlayPause,
+    handleNext,
+    handlePrevious,
+  } = usePlayerCore({
+    urls,
+    currentIndex,
+    setCurrentIndex,
+    isPlaying,
+    setIsPlaying,
+    tracks
+  });
+  
+  // Calculate current track
+  const currentTrack = tracks[currentIndex] || null;
+  
+  // Handle selecting a station from a grid
+  const handleSelectStation = (stationIndex: number, stationList: typeof tracks) => {
+    // Find the corresponding index in the full tracks list
+    const mainIndex = tracks.findIndex(t => t.url === stationList[stationIndex].url);
+    if (mainIndex !== -1) {
+      setCurrentIndex(mainIndex);
+      setIsPlaying(true);
+    }
   };
-
-  const handlePlayTrack = (index: number) => {
-    console.log("Selected track at index:", index);
-    setCurrentIndex(index);
-    setIsPlaying(true);
+  
+  // Edit station handler
+  const handleEditStation = (station: Track) => {
+    setEditingStation(station);
   };
-
-  const handleRemoveTrack = (index: number) => {
-    console.log("Removing track at index:", index);
-    removeUrl(index);
-    
+  
+  // Handle delete station
+  const handleDeleteStation = (station: Track) => {
+    removeStationByValue(station);
     toast({
       title: "Station removed",
-      description: "The station has been removed from your playlist"
+      description: `${station.name} has been removed from your playlist`
     });
-    
-    // Force a re-render
-    forceRefresh();
+  };
+  
+  // Toggle favorite for a station
+  const handleToggleFavorite = (station: Track) => {
+    const index = tracks.findIndex(t => t.url === station.url);
+    if (index !== -1) {
+      toggleFavorite(index);
+    }
+  };
+  
+  // Save edited station
+  const handleSaveEdit = (data: { url: string; name: string }) => {
+    if (editingStation) {
+      editStationByValue(editingStation, data);
+      toast({
+        title: "Station updated",
+        description: `"${data.name}" has been updated`,
+      });
+      setEditingStation(null);
+    }
   };
 
   return (
-    <div className="min-h-screen p-3 md:p-4 bg-gradient-to-br from-blue-900 via-purple-900 to-pink-700 dark:from-gray-900 dark:via-gray-800 dark:to-gray-700 flex flex-col items-center">
-      <div className="w-full max-w-2xl space-y-4 md:space-y-6 flex flex-col">
-        <Navigation />
+    <AppLayout>
+      <div className="container mx-auto max-w-5xl space-y-6">
+        {/* Player Card */}
+        <div className="mb-6">
+          <MusicPlayer
+            currentTrack={currentTrack}
+            isPlaying={isPlaying}
+            onPlayPause={handlePlayPause}
+            onNext={handleNext}
+            onPrevious={handlePrevious}
+            volume={volume}
+            onVolumeChange={setVolume}
+            loading={loading}
+          />
+        </div>
         
-        <MusicPlayer
-          urls={urls}
-          currentIndex={currentIndex}
-          setCurrentIndex={setCurrentIndex}
-          isPlaying={isPlaying}
-          setIsPlaying={setIsPlaying}
-          tracks={tracks}
-        />
-
-        <Card className="bg-white/10 backdrop-blur-md border-none shadow-lg">
-          <CardHeader className="p-3 md:p-4">
-            <CardTitle className="text-lg md:text-xl">My Stations</CardTitle>
+        <Card className="bg-background/30 backdrop-blur-md border-none shadow-lg">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg">My Playlist</CardTitle>
           </CardHeader>
-          <CardContent className="p-3 md:p-4 pt-0">
-            {/* Critical Fix: Use key to force re-render when tracks change */}
-            <Playlist
-              key={tracksKey}
-              urls={urls}
-              tracks={tracks}
-              currentIndex={currentIndex}
-              onSelectTrack={handlePlayTrack}
-              onRemoveTrack={handleRemoveTrack}
-              onEditTrack={handleEditTrack}
-            />
+          <CardContent>
+            <Tabs defaultValue="mystations" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="mystations">My Stations</TabsTrigger>
+                <TabsTrigger value="prebuilt">Prebuilt Stations</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="mystations" className="mt-4">
+                <StationGrid
+                  stations={userStations}
+                  currentIndex={currentIndex}
+                  currentTrackUrl={currentTrack?.url}
+                  isPlaying={isPlaying}
+                  onSelectStation={(index) => handleSelectStation(index, userStations)}
+                  onEditStation={handleEditStation}
+                  onDeleteStation={handleDeleteStation}
+                  onToggleFavorite={handleToggleFavorite}
+                />
+              </TabsContent>
+              
+              <TabsContent value="prebuilt" className="mt-4">
+                <StationGrid
+                  stations={prebuiltStations}
+                  currentIndex={currentIndex}
+                  currentTrackUrl={currentTrack?.url}
+                  isPlaying={isPlaying}
+                  onSelectStation={(index) => handleSelectStation(index, prebuiltStations)}
+                  onToggleFavorite={handleToggleFavorite}
+                />
+              </TabsContent>
+            </Tabs>
           </CardContent>
         </Card>
+        
+        {/* Edit station dialog */}
+        {editingStation && (
+          <EditStationDialog
+            isOpen={!!editingStation}
+            onClose={() => setEditingStation(null)}
+            onSave={handleSaveEdit}
+            initialValues={{
+              url: editingStation.url,
+              name: editingStation.name,
+            }}
+          />
+        )}
       </div>
-    </div>
+    </AppLayout>
   );
 };
 

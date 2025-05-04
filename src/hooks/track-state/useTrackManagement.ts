@@ -1,34 +1,39 @@
 
 import { useCallback } from "react";
 import { Track } from "@/types/track";
-import { getUserStations as getUser, getTopStations as getTop } from "./trackUtils";
-import { checkIfStationExists as checkExists } from "./trackUtils";
+import { checkIfStationExists, getUserStations, getTopStations } from "./trackUtils";
 
+/**
+ * Hook for track management operations that don't modify state
+ */
 export const useTrackManagement = (
   tracks: Track[], 
   tracksRef?: React.MutableRefObject<Track[]>
 ) => {
-  const getUserStations = useCallback(() => {
+  // Get user-created stations (non-prebuilt)
+  const getMyStations = useCallback(() => {
     // Use tracksRef for most up-to-date value when available
     const currentTracks = tracksRef?.current || tracks;
-    return getUser(currentTracks);
+    return getUserStations(currentTracks);
   }, [tracks, tracksRef]);
 
-  const getTopStations = useCallback(() => {
+  // Get popular stations by play time
+  const getPopularStations = useCallback(() => {
     // Use tracksRef for most up-to-date value when available
     const currentTracks = tracksRef?.current || tracks;
-    return getTop(currentTracks);
+    return getTopStations(currentTracks);
   }, [tracks, tracksRef]);
 
-  const checkIfStationExists = useCallback((url: string) => {
+  // Check if a station with the given URL already exists
+  const stationExists = useCallback((url: string) => {
     // Use tracksRef for most up-to-date value when available
     const currentTracks = tracksRef?.current || tracks;
-    return checkExists(url, currentTracks);
+    return checkIfStationExists(url, currentTracks);
   }, [tracks, tracksRef]);
 
   return {
-    getUserStations,
-    getTopStations,
-    checkIfStationExists
+    getMyStations,
+    getPopularStations,
+    stationExists
   };
 };

@@ -1,20 +1,20 @@
 
 import React from "react";
+import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import AddUrlForm from "@/components/AddUrlForm";
 import ImportStationsFromCsv from "@/components/ImportStationsFromCsv";
-import Navigation from "@/components/Navigation";
-import { useToast } from "@/hooks/use-toast";
 import { useTrackStateContext } from "@/context/TrackStateContext";
+import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 const AddStationPage: React.FC = () => {
   const { addUrl } = useTrackStateContext();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleAddUrl = (url: string, name: string) => {
-    console.log("HandleAddUrl called with:", url, name);
     const result = addUrl(url, name, false);
-    console.log("Result from handleAddStation:", result);
     
     if (result.success) {
       toast({
@@ -23,6 +23,8 @@ const AddStationPage: React.FC = () => {
           ? `${name} has been added to your stations.`
           : "The station has been added to your stations.",
       });
+      // Navigate to the playlist page after successful add
+      setTimeout(() => navigate("/playlist"), 500);
       return true;
     } else {
       toast({
@@ -35,40 +37,51 @@ const AddStationPage: React.FC = () => {
   };
   
   const handleImport = (stations: Array<{ name: string; url: string }>) => {
-    console.log("Importing stations:", stations.length);
-    stations.forEach(station => {
-      addUrl(station.url, station.name);
+    const addedStations = stations.filter(station => {
+      const result = addUrl(station.url, station.name);
+      return result.success;
     });
-    toast({
-      title: "Stations Imported",
-      description: `${stations.length} stations have been imported.`,
-    });
+    
+    if (addedStations.length > 0) {
+      toast({
+        title: "Stations Imported",
+        description: `${addedStations.length} stations have been imported.`,
+      });
+      // Navigate to the playlist page after successful import
+      setTimeout(() => navigate("/playlist"), 500);
+    } else {
+      toast({
+        title: "Import Failed",
+        description: "No stations were imported. Please check the format and try again.",
+        variant: "destructive"
+      });
+    }
   };
 
   return (
-    <div className="min-h-screen p-3 md:p-4 bg-gradient-to-br from-blue-900 via-purple-900 to-pink-700 dark:from-gray-900 dark:via-gray-800 dark:to-gray-700">
-      <div className="w-full max-w-2xl mx-auto space-y-4 md:space-y-6">
-        <Navigation />
+    <AppLayout>
+      <div className="container mx-auto max-w-lg space-y-6">
+        <h1 className="text-2xl font-bold text-white">Add Station</h1>
         
-        <Card className="bg-white/10 backdrop-blur-md border-none shadow-lg">
-          <CardHeader className="p-3 md:p-4">
-            <CardTitle className="text-lg md:text-xl">Add Radio Station</CardTitle>
+        <Card className="bg-background/30 backdrop-blur-md border-none shadow-lg">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg">Add Radio Station</CardTitle>
           </CardHeader>
-          <CardContent className="p-3 md:p-4 pt-0">
+          <CardContent>
             <AddUrlForm onAddUrl={handleAddUrl} />
           </CardContent>
         </Card>
 
-        <Card className="bg-white/10 backdrop-blur-md border-none shadow-lg">
-          <CardHeader className="p-3 md:p-4">
-            <CardTitle className="text-lg md:text-xl">Import Stations</CardTitle>
+        <Card className="bg-background/30 backdrop-blur-md border-none shadow-lg">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg">Import Stations</CardTitle>
           </CardHeader>
-          <CardContent className="p-3 md:p-4 pt-0">
+          <CardContent>
             <ImportStationsFromCsv onImport={handleImport} />
           </CardContent>
         </Card>
       </div>
-    </div>
+    </AppLayout>
   );
 };
 

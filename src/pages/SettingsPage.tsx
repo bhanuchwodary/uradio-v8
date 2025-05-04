@@ -1,45 +1,85 @@
 
 import React from "react";
-import { Link } from "react-router-dom";
-import { Home, Music, PlusCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { AppLayout } from "@/components/layout/AppLayout";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
-const SettingsPage = () => {
+const SettingsPage: React.FC = () => {
+  const navigate = useNavigate();
+
   return (
-    <div className="min-h-screen flex flex-col items-center justify-start p-8 bg-gradient-to-br from-blue-900 via-purple-900 to-pink-700 dark:from-gray-900 dark:via-gray-800 dark:to-gray-700">
-      <div className="w-full max-w-md bg-white/10 rounded-2xl shadow-lg p-8 mt-10 space-y-7 flex flex-col items-center">
+    <AppLayout>
+      <div className="container mx-auto max-w-lg space-y-6">
+        <h1 className="text-2xl font-bold text-white">Settings</h1>
         
-        {/* Home Button */}
-        <Link to="/" className="w-full">
-          <Button variant="outline" className="w-full glass bg-white/20 backdrop-blur-sm border-none flex items-center justify-center gap-2">
-            <Home className="w-5 h-5" />
-            Home
-          </Button>
-        </Link>
-
-        {/* Playlist */}
-        <Link to="/playlist" className="w-full">
-          <Button variant="outline" className="w-full glass bg-white/20 backdrop-blur-sm border-none flex items-center justify-center gap-2">
-            <Music className="w-5 h-5" />
-            Playlist
-          </Button>
-        </Link>
-
-        {/* Add Station */}
-        <Link to="/add-station" className="w-full">
-          <Button variant="outline" className="w-full glass bg-white/20 backdrop-blur-sm border-none flex items-center justify-center gap-2">
-            <PlusCircle className="w-5 h-5" />
-            Add Station
-          </Button>
-        </Link>
-
-        {/* Theme Toggle */}
-        <div className="w-full flex items-center justify-center">
-          <ThemeToggle />
-        </div>
+        <Card className="bg-background/30 backdrop-blur-md border-none shadow-lg">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg">Appearance</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between">
+              <span>Theme</span>
+              <ThemeToggle />
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="bg-background/30 backdrop-blur-md border-none shadow-lg">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg">Navigation</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Button 
+              variant="outline"
+              className="w-full justify-start"
+              onClick={() => navigate("/")}
+            >
+              Home
+            </Button>
+            
+            <Button 
+              variant="outline"
+              className="w-full justify-start"
+              onClick={() => navigate("/playlist")}
+            >
+              Playlist
+            </Button>
+            
+            <Button 
+              variant="outline"
+              className="w-full justify-start"
+              onClick={() => navigate("/station-list")}
+            >
+              Station List
+            </Button>
+            
+            <Button 
+              variant="outline"
+              className="w-full justify-start"
+              onClick={() => navigate("/add-station")}
+            >
+              Add Station
+            </Button>
+          </CardContent>
+        </Card>
+        
+        <Card className="bg-background/30 backdrop-blur-md border-none shadow-lg">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg">About</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground">
+              Streamify Jukebox v1.0.0
+            </p>
+            <p className="text-xs text-muted-foreground mt-1">
+              A modern radio streaming application
+            </p>
+          </CardContent>
+        </Card>
       </div>
-    </div>
+    </AppLayout>
   );
 };
 
