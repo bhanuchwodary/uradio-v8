@@ -15,7 +15,7 @@ const Navigation = () => {
         <Link to="/">
           <Button variant="ghost" size="icon" className="bg-white/20 hover:bg-white/30 dark:bg-black/20 dark:hover:bg-black/30 border-none">
             <ListMusic className="h-6 w-6" />
-            <span className="sr-only">Playlist</span>
+            <span className="sr-only">Home</span>
           </Button>
         </Link>
         <Link to="/station-list">
@@ -28,6 +28,12 @@ const Navigation = () => {
           <Button variant="ghost" size="icon" className="bg-white/20 hover:bg-white/30 dark:bg-black/20 dark:hover:bg-black/30 border-none">
             <Plus className="h-6 w-6" />
             <span className="sr-only">Add Station</span>
+          </Button>
+        </Link>
+        <Link to="/playlist">
+          <Button variant="ghost" size="icon" className="bg-white/20 hover:bg-white/30 dark:bg-black/20 dark:hover:bg-black/30 border-none">
+            <ListMusic className="h-6 w-6" />
+            <span className="sr-only">Playlist</span>
           </Button>
         </Link>
       </div>

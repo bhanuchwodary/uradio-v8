@@ -7,6 +7,7 @@ type AudioInstanceType = {
   activePlayerInstance: React.MutableRefObject<symbol> | null;
   isInitialized: boolean;
   currentUrl: string | null;
+  isPlaying: boolean; // Track global playback state
 };
 
 // Maintains a shared audio and HLS context across the app
@@ -15,5 +16,6 @@ export const globalAudioRef: AudioInstanceType = {
   hls: null,
   activePlayerInstance: null,
   isInitialized: false,
-  currentUrl: null
+  currentUrl: null,
+  isPlaying: false // Initialize as not playing
 };

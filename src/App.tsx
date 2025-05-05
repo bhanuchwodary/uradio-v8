@@ -10,6 +10,7 @@ import AddStationPage from "./pages/AddStationPage";
 import StationListPage from "./pages/StationListPage";
 import SettingsPage from "./pages/SettingsPage";
 import Index from "./pages/Index";
+import PlaylistPage from "./pages/PlaylistPage";
 import { TrackStateProvider } from "./context/TrackStateContext";
 
 const queryClient = new QueryClient({
@@ -35,6 +36,7 @@ const App = () => {
                 <Route path="/add-station" element={<AddStationPage />} />
                 <Route path="/station-list" element={<StationListPage />} />
                 <Route path="/settings" element={<SettingsPage />} />
+                <Route path="/playlist" element={<PlaylistPage />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </TrackStateProvider>

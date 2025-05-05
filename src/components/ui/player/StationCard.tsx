@@ -44,7 +44,7 @@ export const StationCard: React.FC<StationCardProps> = ({
       <div className="px-3 py-4 flex flex-col items-center space-y-2">
         <div 
           className={cn(
-            "w-16 h-16 rounded-full flex items-center justify-center transition-all duration-300",
+            "w-16 h-16 rounded-full flex items-center justify-center transition-colors",
             isPlaying 
               ? "bg-primary text-primary-foreground" 
               : "bg-background/50 text-muted-foreground group-hover:bg-primary/20"

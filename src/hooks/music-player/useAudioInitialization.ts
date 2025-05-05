@@ -20,6 +20,11 @@ export const useAudioInitialization = ({
       globalAudioRef.element = new Audio();
       globalAudioRef.element.preload = "auto";
       globalAudioRef.element.crossOrigin = "anonymous";
+      
+      // Set additional properties to help with mobile playback
+      globalAudioRef.element.autoplay = false;
+      globalAudioRef.element.playsInline = true;
+      
       // Prevent audio element from being garbage collected
       globalAudioRef.element.addEventListener('canplay', () => {
         // This empty handler helps keep the audio element alive
@@ -38,10 +43,14 @@ export const useAudioInitialization = ({
       audioRef.current.volume = volume;
     }
 
+    // Log that we're using the existing audio element instead of creating a new one
+    console.log("Using existing global audio element for page:", window.location.pathname);
+    
     // This is crucial - we're not cleaning up the audio element on unmount
     // to maintain continuous playback between page navigations
     return () => {
       console.log("Component unmounting, audio reference removed but playback continues");
+      // Don't reset anything here, let the audio continue playing
     };
   }, []); // Empty dependency array ensures this only runs once
 };
