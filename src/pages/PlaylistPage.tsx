@@ -1,27 +1,13 @@
 
 import React, { useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { StationGrid } from "@/components/ui/player/StationGrid";
-import { MusicPlayer } from "@/components/ui/player/MusicPlayer";
 import { useTrackStateContext } from "@/context/TrackStateContext";
 import { usePlayerCore } from "@/hooks/usePlayerCore";
 import { Track } from "@/types/track";
-import EditStationDialog from "@/components/EditStationDialog";
 import { useToast } from "@/hooks/use-toast";
-import { Button } from "@/components/ui/button";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { X } from "lucide-react";
+import PlaylistPlayer from "@/components/playlist/PlaylistPlayer";
+import PlaylistContent from "@/components/playlist/PlaylistContent";
+import PlaylistDialogs from "@/components/playlist/PlaylistDialogs";
 
 const PlaylistPage: React.FC = () => {
   const { toast } = useToast();
@@ -123,92 +109,40 @@ const PlaylistPage: React.FC = () => {
   return (
     <AppLayout>
       <div className="container mx-auto max-w-5xl space-y-6">
-        {/* Player Card */}
-        <div className="mb-6">
-          <MusicPlayer
-            currentTrack={currentTrack}
-            isPlaying={isPlaying}
-            onPlayPause={handlePlayPause}
-            onNext={handleNext}
-            onPrevious={handlePrevious}
-            volume={volume}
-            onVolumeChange={setVolume}
-            loading={loading}
-          />
-        </div>
+        {/* Player Component */}
+        <PlaylistPlayer
+          currentTrack={currentTrack}
+          isPlaying={isPlaying}
+          handlePlayPause={handlePlayPause}
+          handleNext={handleNext}
+          handlePrevious={handlePrevious}
+          volume={volume}
+          setVolume={setVolume}
+          loading={loading}
+        />
         
-        <Card className="bg-background/30 backdrop-blur-md border-none shadow-lg">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg">My Playlist</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Tabs defaultValue="mystations" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="mystations">My Stations</TabsTrigger>
-                <TabsTrigger value="prebuilt">Prebuilt Stations</TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="mystations" className="mt-4">
-                <StationGrid
-                  stations={userStations}
-                  currentIndex={currentIndex}
-                  currentTrackUrl={currentTrack?.url}
-                  isPlaying={isPlaying}
-                  onSelectStation={(index) => handleSelectStation(index, userStations)}
-                  onEditStation={handleEditStation}
-                  onDeleteStation={handleConfirmDelete}
-                  onToggleFavorite={handleToggleFavorite}
-                />
-              </TabsContent>
-              
-              <TabsContent value="prebuilt" className="mt-4">
-                <StationGrid
-                  stations={prebuiltStations}
-                  currentIndex={currentIndex}
-                  currentTrackUrl={currentTrack?.url}
-                  isPlaying={isPlaying}
-                  onSelectStation={(index) => handleSelectStation(index, prebuiltStations)}
-                  onToggleFavorite={handleToggleFavorite}
-                  onDeleteStation={handleConfirmDelete}
-                />
-              </TabsContent>
-            </Tabs>
-          </CardContent>
-        </Card>
+        {/* Playlist Content Component */}
+        <PlaylistContent
+          userStations={userStations}
+          prebuiltStations={prebuiltStations}
+          currentIndex={currentIndex}
+          currentTrack={currentTrack}
+          isPlaying={isPlaying}
+          onSelectStation={handleSelectStation}
+          onEditStation={handleEditStation}
+          onConfirmDelete={handleConfirmDelete}
+          onToggleFavorite={handleToggleFavorite}
+        />
         
-        {/* Edit station dialog */}
-        {editingStation && (
-          <EditStationDialog
-            isOpen={!!editingStation}
-            onClose={() => setEditingStation(null)}
-            onSave={handleSaveEdit}
-            initialValues={{
-              url: editingStation.url,
-              name: editingStation.name,
-            }}
-          />
-        )}
-
-        {/* Delete confirmation dialog */}
-        <AlertDialog 
-          open={!!stationToDelete} 
-          onOpenChange={(open) => !open && setStationToDelete(null)}
-        >
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Remove Station</AlertDialogTitle>
-              <AlertDialogDescription>
-                Are you sure you want to remove "{stationToDelete?.name}"? This action cannot be undone.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={handleDeleteStation}>
-                Remove
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+        {/* Dialogs Component */}
+        <PlaylistDialogs
+          editingStation={editingStation}
+          stationToDelete={stationToDelete}
+          onCloseEditDialog={() => setEditingStation(null)}
+          onSaveEdit={handleSaveEdit}
+          onCloseDeleteDialog={() => setStationToDelete(null)}
+          onConfirmDelete={handleDeleteStation}
+        />
       </div>
     </AppLayout>
   );
