@@ -1,25 +1,14 @@
 
 import React, { useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { MusicPlayer } from "@/components/ui/player/MusicPlayer";
-import { StationGrid } from "@/components/ui/player/StationGrid";
 import { useTrackStateContext } from "@/context/TrackStateContext";
 import { usePlayerCore } from "@/hooks/usePlayerCore";
 import { Track } from "@/types/track";
-import EditStationDialog from "@/components/EditStationDialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import HomePagePlayer from "@/components/home/HomePagePlayer";
+import FavoritesSection from "@/components/home/FavoritesSection";
+import StationsTabsSection from "@/components/home/StationsTabsSection";
+import HomePageDialogs from "@/components/home/HomePageDialogs";
 
 const Index: React.FC = () => {
   const { toast } = useToast();
@@ -131,125 +120,51 @@ const Index: React.FC = () => {
     <AppLayout>
       <div className="container mx-auto max-w-5xl space-y-6">
         {/* Player Card */}
-        <div className="mb-6">
-          <MusicPlayer
-            currentTrack={currentTrack}
-            isPlaying={isPlaying}
-            onPlayPause={handlePlayPause}
-            onNext={handleNext}
-            onPrevious={handlePrevious}
-            volume={volume}
-            onVolumeChange={setVolume}
-            loading={loading}
-          />
-        </div>
+        <HomePagePlayer
+          currentTrack={currentTrack}
+          isPlaying={isPlaying}
+          handlePlayPause={handlePlayPause}
+          handleNext={handleNext}
+          handlePrevious={handlePrevious}
+          volume={volume}
+          setVolume={setVolume}
+          loading={loading}
+        />
 
         {/* Favorites Section */}
-        {favoriteStations.length > 0 && (
-          <Card className="bg-background/30 backdrop-blur-md border-none shadow-lg">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg">Favorites</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <StationGrid
-                stations={favoriteStations}
-                currentIndex={currentIndex}
-                currentTrackUrl={currentTrack?.url}
-                isPlaying={isPlaying}
-                onSelectStation={(index) => handleSelectStation(index, favoriteStations)}
-                onToggleFavorite={handleToggleFavorite}
-                onDeleteStation={handleConfirmDelete}
-              />
-            </CardContent>
-          </Card>
-        )}
+        <FavoritesSection 
+          favoriteStations={favoriteStations}
+          currentIndex={currentIndex}
+          currentTrackUrl={currentTrack?.url}
+          isPlaying={isPlaying}
+          onSelectStation={handleSelectStation}
+          onToggleFavorite={handleToggleFavorite}
+          onDeleteStation={handleConfirmDelete}
+        />
         
-        {/* All Stations Section */}
-        <Card className="bg-background/30 backdrop-blur-md border-none shadow-lg">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg">My Stations</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Tabs defaultValue="popular" className="w-full">
-              <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="popular">Popular</TabsTrigger>
-                <TabsTrigger value="mystations">My Stations</TabsTrigger>
-                <TabsTrigger value="prebuilt">Prebuilt</TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="popular" className="mt-4">
-                <StationGrid
-                  stations={popularStations}
-                  currentIndex={currentIndex}
-                  currentTrackUrl={currentTrack?.url}
-                  isPlaying={isPlaying}
-                  onSelectStation={(index) => handleSelectStation(index, popularStations)}
-                  onToggleFavorite={handleToggleFavorite}
-                  onDeleteStation={handleConfirmDelete}
-                />
-              </TabsContent>
-              
-              <TabsContent value="mystations" className="mt-4">
-                <StationGrid
-                  stations={userStations}
-                  currentIndex={currentIndex}
-                  currentTrackUrl={currentTrack?.url}
-                  isPlaying={isPlaying}
-                  onSelectStation={(index) => handleSelectStation(index, userStations)}
-                  onEditStation={handleEditStation}
-                  onDeleteStation={handleConfirmDelete}
-                  onToggleFavorite={handleToggleFavorite}
-                />
-              </TabsContent>
-              
-              <TabsContent value="prebuilt" className="mt-4">
-                <StationGrid
-                  stations={prebuiltStations}
-                  currentIndex={currentIndex}
-                  currentTrackUrl={currentTrack?.url}
-                  isPlaying={isPlaying}
-                  onSelectStation={(index) => handleSelectStation(index, prebuiltStations)}
-                  onToggleFavorite={handleToggleFavorite}
-                  onDeleteStation={handleConfirmDelete}
-                />
-              </TabsContent>
-            </Tabs>
-          </CardContent>
-        </Card>
+        {/* All Stations Section with Tabs */}
+        <StationsTabsSection
+          popularStations={popularStations}
+          userStations={userStations}
+          prebuiltStations={prebuiltStations}
+          currentIndex={currentIndex}
+          currentTrackUrl={currentTrack?.url}
+          isPlaying={isPlaying}
+          onSelectStation={handleSelectStation}
+          onEditStation={handleEditStation}
+          onDeleteStation={handleConfirmDelete}
+          onToggleFavorite={handleToggleFavorite}
+        />
         
-        {/* Edit station dialog */}
-        {editingStation && (
-          <EditStationDialog
-            isOpen={!!editingStation}
-            onClose={() => setEditingStation(null)}
-            onSave={handleSaveEdit}
-            initialValues={{
-              url: editingStation.url,
-              name: editingStation.name,
-            }}
-          />
-        )}
-
-        {/* Delete confirmation dialog */}
-        <AlertDialog 
-          open={!!stationToDelete} 
-          onOpenChange={(open) => !open && setStationToDelete(null)}
-        >
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Remove Station</AlertDialogTitle>
-              <AlertDialogDescription>
-                Are you sure you want to remove "{stationToDelete?.name}"? This action cannot be undone.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={handleDeleteStation}>
-                Remove
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+        {/* Dialogs for editing and deleting */}
+        <HomePageDialogs 
+          editingStation={editingStation}
+          stationToDelete={stationToDelete}
+          onCloseEditDialog={() => setEditingStation(null)}
+          onSaveEdit={handleSaveEdit}
+          onCloseDeleteDialog={() => setStationToDelete(null)}
+          onConfirmDelete={handleDeleteStation}
+        />
       </div>
     </AppLayout>
   );
