@@ -1,4 +1,3 @@
-
 import { useEffect } from "react";
 import { globalAudioRef } from "@/components/music-player/audioInstance";
 
@@ -23,7 +22,8 @@ export const useAudioInitialization = ({
       
       // Set additional properties to help with mobile playback
       globalAudioRef.element.autoplay = false;
-      globalAudioRef.element.playsInline = true;
+      // Using type assertion to handle playsInline
+      (globalAudioRef.element as any).playsInline = true;
       
       // Prevent audio element from being garbage collected
       globalAudioRef.element.addEventListener('canplay', () => {
