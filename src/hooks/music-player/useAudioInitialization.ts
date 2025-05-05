@@ -38,10 +38,10 @@ export const useAudioInitialization = ({
       audioRef.current.volume = volume;
     }
 
+    // This is crucial - we're not cleaning up the audio element on unmount
+    // to maintain continuous playback between page navigations
     return () => {
-      // Instead of destroying the audio element, we'll just remove the reference
-      // but keep the global audio element playing
       console.log("Component unmounting, audio reference removed but playback continues");
     };
-  }, []);  // Remove dependencies to prevent recreation of audio element
+  }, []); // Empty dependency array ensures this only runs once
 };

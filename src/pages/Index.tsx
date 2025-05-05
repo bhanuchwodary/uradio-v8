@@ -1,20 +1,30 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MusicPlayer } from "@/components/ui/player/MusicPlayer";
 import { StationGrid } from "@/components/ui/player/StationGrid";
 import { useTrackStateContext } from "@/context/TrackStateContext";
 import { usePlayerCore } from "@/hooks/usePlayerCore";
+import { Track } from "@/types/track";
+import EditStationDialog from "@/components/EditStationDialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useToast } from "@/hooks/use-toast";
 
 const Index: React.FC = () => {
+  const { toast } = useToast();
+  const [editingStation, setEditingStation] = useState<Track | null>(null);
+  
   const { 
     tracks, 
     currentIndex,
     isPlaying,
     setCurrentIndex,
     setIsPlaying,
-    toggleFavorite
+    editStationByValue,
+    removeStationByValue,
+    toggleFavorite,
+    getUserStations
   } = useTrackStateContext();
   
   // Get favorite and popular stations
@@ -24,6 +34,11 @@ const Index: React.FC = () => {
   const popularStations = [...tracks]
     .sort((a, b) => (b.playTime || 0) - (a.playTime || 0))
     .slice(0, 8);
+    
+  // Get user stations (not prebuilt)
+  const userStations = getUserStations();
+  // Get prebuilt stations
+  const prebuiltStations = tracks.filter(track => track.isPrebuilt);
   
   // Derive URLs from tracks
   const urls = tracks.map(track => track.url);
@@ -65,6 +80,32 @@ const Index: React.FC = () => {
       toggleFavorite(index);
     }
   };
+  
+  // Edit station handler
+  const handleEditStation = (station: Track) => {
+    setEditingStation(station);
+  };
+  
+  // Handle delete station
+  const handleDeleteStation = (station: Track) => {
+    removeStationByValue(station);
+    toast({
+      title: "Station removed",
+      description: `${station.name} has been removed from your playlist`
+    });
+  };
+  
+  // Save edited station
+  const handleSaveEdit = (data: { url: string; name: string }) => {
+    if (editingStation) {
+      editStationByValue(editingStation, data);
+      toast({
+        title: "Station updated",
+        description: `"${data.name}" has been updated`,
+      });
+      setEditingStation(null);
+    }
+  };
 
   return (
     <AppLayout>
@@ -101,23 +142,70 @@ const Index: React.FC = () => {
             </CardContent>
           </Card>
         )}
-
-        {/* Popular Stations */}
+        
+        {/* All Stations Section */}
         <Card className="bg-background/30 backdrop-blur-md border-none shadow-lg">
           <CardHeader className="pb-2">
-            <CardTitle className="text-lg">Popular Stations</CardTitle>
+            <CardTitle className="text-lg">My Stations</CardTitle>
           </CardHeader>
           <CardContent>
-            <StationGrid
-              stations={popularStations}
-              currentIndex={currentIndex}
-              currentTrackUrl={currentTrack?.url}
-              isPlaying={isPlaying}
-              onSelectStation={(index) => handleSelectStation(index, popularStations)}
-              onToggleFavorite={handleToggleFavorite}
-            />
+            <Tabs defaultValue="popular" className="w-full">
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="popular">Popular</TabsTrigger>
+                <TabsTrigger value="mystations">My Stations</TabsTrigger>
+                <TabsTrigger value="prebuilt">Prebuilt</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="popular" className="mt-4">
+                <StationGrid
+                  stations={popularStations}
+                  currentIndex={currentIndex}
+                  currentTrackUrl={currentTrack?.url}
+                  isPlaying={isPlaying}
+                  onSelectStation={(index) => handleSelectStation(index, popularStations)}
+                  onToggleFavorite={handleToggleFavorite}
+                />
+              </TabsContent>
+              
+              <TabsContent value="mystations" className="mt-4">
+                <StationGrid
+                  stations={userStations}
+                  currentIndex={currentIndex}
+                  currentTrackUrl={currentTrack?.url}
+                  isPlaying={isPlaying}
+                  onSelectStation={(index) => handleSelectStation(index, userStations)}
+                  onEditStation={handleEditStation}
+                  onDeleteStation={handleDeleteStation}
+                  onToggleFavorite={handleToggleFavorite}
+                />
+              </TabsContent>
+              
+              <TabsContent value="prebuilt" className="mt-4">
+                <StationGrid
+                  stations={prebuiltStations}
+                  currentIndex={currentIndex}
+                  currentTrackUrl={currentTrack?.url}
+                  isPlaying={isPlaying}
+                  onSelectStation={(index) => handleSelectStation(index, prebuiltStations)}
+                  onToggleFavorite={handleToggleFavorite}
+                />
+              </TabsContent>
+            </Tabs>
           </CardContent>
         </Card>
+        
+        {/* Edit station dialog */}
+        {editingStation && (
+          <EditStationDialog
+            isOpen={!!editingStation}
+            onClose={() => setEditingStation(null)}
+            onSave={handleSaveEdit}
+            initialValues={{
+              url: editingStation.url,
+              name: editingStation.name,
+            }}
+          />
+        )}
       </div>
     </AppLayout>
   );

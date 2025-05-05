@@ -6,7 +6,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import NotFound from "./pages/NotFound";
-import PlaylistPage from "./pages/PlaylistPage";
 import AddStationPage from "./pages/AddStationPage";
 import StationListPage from "./pages/StationListPage";
 import SettingsPage from "./pages/SettingsPage";
@@ -33,7 +32,6 @@ const App = () => {
             <TrackStateProvider>
               <Routes>
                 <Route path="/" element={<Index />} />
-                <Route path="/playlist" element={<PlaylistPage />} />
                 <Route path="/add-station" element={<AddStationPage />} />
                 <Route path="/station-list" element={<StationListPage />} />
                 <Route path="/settings" element={<SettingsPage />} />
