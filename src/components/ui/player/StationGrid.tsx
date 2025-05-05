@@ -40,7 +40,7 @@ export const StationGrid: React.FC<StationGridProps> = ({
         
         return (
           <StationCard
-            key={`${station.url}-${index}`}
+            key={`${station.url}-${index}-${isSelected}`}
             station={station}
             isPlaying={isCurrentlyPlaying}
             isSelected={isSelected}

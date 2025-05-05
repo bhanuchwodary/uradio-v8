@@ -10,10 +10,21 @@ import { Track } from "@/types/track";
 import EditStationDialog from "@/components/EditStationDialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const Index: React.FC = () => {
   const { toast } = useToast();
   const [editingStation, setEditingStation] = useState<Track | null>(null);
+  const [stationToDelete, setStationToDelete] = useState<Track | null>(null);
   
   const { 
     tracks, 
@@ -86,13 +97,22 @@ const Index: React.FC = () => {
     setEditingStation(station);
   };
   
-  // Handle delete station
-  const handleDeleteStation = (station: Track) => {
-    removeStationByValue(station);
-    toast({
-      title: "Station removed",
-      description: `${station.name} has been removed from your playlist`
-    });
+  // Open the delete confirmation dialog for a station
+  const handleConfirmDelete = (station: Track) => {
+    setStationToDelete(station);
+  };
+  
+  // Handle actual deletion after confirmation
+  const handleDeleteStation = () => {
+    if (stationToDelete) {
+      const stationName = stationToDelete.name;
+      removeStationByValue(stationToDelete);
+      toast({
+        title: "Station removed",
+        description: `${stationName} has been removed from your playlist`
+      });
+      setStationToDelete(null);
+    }
   };
   
   // Save edited station
@@ -138,6 +158,7 @@ const Index: React.FC = () => {
                 isPlaying={isPlaying}
                 onSelectStation={(index) => handleSelectStation(index, favoriteStations)}
                 onToggleFavorite={handleToggleFavorite}
+                onDeleteStation={handleConfirmDelete}
               />
             </CardContent>
           </Card>
@@ -164,6 +185,7 @@ const Index: React.FC = () => {
                   isPlaying={isPlaying}
                   onSelectStation={(index) => handleSelectStation(index, popularStations)}
                   onToggleFavorite={handleToggleFavorite}
+                  onDeleteStation={handleConfirmDelete}
                 />
               </TabsContent>
               
@@ -175,7 +197,7 @@ const Index: React.FC = () => {
                   isPlaying={isPlaying}
                   onSelectStation={(index) => handleSelectStation(index, userStations)}
                   onEditStation={handleEditStation}
-                  onDeleteStation={handleDeleteStation}
+                  onDeleteStation={handleConfirmDelete}
                   onToggleFavorite={handleToggleFavorite}
                 />
               </TabsContent>
@@ -188,6 +210,7 @@ const Index: React.FC = () => {
                   isPlaying={isPlaying}
                   onSelectStation={(index) => handleSelectStation(index, prebuiltStations)}
                   onToggleFavorite={handleToggleFavorite}
+                  onDeleteStation={handleConfirmDelete}
                 />
               </TabsContent>
             </Tabs>
@@ -206,6 +229,27 @@ const Index: React.FC = () => {
             }}
           />
         )}
+
+        {/* Delete confirmation dialog */}
+        <AlertDialog 
+          open={!!stationToDelete} 
+          onOpenChange={(open) => !open && setStationToDelete(null)}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Remove Station</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to remove "{stationToDelete?.name}"? This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={handleDeleteStation}>
+                Remove
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </AppLayout>
   );
