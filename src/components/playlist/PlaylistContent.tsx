@@ -4,6 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { StationGrid } from "@/components/ui/player/StationGrid";
 import { Track } from "@/types/track";
+import { useTheme } from "@/components/ThemeProvider";
+import { cn } from "@/lib/utils";
 
 interface PlaylistContentProps {
   userStations: Track[];
@@ -28,16 +30,49 @@ const PlaylistContent: React.FC<PlaylistContentProps> = ({
   onConfirmDelete,
   onToggleFavorite
 }) => {
+  const { theme } = useTheme();
+  const isDark = theme === "dark" || (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+  
   return (
-    <Card className="bg-background/30 backdrop-blur-md border-none shadow-lg">
+    <Card className={cn(
+      "border-none shadow-lg",
+      isDark 
+        ? "dark-glass bg-background/30" 
+        : "light-glass bg-white/40"
+    )}>
       <CardHeader className="pb-2">
-        <CardTitle className="text-lg">My Playlist</CardTitle>
+        <CardTitle className="text-lg font-bold flex items-center">
+          <span className="relative">
+            My Playlist
+            <span className={cn(
+              "absolute -bottom-1.5 left-0 right-0 h-0.5 rounded-full",
+              isDark ? "bg-primary/70" : "bg-primary/60"
+            )}></span>
+          </span>
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="mystations" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="mystations">My Stations</TabsTrigger>
-            <TabsTrigger value="prebuilt">Prebuilt Stations</TabsTrigger>
+          <TabsList className={cn(
+            "grid w-full grid-cols-2 mb-2",
+            isDark 
+              ? "bg-background/40" 
+              : "bg-white/50"
+          )}>
+            <TabsTrigger value="mystations" className={cn(
+              isDark 
+                ? "data-[state=active]:bg-background/60" 
+                : "data-[state=active]:bg-white/80"
+            )}>
+              My Stations
+            </TabsTrigger>
+            <TabsTrigger value="prebuilt" className={cn(
+              isDark 
+                ? "data-[state=active]:bg-background/60" 
+                : "data-[state=active]:bg-white/80"
+            )}>
+              Prebuilt Stations
+            </TabsTrigger>
           </TabsList>
           
           <TabsContent value="mystations" className="mt-4">

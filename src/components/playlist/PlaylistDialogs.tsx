@@ -12,6 +12,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { useTheme } from "@/components/ThemeProvider";
+import { cn } from "@/lib/utils";
 
 interface PlaylistDialogsProps {
   editingStation: Track | null;
@@ -30,6 +32,9 @@ const PlaylistDialogs: React.FC<PlaylistDialogsProps> = ({
   onCloseDeleteDialog,
   onConfirmDelete
 }) => {
+  const { theme } = useTheme();
+  const isDark = theme === "dark" || (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+  
   return (
     <>
       {/* Edit station dialog */}
@@ -50,16 +55,26 @@ const PlaylistDialogs: React.FC<PlaylistDialogsProps> = ({
         open={!!stationToDelete} 
         onOpenChange={(open) => !open && onCloseDeleteDialog()}
       >
-        <AlertDialogContent>
+        <AlertDialogContent className={cn(
+          "border-none",
+          isDark ? "dark-glass" : "light-glass"
+        )}>
           <AlertDialogHeader>
-            <AlertDialogTitle>Remove Station</AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogTitle className="text-xl">Remove Station</AlertDialogTitle>
+            <AlertDialogDescription className="text-muted-foreground">
               Are you sure you want to remove "{stationToDelete?.name}"? This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={onConfirmDelete}>
+            <AlertDialogCancel className={cn(
+              isDark ? "bg-background/50 hover:bg-background/70" : "bg-background/70 hover:bg-background/90"
+            )}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={onConfirmDelete}
+              className="bg-destructive hover:bg-destructive/90"
+            >
               Remove
             </AlertDialogAction>
           </AlertDialogFooter>

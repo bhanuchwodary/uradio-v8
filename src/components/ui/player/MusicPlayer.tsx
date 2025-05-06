@@ -6,6 +6,7 @@ import { Play, Pause, SkipBack, SkipForward, Volume2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { cn } from "@/lib/utils";
+import { useTheme } from "@/components/ThemeProvider";
 
 interface MusicPlayerProps {
   currentTrack: Track | null;
@@ -28,6 +29,9 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
   onVolumeChange,
   loading = false
 }) => {
+  const { theme } = useTheme();
+  const isDark = theme === "dark" || (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+
   const getHostnameFromUrl = (url: string): string => {
     if (!url) return "No URL";
     try {
@@ -39,47 +43,57 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
   };
 
   return (
-    <Card className="p-4 bg-gradient-to-br from-background/80 to-background border-none shadow-lg backdrop-blur-md">
-      <div className="flex flex-col space-y-4">
+    <Card className={cn(
+      "p-5 border-none shadow-lg",
+      isDark 
+        ? "dark-glass bg-gradient-to-br from-background/70 to-background/40 bg-music-pattern-dark" 
+        : "light-glass bg-gradient-to-br from-white/50 to-background/70 bg-music-pattern"
+    )}>
+      <div className="flex flex-col space-y-5">
         {/* Station info */}
         <div className="text-center">
-          <h2 className="text-xl font-bold truncate">
+          <h2 className={cn(
+            "text-2xl font-bold truncate",
+            isPlaying && "text-primary"
+          )}>
             {currentTrack?.name || "Select a station"}
           </h2>
-          <p className="text-xs text-muted-foreground truncate">
+          <p className="text-sm text-muted-foreground truncate mt-1">
             {currentTrack?.url ? getHostnameFromUrl(currentTrack.url) : "No station selected"}
           </p>
           {loading && (
-            <p className="text-xs text-blue-400 animate-pulse mt-1">Loading stream...</p>
+            <p className="text-sm text-accent animate-pulse mt-2 font-medium">Loading stream...</p>
           )}
         </div>
 
         {/* Controls */}
-        <div className="flex items-center justify-center space-x-4">
+        <div className="flex items-center justify-center space-x-6">
           <Button
             variant="ghost"
             size="icon"
             onClick={onPrevious}
             disabled={!currentTrack}
-            className="h-10 w-10 rounded-full"
+            className="h-12 w-12 rounded-full transition-all hover:bg-background/50"
           >
-            <SkipBack className="h-5 w-5" />
+            <SkipBack className="h-6 w-6" />
           </Button>
           
           <Button
-            variant="default"
+            variant={isPlaying ? "outline" : "default"}
             size="icon"
             onClick={onPlayPause}
             disabled={!currentTrack}
             className={cn(
-              "h-12 w-12 rounded-full",
-              isPlaying ? "bg-primary/90" : "bg-primary"
+              "h-16 w-16 rounded-full transition-all shadow-md",
+              isPlaying 
+                ? "bg-background/50 border-primary text-primary hover:text-primary hover:bg-background/70" 
+                : "bg-primary hover:bg-primary/90"
             )}
           >
             {isPlaying ? (
-              <Pause className="h-6 w-6" />
+              <Pause className="h-8 w-8" />
             ) : (
-              <Play className="h-6 w-6 ml-0.5" />
+              <Play className="h-8 w-8 ml-1" />
             )}
           </Button>
           
@@ -88,14 +102,14 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
             size="icon"
             onClick={onNext}
             disabled={!currentTrack}
-            className="h-10 w-10 rounded-full"
+            className="h-12 w-12 rounded-full transition-all hover:bg-background/50"
           >
-            <SkipForward className="h-5 w-5" />
+            <SkipForward className="h-6 w-6" />
           </Button>
         </div>
 
         {/* Volume control */}
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-3 px-2 pt-1">
           <Volume2 className="h-4 w-4 text-muted-foreground" />
           <Slider
             value={[volume * 100]}
@@ -104,6 +118,9 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
             onValueChange={(values) => onVolumeChange(values[0] / 100)}
             className="flex-1"
           />
+          <span className="text-xs text-muted-foreground w-8 text-right">
+            {Math.round(volume * 100)}%
+          </span>
         </div>
       </div>
     </Card>
