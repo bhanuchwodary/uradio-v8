@@ -46,8 +46,8 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
     <Card className={cn(
       "p-5 border-none shadow-lg",
       isDark 
-        ? "dark-glass bg-gradient-to-br from-background/70 to-background/40 bg-music-pattern-dark" 
-        : "light-glass bg-gradient-to-br from-white/50 to-background/70 bg-music-pattern"
+        ? "bg-gradient-to-br from-background/70 to-background/40" 
+        : "bg-gradient-to-br from-white/70 to-background/40"
     )}>
       <div className="flex flex-col space-y-5">
         {/* Station info */}

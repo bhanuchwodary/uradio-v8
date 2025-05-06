@@ -28,8 +28,8 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
     <div className={cn(
       "min-h-screen flex flex-col relative",
       isDark 
-        ? "bg-gradient-to-br from-background via-background/95 to-background/90 bg-music-pattern-dark" 
-        : "bg-gradient-to-br from-background via-background/70 to-background/60 bg-music-pattern"
+        ? "bg-gradient-to-br from-background to-background/95" 
+        : "bg-gradient-to-br from-background to-background/90"
     )}>
       {/* Main Content */}
       <main className="flex-grow p-4 pb-20">

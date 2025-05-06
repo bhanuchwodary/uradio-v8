@@ -37,8 +37,8 @@ const PlaylistContent: React.FC<PlaylistContentProps> = ({
     <Card className={cn(
       "border-none shadow-lg",
       isDark 
-        ? "dark-glass bg-background/30" 
-        : "light-glass bg-white/40"
+        ? "bg-background/30" 
+        : "bg-white/40"
     )}>
       <CardHeader className="pb-2">
         <CardTitle className="text-lg font-bold flex items-center">

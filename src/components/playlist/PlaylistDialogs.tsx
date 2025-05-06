@@ -57,7 +57,7 @@ const PlaylistDialogs: React.FC<PlaylistDialogsProps> = ({
       >
         <AlertDialogContent className={cn(
           "border-none",
-          isDark ? "dark-glass" : "light-glass"
+          isDark ? "bg-background/70 backdrop-blur-md" : "bg-white/90 backdrop-blur-md"
         )}>
           <AlertDialogHeader>
             <AlertDialogTitle className="text-xl">Remove Station</AlertDialogTitle>

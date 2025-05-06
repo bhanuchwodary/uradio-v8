@@ -37,8 +37,8 @@ const PlaylistPlayer: React.FC<PlaylistPlayerProps> = ({
       <div className={cn(
         "absolute inset-0 rounded-xl opacity-70 blur-xl -z-10 transition-all",
         isPlaying ? "opacity-70" : "opacity-40",
-        isDark ? "bg-gradient-to-r from-primary/40 via-accent/30 to-primary/40" : 
-                "bg-gradient-to-r from-accent/30 via-primary/30 to-accent/30"
+        isDark ? "bg-gradient-to-r from-primary/40 to-accent/30" : 
+                "bg-gradient-to-r from-primary/30 to-accent/30"
       )} />
       
       <MusicPlayer

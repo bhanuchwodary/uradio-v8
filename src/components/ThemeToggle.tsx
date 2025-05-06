@@ -20,9 +20,9 @@ export function ThemeToggle() {
           variant="outline" 
           className={cn(
             "w-full transition-all flex items-center justify-center gap-2 border shadow",
-            theme === "dark" ? "dark-glass bg-background/50 border-white/10" : 
-            theme === "light" ? "light-glass bg-white/40 border-white/30" :
-            "glass bg-white/30 border-white/20"
+            theme === "dark" ? "bg-background/50 border-white/10" : 
+            theme === "light" ? "bg-white/60 border-white/30" :
+            "bg-white/30 border-white/20"
           )}
         >
           <div className="relative w-4 h-4">
@@ -40,8 +40,8 @@ export function ThemeToggle() {
         align="end" 
         className={cn(
           "border shadow-lg animate-in fade-in-80 zoom-in-95",
-          theme === "dark" ? "dark-glass bg-background/70 border-white/10" : 
-                           "light-glass bg-white/70 border-white/20"
+          theme === "dark" ? "bg-background/70 backdrop-blur-md border-white/10" : 
+                             "bg-white/70 backdrop-blur-md border-white/20"
         )}
       >
         <DropdownMenuItem 
