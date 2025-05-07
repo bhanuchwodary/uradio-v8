@@ -34,20 +34,20 @@ export const StationCard: React.FC<StationCardProps> = ({
   return (
     <Card 
       className={cn(
-        "relative overflow-hidden group transition-all duration-200 cursor-pointer",
+        "relative overflow-hidden group transition-all duration-300 cursor-pointer material-transition elevation-hover",
         isSelected 
-          ? "bg-primary/10 border-primary/50 shadow-lg" 
-          : "bg-background/70 hover:bg-accent/30 border-border/50"
+          ? "bg-primary/10 border-primary/50 material-shadow-2" 
+          : "bg-background/70 hover:bg-accent/30 border-border/50 material-shadow-1"
       )}
       onClick={onPlay} // Make entire card clickable
     >
       <div className="px-3 py-4 flex flex-col items-center space-y-2">
         <div 
           className={cn(
-            "w-16 h-16 rounded-full flex items-center justify-center transition-colors",
+            "w-16 h-16 rounded-full flex items-center justify-center transition-colors material-shadow-1",
             isPlaying 
-              ? "bg-primary text-primary-foreground" 
-              : "bg-accent text-accent-foreground group-hover:bg-primary/20"
+              ? "bg-primary text-primary-foreground material-shadow-2" 
+              : "bg-secondary text-secondary-foreground group-hover:bg-primary/20"
           )}
         >
           {isPlaying ? (
@@ -67,7 +67,7 @@ export const StationCard: React.FC<StationCardProps> = ({
               size="icon" 
               variant="ghost" 
               className={cn(
-                "h-8 w-8", 
+                "h-8 w-8 material-transition", 
                 station.isFavorite ? "text-yellow-500" : "text-muted-foreground"
               )}
               onClick={(e) => handleButtonClick(e, onToggleFavorite)}
@@ -83,7 +83,7 @@ export const StationCard: React.FC<StationCardProps> = ({
             <Button 
               size="icon" 
               variant="ghost" 
-              className="h-8 w-8 text-blue-500 hover:bg-accent/50"
+              className="h-8 w-8 text-blue-500 hover:bg-accent/50 material-transition"
               onClick={(e) => handleButtonClick(e, onEdit)}
             >
               <Edit className="h-4 w-4" />
@@ -94,7 +94,7 @@ export const StationCard: React.FC<StationCardProps> = ({
             <Button 
               size="icon" 
               variant="ghost" 
-              className="h-8 w-8 text-destructive hover:bg-accent/50"
+              className="h-8 w-8 text-destructive hover:bg-accent/50 material-transition"
               onClick={(e) => handleButtonClick(e, onDelete)}
             >
               <Trash2 className="h-4 w-4" />

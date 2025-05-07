@@ -22,28 +22,36 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   ];
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-blue-100 via-indigo-50 to-purple-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-700">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-secondary/80 via-background to-accent/30 dark:from-background dark:via-card dark:to-muted/30">
       {/* Main Content */}
-      <main className="flex-grow p-4">
+      <main className="flex-grow p-4 pb-20">
         {children}
       </main>
       
-      {/* Bottom Navigation Bar */}
-      <nav className="sticky bottom-0 p-2 bg-background/80 backdrop-blur-md border-t border-border/50 shadow-lg">
+      {/* Bottom Navigation Bar - Material Design Style */}
+      <nav className="fixed bottom-0 left-0 right-0 p-2 bg-background/90 backdrop-blur-lg border-t border-border/30 material-shadow-3 z-10">
         <div className="max-w-screen-lg mx-auto flex justify-around items-center">
           {navItems.map((item) => (
-            <Link key={item.path} to={item.path}>
+            <Link key={item.path} to={item.path} className="relative flex-1">
               <Button
                 variant="ghost"
                 className={cn(
-                  "flex flex-col items-center gap-1 h-auto py-2 px-3 bg-transparent",
+                  "flex flex-col items-center gap-1 h-auto py-2 px-0 w-full material-transition bg-transparent",
                   path === item.path 
-                    ? "text-primary bg-accent/50" 
-                    : "text-muted-foreground hover:bg-accent/30"
+                    ? "text-primary after:absolute after:bottom-0 after:left-1/4 after:w-1/2 after:h-0.5 after:bg-primary after:rounded-full" 
+                    : "text-muted-foreground hover:text-foreground hover:bg-transparent"
                 )}
               >
-                <item.icon className="h-5 w-5" />
-                <span className="text-xs">{item.label}</span>
+                <item.icon className={cn(
+                  "transition-transform", 
+                  path === item.path ? "h-5 w-5 scale-110" : "h-5 w-5"
+                )} />
+                <span className={cn(
+                  "text-xs transition-opacity",
+                  path === item.path ? "opacity-100" : "opacity-80"
+                )}>
+                  {item.label}
+                </span>
               </Button>
             </Link>
           ))}

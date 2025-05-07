@@ -1,10 +1,11 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 210 40% 96.1%;
+    --background: 210 40% 98%;
     --foreground: 222.2 84% 4.9%;
 
     --card: 0 0% 100%;
@@ -13,73 +14,74 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 221 83% 53%;
+    --primary: 262 83% 58%;
     --primary-foreground: 210 40% 98%;
 
-    --secondary: 214 32% 91%;
+    --secondary: 220 14.3% 95.9%;
     --secondary-foreground: 222.2 47.4% 11.2%;
 
     --muted: 210 40% 93%;
     --muted-foreground: 215.4 16.3% 46.9%;
 
-    --accent: 220 14% 80%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 262 83% 96%;
+    --accent-foreground: 262 60% 40%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
     --border: 214.3 31.8% 85%;
     --input: 214.3 31.8% 85%;
-    --ring: 221 83% 53%;
+    --ring: 262 83% 58%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
 
-    --sidebar-background: 220 14% 95%;
+    --sidebar-background: 262 59% 97%;
     --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary: 262 83% 58%;
     --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 214 32% 91%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-accent: 262 83% 96%;
+    --sidebar-accent-foreground: 262 60% 40%;
+    --sidebar-border: 262 83% 90%;
+    --sidebar-ring: 262 91.2% 59.8%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
+    --background: 220 40% 13%;
     --foreground: 210 40% 98%;
 
-    --card: 222.2 84% 4.9%;
+    --card: 222.2 84% 8%;
     --card-foreground: 210 40% 98%;
 
-    --popover: 222.2 84% 4.9%;
+    --popover: 222.2 84% 8%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 210 40% 98%;
+    --primary: 262 83% 68%;
     --primary-foreground: 222.2 47.4% 11.2%;
 
-    --secondary: 217.2 32.6% 17.5%;
+    --secondary: 217.2 32.6% 20%;
     --secondary-foreground: 210 40% 98%;
 
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 262 40% 20%;
+    --accent-foreground: 262 83% 68%;
 
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 0 62.8% 40.6%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
+    --border: 217.2 32.6% 22.5%;
+    --input: 217.2 32.6% 22.5%;
+    --ring: 262.7 66.8% 70%;
+
+    --sidebar-background: 224 40% 16%;
     --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary: 262 83% 68%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-accent: 262 40% 20%;
+    --sidebar-accent-foreground: 262 83% 68%;
+    --sidebar-border: 224 40% 22%;
+    --sidebar-ring: 262 91.2% 69.8%;
   }
 }
 
@@ -97,14 +99,34 @@
   }
 }
 
-/* Custom Glass Morphism Utilities */
+/* Material Design Utilities */
 @layer utilities {
+  .material-shadow-1 {
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+  }
+  
+  .material-shadow-2 {
+    box-shadow: 0 3px 6px rgba(0,0,0,0.15), 0 2px 4px rgba(0,0,0,0.12);
+  }
+  
+  .material-shadow-3 {
+    box-shadow: 0 10px 20px rgba(0,0,0,0.15), 0 3px 6px rgba(0,0,0,0.10);
+  }
+  
+  .material-shadow-4 {
+    box-shadow: 0 15px 25px rgba(0,0,0,0.15), 0 5px 10px rgba(0,0,0,0.05);
+  }
+  
+  .material-shadow-5 {
+    box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+  }
+  
   .glass {
-    @apply backdrop-blur-md bg-white/10 border-white/10;
+    @apply backdrop-blur-md bg-white/15 border-white/10;
   }
   
   .dark-glass {
-    @apply backdrop-blur-md bg-black/30 border-white/10;
+    @apply backdrop-blur-md bg-black/25 border-white/10;
   }
   
   .no-scrollbar {
@@ -115,4 +137,49 @@
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
+
+  .material-transition {
+    @apply transition-all duration-300 ease-in-out;
+  }
+
+  .elevation-hover {
+    @apply material-transition hover:material-shadow-3;
+  }
+}
+
+/* Material Design Animation Keyframes */
+@keyframes material-ripple {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+/* Ink Ripple Effect for buttons */
+.ink-ripple {
+  position: relative;
+  overflow: hidden;
+}
+
+.ink-ripple:after {
+  content: '';
+  display: block;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  background-image: radial-gradient(circle, #fff 10%, transparent 10.01%);
+  background-repeat: no-repeat;
+  background-position: 50%;
+  transform: scale(10, 10);
+  opacity: 0;
+  transition: transform .3s, opacity 1s;
+}
+
+.ink-ripple:active:after {
+  transform: scale(0, 0);
+  opacity: .3;
+  transition: 0s;
 }
