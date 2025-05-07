@@ -17,7 +17,7 @@ export function ThemeToggle() {
       <DropdownMenuTrigger asChild>
         <Button 
           variant="outline" 
-          className="w-full bg-accent/50 backdrop-blur-sm border-none flex items-center justify-center gap-2 dark:bg-white/20"
+          className="w-full bg-primary/15 backdrop-blur-sm border-none flex items-center justify-center gap-2 dark:bg-white/20"
         >
           <div className="relative w-4 h-4">
             <Sun className="h-[1.2rem] w-[1.2rem] absolute left-0 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />

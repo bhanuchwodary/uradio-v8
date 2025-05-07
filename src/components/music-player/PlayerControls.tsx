@@ -20,7 +20,7 @@ const PlayerControls: React.FC<PlayerControlsProps> = ({
       size="icon"
       onClick={onPrev}
       disabled={disabled}
-      className="bg-accent/50 hover:bg-accent dark:bg-gray-800 dark:hover:bg-gray-700"
+      className="bg-primary/15 hover:bg-primary/25 dark:bg-gray-800 dark:hover:bg-gray-700"
     >
       <SkipBack className="w-6 h-6" />
     </Button>
@@ -38,7 +38,7 @@ const PlayerControls: React.FC<PlayerControlsProps> = ({
       size="icon"
       onClick={onNext}
       disabled={disabled}
-      className="bg-accent/50 hover:bg-accent dark:bg-gray-800 dark:hover:bg-gray-700"
+      className="bg-primary/15 hover:bg-primary/25 dark:bg-gray-800 dark:hover:bg-gray-700"
     >
       <SkipForward className="w-6 h-6" />
     </Button>

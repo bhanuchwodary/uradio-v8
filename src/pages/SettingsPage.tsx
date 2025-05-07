@@ -12,9 +12,9 @@ const SettingsPage: React.FC = () => {
   return (
     <AppLayout>
       <div className="container mx-auto max-w-lg space-y-6">
-        <h1 className="text-2xl font-bold text-white">Settings</h1>
+        <h1 className="text-2xl font-bold text-foreground">Settings</h1>
         
-        <Card className="bg-background/30 backdrop-blur-md border-none shadow-lg">
+        <Card className="bg-background/50 backdrop-blur-md border-none shadow-lg">
           <CardHeader className="pb-2">
             <CardTitle className="text-lg">Appearance</CardTitle>
           </CardHeader>
@@ -25,14 +25,14 @@ const SettingsPage: React.FC = () => {
           </CardContent>
         </Card>
         
-        <Card className="bg-background/30 backdrop-blur-md border-none shadow-lg">
+        <Card className="bg-background/50 backdrop-blur-md border-none shadow-lg">
           <CardHeader className="pb-2">
             <CardTitle className="text-lg">Navigation</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <Button 
               variant="outline"
-              className="w-full justify-start"
+              className="w-full justify-start bg-primary/10 hover:bg-primary/20"
               onClick={() => navigate("/")}
             >
               Home
@@ -40,7 +40,7 @@ const SettingsPage: React.FC = () => {
             
             <Button 
               variant="outline"
-              className="w-full justify-start"
+              className="w-full justify-start bg-primary/10 hover:bg-primary/20"
               onClick={() => navigate("/playlist")}
             >
               Playlist
@@ -48,7 +48,7 @@ const SettingsPage: React.FC = () => {
             
             <Button 
               variant="outline"
-              className="w-full justify-start"
+              className="w-full justify-start bg-primary/10 hover:bg-primary/20"
               onClick={() => navigate("/station-list")}
             >
               Station List
@@ -56,7 +56,7 @@ const SettingsPage: React.FC = () => {
             
             <Button 
               variant="outline"
-              className="w-full justify-start"
+              className="w-full justify-start bg-primary/10 hover:bg-primary/20"
               onClick={() => navigate("/add-station")}
             >
               Add Station
@@ -64,7 +64,7 @@ const SettingsPage: React.FC = () => {
           </CardContent>
         </Card>
         
-        <Card className="bg-background/30 backdrop-blur-md border-none shadow-lg">
+        <Card className="bg-background/50 backdrop-blur-md border-none shadow-lg">
           <CardHeader className="pb-2">
             <CardTitle className="text-lg">About</CardTitle>
           </CardHeader>
