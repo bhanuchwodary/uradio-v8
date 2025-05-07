@@ -61,7 +61,7 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
             size="icon"
             onClick={onPrevious}
             disabled={!currentTrack}
-            className="h-10 w-10 rounded-full"
+            className="h-10 w-10 rounded-full bg-accent hover:bg-accent/80 dark:bg-gray-800 dark:hover:bg-gray-700"
           >
             <SkipBack className="h-5 w-5" />
           </Button>
@@ -88,7 +88,7 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
             size="icon"
             onClick={onNext}
             disabled={!currentTrack}
-            className="h-10 w-10 rounded-full"
+            className="h-10 w-10 rounded-full bg-accent hover:bg-accent/80 dark:bg-gray-800 dark:hover:bg-gray-700"
           >
             <SkipForward className="h-5 w-5" />
           </Button>

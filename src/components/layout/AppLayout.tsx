@@ -22,7 +22,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   ];
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-blue-900 via-purple-900 to-pink-700 dark:from-gray-900 dark:via-gray-800 dark:to-gray-700">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-700">
       {/* Main Content */}
       <main className="flex-grow p-4">
         {children}
@@ -36,8 +36,10 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
               <Button
                 variant="ghost"
                 className={cn(
-                  "flex flex-col items-center gap-1 h-auto py-2 px-3",
-                  path === item.path && "text-primary"
+                  "flex flex-col items-center gap-1 h-auto py-2 px-3 bg-transparent",
+                  path === item.path 
+                    ? "text-primary bg-accent/50" 
+                    : "text-muted-foreground hover:bg-accent/30"
                 )}
               >
                 <item.icon className="h-5 w-5" />

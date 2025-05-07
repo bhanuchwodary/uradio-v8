@@ -17,7 +17,7 @@ export function ThemeToggle() {
       <DropdownMenuTrigger asChild>
         <Button 
           variant="outline" 
-          className="w-full glass bg-white/20 backdrop-blur-sm border-none flex items-center justify-center gap-2"
+          className="w-full bg-accent/80 backdrop-blur-sm border-none flex items-center justify-center gap-2 dark:bg-white/20"
         >
           <div className="relative w-4 h-4">
             <Sun className="h-[1.2rem] w-[1.2rem] absolute left-0 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
@@ -26,14 +26,14 @@ export function ThemeToggle() {
           <span className="ml-2">Theme</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="bg-white/10 backdrop-blur-sm border-none">
-        <DropdownMenuItem onClick={() => setTheme("light")} className="hover:bg-white/20">
+      <DropdownMenuContent align="end" className="bg-background/90 backdrop-blur-sm border-accent/20">
+        <DropdownMenuItem onClick={() => setTheme("light")} className="hover:bg-accent/50">
           Light
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("dark")} className="hover:bg-white/20">
+        <DropdownMenuItem onClick={() => setTheme("dark")} className="hover:bg-accent/50">
           Dark
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("system")} className="hover:bg-white/20">
+        <DropdownMenuItem onClick={() => setTheme("system")} className="hover:bg-accent/50">
           System
         </DropdownMenuItem>
       </DropdownMenuContent>

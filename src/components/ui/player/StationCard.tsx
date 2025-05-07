@@ -37,7 +37,7 @@ export const StationCard: React.FC<StationCardProps> = ({
         "relative overflow-hidden group transition-all duration-200 cursor-pointer",
         isSelected 
           ? "bg-primary/10 border-primary/50 shadow-lg" 
-          : "bg-background/30 hover:bg-background/50 border-border/50"
+          : "bg-background/70 hover:bg-accent/30 border-border/50"
       )}
       onClick={onPlay} // Make entire card clickable
     >
@@ -47,7 +47,7 @@ export const StationCard: React.FC<StationCardProps> = ({
             "w-16 h-16 rounded-full flex items-center justify-center transition-colors",
             isPlaying 
               ? "bg-primary text-primary-foreground" 
-              : "bg-background/50 text-muted-foreground group-hover:bg-primary/20"
+              : "bg-accent text-accent-foreground group-hover:bg-primary/20"
           )}
         >
           {isPlaying ? (
@@ -83,7 +83,7 @@ export const StationCard: React.FC<StationCardProps> = ({
             <Button 
               size="icon" 
               variant="ghost" 
-              className="h-8 w-8 text-blue-500"
+              className="h-8 w-8 text-blue-500 hover:bg-accent/50"
               onClick={(e) => handleButtonClick(e, onEdit)}
             >
               <Edit className="h-4 w-4" />
@@ -94,7 +94,7 @@ export const StationCard: React.FC<StationCardProps> = ({
             <Button 
               size="icon" 
               variant="ghost" 
-              className="h-8 w-8 text-destructive"
+              className="h-8 w-8 text-destructive hover:bg-accent/50"
               onClick={(e) => handleButtonClick(e, onDelete)}
             >
               <Trash2 className="h-4 w-4" />
