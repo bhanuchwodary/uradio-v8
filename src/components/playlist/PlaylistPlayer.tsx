@@ -2,8 +2,6 @@
 import React from "react";
 import { MusicPlayer } from "@/components/ui/player/MusicPlayer";
 import { Track } from "@/types/track";
-import { cn } from "@/lib/utils";
-import { useTheme } from "@/components/ThemeProvider";
 
 interface PlaylistPlayerProps {
   currentTrack: Track | null;
@@ -26,21 +24,8 @@ const PlaylistPlayer: React.FC<PlaylistPlayerProps> = ({
   setVolume,
   loading
 }) => {
-  const { theme } = useTheme();
-  const isDark = theme === "dark" || (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
-  
   return (
-    <div className={cn(
-      "mb-6 relative",
-      isPlaying && "animate-pulse-glow"
-    )}>
-      <div className={cn(
-        "absolute inset-0 rounded-xl opacity-70 blur-xl -z-10 transition-all",
-        isPlaying ? "opacity-70" : "opacity-40",
-        isDark ? "bg-gradient-to-r from-primary/40 to-accent/30" : 
-                "bg-gradient-to-r from-primary/30 to-accent/30"
-      )} />
-      
+    <div className="mb-6">
       <MusicPlayer
         currentTrack={currentTrack}
         isPlaying={isPlaying}

@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -85,35 +84,11 @@ export default {
 					to: {
 						height: '0'
 					}
-				},
-				'pulse-glow': {
-					'0%, 100%': { 
-						opacity: '1',
-						filter: 'brightness(1)'
-					},
-					'50%': { 
-						opacity: '0.8',
-						filter: 'brightness(1.2)'
-					},
-				},
-				'float': {
-					'0%, 100%': { 
-						transform: 'translateY(0)' 
-					},
-					'50%': { 
-						transform: 'translateY(-8px)' 
-					},
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out',
-				'pulse-glow': 'pulse-glow 3s infinite ease-in-out',
-				'float': 'float 6s infinite ease-in-out'
-			},
-			backgroundImage: {
-				'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
-				'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
+				'accordion-up': 'accordion-up 0.2s ease-out'
 			}
 		}
 	},

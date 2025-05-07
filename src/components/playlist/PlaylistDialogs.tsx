@@ -12,8 +12,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { useTheme } from "@/components/ThemeProvider";
-import { cn } from "@/lib/utils";
 
 interface PlaylistDialogsProps {
   editingStation: Track | null;
@@ -32,9 +30,6 @@ const PlaylistDialogs: React.FC<PlaylistDialogsProps> = ({
   onCloseDeleteDialog,
   onConfirmDelete
 }) => {
-  const { theme } = useTheme();
-  const isDark = theme === "dark" || (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
-  
   return (
     <>
       {/* Edit station dialog */}
@@ -55,26 +50,16 @@ const PlaylistDialogs: React.FC<PlaylistDialogsProps> = ({
         open={!!stationToDelete} 
         onOpenChange={(open) => !open && onCloseDeleteDialog()}
       >
-        <AlertDialogContent className={cn(
-          "border-none",
-          isDark ? "bg-background/70 backdrop-blur-md" : "bg-white/90 backdrop-blur-md"
-        )}>
+        <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-xl">Remove Station</AlertDialogTitle>
-            <AlertDialogDescription className="text-muted-foreground">
+            <AlertDialogTitle>Remove Station</AlertDialogTitle>
+            <AlertDialogDescription>
               Are you sure you want to remove "{stationToDelete?.name}"? This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className={cn(
-              isDark ? "bg-background/50 hover:bg-background/70" : "bg-background/70 hover:bg-background/90"
-            )}>
-              Cancel
-            </AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={onConfirmDelete}
-              className="bg-destructive hover:bg-destructive/90"
-            >
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={onConfirmDelete}>
               Remove
             </AlertDialogAction>
           </AlertDialogFooter>
