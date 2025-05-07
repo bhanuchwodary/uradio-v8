@@ -6,14 +6,15 @@ export const addStationUrl = (
   name: string = "", 
   isPrebuilt: boolean = false, 
   isFavorite: boolean = false, 
-  tracks: Track[]
+  tracks: Track[],
+  language: string = ""
 ): { tracks: Track[], result: { success: boolean, message: string } } => {
   if (!url) {
     console.error("Cannot add empty URL");
     return { tracks, result: { success: false, message: "URL cannot be empty" } };
   }
   
-  console.log(`Adding URL: ${url}, Name: ${name}, IsPrebuilt: ${isPrebuilt}, IsFavorite: ${isFavorite}`);
+  console.log(`Adding URL: ${url}, Name: ${name}, IsPrebuilt: ${isPrebuilt}, IsFavorite: ${isFavorite}, Language: ${language}`);
   console.log("Current tracks count before add:", tracks.length);
   console.log("Current tracks before add:", JSON.stringify(tracks));
   
@@ -45,6 +46,7 @@ export const addStationUrl = (
       name: name || updatedTracks[existingIndex].name,
       isPrebuilt: isPrebuilt !== undefined ? isPrebuilt : updatedTracks[existingIndex].isPrebuilt,
       isFavorite: isFavorite !== undefined ? isFavorite : updatedTracks[existingIndex].isFavorite,
+      language: language || updatedTracks[existingIndex].language,
       playTime: updatedTracks[existingIndex].playTime || 0
     };
     
@@ -58,7 +60,8 @@ export const addStationUrl = (
       name: name || `Station ${tracksClone.length + 1}`,
       isFavorite: !!isFavorite,
       playTime: 0,
-      isPrebuilt: !!isPrebuilt
+      isPrebuilt: !!isPrebuilt,
+      language: language || ""
     };
     
     console.log("New track being added:", JSON.stringify(newTrack));
@@ -116,7 +119,7 @@ export const removeTrackByIndex = (
 export const editTrackInfo = (
   tracks: Track[], 
   index: number, 
-  data: { url: string; name: string }
+  data: { url: string; name: string; language?: string }
 ): Track[] => {
   // Create a new array to ensure state updates are detected
   const newTracks = JSON.parse(JSON.stringify(tracks));
@@ -124,7 +127,8 @@ export const editTrackInfo = (
     newTracks[index] = {
       ...newTracks[index],
       url: data.url,
-      name: data.name || `Station ${index + 1}`
+      name: data.name || `Station ${index + 1}`,
+      language: data.language !== undefined ? data.language : newTracks[index].language
     };
   }
   return newTracks;
@@ -133,7 +137,7 @@ export const editTrackInfo = (
 export const editStationByValue = (
   tracks: Track[], 
   station: Track, 
-  data: { url: string; name: string }
+  data: { url: string; name: string; language?: string }
 ): Track[] => {
   const index = tracks.findIndex(
     track => track.url === station.url && track.name === station.name
@@ -145,7 +149,8 @@ export const editStationByValue = (
     newTracks[index] = {
       ...newTracks[index],
       url: data.url,
-      name: data.name
+      name: data.name,
+      language: data.language !== undefined ? data.language : newTracks[index].language
     };
     return newTracks;
   }

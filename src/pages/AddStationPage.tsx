@@ -13,8 +13,8 @@ const AddStationPage: React.FC = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const handleAddUrl = (url: string, name: string) => {
-    const result = addUrl(url, name, false);
+  const handleAddUrl = (url: string, name: string, language: string) => {
+    const result = addUrl(url, name, false, false, language);
     
     if (result.success) {
       toast({
@@ -36,9 +36,9 @@ const AddStationPage: React.FC = () => {
     }
   };
   
-  const handleImport = (stations: Array<{ name: string; url: string }>) => {
+  const handleImport = (stations: Array<{ name: string; url: string; language?: string }>) => {
     const addedStations = stations.filter(station => {
-      const result = addUrl(station.url, station.name);
+      const result = addUrl(station.url, station.name, false, false, station.language);
       return result.success;
     });
     
@@ -63,7 +63,7 @@ const AddStationPage: React.FC = () => {
       <div className="container mx-auto max-w-lg space-y-6">
         <h1 className="text-2xl font-bold text-white">Add Station</h1>
         
-        <Card className="bg-background/30 backdrop-blur-md border-none shadow-lg">
+        <Card className="bg-background/30 backdrop-blur-md border-none shadow-lg material-shadow-2">
           <CardHeader className="pb-2">
             <CardTitle className="text-lg">Add Radio Station</CardTitle>
           </CardHeader>
@@ -72,7 +72,7 @@ const AddStationPage: React.FC = () => {
           </CardContent>
         </Card>
 
-        <Card className="bg-background/30 backdrop-blur-md border-none shadow-lg">
+        <Card className="bg-background/30 backdrop-blur-md border-none shadow-lg material-shadow-2">
           <CardHeader className="pb-2">
             <CardTitle className="text-lg">Import Stations</CardTitle>
           </CardHeader>

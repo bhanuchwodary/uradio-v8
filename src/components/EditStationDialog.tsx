@@ -1,32 +1,34 @@
 
 import React from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useForm } from "react-hook-form";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-} from "@/components/ui/form";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface EditStationDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (values: { url: string; name: string }) => void;
-  initialValues: {
-    url: string;
-    name: string;
-  };
+  onSave: (data: { url: string; name: string; language?: string }) => void;
+  initialValues: { url: string; name: string; language?: string };
 }
+
+// Common language options for radio stations
+const languageOptions = [
+  "English",
+  "Hindi",
+  "Telugu",
+  "Tamil",
+  "Malayalam",
+  "Kannada",
+  "Bengali",
+  "Marathi",
+  "Punjabi",
+  "Gujarati",
+  "Classical Music",
+  "Other"
+];
 
 const EditStationDialog: React.FC<EditStationDialogProps> = ({
   isOpen,
@@ -35,23 +37,26 @@ const EditStationDialog: React.FC<EditStationDialogProps> = ({
   initialValues,
 }) => {
   const form = useForm({
-    defaultValues: initialValues,
+    defaultValues: {
+      url: initialValues.url || "",
+      name: initialValues.name || "",
+      language: initialValues.language || "English"
+    }
   });
 
-  const handleSubmit = (values: { url: string; name: string }) => {
+  const handleSubmit = (values: { url: string; name: string; language: string }) => {
     onSave(values);
-    form.reset();
-    onClose();
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="bg-card text-card-foreground backdrop-blur-md">
+      <DialogContent className="sm:max-w-[425px] bg-background/95 backdrop-blur-md material-shadow-3">
         <DialogHeader>
-          <DialogTitle>Edit Station</DialogTitle>
+          <DialogTitle>Edit Radio Station</DialogTitle>
         </DialogHeader>
+
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-3">
+          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
             <FormField
               control={form.control}
               name="url"
@@ -59,11 +64,27 @@ const EditStationDialog: React.FC<EditStationDialogProps> = ({
                 <FormItem>
                   <FormLabel>URL</FormLabel>
                   <FormControl>
-                    <Input
-                      type="url"
-                      placeholder="Enter audio URL or stream URL"
-                      className="bg-white/20 backdrop-blur-sm border-none"
+                    <Input 
+                      placeholder="Enter station URL" 
                       {...field}
+                      className="bg-background/60"
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Station Name</FormLabel>
+                  <FormControl>
+                    <Input 
+                      placeholder="Enter station name" 
+                      {...field}
+                      className="bg-background/60"
                     />
                   </FormControl>
                 </FormItem>
@@ -72,37 +93,34 @@ const EditStationDialog: React.FC<EditStationDialogProps> = ({
 
             <FormField
               control={form.control}
-              name="name"
+              name="language"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Station Name</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="text"
-                      placeholder="Enter station name"
-                      className="bg-white/20 backdrop-blur-sm border-none"
-                      {...field}
-                    />
-                  </FormControl>
+                  <FormLabel>Language</FormLabel>
+                  <Select 
+                    onValueChange={field.onChange} 
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger className="bg-background/60">
+                        <SelectValue placeholder="Select station language" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {languageOptions.map((language) => (
+                        <SelectItem key={language} value={language}>
+                          {language}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </FormItem>
               )}
             />
 
-            <DialogFooter className="pt-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={onClose}
-                className="bg-white/20 backdrop-blur-sm border-none"
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                className="bg-primary text-primary-foreground"
-              >
-                Save Changes
-              </Button>
+            <DialogFooter>
+              <Button variant="outline" onClick={onClose} className="mr-2">Cancel</Button>
+              <Button type="submit">Save Changes</Button>
             </DialogFooter>
           </form>
         </Form>

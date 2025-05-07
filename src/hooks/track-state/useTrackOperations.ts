@@ -30,16 +30,17 @@ export const useTrackOperations = (
     url: string, 
     name: string = "", 
     isPrebuilt: boolean = false, 
-    isFavorite: boolean = false
+    isFavorite: boolean = false,
+    language: string = ""
   ) => {
-    console.log("addUrl called with:", url, name, isPrebuilt, isFavorite);
+    console.log("addUrl called with:", url, name, isPrebuilt, isFavorite, language);
     console.log("Current tracks count:", tracks.length);
     
     // Use tracksRef for most up-to-date value when available
     const currentTracks = tracksRef?.current || tracks;
     
     const { tracks: updatedTracks, result } = addStationUrl(
-      url, name, isPrebuilt, isFavorite, currentTracks
+      url, name, isPrebuilt, isFavorite, currentTracks, language
     );
     
     console.log("Result of addStationUrl:", result.success, result.message);
@@ -81,7 +82,7 @@ export const useTrackOperations = (
     });
   }, [setTracks, tracksRef]);
 
-  const editTrack = useCallback((index: number, data: { url: string; name: string }) => {
+  const editTrack = useCallback((index: number, data: { url: string; name: string; language?: string }) => {
     console.log("Editing track at index:", index, "with data:", JSON.stringify(data));
     setTracks(currentTracks => {
       const updatedTracks = editTrackInfo(currentTracks, index, data);
@@ -97,7 +98,7 @@ export const useTrackOperations = (
     });
   }, [setTracks, tracksRef]);
   
-  const editStationByValue = useCallback((station: Track, data: { url: string; name: string }) => {
+  const editStationByValue = useCallback((station: Track, data: { url: string; name: string; language?: string }) => {
     console.log("Editing station by value:", JSON.stringify(station), "with data:", JSON.stringify(data));
     setTracks(currentTracks => {
       const updatedTracks = editByValue(currentTracks, station, data);
