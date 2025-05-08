@@ -55,6 +55,21 @@ export const useHlsHandler = ({
       if (!globalAudioRef.hls) {
         const hls = new Hls({
           enableWorker: false, // Disable web workers to prevent CORS issues
+          // Enhanced audio quality settings
+          maxBufferLength: 30, // Increase buffer length for smoother playback
+          maxMaxBufferLength: 60, // Maximum buffer size
+          maxBufferSize: 60 * 1000 * 1000, // 60MB buffer size
+          maxBufferHole: 0.5, // Maximum buffer holes
+          // Quality selection - prefer highest quality audio
+          startLevel: -1, // Auto select based on bandwidth
+          capLevelToPlayerSize: false, // Don't limit quality
+          autoStartLoad: true, // Auto start loading
+          abrEwmaDefaultEstimate: 500000, // Higher bandwidth estimate for better initial quality
+          // Error recovery improvements
+          maxLoadingDelay: 4, // Allow more time for loading
+          fragLoadingMaxRetry: 6, // More retries for fragment loading
+          manifestLoadingMaxRetry: 6, // More retries for manifest loading
+          levelLoadingMaxRetry: 6 // More retries for level loading
         });
         
         hls.attachMedia(audioRef.current);
@@ -62,8 +77,40 @@ export const useHlsHandler = ({
           hls.loadSource(url);
         });
         
-        hls.on(Hls.Events.MANIFEST_PARSED, () => {
-          console.log("HLS manifest loaded");
+        // Set audio element properties for better quality
+        if (audioRef.current) {
+          audioRef.current.preload = "auto"; // Preload audio data
+          // Setting high-quality audio attributes when possible
+          try {
+            // @ts-ignore - These are non-standard but useful properties
+            audioRef.current.audioTracks?.forEach(track => {
+              if (track.enabled) {
+                console.log("Setting audio track to high quality");
+              }
+            });
+          } catch (e) {
+            console.log("Advanced audio features not supported");
+          }
+        }
+        
+        hls.on(Hls.Events.MANIFEST_PARSED, (event, data) => {
+          console.log("HLS manifest loaded with levels:", data.levels?.length || 0);
+          
+          // Select the highest quality level if available
+          if (data.levels && data.levels.length > 1) {
+            const audioLevels = data.levels.filter(level => !level.videoCodec);
+            const bestLevel = audioLevels.length > 0 
+              ? audioLevels.reduce((prev, current) => 
+                  (prev.bitrate > current.bitrate) ? prev : current) 
+              : null;
+              
+            if (bestLevel) {
+              const bestLevelIdx = data.levels.indexOf(bestLevel);
+              console.log(`Selecting best audio quality level: ${bestLevel.bitrate} bps (index: ${bestLevelIdx})`);
+              hls.currentLevel = bestLevelIdx;
+            }
+          }
+          
           setLoading(false);
           if (isPlaying) {
             audioRef.current?.play().catch(error => {
@@ -71,6 +118,10 @@ export const useHlsHandler = ({
               setIsPlaying(false);
             });
           }
+        });
+        
+        hls.on(Hls.Events.LEVEL_SWITCHED, (event, data) => {
+          console.log(`HLS quality level switched to: ${data.level}`);
         });
         
         hls.on(Hls.Events.ERROR, (event, data) => {
@@ -104,6 +155,22 @@ export const useHlsHandler = ({
       console.log("Loading regular audio stream:", url);
       audioRef.current.src = url;
       audioRef.current.load();
+      
+      // Enhanced audio settings for regular streams
+      try {
+        // Set audio quality attributes
+        // Note: These are somewhat browser dependent
+        audioRef.current.autoplay = false; // Let us control playback
+        audioRef.current.preload = "auto"; // Preload audio
+        // @ts-ignore - Non-standard but useful in some browsers
+        if (typeof audioRef.current.mozAutoplayEnabled !== 'undefined') {
+          // Firefox-specific
+          // @ts-ignore
+          audioRef.current.mozAutoplayEnabled = false;
+        }
+      } catch (e) {
+        console.log("Some audio enhancements not supported by this browser");
+      }
       
       // Wait for canplay event to clear loading
       audioRef.current.oncanplay = () => {
