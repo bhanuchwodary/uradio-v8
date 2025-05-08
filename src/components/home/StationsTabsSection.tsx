@@ -44,7 +44,7 @@ const StationsTabsSection: React.FC<StationsTabsSectionProps> = ({
   return (
     <Card className="bg-background/30 backdrop-blur-md border-none shadow-lg">
       <CardHeader className="pb-2">
-        <CardTitle className="text-lg">My Stations</CardTitle>
+        <CardTitle className="text-lg text-foreground">My Stations</CardTitle>
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="popular" className="w-full">
@@ -82,7 +82,7 @@ const StationsTabsSection: React.FC<StationsTabsSectionProps> = ({
           <TabsContent value="prebuilt" className="mt-4 space-y-6">
             {Object.entries(prebuiltByLanguage).map(([language, stations]) => (
               <div key={language} className="mb-4">
-                <h3 className="font-medium text-lg mb-2">{language}</h3>
+                <h3 className="font-medium text-lg mb-2 text-foreground">{language}</h3>
                 <StationGrid
                   stations={stations}
                   currentIndex={currentIndex}

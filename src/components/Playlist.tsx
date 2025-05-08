@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Radio, Edit, Trash2, Globe } from "lucide-react";
@@ -82,13 +81,13 @@ const Playlist: React.FC<PlaylistProps> = ({
 
     return (
       <div className="space-y-4 mb-6" key={uniqueKey}>
-        <h3 className="text-lg font-semibold mb-2">{title}</h3>
+        <h3 className="text-lg font-semibold mb-2 text-foreground">{title}</h3>
         
         {Object.entries(stationsByLanguage).map(([language, stations]) => (
           <div key={`${language}-${uniqueKey}`} className="mb-6">
             <div className="flex items-center gap-2 mb-3 text-primary">
               <Globe className="h-4 w-4" />
-              <h4 className="text-md font-medium">{language}</h4>
+              <h4 className="text-md font-medium text-foreground">{language}</h4>
             </div>
             
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -123,7 +122,7 @@ const Playlist: React.FC<PlaylistProps> = ({
                       />
                     </div>
                     <button
-                      className="text-sm font-medium text-center mb-3 hover:text-primary transition-colors line-clamp-2"
+                      className="text-sm font-medium text-center mb-3 hover:text-primary transition-colors line-clamp-2 text-foreground"
                       onClick={() => onSelectTrack(index)}
                     >
                       {station.name}

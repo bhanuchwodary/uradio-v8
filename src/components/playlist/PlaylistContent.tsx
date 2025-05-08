@@ -42,7 +42,7 @@ const PlaylistContent: React.FC<PlaylistContentProps> = ({
   return (
     <Card className="bg-background/30 backdrop-blur-md border-none shadow-lg">
       <CardHeader className="pb-2">
-        <CardTitle className="text-lg">My Playlist</CardTitle>
+        <CardTitle className="text-lg text-foreground">My Playlist</CardTitle>
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="prebuilt" className="w-full">
@@ -54,7 +54,7 @@ const PlaylistContent: React.FC<PlaylistContentProps> = ({
           <TabsContent value="prebuilt" className="mt-4 space-y-6">
             {Object.entries(prebuiltByLanguage).map(([language, stations]) => (
               <div key={language} className="mb-4">
-                <h3 className="font-medium text-lg mb-2">{language}</h3>
+                <h3 className="font-medium text-lg mb-2 text-foreground">{language}</h3>
                 <StationGrid
                   stations={stations}
                   currentIndex={currentIndex}

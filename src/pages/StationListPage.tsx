@@ -103,12 +103,12 @@ const StationListPage: React.FC = () => {
   return (
     <AppLayout>
       <div className="container mx-auto max-w-5xl space-y-6">
-        <h1 className="text-2xl font-bold text-white">Station List</h1>
+        <h1 className="text-2xl font-bold text-foreground">Station List</h1>
         
         {/* User Stations */}
         <Card className="bg-background/30 backdrop-blur-md border-none shadow-lg material-shadow-2">
           <CardHeader className="pb-2">
-            <CardTitle className="text-lg">My Stations</CardTitle>
+            <CardTitle className="text-lg text-foreground">My Stations</CardTitle>
           </CardHeader>
           <CardContent>
             {userStations.length > 0 ? (
@@ -134,7 +134,7 @@ const StationListPage: React.FC = () => {
         {Object.entries(stationsByLanguage).map(([language, stations]) => (
           <Card key={language} className="bg-background/30 backdrop-blur-md border-none shadow-lg material-shadow-2">
             <CardHeader className="pb-2">
-              <CardTitle className="text-lg">Prebuilt {language} Stations</CardTitle>
+              <CardTitle className="text-lg text-foreground">Prebuilt {language} Stations</CardTitle>
             </CardHeader>
             <CardContent>
               <StationGrid
