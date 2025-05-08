@@ -1,6 +1,5 @@
 
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StationGrid } from "@/components/ui/player/StationGrid";
@@ -9,9 +8,9 @@ import { useToast } from "@/hooks/use-toast";
 import { prebuiltStations } from "@/data/prebuiltStations";
 import { Track } from "@/types/track";
 import EditStationDialog from "@/components/EditStationDialog";
+import { Plus } from "lucide-react";
 
 const StationListPage: React.FC = () => {
-  const navigate = useNavigate();
   const { toast } = useToast();
   const [editingStation, setEditingStation] = useState<Track | null>(null);
   
@@ -39,13 +38,25 @@ const StationListPage: React.FC = () => {
   // Get current track
   const currentTrack = tracks[currentIndex];
   
+  // Group prebuilt stations by language
+  const stationsByLanguage: Record<string, Track[]> = {};
+  
+  prebuiltStationTracks.forEach(station => {
+    const language = station.language || "Unknown";
+    if (!stationsByLanguage[language]) {
+      stationsByLanguage[language] = [];
+    }
+    stationsByLanguage[language].push(station);
+  });
+  
   // Add station to playlist handler
   const handleAddStation = (station: Track) => {
     const result = addUrl(
       station.url, 
       station.name, 
       station.isPrebuilt || false,
-      station.isFavorite || false
+      station.isFavorite || false,
+      station.language || ""
     );
     
     if (result.success) {
@@ -53,8 +64,7 @@ const StationListPage: React.FC = () => {
         title: "Station Added",
         description: `${station.name} has been added to your playlist`,
       });
-      // Navigate to playlist
-      setTimeout(() => navigate("/playlist"), 500);
+      // Don't navigate automatically
     } else {
       toast({
         title: "Failed to Add Station",
@@ -79,7 +89,7 @@ const StationListPage: React.FC = () => {
   };
   
   // Save edited station
-  const handleSaveEdit = (data: { url: string; name: string }) => {
+  const handleSaveEdit = (data: { url: string; name: string; language?: string }) => {
     if (editingStation) {
       editStationByValue(editingStation, data);
       toast({
@@ -96,7 +106,7 @@ const StationListPage: React.FC = () => {
         <h1 className="text-2xl font-bold text-white">Station List</h1>
         
         {/* User Stations */}
-        <Card className="bg-background/30 backdrop-blur-md border-none shadow-lg">
+        <Card className="bg-background/30 backdrop-blur-md border-none shadow-lg material-shadow-2">
           <CardHeader className="pb-2">
             <CardTitle className="text-lg">My Stations</CardTitle>
           </CardHeader>
@@ -110,6 +120,7 @@ const StationListPage: React.FC = () => {
                 onSelectStation={(index) => handleAddStation(userStations[index])}
                 onEditStation={handleEditStation}
                 onDeleteStation={handleDeleteStation}
+                actionIcon="add"
               />
             ) : (
               <div className="text-center p-6 bg-background/50 rounded-lg">
@@ -119,21 +130,24 @@ const StationListPage: React.FC = () => {
           </CardContent>
         </Card>
         
-        {/* Prebuilt Stations */}
-        <Card className="bg-background/30 backdrop-blur-md border-none shadow-lg">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg">Prebuilt Stations</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <StationGrid
-              stations={prebuiltStationTracks}
-              currentIndex={currentIndex}
-              currentTrackUrl={currentTrack?.url}
-              isPlaying={isPlaying}
-              onSelectStation={(index) => handleAddStation(prebuiltStationTracks[index])}
-            />
-          </CardContent>
-        </Card>
+        {/* Prebuilt Stations - Now grouped by language */}
+        {Object.entries(stationsByLanguage).map(([language, stations]) => (
+          <Card key={language} className="bg-background/30 backdrop-blur-md border-none shadow-lg material-shadow-2">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg">Prebuilt {language} Stations</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <StationGrid
+                stations={stations}
+                currentIndex={currentIndex}
+                currentTrackUrl={currentTrack?.url}
+                isPlaying={isPlaying}
+                onSelectStation={(index) => handleAddStation(stations[index])}
+                actionIcon="add"
+              />
+            </CardContent>
+          </Card>
+        ))}
         
         {/* Edit station dialog */}
         {editingStation && (
@@ -144,6 +158,7 @@ const StationListPage: React.FC = () => {
             initialValues={{
               url: editingStation.url,
               name: editingStation.name,
+              language: editingStation.language
             }}
           />
         )}

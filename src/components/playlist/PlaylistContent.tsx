@@ -28,17 +28,51 @@ const PlaylistContent: React.FC<PlaylistContentProps> = ({
   onConfirmDelete,
   onToggleFavorite
 }) => {
+  // Group prebuilt stations by language
+  const prebuiltByLanguage: Record<string, Track[]> = {};
+  
+  prebuiltStations.forEach(station => {
+    const language = station.language || "Unknown";
+    if (!prebuiltByLanguage[language]) {
+      prebuiltByLanguage[language] = [];
+    }
+    prebuiltByLanguage[language].push(station);
+  });
+
   return (
     <Card className="bg-background/30 backdrop-blur-md border-none shadow-lg">
       <CardHeader className="pb-2">
         <CardTitle className="text-lg">My Playlist</CardTitle>
       </CardHeader>
       <CardContent>
-        <Tabs defaultValue="mystations" className="w-full">
+        <Tabs defaultValue="prebuilt" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="mystations">My Stations</TabsTrigger>
             <TabsTrigger value="prebuilt">Prebuilt Stations</TabsTrigger>
+            <TabsTrigger value="mystations">My Stations</TabsTrigger>
           </TabsList>
+          
+          <TabsContent value="prebuilt" className="mt-4 space-y-6">
+            {Object.entries(prebuiltByLanguage).map(([language, stations]) => (
+              <div key={language} className="mb-4">
+                <h3 className="font-medium text-lg mb-2">{language}</h3>
+                <StationGrid
+                  stations={stations}
+                  currentIndex={currentIndex}
+                  currentTrackUrl={currentTrack?.url}
+                  isPlaying={isPlaying}
+                  onSelectStation={(index) => onSelectStation(index, stations)}
+                  onToggleFavorite={onToggleFavorite}
+                  onDeleteStation={onConfirmDelete}
+                />
+              </div>
+            ))}
+            
+            {prebuiltStations.length === 0 && (
+              <div className="text-center p-6 bg-background/50 rounded-lg">
+                <p className="text-muted-foreground">No prebuilt stations available</p>
+              </div>
+            )}
+          </TabsContent>
           
           <TabsContent value="mystations" className="mt-4">
             <StationGrid
@@ -50,18 +84,6 @@ const PlaylistContent: React.FC<PlaylistContentProps> = ({
               onEditStation={onEditStation}
               onDeleteStation={onConfirmDelete}
               onToggleFavorite={onToggleFavorite}
-            />
-          </TabsContent>
-          
-          <TabsContent value="prebuilt" className="mt-4">
-            <StationGrid
-              stations={prebuiltStations}
-              currentIndex={currentIndex}
-              currentTrackUrl={currentTrack?.url}
-              isPlaying={isPlaying}
-              onSelectStation={(index) => onSelectStation(index, prebuiltStations)}
-              onToggleFavorite={onToggleFavorite}
-              onDeleteStation={onConfirmDelete}
             />
           </TabsContent>
         </Tabs>

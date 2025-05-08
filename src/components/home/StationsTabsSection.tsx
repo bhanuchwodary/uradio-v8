@@ -30,6 +30,17 @@ const StationsTabsSection: React.FC<StationsTabsSectionProps> = ({
   onDeleteStation,
   onToggleFavorite
 }) => {
+  // Group prebuilt stations by language
+  const prebuiltByLanguage: Record<string, Track[]> = {};
+  
+  prebuiltStations.forEach(station => {
+    const language = station.language || "Unknown";
+    if (!prebuiltByLanguage[language]) {
+      prebuiltByLanguage[language] = [];
+    }
+    prebuiltByLanguage[language].push(station);
+  });
+
   return (
     <Card className="bg-background/30 backdrop-blur-md border-none shadow-lg">
       <CardHeader className="pb-2">
@@ -68,16 +79,21 @@ const StationsTabsSection: React.FC<StationsTabsSectionProps> = ({
             />
           </TabsContent>
           
-          <TabsContent value="prebuilt" className="mt-4">
-            <StationGrid
-              stations={prebuiltStations}
-              currentIndex={currentIndex}
-              currentTrackUrl={currentTrackUrl}
-              isPlaying={isPlaying}
-              onSelectStation={(index) => onSelectStation(index, prebuiltStations)}
-              onToggleFavorite={onToggleFavorite}
-              onDeleteStation={onDeleteStation}
-            />
+          <TabsContent value="prebuilt" className="mt-4 space-y-6">
+            {Object.entries(prebuiltByLanguage).map(([language, stations]) => (
+              <div key={language} className="mb-4">
+                <h3 className="font-medium text-lg mb-2">{language}</h3>
+                <StationGrid
+                  stations={stations}
+                  currentIndex={currentIndex}
+                  currentTrackUrl={currentTrackUrl}
+                  isPlaying={isPlaying}
+                  onSelectStation={(index) => onSelectStation(index, stations)}
+                  onToggleFavorite={onToggleFavorite}
+                  onDeleteStation={onDeleteStation}
+                />
+              </div>
+            ))}
           </TabsContent>
         </Tabs>
       </CardContent>

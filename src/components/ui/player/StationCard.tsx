@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Card } from "@/components/ui/card";
-import { Play, Pause, Edit, Trash2, Star } from "lucide-react";
+import { Play, Pause, Edit, Trash2, Star, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Track } from "@/types/track";
 import { cn } from "@/lib/utils";
@@ -14,6 +14,7 @@ interface StationCardProps {
   onEdit?: () => void;
   onDelete?: () => void;
   onToggleFavorite?: () => void;
+  actionIcon?: "play" | "add";
 }
 
 export const StationCard: React.FC<StationCardProps> = ({
@@ -23,12 +24,22 @@ export const StationCard: React.FC<StationCardProps> = ({
   onPlay,
   onEdit,
   onDelete,
-  onToggleFavorite
+  onToggleFavorite,
+  actionIcon = "play"
 }) => {
   // Prevent event bubbling for control buttons
   const handleButtonClick = (e: React.MouseEvent, callback?: () => void) => {
     e.stopPropagation();
     if (callback) callback();
+  };
+
+  // Determine the main action icon
+  const renderActionIcon = () => {
+    if (actionIcon === "add") {
+      return <Plus className="w-8 h-8" />;
+    }
+    
+    return isPlaying ? <Pause className="w-8 h-8" /> : <Play className="w-8 h-8 ml-1" />;
   };
 
   return (
@@ -50,16 +61,18 @@ export const StationCard: React.FC<StationCardProps> = ({
               : "bg-secondary text-secondary-foreground group-hover:bg-primary/20"
           )}
         >
-          {isPlaying ? (
-            <Pause className="w-8 h-8" />
-          ) : (
-            <Play className="w-8 h-8 ml-1" />
-          )}
+          {renderActionIcon()}
         </div>
         
         <h3 className="font-medium text-sm truncate w-full text-center pt-1">
           {station.name}
         </h3>
+        
+        {station.language && (
+          <span className="text-xs text-muted-foreground">
+            {station.language}
+          </span>
+        )}
         
         <div className="flex justify-center space-x-1 mt-auto">
           {onToggleFavorite && (

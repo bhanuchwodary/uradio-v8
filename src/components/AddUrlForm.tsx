@@ -1,159 +1,120 @@
 
-import React from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { PlusCircle } from "lucide-react";
-import { useToast } from "@/components/ui/use-toast";
-import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
-import { useForm } from "react-hook-form";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import React, { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { z } from 'zod';
 
-interface AddUrlFormProps {
-  onAddUrl: (url: string, name: string, language: string) => void;
-}
-
-interface FormValues {
-  url: string;
-  name: string;
-  language: string;
-}
-
-// Common language options for radio stations
-const languageOptions = [
-  "English",
-  "Hindi",
-  "Telugu",
-  "Tamil",
-  "Malayalam",
-  "Kannada",
-  "Bengali",
-  "Marathi",
-  "Punjabi",
-  "Gujarati",
-  "Classical Music",
-  "Other"
+const languages = [
+  "English", "Hindi", "Telugu", "Tamil", "Malayalam", "Kannada", 
+  "Bengali", "Punjabi", "Marathi", "Gujarati", "Classical Music", "Other"
 ];
 
-const AddUrlForm: React.FC<AddUrlFormProps> = ({ onAddUrl }) => {
-  const { toast } = useToast();
-  const form = useForm<FormValues>({
-    defaultValues: {
-      url: "",
-      name: "",
-      language: "English"
-    }
-  });
+interface AddUrlFormProps {
+  onAddUrl: (url: string, name: string, language: string) => boolean;
+}
 
-  const handleSubmit = (values: FormValues) => {
-    const { url, name, language } = values;
+const validateUrl = (url: string): boolean => {
+  try {
+    // Simple check for URL syntax
+    new URL(url);
+    return true;
+  } catch (e) {
+    return false;
+  }
+};
+
+const AddUrlForm: React.FC<AddUrlFormProps> = ({ onAddUrl }) => {
+  const [url, setUrl] = useState('');
+  const [name, setName] = useState('');
+  const [language, setLanguage] = useState('');
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
     
-    // Basic URL validation
-    try {
-      // Make sure it's a valid URL
-      new URL(url);
-      
-      // Accept any URL that looks like a media URL or stream URL
-      // This includes URLs with audio file extensions, m3u8, or URLs containing "stream", "radio", etc.
-      const fileExtension = url.split('.').pop()?.toLowerCase();
-      const validExtensions = ['mp3', 'wav', 'ogg', 'aac', 'm4a', 'flac', 'm3u8', 'pls', 'asx'];
-      const isStreamUrl = 
-        url.includes('stream') || 
-        url.includes('radio') || 
-        url.includes('audio') || 
-        url.includes('music') || 
-        url.includes('live') ||
-        url.includes('/hls/');
-      
-      if (validExtensions.includes(fileExtension || '') || isStreamUrl) {
-        // Debug check to ensure values are passed correctly
-        console.log("AddUrlForm submitting:", { url, name, language });
-        onAddUrl(url, name || `Station ${Date.now()}`, language);
-        form.reset();
-      } else {
-        toast({
-          title: "Unsupported URL format",
-          description: "Please enter a URL that points to an audio file or streaming service (mp3, m3u8, etc.)",
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      toast({
-        title: "Invalid URL",
-        description: "Please enter a valid URL",
-        variant: "destructive",
-      });
+    // Basic validation
+    if (!url) {
+      setError('URL is required');
+      return;
+    }
+    
+    if (!validateUrl(url)) {
+      setError('Please enter a valid URL');
+      return;
+    }
+    
+    if (!name) {
+      setError('Name is required');
+      return;
+    }
+    
+    if (!language) {
+      setError('Language is required');
+      return;
+    }
+    
+    // Submit form if validation passes
+    const success = onAddUrl(url, name, language);
+    
+    // Reset form if successful
+    if (success) {
+      setUrl('');
+      setName('');
+      setLanguage('');
     }
   };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-3">
-        <FormField
-          control={form.control}
-          name="url"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>URL</FormLabel>
-              <FormControl>
-                <Input
-                  type="url"
-                  placeholder="Enter audio URL or stream URL (mp3, m3u8)"
-                  className="bg-white/20 backdrop-blur-sm border-none"
-                  {...field}
-                />
-              </FormControl>
-            </FormItem>
-          )}
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="space-y-2">
+        <Label htmlFor="url">Station URL</Label>
+        <Input
+          id="url"
+          type="text"
+          placeholder="https://example.com/stream"
+          value={url}
+          onChange={(e) => setUrl(e.target.value)}
         />
-        
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Station Name</FormLabel>
-              <FormControl>
-                <Input
-                  type="text"
-                  placeholder="Enter station name"
-                  className="bg-white/20 backdrop-blur-sm border-none"
-                  {...field}
-                />
-              </FormControl>
-            </FormItem>
-          )}
+      </div>
+      
+      <div className="space-y-2">
+        <Label htmlFor="name">Station Name</Label>
+        <Input
+          id="name"
+          type="text"
+          placeholder="My Favorite Station"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
         />
-        
-        <FormField
-          control={form.control}
-          name="language"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Language</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger className="bg-white/20 backdrop-blur-sm border-none">
-                    <SelectValue placeholder="Select station language" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {languageOptions.map((language) => (
-                    <SelectItem key={language} value={language}>
-                      {language}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </FormItem>
-          )}
-        />
-        
-        <Button type="submit" variant="outline" className="w-full bg-white/20 backdrop-blur-sm border-none material-shadow-1 hover:material-shadow-2 material-transition">
-          <PlusCircle className="w-4 h-4 mr-2" />
-          Add Station
-        </Button>
-      </form>
-    </Form>
+      </div>
+      
+      <div className="space-y-2">
+        <Label htmlFor="language">Language</Label>
+        <Select value={language} onValueChange={setLanguage}>
+          <SelectTrigger>
+            <SelectValue placeholder="Select language" />
+          </SelectTrigger>
+          <SelectContent>
+            {languages.map((lang) => (
+              <SelectItem key={lang} value={lang}>
+                {lang}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      
+      {error && (
+        <p className="text-sm text-destructive">{error}</p>
+      )}
+      
+      <Button type="submit" className="w-full">
+        Add Station
+      </Button>
+    </form>
   );
 };
 
