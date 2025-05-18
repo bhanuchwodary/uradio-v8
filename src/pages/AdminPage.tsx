@@ -1,12 +1,12 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import AdminPasswordDialog from "@/components/admin/AdminPasswordDialog";
 import AdminStationsManager from "@/components/admin/AdminStationsManager";
-import { savePrebuiltStations, resetPrebuiltStations } from "@/utils/prebuiltStationsManager";
+import { savePrebuiltStations, resetPrebuiltStations, getPrebuiltStations } from "@/utils/prebuiltStationsManager";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 
@@ -16,6 +16,12 @@ const AdminPage = () => {
   const [isResetting, setIsResetting] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
+  
+  useEffect(() => {
+    // Reset authentication when component mounts
+    setIsAuthenticated(false);
+    setIsPasswordDialogOpen(true);
+  }, []);
 
   const handlePasswordSuccess = () => {
     setIsPasswordDialogOpen(false);
@@ -23,12 +29,22 @@ const AdminPage = () => {
   };
 
   const handleSaveStations = (stations: any[]) => {
+    // Validate stations before saving
+    if (!Array.isArray(stations) || stations.length === 0) {
+      toast({
+        title: "Error",
+        description: "Invalid stations data. Cannot save empty stations list.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     if (savePrebuiltStations(stations)) {
       toast({
         title: "Changes saved",
         description: "Prebuilt stations have been updated successfully"
       });
-      navigate("/station-list");
+      // We don't navigate anymore since savePrebuiltStations will reload the page
     } else {
       toast({
         title: "Error",
@@ -46,14 +62,15 @@ const AdminPage = () => {
           title: "Reset complete",
           description: "Prebuilt stations have been reset to default values"
         });
+        // We don't need to set isResetting to false since page will reload
       } else {
         toast({
           title: "Error",
           description: "Failed to reset stations",
           variant: "destructive"
         });
+        setIsResetting(false);
       }
-      setIsResetting(false);
     }, 500);
   };
 

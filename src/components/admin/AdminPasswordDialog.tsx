@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,14 +22,24 @@ const AdminPasswordDialog: React.FC<AdminPasswordDialogProps> = ({
   const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+  
+  // Reset password field when dialog opens
+  useEffect(() => {
+    if (isOpen) {
+      setPassword("");
+      setIsSubmitting(false);
+    }
+  }, [isOpen]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     
-    // Add slight delay for security feel
-    setTimeout(() => {
-      if (verifyPassword(password)) {
+    try {
+      // Immediate verification without delay
+      const isValid = verifyPassword(password);
+      
+      if (isValid) {
         toast({
           title: "Access granted",
           description: "You now have admin access",
@@ -41,10 +51,18 @@ const AdminPasswordDialog: React.FC<AdminPasswordDialogProps> = ({
           description: "Incorrect password",
           variant: "destructive",
         });
+        setPassword("");
+        setIsSubmitting(false);
       }
+    } catch (error) {
+      console.error("Authentication error:", error);
+      toast({
+        title: "Authentication error",
+        description: "There was a problem verifying the password",
+        variant: "destructive",
+      });
       setIsSubmitting(false);
-      setPassword("");
-    }, 500);
+    }
   };
 
   return (
