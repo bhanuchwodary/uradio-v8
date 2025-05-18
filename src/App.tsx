@@ -1,9 +1,10 @@
+
 import React from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import { ThemeProvider } from "@/components/ui/theme-provider";
+import { ThemeProvider } from "@/components/ThemeProvider";
 import { Toaster } from "@/components/ui/toaster";
 import { TrackStateProvider } from "@/context/TrackStateContext";
-import Index from "@/pages/index";
+import Index from "@/pages/Index";
 import PlaylistPage from "@/pages/PlaylistPage";
 import AddStationPage from "@/pages/AddStationPage";
 import SettingsPage from "@/pages/SettingsPage";

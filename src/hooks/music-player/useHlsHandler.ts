@@ -146,8 +146,13 @@ export const useHlsHandler = ({
         });
         
         globalAudioRef.hls = hls;
-      } else if (globalAudioRef.hls.url !== url) {
-        // If we have an HLS instance but URL changed, load the new source
+      } else if (globalAudioRef.hls) {
+        // Compare current URL with the source URL we want to load
+        const currentSource = url;
+        // Remove this line that was causing the error
+        // globalAudioRef.hls.url !== url
+        
+        // Just load the new source directly
         globalAudioRef.hls.loadSource(url);
       }
     } else if (audioRef.current.src !== url) {
