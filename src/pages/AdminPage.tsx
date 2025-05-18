@@ -40,12 +40,12 @@ const AdminPage = () => {
       return;
     }
     
-    if (savePrebuiltStations(stations)) {
+    if (savePrebuiltStations(stations, true)) {
       toast({
         title: "Changes saved",
         description: "Prebuilt stations have been updated successfully"
       });
-      // We don't navigate anymore since savePrebuiltStations will reload the page
+      // savePrebuiltStations will handle the redirect
     } else {
       toast({
         title: "Error",
@@ -58,12 +58,12 @@ const AdminPage = () => {
   const handleResetToDefault = () => {
     setIsResetting(true);
     setTimeout(() => {
-      if (resetPrebuiltStations()) {
+      if (resetPrebuiltStations(true)) {
         toast({
           title: "Reset complete",
           description: "Prebuilt stations have been reset to default values"
         });
-        // We don't need to set isResetting to false since page will reload
+        // resetPrebuiltStations will handle the redirect
       } else {
         toast({
           title: "Error",

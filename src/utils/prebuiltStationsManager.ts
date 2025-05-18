@@ -31,18 +31,22 @@ export const getPrebuiltStations = (): any[] => {
 };
 
 /**
- * Save custom prebuilt stations to localStorage
+ * Save custom prebuilt stations to localStorage and redirect to station list
  */
-export const savePrebuiltStations = (stations: any[]): boolean => {
+export const savePrebuiltStations = (stations: any[], redirectToStationList: boolean = true): boolean => {
   try {
     console.log("Saving custom prebuilt stations:", stations.length);
     // Force reload any cached stations data
     localStorage.setItem(CUSTOM_PREBUILT_STATIONS_KEY, JSON.stringify(stations));
     console.log("Saved custom prebuilt stations:", stations.length);
     
-    // Force a page reload to update all components that might be using the stations
-    // This ensures changes are immediately visible throughout the app
-    window.location.reload();
+    if (redirectToStationList) {
+      // Navigate to the station list page instead of reloading
+      window.location.href = "/station-list";
+    } else {
+      // Force a page reload to update all components that might be using the stations
+      window.location.reload();
+    }
     return true;
   } catch (error) {
     console.error("Failed to save custom prebuilt stations:", error);
@@ -53,13 +57,18 @@ export const savePrebuiltStations = (stations: any[]): boolean => {
 /**
  * Reset prebuilt stations to default
  */
-export const resetPrebuiltStations = (): boolean => {
+export const resetPrebuiltStations = (redirectToStationList: boolean = true): boolean => {
   try {
     console.log("Resetting prebuilt stations to default");
     localStorage.removeItem(CUSTOM_PREBUILT_STATIONS_KEY);
     
-    // Force a page reload to update all components
-    window.location.reload();
+    if (redirectToStationList) {
+      // Navigate to the station list page instead of reloading
+      window.location.href = "/station-list";
+    } else {
+      // Force a page reload to update all components
+      window.location.reload();
+    }
     return true;
   } catch (error) {
     console.error("Failed to reset prebuilt stations:", error);

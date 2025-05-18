@@ -36,8 +36,9 @@ const AdminPasswordDialog: React.FC<AdminPasswordDialogProps> = ({
     setIsSubmitting(true);
     
     try {
-      // Immediate verification without delay
+      console.log("Verifying admin password...");
       const isValid = verifyPassword(password);
+      console.log("Password verification result:", isValid);
       
       if (isValid) {
         toast({
@@ -45,6 +46,8 @@ const AdminPasswordDialog: React.FC<AdminPasswordDialogProps> = ({
           description: "You now have admin access",
         });
         onSuccess();
+        // Close the dialog after successful authentication
+        onClose();
       } else {
         toast({
           title: "Access denied",
