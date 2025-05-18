@@ -110,6 +110,7 @@ const StationListPage: React.FC = () => {
   
   // Handle admin authentication success
   const handleAdminSuccess = () => {
+    console.log("Admin authentication successful, navigating to admin page");
     setIsAdminDialogOpen(false);
     navigate("/admin");
   };

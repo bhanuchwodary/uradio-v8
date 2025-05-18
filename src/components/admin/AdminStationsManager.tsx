@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus, Edit, Trash2, Shield } from "lucide-react";
@@ -7,8 +7,7 @@ import { Track } from "@/types/track";
 import EditStationDialog from "@/components/EditStationDialog";
 import { useToast } from "@/hooks/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import AdminPasswordDialog from "./AdminPasswordDialog";
-import { prebuiltStations } from "@/data/prebuiltStations";
+import { getPrebuiltStations } from "@/utils/prebuiltStationsManager";
 
 interface AdminStationsManagerProps {
   onSave: (stations: any[]) => void;
@@ -16,19 +15,29 @@ interface AdminStationsManagerProps {
 }
 
 const AdminStationsManager: React.FC<AdminStationsManagerProps> = ({ onSave, onCancel }) => {
-  const [stations, setStations] = useState<Track[]>(
-    prebuiltStations.map(station => ({
-      ...station,
-      isFavorite: false,
-      isPrebuilt: true,
-      playTime: 0
-    }))
-  );
+  const [stations, setStations] = useState<Track[]>([]);
   const [editingStation, setEditingStation] = useState<{ index: number; station: Track } | null>(null);
   const [stationToDelete, setStationToDelete] = useState<{ index: number; station: Track } | null>(null);
   const { toast } = useToast();
 
+  // Load current prebuilt stations on component mount
+  useEffect(() => {
+    const currentStations = getPrebuiltStations();
+    console.log("Loading stations for admin manager:", currentStations.length);
+    
+    // Convert to Track objects
+    const trackStations = currentStations.map(station => ({
+      ...station,
+      isFavorite: false,
+      isPrebuilt: true,
+      playTime: 0
+    }));
+    
+    setStations(trackStations);
+  }, []);
+
   const handleAddStation = () => {
+    console.log("Adding new station");
     setEditingStation({
       index: -1,
       station: { 
@@ -43,6 +52,7 @@ const AdminStationsManager: React.FC<AdminStationsManagerProps> = ({ onSave, onC
   };
 
   const handleEditStation = (index: number) => {
+    console.log("Editing station at index:", index);
     setEditingStation({
       index,
       station: stations[index]
@@ -50,6 +60,7 @@ const AdminStationsManager: React.FC<AdminStationsManagerProps> = ({ onSave, onC
   };
 
   const handleDeleteStation = (index: number) => {
+    console.log("Preparing to delete station at index:", index);
     setStationToDelete({
       index,
       station: stations[index]
@@ -58,6 +69,7 @@ const AdminStationsManager: React.FC<AdminStationsManagerProps> = ({ onSave, onC
 
   const confirmDeleteStation = () => {
     if (stationToDelete !== null) {
+      console.log("Confirming deletion of station:", stationToDelete.station.name);
       const newStations = [...stations];
       newStations.splice(stationToDelete.index, 1);
       setStations(newStations);
@@ -74,6 +86,7 @@ const AdminStationsManager: React.FC<AdminStationsManagerProps> = ({ onSave, onC
   const handleSaveEdit = (data: { url: string; name: string; language?: string }) => {
     if (editingStation === null) return;
     
+    console.log("Saving station edit:", data);
     const newStations = [...stations];
     const station: Track = {
       url: data.url,
@@ -106,6 +119,7 @@ const AdminStationsManager: React.FC<AdminStationsManagerProps> = ({ onSave, onC
 
   const handleSaveChanges = () => {
     // Convert the stations back to the format used in prebuiltStations.ts
+    console.log("Saving all station changes");
     const stationsToSave = stations.map(station => ({
       name: station.name,
       url: station.url,

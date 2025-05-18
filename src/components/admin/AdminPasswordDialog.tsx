@@ -52,7 +52,6 @@ const AdminPasswordDialog: React.FC<AdminPasswordDialogProps> = ({
           variant: "destructive",
         });
         setPassword("");
-        setIsSubmitting(false);
       }
     } catch (error) {
       console.error("Authentication error:", error);
@@ -61,8 +60,8 @@ const AdminPasswordDialog: React.FC<AdminPasswordDialogProps> = ({
         description: "There was a problem verifying the password",
         variant: "destructive",
       });
-      setIsSubmitting(false);
     }
+    setIsSubmitting(false);
   };
 
   return (

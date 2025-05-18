@@ -35,6 +35,7 @@ export const getPrebuiltStations = (): any[] => {
  */
 export const savePrebuiltStations = (stations: any[]): boolean => {
   try {
+    console.log("Saving custom prebuilt stations:", stations.length);
     // Force reload any cached stations data
     localStorage.setItem(CUSTOM_PREBUILT_STATIONS_KEY, JSON.stringify(stations));
     console.log("Saved custom prebuilt stations:", stations.length);
@@ -54,8 +55,8 @@ export const savePrebuiltStations = (stations: any[]): boolean => {
  */
 export const resetPrebuiltStations = (): boolean => {
   try {
+    console.log("Resetting prebuilt stations to default");
     localStorage.removeItem(CUSTOM_PREBUILT_STATIONS_KEY);
-    console.log("Reset prebuilt stations to default");
     
     // Force a page reload to update all components
     window.location.reload();

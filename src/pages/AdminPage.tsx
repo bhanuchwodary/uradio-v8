@@ -24,6 +24,7 @@ const AdminPage = () => {
   }, []);
 
   const handlePasswordSuccess = () => {
+    console.log("Authentication successful, showing admin interface");
     setIsPasswordDialogOpen(false);
     setIsAuthenticated(true);
   };
