@@ -45,6 +45,9 @@ const AdminPasswordDialog: React.FC<AdminPasswordDialogProps> = ({
           title: "Access granted",
           description: "You now have admin access",
         });
+        // Store authentication state in session storage
+        sessionStorage.setItem("admin_authenticated", "true");
+        // Call onSuccess callback first
         onSuccess();
         // Close the dialog after successful authentication
         onClose();
@@ -88,6 +91,7 @@ const AdminPasswordDialog: React.FC<AdminPasswordDialogProps> = ({
               placeholder="Enter admin password"
               className="bg-background/60"
               autoComplete="current-password"
+              autoFocus
             />
           </div>
 

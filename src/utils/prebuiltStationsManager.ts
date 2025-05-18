@@ -40,6 +40,9 @@ export const savePrebuiltStations = (stations: any[], redirectToStationList: boo
     localStorage.setItem(CUSTOM_PREBUILT_STATIONS_KEY, JSON.stringify(stations));
     console.log("Saved custom prebuilt stations:", stations.length);
     
+    // Clear admin authentication state to ensure fresh authentication next time
+    sessionStorage.removeItem("admin_authenticated");
+    
     if (redirectToStationList) {
       // Navigate to the station list page instead of reloading
       window.location.href = "/station-list";
@@ -61,6 +64,9 @@ export const resetPrebuiltStations = (redirectToStationList: boolean = true): bo
   try {
     console.log("Resetting prebuilt stations to default");
     localStorage.removeItem(CUSTOM_PREBUILT_STATIONS_KEY);
+    
+    // Clear admin authentication state to ensure fresh authentication next time
+    sessionStorage.removeItem("admin_authenticated");
     
     if (redirectToStationList) {
       // Navigate to the station list page instead of reloading

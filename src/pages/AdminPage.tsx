@@ -17,16 +17,22 @@ const AdminPage = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   
+  // Skip the authentication step if coming from StationListPage with successful auth
   useEffect(() => {
-    // Reset authentication when component mounts
-    setIsAuthenticated(false);
-    setIsPasswordDialogOpen(true);
+    const hasAuth = sessionStorage.getItem("admin_authenticated");
+    if (hasAuth === "true") {
+      console.log("Admin already authenticated, skipping password dialog");
+      setIsAuthenticated(true);
+      setIsPasswordDialogOpen(false);
+    }
   }, []);
 
   const handlePasswordSuccess = () => {
     console.log("Authentication successful, showing admin interface");
     setIsPasswordDialogOpen(false);
     setIsAuthenticated(true);
+    // Save authentication state to session storage
+    sessionStorage.setItem("admin_authenticated", "true");
   };
 
   const handleSaveStations = (stations: any[]) => {

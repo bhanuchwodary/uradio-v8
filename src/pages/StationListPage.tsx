@@ -72,7 +72,6 @@ const StationListPage: React.FC = () => {
         title: "Station Added",
         description: `${station.name} has been added to your playlist`,
       });
-      // Don't navigate automatically
     } else {
       toast({
         title: "Failed to Add Station",
@@ -112,6 +111,8 @@ const StationListPage: React.FC = () => {
   const handleAdminSuccess = () => {
     console.log("Admin authentication successful, navigating to admin page");
     setIsAdminDialogOpen(false);
+    // Store authentication state to prevent re-authentication in the AdminPage
+    sessionStorage.setItem("admin_authenticated", "true");
     navigate("/admin");
   };
 
