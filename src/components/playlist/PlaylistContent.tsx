@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { StationGrid } from "@/components/ui/player/StationGrid";
 import { Track } from "@/types/track";
+import { getStations } from "@/data/prebuiltStationsLoader";
 
 interface PlaylistContentProps {
   userStations: Track[];

@@ -5,14 +5,19 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StationGrid } from "@/components/ui/player/StationGrid";
 import { useTrackStateContext } from "@/context/TrackStateContext";
 import { useToast } from "@/hooks/use-toast";
-import { prebuiltStations } from "@/data/prebuiltStations";
+import { getStations } from "@/data/prebuiltStationsLoader";
 import { Track } from "@/types/track";
 import EditStationDialog from "@/components/EditStationDialog";
-import { Plus } from "lucide-react";
+import { Plus, Shield } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
+import AdminPasswordDialog from "@/components/admin/AdminPasswordDialog";
 
 const StationListPage: React.FC = () => {
   const { toast } = useToast();
   const [editingStation, setEditingStation] = useState<Track | null>(null);
+  const [isAdminDialogOpen, setIsAdminDialogOpen] = useState(false);
+  const navigate = useNavigate();
   
   const { 
     tracks,
@@ -27,8 +32,11 @@ const StationListPage: React.FC = () => {
   // Get user stations
   const userStations = getUserStations();
   
+  // Get prebuilt stations from loader (which checks for custom stations)
+  const prebuiltStationsList = getStations();
+  
   // Create proper track objects from prebuilt stations data
-  const prebuiltStationTracks: Track[] = prebuiltStations.map(station => ({
+  const prebuiltStationTracks: Track[] = prebuiltStationsList.map(station => ({
     ...station,
     isFavorite: false,
     isPrebuilt: true,
@@ -99,11 +107,26 @@ const StationListPage: React.FC = () => {
       setEditingStation(null);
     }
   };
+  
+  // Handle admin authentication success
+  const handleAdminSuccess = () => {
+    setIsAdminDialogOpen(false);
+    navigate("/admin");
+  };
 
   return (
     <AppLayout>
       <div className="container mx-auto max-w-5xl space-y-6">
-        <h1 className="text-2xl font-bold text-foreground">Station List</h1>
+        <div className="flex justify-between items-center">
+          <h1 className="text-2xl font-bold text-foreground">Station List</h1>
+          <Button 
+            variant="outline" 
+            className="flex items-center gap-1"
+            onClick={() => setIsAdminDialogOpen(true)}
+          >
+            <Shield className="h-4 w-4" /> Admin
+          </Button>
+        </div>
         
         {/* User Stations */}
         <Card className="bg-background/30 backdrop-blur-md border-none shadow-lg material-shadow-2">
@@ -162,6 +185,13 @@ const StationListPage: React.FC = () => {
             }}
           />
         )}
+        
+        {/* Admin password dialog */}
+        <AdminPasswordDialog 
+          isOpen={isAdminDialogOpen}
+          onClose={() => setIsAdminDialogOpen(false)}
+          onSuccess={handleAdminSuccess}
+        />
       </div>
     </AppLayout>
   );
