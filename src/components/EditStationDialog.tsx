@@ -1,10 +1,9 @@
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useForm } from "react-hook-form";
+import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface EditStationDialogProps {
@@ -12,22 +11,12 @@ interface EditStationDialogProps {
   onClose: () => void;
   onSave: (data: { url: string; name: string; language?: string }) => void;
   initialValues: { url: string; name: string; language?: string };
+  error?: string | null;
 }
 
-// Common language options for radio stations
-const languageOptions = [
-  "English",
-  "Hindi",
-  "Telugu",
-  "Tamil",
-  "Malayalam",
-  "Kannada",
-  "Bengali",
-  "Marathi",
-  "Punjabi",
-  "Gujarati",
-  "Classical Music",
-  "Other"
+const languages = [
+  "English", "Hindi", "Telugu", "Tamil", "Malayalam", "Kannada", 
+  "Bengali", "Punjabi", "Marathi", "Gujarati", "Classical Music", "Other"
 ];
 
 const EditStationDialog: React.FC<EditStationDialogProps> = ({
@@ -35,95 +24,83 @@ const EditStationDialog: React.FC<EditStationDialogProps> = ({
   onClose,
   onSave,
   initialValues,
+  error
 }) => {
-  const form = useForm({
-    defaultValues: {
-      url: initialValues.url || "",
-      name: initialValues.name || "",
-      language: initialValues.language || "English"
-    }
-  });
+  const [url, setUrl] = useState(initialValues.url);
+  const [name, setName] = useState(initialValues.name);
+  const [language, setLanguage] = useState(initialValues.language || "English");
 
-  const handleSubmit = (values: { url: string; name: string; language: string }) => {
-    onSave(values);
+  // Update state when initialValues changes
+  useEffect(() => {
+    setUrl(initialValues.url);
+    setName(initialValues.name);
+    setLanguage(initialValues.language || "English");
+  }, [initialValues]);
+
+  const handleSave = () => {
+    onSave({ url, name, language });
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px] bg-background/95 backdrop-blur-md material-shadow-3">
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Edit Radio Station</DialogTitle>
+          <DialogTitle>Edit Station</DialogTitle>
         </DialogHeader>
-
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="url"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>URL</FormLabel>
-                  <FormControl>
-                    <Input 
-                      placeholder="Enter station URL" 
-                      {...field}
-                      className="bg-background/60"
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
+        <div className="grid gap-4 py-4">
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="station-url" className="text-right">
+              URL
+            </Label>
+            <Input
+              id="station-url"
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              className="col-span-3"
             />
-            
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Station Name</FormLabel>
-                  <FormControl>
-                    <Input 
-                      placeholder="Enter station name" 
-                      {...field}
-                      className="bg-background/60"
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="station-name" className="text-right">
+              Name
+            </Label>
+            <Input
+              id="station-name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="col-span-3"
             />
-
-            <FormField
-              control={form.control}
-              name="language"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Language</FormLabel>
-                  <Select 
-                    onValueChange={field.onChange} 
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger className="bg-background/60">
-                        <SelectValue placeholder="Select station language" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {languageOptions.map((language) => (
-                        <SelectItem key={language} value={language}>
-                          {language}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </FormItem>
-              )}
-            />
-
-            <DialogFooter>
-              <Button variant="outline" onClick={onClose} className="mr-2">Cancel</Button>
-              <Button type="submit">Save Changes</Button>
-            </DialogFooter>
-          </form>
-        </Form>
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="station-language" className="text-right">
+              Language
+            </Label>
+            <div className="col-span-3">
+              <Select value={language} onValueChange={setLanguage}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select language" />
+                </SelectTrigger>
+                <SelectContent>
+                  {languages.map((lang) => (
+                    <SelectItem key={lang} value={lang}>
+                      {lang}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          {error && (
+            <div className="col-span-4 text-destructive text-sm">
+              {error}
+            </div>
+          )}
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button onClick={handleSave}>Save</Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

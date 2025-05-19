@@ -8,6 +8,7 @@ import EditStationDialog from "@/components/EditStationDialog";
 import { useToast } from "@/hooks/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { getPrebuiltStations } from "@/utils/prebuiltStationsManager";
+import { useTrackStateContext } from "@/context/TrackStateContext";
 
 interface AdminStationsManagerProps {
   onSave: (stations: any[]) => void;
@@ -18,7 +19,9 @@ const AdminStationsManager: React.FC<AdminStationsManagerProps> = ({ onSave, onC
   const [stations, setStations] = useState<Track[]>([]);
   const [editingStation, setEditingStation] = useState<{ index: number; station: Track } | null>(null);
   const [stationToDelete, setStationToDelete] = useState<{ index: number; station: Track } | null>(null);
+  const [editError, setEditError] = useState<string | null>(null);
   const { toast } = useToast();
+  const { checkIfStationExists } = useTrackStateContext();
 
   // Load current prebuilt stations on component mount
   useEffect(() => {
@@ -49,6 +52,7 @@ const AdminStationsManager: React.FC<AdminStationsManagerProps> = ({ onSave, onC
         playTime: 0
       }
     });
+    setEditError(null);
   };
 
   const handleEditStation = (index: number) => {
@@ -57,6 +61,7 @@ const AdminStationsManager: React.FC<AdminStationsManagerProps> = ({ onSave, onC
       index,
       station: stations[index]
     });
+    setEditError(null);
   };
 
   const handleDeleteStation = (index: number) => {
@@ -87,6 +92,48 @@ const AdminStationsManager: React.FC<AdminStationsManagerProps> = ({ onSave, onC
     if (editingStation === null) return;
     
     console.log("Saving station edit:", data);
+    
+    // Check if this is a new station or editing an existing one
+    if (editingStation.index === -1) {
+      // For new stations, check if URL already exists in user stations
+      const { exists, isUserStation } = checkIfStationExists(data.url);
+      if (exists) {
+        setEditError(`This URL already exists ${isUserStation ? 'in your stations' : 'in another prebuilt station'}`);
+        return;
+      }
+      
+      // Also check if URL exists in current prebuilt stations being edited
+      const urlExists = stations.some(station => 
+        station.url.toLowerCase() === data.url.toLowerCase()
+      );
+      
+      if (urlExists) {
+        setEditError("This URL already exists in another prebuilt station");
+        return;
+      }
+    } else {
+      // For existing stations, check if changing to a URL that already exists elsewhere
+      const currentUrl = stations[editingStation.index].url;
+      if (currentUrl.toLowerCase() !== data.url.toLowerCase()) {
+        // URL is being changed, check if new URL exists
+        const { exists, isUserStation } = checkIfStationExists(data.url);
+        if (exists) {
+          setEditError(`This URL already exists ${isUserStation ? 'in your stations' : 'in another prebuilt station'}`);
+          return;
+        }
+        
+        // Check within current stations list (excluding the one being edited)
+        const urlExists = stations.some((station, idx) => 
+          idx !== editingStation.index && station.url.toLowerCase() === data.url.toLowerCase()
+        );
+        
+        if (urlExists) {
+          setEditError("This URL already exists in another prebuilt station");
+          return;
+        }
+      }
+    }
+    
     const newStations = [...stations];
     const station: Track = {
       url: data.url,
@@ -115,6 +162,7 @@ const AdminStationsManager: React.FC<AdminStationsManagerProps> = ({ onSave, onC
     
     setStations(newStations);
     setEditingStation(null);
+    setEditError(null);
   };
 
   const handleSaveChanges = () => {
@@ -196,13 +244,17 @@ const AdminStationsManager: React.FC<AdminStationsManagerProps> = ({ onSave, onC
         {editingStation && (
           <EditStationDialog
             isOpen={true}
-            onClose={() => setEditingStation(null)}
+            onClose={() => {
+              setEditingStation(null);
+              setEditError(null);
+            }}
             onSave={handleSaveEdit}
             initialValues={{
               url: editingStation.station.url,
               name: editingStation.station.name,
               language: editingStation.station.language
             }}
+            error={editError}
           />
         )}
         

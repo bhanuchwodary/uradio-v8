@@ -21,6 +21,7 @@ const App = () => {
             <Route path="/" element={<Index />} />
             <Route path="/playlist" element={<PlaylistPage />} />
             <Route path="/add" element={<AddStationPage />} />
+            <Route path="/add-station" element={<AddStationPage />} /> {/* Add alternate route */}
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="/station-list" element={<StationListPage />} />
             <Route path="/admin" element={<AdminPage />} />

@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { z } from 'zod';
+import { useTrackStateContext } from '@/context/TrackStateContext';
 
 const languages = [
   "English", "Hindi", "Telugu", "Tamil", "Malayalam", "Kannada", 
@@ -30,6 +31,7 @@ const AddUrlForm: React.FC<AddUrlFormProps> = ({ onAddUrl }) => {
   const [name, setName] = useState('');
   const [language, setLanguage] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const { checkIfStationExists } = useTrackStateContext();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,6 +55,13 @@ const AddUrlForm: React.FC<AddUrlFormProps> = ({ onAddUrl }) => {
     
     if (!language) {
       setError('Language is required');
+      return;
+    }
+    
+    // Check if the station already exists
+    const { exists, isUserStation } = checkIfStationExists(url);
+    if (exists) {
+      setError(`Station already exists ${isUserStation ? 'in your stations' : 'in prebuilt stations'}`);
       return;
     }
     
