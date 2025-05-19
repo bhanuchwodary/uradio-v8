@@ -95,7 +95,8 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
+    text-rendering: optimizeLegibility;
   }
 }
 
@@ -145,6 +146,19 @@
   .elevation-hover {
     @apply material-transition hover:material-shadow-3;
   }
+  
+  /* Responsive utilities */
+  .responsive-container {
+    @apply w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+  
+  .responsive-padding {
+    @apply px-4 sm:px-6 md:px-8;
+  }
+  
+  .responsive-grid {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4;
+  }
 }
 
 /* Material Design Animation Keyframes */
@@ -182,4 +196,23 @@
   transform: scale(0, 0);
   opacity: .3;
   transition: 0s;
+}
+
+/* Safe area handling for modern devices */
+@supports (padding: max(0px)) {
+  .safe-area-inset-bottom {
+    padding-bottom: max(env(safe-area-inset-bottom), 1rem);
+  }
+  
+  .safe-area-inset-top {
+    padding-top: max(env(safe-area-inset-top), 1rem);
+  }
+}
+
+/* Better form elements for mobile */
+@media (max-width: 640px) {
+  input, select, textarea, button {
+    @apply text-base;
+    min-height: 44px;
+  }
 }

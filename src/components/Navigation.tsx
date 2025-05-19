@@ -24,7 +24,7 @@ const Navigation = () => {
             <span className="sr-only">Station List</span>
           </Button>
         </Link>
-        <Link to="/add-station">
+        <Link to="/add">
           <Button variant="ghost" size="icon" className="bg-white/20 hover:bg-white/30 dark:bg-black/20 dark:hover:bg-black/30 border-none">
             <Plus className="h-6 w-6" />
             <span className="sr-only">Add Station</span>

@@ -1,12 +1,13 @@
 
 import React from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import AddUrlForm from "@/components/AddUrlForm";
 import ImportStationsFromCsv from "@/components/ImportStationsFromCsv";
 import { useTrackStateContext } from "@/context/TrackStateContext";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
+import { Plus, Upload } from "lucide-react";
 
 const AddStationPage: React.FC = () => {
   const { addUrl } = useTrackStateContext();
@@ -60,12 +61,16 @@ const AddStationPage: React.FC = () => {
 
   return (
     <AppLayout>
-      <div className="container mx-auto max-w-lg space-y-6">
-        <h1 className="text-2xl font-bold text-white">Add Station</h1>
+      <div className="container mx-auto max-w-lg space-y-6 py-4">
+        <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
+          <Plus className="h-5 w-5 text-primary" />
+          Add Station
+        </h1>
         
         <Card className="bg-background/30 backdrop-blur-md border-none shadow-lg material-shadow-2">
           <CardHeader className="pb-2">
             <CardTitle className="text-lg">Add Radio Station</CardTitle>
+            <CardDescription>Enter the URL and name of the radio station you want to add</CardDescription>
           </CardHeader>
           <CardContent>
             <AddUrlForm onAddUrl={handleAddUrl} />
@@ -74,7 +79,11 @@ const AddStationPage: React.FC = () => {
 
         <Card className="bg-background/30 backdrop-blur-md border-none shadow-lg material-shadow-2">
           <CardHeader className="pb-2">
-            <CardTitle className="text-lg">Import Stations</CardTitle>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Upload className="h-4 w-4" />
+              Import Stations
+            </CardTitle>
+            <CardDescription>Import multiple stations from a CSV file</CardDescription>
           </CardHeader>
           <CardContent>
             <ImportStationsFromCsv onImport={handleImport} />

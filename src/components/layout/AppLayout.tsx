@@ -17,14 +17,14 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
     { icon: Home, label: "Home", path: "/" },
     { icon: Music, label: "Playlist", path: "/playlist" },
     { icon: List, label: "Stations", path: "/station-list" },
-    { icon: Plus, label: "Add", path: "/add-station" },
+    { icon: Plus, label: "Add", path: "/add" },
     { icon: Settings, label: "Settings", path: "/settings" }
   ];
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-secondary/80 via-background to-accent/30 dark:from-background dark:via-card dark:to-muted/30">
       {/* Main Content */}
-      <main className="flex-grow p-4 pb-20">
+      <main className="flex-grow p-4 pb-20 overflow-x-hidden">
         {children}
       </main>
       
