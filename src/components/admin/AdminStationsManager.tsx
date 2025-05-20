@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, Edit, Trash2, Shield } from "lucide-react";
+import { Plus, Edit, Trash2, Shield, Upload } from "lucide-react";
 import { Track } from "@/types/track";
 import EditStationDialog from "@/components/EditStationDialog";
 import { useToast } from "@/hooks/use-toast";
@@ -10,6 +10,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { getPrebuiltStations } from "@/utils/prebuiltStationsManager";
 import { useTrackStateContext } from "@/context/TrackStateContext";
 import { useIsMobile } from "@/hooks/use-mobile";
+import ImportStationsFromCsv from "@/components/ImportStationsFromCsv";
 
 interface AdminStationsManagerProps {
   onSave: (stations: any[]) => void;
@@ -21,6 +22,7 @@ const AdminStationsManager: React.FC<AdminStationsManagerProps> = ({ onSave, onC
   const [editingStation, setEditingStation] = useState<{ index: number; station: Track } | null>(null);
   const [stationToDelete, setStationToDelete] = useState<{ index: number; station: Track } | null>(null);
   const [editError, setEditError] = useState<string | null>(null);
+  const [showImport, setShowImport] = useState(false);
   const { toast } = useToast();
   const { checkIfStationExists } = useTrackStateContext();
   const isMobile = useIsMobile();
@@ -179,6 +181,62 @@ const AdminStationsManager: React.FC<AdminStationsManagerProps> = ({ onSave, onC
     onSave(stationsToSave);
   };
 
+  const handleImportStations = (importedStations: Array<{ name: string; url: string; language?: string }>) => {
+    if (!Array.isArray(importedStations) || importedStations.length === 0) {
+      toast({
+        title: "Import Error",
+        description: "No valid stations were found in the imported data.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Filter out stations that already exist
+    const newStations = [...stations];
+    let addedCount = 0;
+    let skippedCount = 0;
+
+    importedStations.forEach(station => {
+      // Check if URL already exists in current stations
+      const urlExists = stations.some(
+        existingStation => existingStation.url.toLowerCase() === station.url.toLowerCase()
+      );
+
+      // Check if URL exists in user stations
+      const { exists, isUserStation } = checkIfStationExists(station.url);
+
+      if (!urlExists && !exists) {
+        // Add as new station
+        newStations.push({
+          url: station.url,
+          name: station.name,
+          language: station.language || "Unknown",
+          isFavorite: false,
+          isPrebuilt: true,
+          playTime: 0
+        });
+        addedCount++;
+      } else {
+        skippedCount++;
+      }
+    });
+
+    if (addedCount > 0) {
+      setStations(newStations);
+      toast({
+        title: "Stations Imported",
+        description: `Added ${addedCount} stations${skippedCount > 0 ? `, skipped ${skippedCount} duplicates` : ''}.`,
+      });
+      setShowImport(false);
+    } else {
+      toast({
+        title: "No New Stations",
+        description: `All ${skippedCount} stations already exist in your collection.`,
+        variant: "destructive",
+      });
+    }
+  };
+
   // Determine grid columns based on screen size
   const gridCols = isMobile 
     ? "grid-cols-1" 
@@ -196,11 +254,32 @@ const AdminStationsManager: React.FC<AdminStationsManagerProps> = ({ onSave, onC
             Add, edit or remove prebuilt radio stations
           </CardDescription>
         </div>
-        <Button onClick={handleAddStation} size={isMobile ? "sm" : "default"} className="flex self-start sm:self-center items-center gap-1">
-          <Plus className="h-4 w-4" /> Add Station
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button 
+            onClick={handleAddStation} 
+            size={isMobile ? "sm" : "default"} 
+            className="flex items-center gap-1"
+          >
+            <Plus className="h-4 w-4" /> Add Station
+          </Button>
+          <Button 
+            onClick={() => setShowImport(!showImport)} 
+            size={isMobile ? "sm" : "default"} 
+            variant="outline"
+            className="flex items-center gap-1"
+          >
+            <Upload className="h-4 w-4" /> {showImport ? 'Hide Import' : 'Bulk Import'}
+          </Button>
+        </div>
       </CardHeader>
       <CardContent>
+        {showImport && (
+          <div className="mb-6 p-4 rounded-lg bg-background/60 backdrop-blur-sm">
+            <h3 className="text-lg font-medium mb-2">Import Stations</h3>
+            <ImportStationsFromCsv onImport={handleImportStations} />
+          </div>
+        )}
+        
         <div className={`grid ${gridCols} gap-4 mb-6`}>
           {stations.map((station, index) => (
             <div
