@@ -9,6 +9,7 @@ import AdminStationsManager from "@/components/admin/AdminStationsManager";
 import { savePrebuiltStations, resetPrebuiltStations, getPrebuiltStations } from "@/utils/prebuiltStationsManager";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const AdminPage = () => {
   const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(true);
@@ -16,6 +17,7 @@ const AdminPage = () => {
   const [isResetting, setIsResetting] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   
   // Skip the authentication step if coming from StationListPage with successful auth
   useEffect(() => {
@@ -87,10 +89,10 @@ const AdminPage = () => {
 
   return (
     <AppLayout>
-      <div className="container mx-auto max-w-5xl space-y-6 py-6">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-            <Shield className="h-6 w-6 text-primary" /> Admin Controls
+      <div className="container mx-auto max-w-5xl px-4 space-y-6 py-6">
+        <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
+          <h1 className="text-xl sm:text-2xl font-bold text-foreground flex items-center gap-2">
+            <Shield className="h-5 w-5 sm:h-6 sm:w-6 text-primary" /> Admin Controls
           </h1>
         </div>
 
@@ -108,6 +110,7 @@ const AdminPage = () => {
                   variant="destructive" 
                   onClick={handleResetToDefault}
                   disabled={isResetting}
+                  className={isMobile ? "w-full" : "w-auto"}
                 >
                   {isResetting ? "Resetting..." : "Reset to Default"}
                 </Button>
@@ -123,7 +126,10 @@ const AdminPage = () => {
               </CardDescription>
             </CardHeader>
             <CardContent className="flex justify-center">
-              <Button onClick={() => setIsPasswordDialogOpen(true)} className="flex items-center gap-1">
+              <Button 
+                onClick={() => setIsPasswordDialogOpen(true)} 
+                className="flex items-center gap-1"
+              >
                 <Shield className="h-4 w-4" /> Authenticate
               </Button>
             </CardContent>

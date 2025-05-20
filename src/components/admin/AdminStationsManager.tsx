@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { getPrebuiltStations } from "@/utils/prebuiltStationsManager";
 import { useTrackStateContext } from "@/context/TrackStateContext";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface AdminStationsManagerProps {
   onSave: (stations: any[]) => void;
@@ -22,6 +23,7 @@ const AdminStationsManager: React.FC<AdminStationsManagerProps> = ({ onSave, onC
   const [editError, setEditError] = useState<string | null>(null);
   const { toast } = useToast();
   const { checkIfStationExists } = useTrackStateContext();
+  const isMobile = useIsMobile();
 
   // Load current prebuilt stations on component mount
   useEffect(() => {
@@ -177,26 +179,29 @@ const AdminStationsManager: React.FC<AdminStationsManagerProps> = ({ onSave, onC
     onSave(stationsToSave);
   };
 
+  // Determine grid columns based on screen size
+  const gridCols = isMobile 
+    ? "grid-cols-1" 
+    : "grid-cols-1 md:grid-cols-2 lg:grid-cols-3";
+
   return (
     <Card className="w-full max-w-4xl mx-auto bg-background/30 backdrop-blur-md border-none shadow-lg material-shadow-2">
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle className="flex items-center gap-2">
-              <Shield className="h-5 w-5 text-primary" />
-              Admin Station Manager
-            </CardTitle>
-            <CardDescription>
-              Add, edit or remove prebuilt radio stations
-            </CardDescription>
-          </div>
-          <Button onClick={handleAddStation} size="sm" className="flex items-center gap-1">
-            <Plus className="h-4 w-4" /> Add Station
-          </Button>
+      <CardHeader className="flex flex-col sm:flex-row gap-4">
+        <div className="flex-1">
+          <CardTitle className="flex items-center gap-2">
+            <Shield className="h-5 w-5 text-primary" />
+            Admin Station Manager
+          </CardTitle>
+          <CardDescription>
+            Add, edit or remove prebuilt radio stations
+          </CardDescription>
         </div>
+        <Button onClick={handleAddStation} size={isMobile ? "sm" : "default"} className="flex self-start sm:self-center items-center gap-1">
+          <Plus className="h-4 w-4" /> Add Station
+        </Button>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+        <div className={`grid ${gridCols} gap-4 mb-6`}>
           {stations.map((station, index) => (
             <div
               key={`${station.url}-${index}`}
@@ -232,11 +237,11 @@ const AdminStationsManager: React.FC<AdminStationsManagerProps> = ({ onSave, onC
           ))}
         </div>
         
-        <div className="flex justify-end gap-2 mt-4">
-          <Button variant="outline" onClick={onCancel}>
+        <div className="flex flex-col sm:flex-row sm:justify-end gap-2 mt-4">
+          <Button variant="outline" onClick={onCancel} className="w-full sm:w-auto">
             Cancel
           </Button>
-          <Button onClick={handleSaveChanges}>
+          <Button onClick={handleSaveChanges} className="w-full sm:w-auto">
             Save Changes
           </Button>
         </div>
@@ -259,16 +264,16 @@ const AdminStationsManager: React.FC<AdminStationsManagerProps> = ({ onSave, onC
         )}
         
         <AlertDialog open={stationToDelete !== null} onOpenChange={() => setStationToDelete(null)}>
-          <AlertDialogContent>
+          <AlertDialogContent className="max-w-[95vw] sm:max-w-lg">
             <AlertDialogHeader>
               <AlertDialogTitle>Are you sure?</AlertDialogTitle>
               <AlertDialogDescription>
                 This will remove {stationToDelete?.station.name} from the prebuilt stations list.
               </AlertDialogDescription>
             </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={confirmDeleteStation}>Delete</AlertDialogAction>
+            <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+              <AlertDialogCancel className="w-full sm:w-auto">Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={confirmDeleteStation} className="w-full sm:w-auto">Delete</AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>

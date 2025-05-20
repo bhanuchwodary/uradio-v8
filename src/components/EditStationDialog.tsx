@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { AlertCircle } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface EditStationDialogProps {
   isOpen: boolean;
@@ -43,7 +45,7 @@ const EditStationDialog: React.FC<EditStationDialogProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] w-[95vw]">
         <DialogHeader>
           <DialogTitle>Edit Station</DialogTitle>
           <DialogDescription>
@@ -92,11 +94,16 @@ const EditStationDialog: React.FC<EditStationDialogProps> = ({
               </Select>
             </div>
           </div>
-          {error && (
-            <div className="col-span-4 text-destructive text-sm">
-              {error}
-            </div>
-          )}
+          
+          {/* Error message area - always reserve space for it */}
+          <div className="min-h-[40px]">
+            {error && (
+              <Alert variant="destructive" className="mt-2">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+          </div>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>
