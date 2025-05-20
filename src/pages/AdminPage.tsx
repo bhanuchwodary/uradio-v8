@@ -3,10 +3,11 @@ import React, { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import AdminPasswordDialog from "@/components/admin/AdminPasswordDialog";
 import AdminStationsManager from "@/components/admin/AdminStationsManager";
-import { savePrebuiltStations, resetPrebuiltStations, getPrebuiltStations } from "@/utils/prebuiltStationsManager";
+import AdminDangerZone from "@/components/admin/AdminDangerZone";
+import AdminAuthenticationCard from "@/components/admin/AdminAuthenticationCard";
+import { savePrebuiltStations } from "@/utils/prebuiltStationsManager";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -14,7 +15,6 @@ import { useIsMobile } from "@/hooks/use-mobile";
 const AdminPage = () => {
   const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isResetting, setIsResetting] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
@@ -62,26 +62,6 @@ const AdminPage = () => {
       });
     }
   };
-  
-  const handleResetToDefault = () => {
-    setIsResetting(true);
-    setTimeout(() => {
-      if (resetPrebuiltStations(true)) {
-        toast({
-          title: "Reset complete",
-          description: "Prebuilt stations have been reset to default values"
-        });
-        // resetPrebuiltStations will handle the redirect
-      } else {
-        toast({
-          title: "Error",
-          description: "Failed to reset stations",
-          variant: "destructive"
-        });
-        setIsResetting(false);
-      }
-    }, 500);
-  };
 
   const handleCancel = () => {
     navigate("/station-list");
@@ -99,41 +79,10 @@ const AdminPage = () => {
         {isAuthenticated ? (
           <>
             <AdminStationsManager onSave={handleSaveStations} onCancel={handleCancel} />
-            
-            <Card className="bg-background/30 backdrop-blur-md border-none shadow-lg material-shadow-2">
-              <CardHeader>
-                <CardTitle>Danger Zone</CardTitle>
-                <CardDescription>Reset prebuilt stations to their default values</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Button 
-                  variant="destructive" 
-                  onClick={handleResetToDefault}
-                  disabled={isResetting}
-                  className={isMobile ? "w-full" : "w-auto"}
-                >
-                  {isResetting ? "Resetting..." : "Reset to Default"}
-                </Button>
-              </CardContent>
-            </Card>
+            <AdminDangerZone isMobile={isMobile} />
           </>
         ) : (
-          <Card className="bg-background/30 backdrop-blur-md border-none shadow-lg material-shadow-2">
-            <CardHeader>
-              <CardTitle className="text-center">Authentication Required</CardTitle>
-              <CardDescription className="text-center">
-                You need admin access to manage prebuilt stations
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="flex justify-center">
-              <Button 
-                onClick={() => setIsPasswordDialogOpen(true)} 
-                className="flex items-center gap-1"
-              >
-                <Shield className="h-4 w-4" /> Authenticate
-              </Button>
-            </CardContent>
-          </Card>
+          <AdminAuthenticationCard onAuthenticate={() => setIsPasswordDialogOpen(true)} />
         )}
 
         <AdminPasswordDialog 
