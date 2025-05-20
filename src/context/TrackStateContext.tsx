@@ -2,7 +2,6 @@
 import React, { createContext, useContext, useEffect, useState, useRef, useMemo } from 'react';
 import { useTrackState } from '@/hooks/useTrackState';
 import { TrackStateResult } from '@/hooks/track-state/types';
-import { Track } from '@/types/track';
 
 // Create the context with a default value
 const TrackStateContext = createContext<TrackStateResult | undefined>(undefined);
@@ -13,30 +12,42 @@ export const TrackStateProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const [initialized, setInitialized] = useState(false);
   const renderCount = useRef(0);
   
-  // Enhanced logging to track state changes across renders
+  // Enhanced logging to track state changes across renders, but only in development
   useEffect(() => {
-    renderCount.current++;
-    console.log(`TrackStateProvider rendered ${renderCount.current} times`);
-    console.log("TrackStateProvider - Current tracks count:", trackState.tracks.length);
-    
-    if (trackState.tracks.length > 0) {
-      console.log("First track in context provider:", JSON.stringify(trackState.tracks[0]));
+    if (process.env.NODE_ENV === 'development') {
+      renderCount.current++;
+      console.log(`TrackStateProvider rendered ${renderCount.current} times`);
+      console.log("TrackStateProvider - Current tracks count:", trackState.tracks.length);
+      
+      if (trackState.tracks.length > 0) {
+        console.log("First track in context provider:", JSON.stringify(trackState.tracks[0]));
+      }
     }
     
     // Mark as initialized after first render
     if (!initialized && trackState.tracks.length >= 0) {
       setInitialized(true);
-      console.log("TrackState provider initialized");
+      if (process.env.NODE_ENV === 'development') {
+        console.log("TrackState provider initialized");
+      }
     }
   }, [trackState.tracks, initialized]);
   
-  // Create a stable context value that won't cause unnecessary rerenders
+  // Create a stable context value with more specific dependencies to avoid unnecessary rerenders
   const contextValue = useMemo(() => {
-    return trackState;
+    return {
+      ...trackState,
+      // Force explicit equality checks for key properties
+      tracks: trackState.tracks,
+      currentIndex: trackState.currentIndex,
+      isPlaying: trackState.isPlaying
+    };
   }, [
     trackState.tracks,
     trackState.currentIndex,
-    trackState.isPlaying
+    trackState.isPlaying,
+    // Only add other dependencies that should trigger context updates
+    trackState.debugState
   ]);
   
   return (

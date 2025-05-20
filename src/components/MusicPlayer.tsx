@@ -1,5 +1,6 @@
+
 // Streamlined MusicPlayer component that uses usePlayerCore for logic.
-import React from "react";
+import React, { memo } from "react";
 import PlayerLayout from "@/components/music-player/PlayerLayout";
 import PlayerTrackInfo from "@/components/music-player/PlayerTrackInfo";
 import PlayerSlider from "@/components/music-player/PlayerSlider";
@@ -17,7 +18,8 @@ interface MusicPlayerProps {
   tracks?: { name: string; url: string }[];
 }
 
-const MusicPlayer: React.FC<MusicPlayerProps> = ({
+// Using React.memo to prevent unnecessary re-renders
+const MusicPlayer: React.FC<MusicPlayerProps> = memo(({
   urls,
   currentIndex,
   setCurrentIndex,
@@ -72,6 +74,17 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
       />
     </PlayerLayout>
   );
-};
+}, (prevProps, nextProps) => {
+  // Custom comparison function for better performance
+  return (
+    prevProps.currentIndex === nextProps.currentIndex &&
+    prevProps.isPlaying === nextProps.isPlaying &&
+    prevProps.urls.length === nextProps.urls.length &&
+    (prevProps.tracks?.length || 0) === (nextProps.tracks?.length || 0) &&
+    prevProps.urls[prevProps.currentIndex] === nextProps.urls[nextProps.currentIndex]
+  );
+});
+
+MusicPlayer.displayName = "MusicPlayer"; // For better React DevTools debugging
 
 export default MusicPlayer;

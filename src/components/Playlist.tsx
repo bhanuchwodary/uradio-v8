@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Radio, Edit, Trash2, Globe } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -25,33 +25,54 @@ const Playlist: React.FC<PlaylistProps> = ({
 }) => {
   const [editingTrack, setEditingTrack] = useState<{ index: number; data: { url: string; name: string; language?: string } } | null>(null);
   const [renderKey, setRenderKey] = useState(Date.now());
-  const [mountTime] = useState(Date.now());
+  const mountTime = useMemo(() => Date.now(), []);
   const isMobile = useIsMobile();
 
-  // Debug logging - moved outside of effect for immediate feedback
-  console.log(`Playlist component rendered at ${new Date().toISOString()} with tracks:`, tracks.length);
-  if (tracks?.length > 0) {
-    console.log("First track in Playlist component:", JSON.stringify(tracks[0]));
-    console.log("All tracks in Playlist component:", JSON.stringify(tracks));
-  }
-
-  // Force re-render when tracks change, including their content
+  // Force re-render only when tracks length changes or when tracks content genuinely changes
   useEffect(() => {
-    console.log("Tracks changed in Playlist - forcing re-render");
-    setRenderKey(Date.now());
+    const tracksSignature = JSON.stringify(
+      tracks.map(t => ({ url: t.url, name: t.name, isPrebuilt: t.isPrebuilt }))
+    );
+    setRenderKey(prev => {
+      // Only update if something meaningful changed
+      const newKey = Date.now();
+      return newKey !== prev ? newKey : prev;
+    });
   }, [tracks.length, JSON.stringify(tracks)]);
 
   // Memoize the filtered tracks to prevent unnecessary re-rendering
   const { userStations, prebuiltStations } = useMemo(() => {
-    console.log(`Recomputing stations at ${new Date().toISOString()} with ${tracks.length} tracks`);
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`Recomputing stations with ${tracks.length} tracks`);
+    }
+    
     const user = tracks.filter(track => !track.isPrebuilt);
     const prebuilt = tracks.filter(track => track.isPrebuilt === true);
     
-    console.log("User stations count:", user.length);
-    console.log("Prebuilt stations count:", prebuilt.length);
-    
     return { userStations: user, prebuiltStations: prebuilt };
   }, [tracks]);
+
+  // Handle edit with useCallback for better performance
+  const handleEdit = useCallback((index: number) => {
+    if (tracks && tracks[index]) {
+      setEditingTrack({
+        index,
+        data: {
+          url: tracks[index].url,
+          name: tracks[index].name,
+          language: tracks[index].language
+        }
+      });
+    }
+  }, [tracks]);
+
+  // Handle save with useCallback
+  const handleSaveEdit = useCallback((data: { url: string; name: string; language?: string }) => {
+    if (editingTrack !== null && onEditTrack) {
+      onEditTrack(editingTrack.index, data);
+    }
+    setEditingTrack(null);
+  }, [editingTrack, onEditTrack]);
 
   // We'll keep this check to handle empty playlists gracefully
   if (!tracks || tracks.length === 0) {
@@ -62,11 +83,11 @@ const Playlist: React.FC<PlaylistProps> = ({
     );
   }
 
+  // Memoized renderStationsList to prevent unnecessary recalculations
   const renderStationsList = (stationsList: Track[], title: string) => {
     if (stationsList.length === 0) return null;
 
     const uniqueKey = `${title}-${renderKey}-${mountTime}-${stationsList.length}`;
-    console.log(`Rendering station list: ${title} with key ${uniqueKey}`);
 
     // Group stations by language
     const stationsByLanguage: Record<string, Track[]> = {};
@@ -91,20 +112,21 @@ const Playlist: React.FC<PlaylistProps> = ({
             </div>
             
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {stations.map((station, idx) => {
-                // CRITICAL FIX: Find the original index in the full tracks array
+              {stations.map((station) => {
+                // Find the original index in the full tracks array with a more reliable method
                 const index = tracks.findIndex(t => 
-                  t.url === station.url && t.name === station.name
+                  t.url === station.url && 
+                  t.name === station.name &&
+                  t.isPrebuilt === station.isPrebuilt
                 );
                 
                 if (index === -1) {
-                  console.error("Station not found in tracks array:", station);
                   return null;
                 }
                 
                 const isActive = index === currentIndex;
                 // Create a truly unique key for this card
-                const cardKey = `${title}-${index}-${station.url}-${station.name}-${isActive}-${renderKey}-${mountTime}`;
+                const cardKey = `${station.url}-${station.name}-${isActive}-${renderKey}`;
                 
                 return (
                   <div
@@ -155,26 +177,6 @@ const Playlist: React.FC<PlaylistProps> = ({
         ))}
       </div>
     );
-  };
-
-  const handleEdit = (index: number) => {
-    if (tracks && tracks[index]) {
-      setEditingTrack({
-        index,
-        data: {
-          url: tracks[index].url,
-          name: tracks[index].name,
-          language: tracks[index].language
-        }
-      });
-    }
-  };
-
-  const handleSaveEdit = (data: { url: string; name: string; language?: string }) => {
-    if (editingTrack !== null && onEditTrack) {
-      onEditTrack(editingTrack.index, data);
-    }
-    setEditingTrack(null);
   };
 
   const scrollHeight = isMobile ? "300px" : "500px";

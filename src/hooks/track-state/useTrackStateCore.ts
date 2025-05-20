@@ -10,103 +10,136 @@ export const useTrackStateCore = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
   
-  // Ref to track whether the current state has been saved to localStorage
+  // Refs for performance optimization
   const needsSaving = useRef(false);
   const stateVersion = useRef(0);
   const tracksRef = useRef<Track[]>([]);
+  const lastSavedTracksJSON = useRef<string>('[]');
   
   // Debug counter to track render cycles
   const renderCount = useRef(0);
+  const isDevMode = process.env.NODE_ENV === 'development';
 
   // Initialization effect - runs only once
   useEffect(() => {
-    console.log("useTrackStateCore - Initial load from localStorage");
-    renderCount.current++;
+    if (isDevMode) {
+      console.log("useTrackStateCore - Initial load from localStorage");
+      renderCount.current++;
+    }
     
     // Test if localStorage is working properly
     const storageAvailable = testLocalStorage();
-    console.log("LocalStorage is available:", storageAvailable);
+    if (isDevMode) {
+      console.log("LocalStorage is available:", storageAvailable);
+    }
     
     if (storageAvailable) {
       const loadedTracks = loadTracksFromLocalStorage();
-      console.log("Initial tracks loaded from localStorage:", loadedTracks.length);
+      if (isDevMode) {
+        console.log("Initial tracks loaded from localStorage:", loadedTracks.length);
+      }
       
       if (loadedTracks && loadedTracks.length > 0) {
-        console.log("First loaded track:", JSON.stringify(loadedTracks[0]));
-        console.log("All loaded tracks:", JSON.stringify(loadedTracks));
+        if (isDevMode) {
+          console.log("First loaded track:", JSON.stringify(loadedTracks[0]));
+          console.log("All loaded tracks:", JSON.stringify(loadedTracks));
+        }
         
         // CRITICAL FIX: Use a deep clone to ensure we're working with a fresh copy
         const freshTracks = JSON.parse(JSON.stringify(loadedTracks));
         tracksRef.current = freshTracks;
         setTracks(freshTracks);
+        lastSavedTracksJSON.current = JSON.stringify(freshTracks);
       }
     }
     
     setIsInitialized(true);
-    console.log("Track state initialized - render count:", renderCount.current);
-  }, []);
+    if (isDevMode) {
+      console.log("Track state initialized - render count:", renderCount.current);
+    }
+  }, [isDevMode]);
 
   // Save tracks to localStorage whenever they change (but after initialization)
   useEffect(() => {
-    renderCount.current++;
-    stateVersion.current++;
-    const currentVersion = stateVersion.current;
+    if (isDevMode) {
+      renderCount.current++;
+      stateVersion.current++;
+      const currentVersion = stateVersion.current;
+      console.log(`Tracks state changed - render count: ${renderCount.current}, state version: ${currentVersion}`);
+      console.log(`Current tracks in state (${tracks.length}):`, JSON.stringify(tracks));
+    }
     
     // Update ref for direct access elsewhere
     tracksRef.current = tracks;
     
-    console.log(`Tracks state changed - render count: ${renderCount.current}, state version: ${currentVersion}`);
-    console.log(`Current tracks in state (${tracks.length}):`, JSON.stringify(tracks));
-    
     if (isInitialized) {
-      console.log("useTrackStateCore - Saving tracks to localStorage:", tracks.length);
-      
-      // Mark that we need to save
-      needsSaving.current = true;
-      
-      // Save immediately to prevent losing data during navigation
-      const saveSuccess = saveTracksToLocalStorage(tracks);
-      if (saveSuccess) {
-        needsSaving.current = false;
-        console.log(`Successfully saved tracks (version ${currentVersion}) to localStorage`);
-      } else {
-        console.error(`Failed to save tracks (version ${currentVersion}) to localStorage`);
+      // Only save if tracks have actually changed (prevents unnecessary writes)
+      const currentTracksJSON = JSON.stringify(tracks);
+      if (currentTracksJSON !== lastSavedTracksJSON.current) {
+        if (isDevMode) {
+          console.log("useTrackStateCore - Saving tracks to localStorage:", tracks.length);
+        }
+        
+        // Mark that we need to save
+        needsSaving.current = true;
+        
+        // Save immediately to prevent losing data during navigation
+        const saveSuccess = saveTracksToLocalStorage(tracks);
+        if (saveSuccess) {
+          needsSaving.current = false;
+          lastSavedTracksJSON.current = currentTracksJSON;
+          if (isDevMode) {
+            console.log(`Successfully saved tracks to localStorage`);
+          }
+        } else if (isDevMode) {
+          console.error(`Failed to save tracks to localStorage`);
+        }
       }
     }
-  }, [tracks, isInitialized]);
+  }, [tracks, isInitialized, isDevMode]);
 
-  // Setup a more aggressive state integrity verification system
+  // Setup a more efficient state integrity verification system
   useEffect(() => {
     if (!isInitialized) return;
     
-    // Verify state integrity every second
+    // Use a less frequent interval to reduce performance impact
     const integrityCheckInterval = setInterval(() => {
       const isInSync = verifySyncStatus(tracks);
       if (!isInSync) {
-        console.warn("Track state and localStorage out of sync - resyncing");
+        if (isDevMode) {
+          console.warn("Track state and localStorage out of sync - resyncing");
+        }
         const storedTracks = loadTracksFromLocalStorage();
         
         // Only update if there are stored tracks and they differ from current tracks
         if (storedTracks && storedTracks.length > 0 && 
             JSON.stringify(storedTracks) !== JSON.stringify(tracks)) {
-          console.log("Reloading tracks from storage during integrity check");
+          if (isDevMode) {
+            console.log("Reloading tracks from storage during integrity check");
+          }
           setTracks(storedTracks);
         } else {
           // If storage is empty but we have tracks, force-save our tracks
           if (tracks.length > 0) {
-            console.log("Forcing save of current tracks to storage");
+            if (isDevMode) {
+              console.log("Forcing save of current tracks to storage");
+            }
             saveTracksToLocalStorage(tracks);
           }
         }
       }
-    }, 1000);
+    }, 5000); // Check less frequently (5 seconds) for better performance
     
     // Check integrity on route changes
     const handleRouteChange = () => {
-      console.log("Route change detected - checking track state integrity");
+      if (isDevMode) {
+        console.log("Route change detected - checking track state integrity");
+      }
       const isInSync = verifySyncStatus(tracks);
       if (!isInSync) {
-        console.warn("Track state and localStorage are out of sync after route change - resyncing");
+        if (isDevMode) {
+          console.warn("Track state and localStorage are out of sync after route change - resyncing");
+        }
         const loadedTracks = loadTracksFromLocalStorage();
         if (loadedTracks && loadedTracks.length > 0) {
           setTracks(loadedTracks);
@@ -120,7 +153,9 @@ export const useTrackStateCore = () => {
     // Force save on page unload
     const handleBeforeUnload = () => {
       if (tracks.length > 0) {
-        console.log("Page unloading - force saving tracks");
+        if (isDevMode) {
+          console.log("Page unloading - force saving tracks");
+        }
         saveTracksToLocalStorage(tracks);
       }
     };
@@ -134,7 +169,7 @@ export const useTrackStateCore = () => {
       window.removeEventListener('popstate', handleRouteChange);
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
-  }, [tracks, isInitialized]);
+  }, [tracks, isInitialized, isDevMode]);
 
   return {
     tracks,
