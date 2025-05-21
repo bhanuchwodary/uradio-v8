@@ -1,14 +1,15 @@
 
-import React, { useState } from "react";
-import { AppLayout } from "@/components/layout/AppLayout";
+import React, { useState, useEffect } from "react";
+import { EnhancedAppLayout } from "@/components/layout/EnhancedAppLayout";
 import { useTrackStateContext } from "@/context/TrackStateContext";
 import { usePlayerCore } from "@/hooks/usePlayerCore";
 import { Track } from "@/types/track";
 import { useToast } from "@/hooks/use-toast";
-import HomePagePlayer from "@/components/home/HomePagePlayer";
-import FavoritesSection from "@/components/home/FavoritesSection";
-import StationsTabsSection from "@/components/home/StationsTabsSection";
+import EnhancedHomePagePlayer from "@/components/home/EnhancedHomePagePlayer";
+import EnhancedFavoritesSection from "@/components/home/EnhancedFavoritesSection";
+import EnhancedStationsTabsSection from "@/components/home/EnhancedStationsTabsSection";
 import HomePageDialogs from "@/components/home/HomePageDialogs";
+import { AnimatePresence, motion } from "framer-motion";
 
 const Index: React.FC = () => {
   const { toast } = useToast();
@@ -78,6 +79,20 @@ const Index: React.FC = () => {
     const index = tracks.findIndex(t => t.url === station.url);
     if (index !== -1) {
       toggleFavorite(index);
+      
+      // Show toast when toggling favorite
+      toast({
+        title: station.isFavorite ? "Removed from favorites" : "Added to favorites",
+        description: `${station.name} ${station.isFavorite ? "removed from" : "added to"} your favorites`,
+        duration: 2000,
+      });
+    }
+  };
+  
+  // Toggle favorite for current track
+  const handleToggleCurrentFavorite = () => {
+    if (currentTrack) {
+      handleToggleFavorite(currentTrack);
     }
   };
   
@@ -117,10 +132,21 @@ const Index: React.FC = () => {
   };
 
   return (
-    <AppLayout>
-      <div className="container mx-auto max-w-5xl space-y-6">
+    <EnhancedAppLayout>
+      <div className="space-y-6">
+        {/* Welcome Message */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="text-center mb-4"
+        >
+          <h1 className="text-2xl font-bold">Welcome to Streamify</h1>
+          <p className="text-muted-foreground">Your personal radio streaming app</p>
+        </motion.div>
+
         {/* Player Card */}
-        <HomePagePlayer
+        <EnhancedHomePagePlayer
           currentTrack={currentTrack}
           isPlaying={isPlaying}
           handlePlayPause={handlePlayPause}
@@ -129,21 +155,26 @@ const Index: React.FC = () => {
           volume={volume}
           setVolume={setVolume}
           loading={loading}
+          onToggleFavorite={handleToggleCurrentFavorite}
         />
 
         {/* Favorites Section */}
-        <FavoritesSection 
-          favoriteStations={favoriteStations}
-          currentIndex={currentIndex}
-          currentTrackUrl={currentTrack?.url}
-          isPlaying={isPlaying}
-          onSelectStation={handleSelectStation}
-          onToggleFavorite={handleToggleFavorite}
-          onDeleteStation={handleConfirmDelete}
-        />
+        <AnimatePresence>
+          {favoriteStations.length > 0 && (
+            <EnhancedFavoritesSection 
+              favoriteStations={favoriteStations}
+              currentIndex={currentIndex}
+              currentTrackUrl={currentTrack?.url}
+              isPlaying={isPlaying}
+              onSelectStation={handleSelectStation}
+              onToggleFavorite={handleToggleFavorite}
+              onDeleteStation={handleConfirmDelete}
+            />
+          )}
+        </AnimatePresence>
         
         {/* All Stations Section with Tabs */}
-        <StationsTabsSection
+        <EnhancedStationsTabsSection
           popularStations={popularStations}
           userStations={userStations}
           prebuiltStations={prebuiltStations}
@@ -166,7 +197,7 @@ const Index: React.FC = () => {
           onConfirmDelete={handleDeleteStation}
         />
       </div>
-    </AppLayout>
+    </EnhancedAppLayout>
   );
 };
 
