@@ -9,7 +9,7 @@ import EnhancedHomePagePlayer from "@/components/home/EnhancedHomePagePlayer";
 import EnhancedFavoritesSection from "@/components/home/EnhancedFavoritesSection";
 import EnhancedStationsTabsSection from "@/components/home/EnhancedStationsTabsSection";
 import HomePageDialogs from "@/components/home/HomePageDialogs";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence } from "framer-motion";
 
 const Index: React.FC = () => {
   const { toast } = useToast();
@@ -134,17 +134,6 @@ const Index: React.FC = () => {
   return (
     <EnhancedAppLayout>
       <div className="space-y-6">
-        {/* Welcome Message */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="text-center mb-4"
-        >
-          <h1 className="text-2xl font-bold">Welcome to Streamify</h1>
-          <p className="text-muted-foreground">Your personal radio streaming app</p>
-        </motion.div>
-
         {/* Player Card */}
         <EnhancedHomePagePlayer
           currentTrack={currentTrack}
