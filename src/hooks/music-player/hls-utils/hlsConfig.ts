@@ -27,7 +27,7 @@ export const createHlsConfig = (): Hls.Config => {
     manifestLoadingMaxRetry: 8,
     levelLoadingMaxRetry: 8,
     
-    // Audio specific improvements - comment out problematic property
-    // Don't reference Hls as a namespace here
+    // Audio specific improvements
+    // No direct Hls namespace references here
   };
 };
