@@ -6,7 +6,7 @@ import Hls from "hls.js";
  * @returns HLS.js configuration object
  */
 export const createHlsConfig = (): Hls.Config => {
-  return {
+  const config: Hls.Config = {
     enableWorker: false, // Disable web workers to prevent CORS issues
     // Buffer settings for smoother playback
     maxBufferLength: 60,
@@ -28,6 +28,8 @@ export const createHlsConfig = (): Hls.Config => {
     levelLoadingMaxRetry: 8,
     
     // Audio specific improvements
-    // No direct Hls namespace references here
+    // We're not using any Hls namespace references here to avoid TypeScript errors
   };
+  
+  return config;
 };
