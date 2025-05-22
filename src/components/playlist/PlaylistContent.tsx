@@ -29,17 +29,6 @@ const PlaylistContent: React.FC<PlaylistContentProps> = ({
   onConfirmDelete,
   onToggleFavorite
 }) => {
-  // Group prebuilt stations by language
-  const prebuiltByLanguage: Record<string, Track[]> = {};
-  
-  prebuiltStations.forEach(station => {
-    const language = station.language || "Unknown";
-    if (!prebuiltByLanguage[language]) {
-      prebuiltByLanguage[language] = [];
-    }
-    prebuiltByLanguage[language].push(station);
-  });
-
   return (
     <Card className="bg-background/30 backdrop-blur-md border-none shadow-lg">
       <CardHeader className="pb-2">
@@ -52,21 +41,16 @@ const PlaylistContent: React.FC<PlaylistContentProps> = ({
             <TabsTrigger value="mystations">My Stations</TabsTrigger>
           </TabsList>
           
-          <TabsContent value="prebuilt" className="mt-4 space-y-6">
-            {Object.entries(prebuiltByLanguage).map(([language, stations]) => (
-              <div key={language} className="mb-4">
-                <h3 className="font-medium text-lg mb-2 text-foreground">{language}</h3>
-                <StationGrid
-                  stations={stations}
-                  currentIndex={currentIndex}
-                  currentTrackUrl={currentTrack?.url}
-                  isPlaying={isPlaying}
-                  onSelectStation={(index) => onSelectStation(index, stations)}
-                  onToggleFavorite={onToggleFavorite}
-                  onDeleteStation={onConfirmDelete}
-                />
-              </div>
-            ))}
+          <TabsContent value="prebuilt" className="mt-4">
+            <StationGrid
+              stations={prebuiltStations}
+              currentIndex={currentIndex}
+              currentTrackUrl={currentTrack?.url}
+              isPlaying={isPlaying}
+              onSelectStation={(index) => onSelectStation(index, prebuiltStations)}
+              onToggleFavorite={onToggleFavorite}
+              onDeleteStation={onConfirmDelete}
+            />
             
             {prebuiltStations.length === 0 && (
               <div className="text-center p-6 bg-background/50 rounded-lg">

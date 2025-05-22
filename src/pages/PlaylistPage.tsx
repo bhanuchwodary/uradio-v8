@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useTrackStateContext } from "@/context/TrackStateContext";
 import { usePlayerCore } from "@/hooks/usePlayerCore";
@@ -13,6 +13,7 @@ const PlaylistPage: React.FC = () => {
   const { toast } = useToast();
   const [editingStation, setEditingStation] = useState<Track | null>(null);
   const [stationToDelete, setStationToDelete] = useState<Track | null>(null);
+  const [isPageReady, setIsPageReady] = useState(false);
   
   const { 
     tracks,
@@ -49,6 +50,16 @@ const PlaylistPage: React.FC = () => {
     setIsPlaying,
     tracks
   });
+  
+  // Add effect for smooth transition on page load
+  useEffect(() => {
+    // Small delay to ensure DOM is ready before animation
+    const timer = setTimeout(() => {
+      setIsPageReady(true);
+    }, 50);
+    
+    return () => clearTimeout(timer);
+  }, []);
   
   // Calculate current track
   const currentTrack = tracks[currentIndex] || null;
@@ -108,7 +119,7 @@ const PlaylistPage: React.FC = () => {
 
   return (
     <AppLayout>
-      <div className="container mx-auto max-w-5xl space-y-6">
+      <div className={`container mx-auto max-w-5xl space-y-6 transition-opacity duration-300 ease-in-out ${isPageReady ? 'opacity-100' : 'opacity-0'}`}>
         {/* Player Component */}
         <PlaylistPlayer
           currentTrack={currentTrack}
