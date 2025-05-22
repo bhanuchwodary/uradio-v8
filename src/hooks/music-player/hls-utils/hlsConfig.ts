@@ -27,7 +27,7 @@ export const createHlsConfig = (): Hls.Config => {
     manifestLoadingMaxRetry: 8,
     levelLoadingMaxRetry: 8,
     
-    // Audio specific improvements
-    audioStreamController: undefined // Remove invalid property that was causing issues
+    // Audio specific improvements - comment out problematic property
+    // Don't reference Hls as a namespace here
   };
 };
