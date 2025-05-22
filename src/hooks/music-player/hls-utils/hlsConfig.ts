@@ -28,9 +28,6 @@ export const createHlsConfig = (): Hls.Config => {
     levelLoadingMaxRetry: 8,
     
     // Audio specific improvements
-    audioStreamController: {
-      // @ts-ignore - These are valid HLS.js options but TypeScript doesn't know about them
-      audioTrackSwitchSmoothOffset: 0.05
-    }
+    audioStreamController: undefined // Remove invalid property that was causing issues
   };
 };
