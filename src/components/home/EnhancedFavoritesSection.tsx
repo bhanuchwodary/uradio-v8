@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EnhancedStationGrid } from "@/components/ui/player/EnhancedStationGrid";
 import { Track } from "@/types/track";
 import { motion } from "framer-motion";
-import { Playlist } from "lucide-react";
+import { ListMusic } from "lucide-react";
 
 interface EnhancedFavoritesSectionProps {
   favoriteStations: Track[];
@@ -37,7 +37,7 @@ const EnhancedFavoritesSection: React.FC<EnhancedFavoritesSectionProps> = ({
     >
       <Card className="bg-gradient-to-br from-background/40 to-background/20 backdrop-blur-md border-none shadow-lg">
         <CardHeader className="pb-2 flex flex-row items-center space-y-0 gap-2">
-          <Playlist className="h-5 w-5 text-primary" />
+          <ListMusic className="h-5 w-5 text-primary" />
           <CardTitle className="text-lg">Playlist</CardTitle>
         </CardHeader>
         <CardContent>
@@ -57,4 +57,3 @@ const EnhancedFavoritesSection: React.FC<EnhancedFavoritesSectionProps> = ({
 };
 
 export default EnhancedFavoritesSection;
-
