@@ -108,6 +108,8 @@ export const useHomePageState = () => {
     tracks,
     currentIndex,
     isPlaying,
+    setCurrentIndex,
+    setIsPlaying,
     currentTrack,
     favoriteStations,
     popularStations,
