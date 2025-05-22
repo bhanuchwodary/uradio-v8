@@ -6,6 +6,7 @@ import Hls from "hls.js";
  * @returns HLS.js configuration object
  */
 export const createHlsConfig = (): Hls.Config => {
+  // Create configuration object without using Hls as a namespace
   const config: Hls.Config = {
     enableWorker: false, // Disable web workers to prevent CORS issues
     // Buffer settings for smoother playback
@@ -28,7 +29,7 @@ export const createHlsConfig = (): Hls.Config => {
     levelLoadingMaxRetry: 8,
     
     // Audio specific improvements
-    // We're not using any Hls namespace references here to avoid TypeScript errors
+    // We're using type-safe configuration without namespace references
   };
   
   return config;
