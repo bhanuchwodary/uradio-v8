@@ -51,24 +51,14 @@ const PlaylistPage: React.FC = () => {
     tracks
   });
   
-  // PERFORMANCE IMPROVEMENT: Better transition animation
+  // Add effect for smooth transition on page load
   useEffect(() => {
-    // Start with opacity 0
-    document.body.classList.add('page-transition');
-    
     // Small delay to ensure DOM is ready before animation
     const timer = setTimeout(() => {
       setIsPageReady(true);
-      // Remove the transition class after animation completes
-      setTimeout(() => {
-        document.body.classList.remove('page-transition');
-      }, 350);
     }, 50);
     
-    return () => {
-      clearTimeout(timer);
-      document.body.classList.remove('page-transition');
-    };
+    return () => clearTimeout(timer);
   }, []);
   
   // Calculate current track
