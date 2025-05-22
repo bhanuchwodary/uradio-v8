@@ -2,174 +2,109 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
+ 
 @layer base {
   :root {
-    --background: 210 40% 98%;
+    --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
-
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-
+ 
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+ 
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
-
-    --primary: 262 83% 58%;
+ 
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+ 
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+ 
+    --primary: 222.2 47.4% 11.2%;
     --primary-foreground: 210 40% 98%;
-
-    --secondary: 220 14.3% 95.9%;
+ 
+    --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
-
-    --muted: 210 40% 93%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-
-    --accent: 262 83% 96%;
-    --accent-foreground: 262 60% 40%;
-
+ 
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+ 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
-
-    --border: 214.3 31.8% 85%;
-    --input: 214.3 31.8% 85%;
-    --ring: 262 83% 58%;
-
-    --radius: 0.75rem;
-
-    --sidebar-background: 262 59% 97%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 262 83% 58%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 262 83% 96%;
-    --sidebar-accent-foreground: 262 60% 40%;
-    --sidebar-border: 262 83% 90%;
-    --sidebar-ring: 262 91.2% 59.8%;
+ 
+    --ring: 215 20.2% 65.1%;
+ 
+    --radius: 0.5rem;
   }
-
+ 
   .dark {
-    --background: 220 40% 13%;
+    --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 8%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 8%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 262 83% 68%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 20%;
-    --secondary-foreground: 210 40% 98%;
-
+ 
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 262 40% 20%;
-    --accent-foreground: 262 83% 68%;
-
-    --destructive: 0 62.8% 40.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 22.5%;
-    --input: 217.2 32.6% 22.5%;
-    --ring: 262.7 66.8% 70%;
-
-    --sidebar-background: 224 40% 16%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 262 83% 68%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 262 40% 20%;
-    --sidebar-accent-foreground: 262 83% 68%;
-    --sidebar-border: 224 40% 22%;
-    --sidebar-ring: 262 91.2% 69.8%;
+ 
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+ 
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+ 
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+ 
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+ 
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+ 
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+ 
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 85.7% 97.3%;
+ 
+    --ring: 217.2 32.6% 17.5%;
   }
 }
-
+ 
 @layer base {
   * {
     @apply border-border;
   }
-
-  html, body, #root {
-    @apply h-full w-full m-0 p-0 overflow-x-hidden;
-  }
-
   body {
-    @apply bg-background text-foreground antialiased;
-    text-rendering: optimizeLegibility;
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
   }
 }
 
-/* Material Design Utilities */
-@layer utilities {
-  .material-shadow-1 {
-    box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
-  }
-  
-  .material-shadow-2 {
-    box-shadow: 0 3px 6px rgba(0,0,0,0.15), 0 2px 4px rgba(0,0,0,0.12);
-  }
-  
-  .material-shadow-3 {
-    box-shadow: 0 10px 20px rgba(0,0,0,0.15), 0 3px 6px rgba(0,0,0,0.10);
-  }
-  
-  .material-shadow-4 {
-    box-shadow: 0 15px 25px rgba(0,0,0,0.15), 0 5px 10px rgba(0,0,0,0.05);
-  }
-  
-  .material-shadow-5 {
-    box-shadow: 0 20px 40px rgba(0,0,0,0.2);
-  }
-  
-  .glass {
-    @apply backdrop-blur-md bg-white/15 border-white/10;
-  }
-  
-  .dark-glass {
-    @apply backdrop-blur-md bg-black/25 border-white/10;
-  }
-  
-  .no-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-  
-  .no-scrollbar::-webkit-scrollbar {
-    display: none;
-  }
-
-  .material-transition {
-    @apply transition-all duration-300 ease-in-out;
-  }
-
-  .elevation-hover {
-    @apply material-transition hover:material-shadow-3;
-  }
-  
-  /* Responsive utilities */
-  .responsive-container {
-    @apply w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
-  }
-  
-  .responsive-padding {
-    @apply px-4 sm:px-6 md:px-8;
-  }
-  
-  .responsive-grid {
-    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4;
-  }
+/* PERFORMANCE IMPROVEMENT: Smooth page transitions */
+.page-transition {
+  opacity: 0;
 }
 
-/* Material Design Animation Keyframes */
-@keyframes material-ripple {
-  to {
-    transform: scale(4);
-    opacity: 0;
-  }
+.material-transition {
+  @apply transition-all duration-300 ease-out;
 }
 
-/* Ink Ripple Effect for buttons */
+.material-shadow-1 {
+  @apply shadow-sm;
+}
+
+.material-shadow-2 {
+  @apply shadow-md;
+}
+
+.material-shadow-3 {
+  @apply shadow-lg;
+}
+
+.elevation-hover {
+  @apply transition-all duration-300 ease-out hover:shadow-md hover:-translate-y-0.5;
+}
+
+/* PERFORMANCE IMPROVEMENT: Better ink ripple effect for buttons */
 .ink-ripple {
   position: relative;
   overflow: hidden;
@@ -177,42 +112,120 @@
 
 .ink-ripple:after {
   content: '';
-  display: block;
   position: absolute;
-  width: 100%;
-  height: 100%;
-  top: 0;
-  left: 0;
-  pointer-events: none;
-  background-image: radial-gradient(circle, #fff 10%, transparent 10.01%);
-  background-repeat: no-repeat;
-  background-position: 50%;
-  transform: scale(10, 10);
+  top: 50%;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.5);
   opacity: 0;
-  transition: transform .3s, opacity 1s;
+  border-radius: 100%;
+  transform: scale(1, 1) translate(-50%, -50%);
+  transform-origin: 50% 50%;
 }
 
-.ink-ripple:active:after {
-  transform: scale(0, 0);
-  opacity: .3;
-  transition: 0s;
+.ink-ripple:focus:after {
+  animation: ripple 1s ease-out;
 }
 
-/* Safe area handling for modern devices */
-@supports (padding: max(0px)) {
-  .safe-area-inset-bottom {
-    padding-bottom: max(env(safe-area-inset-bottom), 1rem);
+@keyframes ripple {
+  0% {
+    transform: scale(0, 0);
+    opacity: 0.5;
   }
-  
-  .safe-area-inset-top {
-    padding-top: max(env(safe-area-inset-top), 1rem);
+  100% {
+    transform: scale(100, 100);
+    opacity: 0;
   }
 }
 
-/* Better form elements for mobile */
-@media (max-width: 640px) {
-  input, select, textarea, button {
-    @apply text-base;
-    min-height: 44px;
+/* PERFORMANCE IMPROVEMENT: Add optimized animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
   }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  will-change: opacity, transform;
+}
+
+.animate-fade-out {
+  animation: fadeOut 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  will-change: opacity, transform;
+}
+
+/* AUDIO VISUALIZER */
+.audio-visualizer {
+  display: flex;
+  align-items: flex-end;
+  height: 20px;
+  gap: 2px;
+  width: 24px;
+}
+
+.audio-bar {
+  background-color: currentColor;
+  width: 3px;
+  height: 5px;
+  border-radius: 1px;
+  animation: audio-wave 0.9s infinite ease-in-out;
+}
+
+.audio-bar:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.audio-bar:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+.audio-bar:nth-child(4) {
+  animation-delay: 0.6s;
+}
+
+@keyframes audio-wave {
+  0%, 100% {
+    height: 5px;
+  }
+  50% {
+    height: 15px;
+  }
+}
+
+/* PERFORMANCE IMPROVEMENTS: optimize paint operations */
+* {
+  backface-visibility: hidden;
+}
+
+img, video {
+  will-change: transform;
+}
+
+.hardware-accelerated {
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+/* Better transitions between screens */
+.app-container {
+  will-change: opacity;
+  transition: opacity 0.3s ease-out;
 }

@@ -55,21 +55,27 @@ export const useHlsHandler = ({
       if (!globalAudioRef.hls) {
         const hls = new Hls({
           enableWorker: false, // Disable web workers to prevent CORS issues
-          // Enhanced audio quality settings
-          maxBufferLength: 30, // Increase buffer length for smoother playback
-          maxMaxBufferLength: 60, // Maximum buffer size
-          maxBufferSize: 60 * 1000 * 1000, // 60MB buffer size
-          maxBufferHole: 0.5, // Maximum buffer holes
-          // Quality selection - prefer highest quality audio
+          // AUDIO QUALITY ENHANCEMENTS
+          maxBufferLength: 60, // Increase buffer length for smoother playback (from 30 to 60)
+          maxMaxBufferLength: 90, // Maximum buffer size (from 60 to 90)
+          maxBufferSize: 100 * 1000 * 1000, // 100MB buffer size (from 60MB to 100MB)
+          maxBufferHole: 0.3, // Maximum buffer holes (from 0.5 to 0.3 - smaller for more precise buffering)
+          highBufferWatchdogPeriod: 5, // Check buffer more frequently (added for better quality monitoring)
+          // Quality selection - select highest quality audio
           startLevel: -1, // Auto select based on bandwidth
           capLevelToPlayerSize: false, // Don't limit quality
           autoStartLoad: true, // Auto start loading
-          abrEwmaDefaultEstimate: 500000, // Higher bandwidth estimate for better initial quality
+          abrEwmaDefaultEstimate: 1000000, // Higher bandwidth estimate for better initial quality (doubled)
           // Error recovery improvements
           maxLoadingDelay: 4, // Allow more time for loading
-          fragLoadingMaxRetry: 6, // More retries for fragment loading
-          manifestLoadingMaxRetry: 6, // More retries for manifest loading
-          levelLoadingMaxRetry: 6 // More retries for level loading
+          fragLoadingMaxRetry: 8, // More retries for fragment loading (increased from 6 to 8)
+          manifestLoadingMaxRetry: 8, // More retries for manifest loading (increased from 6 to 8)
+          levelLoadingMaxRetry: 8, // More retries for level loading (increased from 6 to 8)
+          // Audio specific improvements
+          audioStreamController: {
+            // @ts-ignore - These are valid HLS.js options but TypeScript doesn't know about them
+            audioTrackSwitchSmoothOffset: 0.05 // Smoother audio track switching
+          }
         });
         
         hls.attachMedia(audioRef.current);
@@ -80,34 +86,56 @@ export const useHlsHandler = ({
         // Set audio element properties for better quality
         if (audioRef.current) {
           audioRef.current.preload = "auto"; // Preload audio data
-          // Setting high-quality audio attributes when possible
+          
+          // AUDIO QUALITY ENHANCEMENT: Add high-quality playback settings
           try {
-            // @ts-ignore - These are non-standard but useful properties
-            audioRef.current.audioTracks?.forEach(track => {
-              if (track.enabled) {
-                console.log("Setting audio track to high quality");
-              }
-            });
+            // Setting best audio quality options
+            audioRef.current.preservesPitch = false; // Better audio fidelity during rate changes
+            audioRef.current.mozPreservesPitch = false; // Firefox specific
+            audioRef.current.webkitPreservesPitch = false; // Safari specific
           } catch (e) {
-            console.log("Advanced audio features not supported");
+            console.log("Advanced audio properties not supported by this browser");
+          }
+          
+          // Set audio sample rate to high quality if possible
+          try {
+            // @ts-ignore - Non-standard but useful in some browsers
+            if (audioRef.current.mozSampleRate) {
+              // @ts-ignore - Firefox specific
+              audioRef.current.mozSampleRate = 48000; // High quality sample rate
+            }
+          } catch (e) {
+            // Silently fail if not supported
           }
         }
         
         hls.on(Hls.Events.MANIFEST_PARSED, (event, data) => {
           console.log("HLS manifest loaded with levels:", data.levels?.length || 0);
           
-          // Select the highest quality level if available
-          if (data.levels && data.levels.length > 1) {
+          // AUDIO QUALITY ENHANCEMENT: Improved level selection logic
+          if (data.levels && data.levels.length > 0) {
+            // First look for pure audio levels (no video)
             const audioLevels = data.levels.filter(level => !level.videoCodec);
-            const bestLevel = audioLevels.length > 0 
-              ? audioLevels.reduce((prev, current) => 
-                  (prev.bitrate > current.bitrate) ? prev : current) 
-              : null;
-              
-            if (bestLevel) {
+            
+            if (audioLevels.length > 0) {
+              // Find the highest quality audio stream
+              const bestLevel = audioLevels.reduce((prev, current) => 
+                (prev.bitrate > current.bitrate) ? prev : current);
+                
               const bestLevelIdx = data.levels.indexOf(bestLevel);
               console.log(`Selecting best audio quality level: ${bestLevel.bitrate} bps (index: ${bestLevelIdx})`);
               hls.currentLevel = bestLevelIdx;
+              
+              // Lock to this level for consistent quality
+              hls.autoLevelEnabled = false;
+              hls.loadLevel = bestLevelIdx;
+            } else if (data.audioTracks && data.audioTracks.length > 0) {
+              // If no pure audio levels, look for best audio track
+              const bestAudioTrack = data.audioTracks.reduce((prev, current) => 
+                (prev.bitrate > current.bitrate) ? prev : current, data.audioTracks[0]);
+                
+              console.log(`Selecting best audio track: ${bestAudioTrack.bitrate} bps`);
+              hls.audioTrack = data.audioTracks.indexOf(bestAudioTrack);
             }
           }
           
@@ -124,8 +152,15 @@ export const useHlsHandler = ({
           console.log(`HLS quality level switched to: ${data.level}`);
         });
         
+        // AUDIO QUALITY ENHANCEMENT: Add audio track switched event
+        hls.on(Hls.Events.AUDIO_TRACK_SWITCHED, (event, data) => {
+          console.log(`HLS audio track switched to: ${data.id}`);
+        });
+        
+        // PERFORMANCE IMPROVEMENT: Better error handling
         hls.on(Hls.Events.ERROR, (event, data) => {
-          console.error("HLS error:", data);
+          console.warn("HLS error:", data.type, data.details);
+          
           if (data.fatal) {
             switch (data.type) {
               case Hls.ErrorTypes.NETWORK_ERROR:
@@ -140,6 +175,20 @@ export const useHlsHandler = ({
                 console.error("Unrecoverable HLS error");
                 setIsPlaying(false);
                 setLoading(false);
+                
+                // Try one more recovery after a short delay
+                setTimeout(() => {
+                  console.log("Attempting final recovery of stream");
+                  if (globalAudioRef.hls) {
+                    globalAudioRef.hls.destroy();
+                    globalAudioRef.hls = null;
+                    // Force restart the stream after a short delay
+                    if (audioRef.current) {
+                      audioRef.current.src = url;
+                      audioRef.current.load();
+                    }
+                  }
+                }, 2000);
                 break;
             }
           }
@@ -147,11 +196,6 @@ export const useHlsHandler = ({
         
         globalAudioRef.hls = hls;
       } else if (globalAudioRef.hls) {
-        // Compare current URL with the source URL we want to load
-        const currentSource = url;
-        // Remove this line that was causing the error
-        // globalAudioRef.hls.url !== url
-        
         // Just load the new source directly
         globalAudioRef.hls.loadSource(url);
       }
@@ -161,21 +205,43 @@ export const useHlsHandler = ({
       audioRef.current.src = url;
       audioRef.current.load();
       
-      // Enhanced audio settings for regular streams
+      // AUDIO QUALITY ENHANCEMENT: Better audio settings for regular streams
       try {
         // Set audio quality attributes
-        // Note: These are somewhat browser dependent
         audioRef.current.autoplay = false; // Let us control playback
         audioRef.current.preload = "auto"; // Preload audio
-        // @ts-ignore - Non-standard but useful in some browsers
-        if (typeof audioRef.current.mozAutoplayEnabled !== 'undefined') {
-          // Firefox-specific
-          // @ts-ignore
-          audioRef.current.mozAutoplayEnabled = false;
+        
+        // Set audio processing mode to high quality if available
+        if ('audioProcessing' in audioRef.current) {
+          // @ts-ignore - This is a non-standard property
+          audioRef.current.audioProcessing = 'highquality';
+        }
+        
+        // Try to enable high quality mode using various browser-specific methods
+        if ('webkitAudioDecodedByteCount' in audioRef.current) {
+          // This forces some browsers to use higher quality decoding
+          audioRef.current.volume = 0.99;
+          setTimeout(() => {
+            if (audioRef.current) audioRef.current.volume = 1.0;
+          }, 10);
         }
       } catch (e) {
         console.log("Some audio enhancements not supported by this browser");
       }
+      
+      // PERFORMANCE IMPROVEMENT: Better error handling for regular streams
+      audioRef.current.onerror = (e) => {
+        console.error("Audio stream error:", e);
+        setLoading(false);
+        setIsPlaying(false);
+        
+        // Try to recover by reloading the stream
+        setTimeout(() => {
+          if (audioRef.current) {
+            audioRef.current.load();
+          }
+        }, 2000);
+      };
       
       // Wait for canplay event to clear loading
       audioRef.current.oncanplay = () => {

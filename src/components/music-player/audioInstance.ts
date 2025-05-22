@@ -8,6 +8,7 @@ type AudioInstanceType = {
   isInitialized: boolean;
   currentUrl: string | null;
   isPlaying: boolean; // Track global playback state
+  lastTransition: number; // Track last transition time to prevent rapid switching
 };
 
 // Maintains a shared audio and HLS context across the app
@@ -17,5 +18,18 @@ export const globalAudioRef: AudioInstanceType = {
   activePlayerInstance: null,
   isInitialized: false,
   currentUrl: null,
-  isPlaying: false // Initialize as not playing
+  isPlaying: false, // Initialize as not playing
+  lastTransition: 0  // Initialize timestamp
+};
+
+// Helper functions for smoother playback transitions
+export const smoothTransition = () => {
+  // Prevent rapid transitions (debounce)
+  const now = Date.now();
+  if (now - globalAudioRef.lastTransition < 300) {
+    return false; // Too soon for another transition
+  }
+  
+  globalAudioRef.lastTransition = now;
+  return true;
 };

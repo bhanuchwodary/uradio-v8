@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useTrackStateContext } from "@/context/TrackStateContext";
 import { usePlayerCore } from "@/hooks/usePlayerCore";
@@ -14,6 +14,7 @@ const Index: React.FC = () => {
   const { toast } = useToast();
   const [editingStation, setEditingStation] = useState<Track | null>(null);
   const [stationToDelete, setStationToDelete] = useState<Track | null>(null);
+  const [isPageReady, setIsPageReady] = useState(false);
   
   const { 
     tracks, 
@@ -59,6 +60,26 @@ const Index: React.FC = () => {
     setIsPlaying,
     tracks
   });
+
+  // PERFORMANCE IMPROVEMENT: Add smooth page transition
+  useEffect(() => {
+    // Start with opacity 0
+    document.body.classList.add('page-transition');
+    
+    // Small delay to ensure DOM is ready before animation
+    const timer = setTimeout(() => {
+      setIsPageReady(true);
+      // Remove the transition class after animation completes
+      setTimeout(() => {
+        document.body.classList.remove('page-transition');
+      }, 350);
+    }, 50);
+    
+    return () => {
+      clearTimeout(timer);
+      document.body.classList.remove('page-transition');
+    };
+  }, []);
   
   // Calculate current track
   const currentTrack = tracks[currentIndex] || null;
@@ -118,7 +139,7 @@ const Index: React.FC = () => {
 
   return (
     <AppLayout>
-      <div className="container mx-auto max-w-5xl space-y-6">
+      <div className={`container mx-auto max-w-5xl space-y-6 transition-opacity duration-300 ease-in-out ${isPageReady ? 'opacity-100' : 'opacity-0'}`}>
         {/* Player Card */}
         <HomePagePlayer
           currentTrack={currentTrack}
