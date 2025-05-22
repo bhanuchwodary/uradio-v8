@@ -1,16 +1,16 @@
 
 import React, { useState, useEffect } from "react";
-import { EnhancedAppLayout } from "@/components/layout/EnhancedAppLayout";
+import { AppLayout } from "@/components/layout/AppLayout";
 import { Shield } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import AdminPasswordDialog from "@/components/admin/AdminPasswordDialog";
 import AdminStationsManager from "@/components/admin/AdminStationsManager";
-import EnhancedAdminDangerZone from "@/components/admin/EnhancedAdminDangerZone";
-import EnhancedAdminAuthenticationCard from "@/components/admin/EnhancedAdminAuthenticationCard";
+import AdminDangerZone from "@/components/admin/AdminDangerZone";
+import AdminAuthenticationCard from "@/components/admin/AdminAuthenticationCard";
 import { savePrebuiltStations } from "@/utils/prebuiltStationsManager";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { motion } from "framer-motion";
 
 const AdminPage = () => {
   const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(true);
@@ -68,34 +68,21 @@ const AdminPage = () => {
   };
 
   return (
-    <EnhancedAppLayout>
-      <div className="space-y-6">
-        <motion.div 
-          className="flex items-center justify-between mb-6 flex-wrap gap-4"
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <div className="flex items-center gap-2">
-            <div className="bg-primary/20 p-1.5 rounded-lg">
-              <Shield className="h-6 w-6 text-primary" />
-            </div>
-            <h1 className="text-xl sm:text-2xl font-bold">Admin Controls</h1>
-          </div>
-        </motion.div>
+    <AppLayout>
+      <div className="container mx-auto max-w-5xl px-4 space-y-6 py-6">
+        <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
+          <h1 className="text-xl sm:text-2xl font-bold text-foreground flex items-center gap-2">
+            <Shield className="h-5 w-5 sm:h-6 sm:w-6 text-primary" /> Admin Controls
+          </h1>
+        </div>
 
         {isAuthenticated ? (
-          <motion.div 
-            className="space-y-6"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5 }}
-          >
+          <>
             <AdminStationsManager onSave={handleSaveStations} onCancel={handleCancel} />
-            <EnhancedAdminDangerZone isMobile={isMobile} />
-          </motion.div>
+            <AdminDangerZone isMobile={isMobile} />
+          </>
         ) : (
-          <EnhancedAdminAuthenticationCard onAuthenticate={() => setIsPasswordDialogOpen(true)} />
+          <AdminAuthenticationCard onAuthenticate={() => setIsPasswordDialogOpen(true)} />
         )}
 
         <AdminPasswordDialog 
@@ -109,7 +96,7 @@ const AdminPage = () => {
           onSuccess={handlePasswordSuccess} 
         />
       </div>
-    </EnhancedAppLayout>
+    </AppLayout>
   );
 };
 
