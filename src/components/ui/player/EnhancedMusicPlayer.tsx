@@ -71,11 +71,11 @@ export const EnhancedMusicPlayer: React.FC<EnhancedMusicPlayerProps> = ({
     >
       <Card className="p-6 bg-gradient-to-br from-background/80 to-background/40 border-none shadow-lg backdrop-blur-md overflow-hidden">
         <div className="flex flex-col space-y-6">
-          {/* Album art or placeholder */}
-          <div className="flex justify-center">
+          {/* Player info with animation moved to left side */}
+          <div className="flex items-center">
             <motion.div 
               className={cn(
-                "w-24 h-24 md:w-32 md:h-32 rounded-full flex items-center justify-center material-shadow-2",
+                "w-16 h-16 md:w-20 md:h-20 mr-4 rounded-full flex items-center justify-center material-shadow-2",
                 isPlaying ? "bg-primary/20" : "bg-secondary/40"
               )}
               animate={{ 
@@ -88,38 +88,38 @@ export const EnhancedMusicPlayer: React.FC<EnhancedMusicPlayerProps> = ({
               }}
             >
               {currentTrack ? (
-                <span className="text-4xl md:text-5xl text-primary font-bold">
+                <span className="text-2xl md:text-3xl text-primary font-bold">
                   {currentTrack.name.charAt(0).toUpperCase()}
                 </span>
               ) : (
-                <span className="text-4xl md:text-5xl text-muted-foreground">?</span>
+                <span className="text-2xl md:text-3xl text-muted-foreground">?</span>
               )}
             </motion.div>
-          </div>
-          
-          {/* Station info */}
-          <div className="text-center">
-            <motion.h2 
-              className="text-2xl font-bold truncate mb-1"
-              initial={false}
-              animate={{ opacity: loading ? 0.7 : 1 }}
-              transition={{ duration: 0.3 }}
-            >
-              {currentTrack?.name || "Select a station"}
-            </motion.h2>
-            <p className="text-sm text-muted-foreground truncate">
-              {currentTrack?.url ? getHostnameFromUrl(currentTrack.url) : "No station selected"}
-            </p>
-            {loading && (
-              <div className="flex justify-center items-center mt-2">
-                <LoadingDots />
-              </div>
-            )}
-            {currentTrack?.language && (
-              <span className="inline-block px-2 py-1 bg-primary/10 text-xs rounded-full mt-2 text-primary">
-                {currentTrack.language}
-              </span>
-            )}
+            
+            {/* Station info */}
+            <div className="flex-1">
+              <motion.h2 
+                className="text-xl md:text-2xl font-bold truncate mb-1"
+                initial={false}
+                animate={{ opacity: loading ? 0.7 : 1 }}
+                transition={{ duration: 0.3 }}
+              >
+                {currentTrack?.name || "Select a station"}
+              </motion.h2>
+              <p className="text-sm text-muted-foreground truncate">
+                {currentTrack?.url ? getHostnameFromUrl(currentTrack.url) : "No station selected"}
+              </p>
+              {loading && (
+                <div className="mt-1">
+                  <LoadingDots />
+                </div>
+              )}
+              {currentTrack?.language && (
+                <span className="inline-block px-2 py-0.5 bg-primary/10 text-xs rounded-full mt-1 text-primary">
+                  {currentTrack.language}
+                </span>
+              )}
+            </div>
           </div>
 
           {/* Controls */}
@@ -208,3 +208,4 @@ export const EnhancedMusicPlayer: React.FC<EnhancedMusicPlayerProps> = ({
     </motion.div>
   );
 };
+
