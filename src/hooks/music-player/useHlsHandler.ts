@@ -89,10 +89,24 @@ export const useHlsHandler = ({
           
           // AUDIO QUALITY ENHANCEMENT: Add high-quality playback settings
           try {
-            // Setting best audio quality options
+            // Setting best audio quality options - using proper type assertions
+            // Fix: Use standard preservesPitch property and proper type assertions for browser-specific properties
             audioRef.current.preservesPitch = false; // Better audio fidelity during rate changes
-            audioRef.current.mozPreservesPitch = false; // Firefox specific
-            audioRef.current.webkitPreservesPitch = false; // Safari specific
+            
+            // Use proper type assertions for non-standard browser properties
+            try {
+              // For Firefox - use type assertion to avoid TypeScript errors
+              (audioRef.current as any).mozPreservesPitch = false; 
+            } catch (e) {
+              // Silently fail if not supported
+            }
+            
+            try {
+              // For Safari/Webkit - use type assertion to avoid TypeScript errors
+              (audioRef.current as any).webkitPreservesPitch = false;
+            } catch (e) {
+              // Silently fail if not supported
+            }
           } catch (e) {
             console.log("Advanced audio properties not supported by this browser");
           }
@@ -126,9 +140,12 @@ export const useHlsHandler = ({
               console.log(`Selecting best audio quality level: ${bestLevel.bitrate} bps (index: ${bestLevelIdx})`);
               hls.currentLevel = bestLevelIdx;
               
-              // Lock to this level for consistent quality
-              hls.autoLevelEnabled = false;
-              hls.loadLevel = bestLevelIdx;
+              // Fix: Can't directly set autoLevelEnabled as it's read-only
+              // Use the correct API methods to control automatic level selection
+              // Instead of: hls.autoLevelEnabled = false;
+              hls.nextLevel = bestLevelIdx;  // Force next level to be our best level
+              hls.loadLevel = bestLevelIdx;   // Load this level
+              hls.startLevel = bestLevelIdx;  // Set start level
             } else if (data.audioTracks && data.audioTracks.length > 0) {
               // If no pure audio levels, look for best audio track
               const bestAudioTrack = data.audioTracks.reduce((prev, current) => 
