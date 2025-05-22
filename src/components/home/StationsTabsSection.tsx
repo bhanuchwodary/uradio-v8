@@ -1,9 +1,9 @@
+
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { StationGrid } from "@/components/ui/player/StationGrid";
 import { Track } from "@/types/track";
-import { getStations } from "@/data/prebuiltStationsLoader";
 
 interface StationsTabsSectionProps {
   popularStations: Track[];
@@ -48,10 +48,11 @@ const StationsTabsSection: React.FC<StationsTabsSectionProps> = ({
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="popular" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="popular">Popular</TabsTrigger>
-            <TabsTrigger value="mystations">My Stations</TabsTrigger>
-            <TabsTrigger value="prebuilt">Prebuilt</TabsTrigger>
+          {/* Fix: Improve tab responsiveness for mobile screens */}
+          <TabsList className="w-full grid grid-cols-3 mb-2">
+            <TabsTrigger value="popular" className="text-xs sm:text-sm px-1 sm:px-3">Popular</TabsTrigger>
+            <TabsTrigger value="mystations" className="text-xs sm:text-sm px-1 sm:px-3">My Stations</TabsTrigger>
+            <TabsTrigger value="prebuilt" className="text-xs sm:text-sm px-1 sm:px-3">Prebuilt</TabsTrigger>
           </TabsList>
           
           <TabsContent value="popular" className="mt-4">
