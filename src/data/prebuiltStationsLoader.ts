@@ -1,16 +1,13 @@
 
-import { prebuiltStations as defaultPrebuiltStations } from "./prebuiltStations";
 import { getPrebuiltStations } from "@/utils/prebuiltStationsManager";
 
-// Export the stations (either custom or default)
-export const getStations = (): any[] => {
-  // Always fetch fresh data to ensure we have the latest changes
+/**
+ * Get the current stations list - either from the prebuilt stations manager
+ * (which checks localStorage first) or from the default prebuilt list.
+ */
+export const getStations = () => {
+  console.log("Loading prebuilt stations");
   const stations = getPrebuiltStations();
-  console.log("Loaded stations:", stations.length);
+  console.log(`Loaded ${stations.length} stations`);
   return stations;
-};
-
-// Export the default stations (for reference)
-export const getDefaultStations = (): any[] => {
-  return defaultPrebuiltStations;
 };
