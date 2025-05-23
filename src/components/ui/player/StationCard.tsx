@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Card } from "@/components/ui/card";
-import { Play, Pause, Edit, Trash2, Star, Plus, Languages } from "lucide-react";
+import { Play, Pause, Edit, Trash2, Star, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Track } from "@/types/track";
 import { cn } from "@/lib/utils";
@@ -70,7 +70,6 @@ export const StationCard: React.FC<StationCardProps> = ({
         
         {station.language && (
           <div className="flex items-center justify-center text-xs text-muted-foreground">
-            <Languages className="h-3.5 w-3.5 mr-1" />
             <span>{station.language}</span>
           </div>
         )}

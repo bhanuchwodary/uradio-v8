@@ -2,7 +2,7 @@
 import React, { useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Track } from "@/types/track";
-import { Play, Pause, SkipBack, SkipForward, Volume2, Languages } from "lucide-react";
+import { Play, Pause, SkipBack, SkipForward, Volume2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { cn } from "@/lib/utils";
@@ -57,7 +57,6 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
           </p>
           {currentTrack?.language && (
             <div className="flex items-center justify-center text-xs text-blue-400 mt-1">
-              <Languages className="h-3 w-3 mr-1" />
               <span>{currentTrack.language}</span>
             </div>
           )}
