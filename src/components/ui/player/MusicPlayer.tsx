@@ -1,11 +1,12 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Track } from "@/types/track";
-import { Play, Pause, SkipBack, SkipForward, Volume2 } from "lucide-react";
+import { Play, Pause, SkipBack, SkipForward, Volume2, Languages } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { cn } from "@/lib/utils";
+import { saveVolumePreference } from "@/utils/volumeStorage";
 
 interface MusicPlayerProps {
   currentTrack: Track | null;
@@ -28,6 +29,11 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
   onVolumeChange,
   loading = false
 }) => {
+  // Save volume preference whenever it changes
+  useEffect(() => {
+    saveVolumePreference(volume);
+  }, [volume]);
+
   const getHostnameFromUrl = (url: string): string => {
     if (!url) return "No URL";
     try {
@@ -49,6 +55,12 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
           <p className="text-xs text-muted-foreground truncate">
             {currentTrack?.url ? getHostnameFromUrl(currentTrack.url) : "No station selected"}
           </p>
+          {currentTrack?.language && (
+            <div className="flex items-center justify-center text-xs text-blue-400 mt-1">
+              <Languages className="h-3 w-3 mr-1" />
+              <span>{currentTrack.language}</span>
+            </div>
+          )}
           {loading && (
             <p className="text-xs text-blue-400 animate-pulse mt-1">Loading stream...</p>
           )}

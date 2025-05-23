@@ -15,6 +15,7 @@ interface UseMusicPlayerProps {
   isPlaying: boolean;
   setIsPlaying: (playing: boolean) => void;
   tracks?: Track[];
+  initialVolume?: number;
 }
 
 export const useMusicPlayer = (props?: UseMusicPlayerProps) => {
@@ -26,11 +27,12 @@ export const useMusicPlayer = (props?: UseMusicPlayerProps) => {
     isPlaying = false,
     setIsPlaying = () => {},
     tracks = [],
+    initialVolume = 0.7,
   } = props || {};
 
   const [duration, setDuration] = useState<number>(0);
   const [currentTime, setCurrentTime] = useState<number>(0);
-  const [volume, setVolume] = useState<number>(0.7);
+  const [volume, setVolume] = useState<number>(initialVolume);
   const [loading, setLoading] = useState<boolean>(false);
   
   // Updated to use MutableRefObject since we need to assign to audioRef.current
