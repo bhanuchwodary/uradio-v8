@@ -27,9 +27,15 @@ const PlaylistPage: React.FC = () => {
     getUserStations
   } = useTrackStateContext();
   
-  // Split stations into user and prebuilt
+  // Split stations into different categories
   const userStations = getUserStations();
   const prebuiltStations = tracks.filter(track => track.isPrebuilt);
+  const favoriteStations = tracks.filter(track => track.isFavorite);
+  
+  // Calculate popular stations based on play time
+  const popularStations = [...tracks]
+    .sort((a, b) => (b.playTime || 0) - (a.playTime || 0))
+    .slice(0, 8);
   
   // Derive URLs from tracks
   const urls = tracks.map(track => track.url);
@@ -136,6 +142,8 @@ const PlaylistPage: React.FC = () => {
         <PlaylistContent
           userStations={userStations}
           prebuiltStations={prebuiltStations}
+          favoriteStations={favoriteStations}
+          popularStations={popularStations}
           currentIndex={currentIndex}
           currentTrack={currentTrack}
           isPlaying={isPlaying}

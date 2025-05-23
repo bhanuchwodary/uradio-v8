@@ -1,10 +1,9 @@
 
 import React from "react";
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Toaster } from "@/components/ui/toaster";
 import { TrackStateProvider } from "@/context/TrackStateContext";
-import Index from "@/pages/Index";
 import PlaylistPage from "@/pages/PlaylistPage";
 import AddStationPage from "@/pages/AddStationPage";
 import SettingsPage from "@/pages/SettingsPage";
@@ -18,10 +17,10 @@ const App = () => {
       <TrackStateProvider>
         <Router>
           <Routes>
-            <Route path="/" element={<Index />} />
+            <Route path="/" element={<PlaylistPage />} />
             <Route path="/playlist" element={<PlaylistPage />} />
             <Route path="/add" element={<AddStationPage />} />
-            <Route path="/add-station" element={<AddStationPage />} /> {/* Add alternate route */}
+            <Route path="/add-station" element={<AddStationPage />} />
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="/station-list" element={<StationListPage />} />
             <Route path="/admin" element={<AdminPage />} />

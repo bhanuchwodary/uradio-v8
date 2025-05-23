@@ -4,11 +4,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { StationGrid } from "@/components/ui/player/StationGrid";
 import { Track } from "@/types/track";
-import { getStations } from "@/data/prebuiltStationsLoader";
 
 interface PlaylistContentProps {
   userStations: Track[];
   prebuiltStations: Track[];
+  favoriteStations: Track[];
+  popularStations: Track[];
   currentIndex: number;
   currentTrack: Track | null;
   isPlaying: boolean;
@@ -21,6 +22,8 @@ interface PlaylistContentProps {
 const PlaylistContent: React.FC<PlaylistContentProps> = ({
   userStations,
   prebuiltStations,
+  favoriteStations,
+  popularStations,
   currentIndex,
   currentTrack,
   isPlaying,
@@ -35,11 +38,64 @@ const PlaylistContent: React.FC<PlaylistContentProps> = ({
         <CardTitle className="text-lg text-foreground">My Playlist</CardTitle>
       </CardHeader>
       <CardContent>
-        <Tabs defaultValue="prebuilt" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="prebuilt">Prebuilt Stations</TabsTrigger>
-            <TabsTrigger value="mystations">My Stations</TabsTrigger>
+        {favoriteStations.length > 0 && (
+          <div className="mb-8">
+            <h3 className="font-medium text-base mb-4">Favorites</h3>
+            <StationGrid
+              stations={favoriteStations}
+              currentIndex={currentIndex}
+              currentTrackUrl={currentTrack?.url}
+              isPlaying={isPlaying}
+              onSelectStation={(index) => onSelectStation(index, favoriteStations)}
+              onToggleFavorite={onToggleFavorite}
+              onDeleteStation={onConfirmDelete}
+            />
+          </div>
+        )}
+      
+        <Tabs defaultValue="popular" className="w-full">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="popular" className="text-xs sm:text-sm">Popular</TabsTrigger>
+            <TabsTrigger value="mystations" className="text-xs sm:text-sm">My Stations</TabsTrigger>
+            <TabsTrigger value="prebuilt" className="text-xs sm:text-sm">Prebuilt</TabsTrigger>
           </TabsList>
+          
+          <TabsContent value="popular" className="mt-4">
+            <StationGrid
+              stations={popularStations}
+              currentIndex={currentIndex}
+              currentTrackUrl={currentTrack?.url}
+              isPlaying={isPlaying}
+              onSelectStation={(index) => onSelectStation(index, popularStations)}
+              onToggleFavorite={onToggleFavorite}
+              onDeleteStation={onConfirmDelete}
+            />
+            
+            {popularStations.length === 0 && (
+              <div className="text-center p-6 bg-background/50 rounded-lg">
+                <p className="text-muted-foreground">No popular stations available yet</p>
+              </div>
+            )}
+          </TabsContent>
+          
+          <TabsContent value="mystations" className="mt-4">
+            <StationGrid
+              stations={userStations}
+              currentIndex={currentIndex}
+              currentTrackUrl={currentTrack?.url}
+              isPlaying={isPlaying}
+              onSelectStation={(index) => onSelectStation(index, userStations)}
+              onEditStation={onEditStation}
+              onDeleteStation={onConfirmDelete}
+              onToggleFavorite={onToggleFavorite}
+            />
+            
+            {userStations.length === 0 && (
+              <div className="text-center p-6 bg-background/50 rounded-lg">
+                <p className="text-muted-foreground">You haven't added any stations yet</p>
+              </div>
+            )}
+          </TabsContent>
           
           <TabsContent value="prebuilt" className="mt-4">
             <StationGrid
@@ -57,19 +113,6 @@ const PlaylistContent: React.FC<PlaylistContentProps> = ({
                 <p className="text-muted-foreground">No prebuilt stations available</p>
               </div>
             )}
-          </TabsContent>
-          
-          <TabsContent value="mystations" className="mt-4">
-            <StationGrid
-              stations={userStations}
-              currentIndex={currentIndex}
-              currentTrackUrl={currentTrack?.url}
-              isPlaying={isPlaying}
-              onSelectStation={(index) => onSelectStation(index, userStations)}
-              onEditStation={onEditStation}
-              onDeleteStation={onConfirmDelete}
-              onToggleFavorite={onToggleFavorite}
-            />
           </TabsContent>
         </Tabs>
       </CardContent>

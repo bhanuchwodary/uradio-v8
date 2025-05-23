@@ -14,8 +14,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const path = location.pathname;
   
   const navItems = [
-    { icon: Home, label: "Home", path: "/" },
-    { icon: Music, label: "Playlist", path: "/playlist" },
+    { icon: Music, label: "Playlist", path: "/" },
     { icon: List, label: "Stations", path: "/station-list" },
     { icon: Plus, label: "Add", path: "/add" },
     { icon: Settings, label: "Settings", path: "/settings" }
