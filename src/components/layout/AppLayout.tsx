@@ -2,7 +2,7 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Home, List, Plus, Settings, Music } from "lucide-react";
+import { Music, List, Plus, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface AppLayoutProps {
@@ -23,12 +23,12 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-secondary/80 via-background to-accent/30 dark:from-background dark:via-card dark:to-muted/30">
       {/* Main Content */}
-      <main className="flex-grow p-4 pb-20 overflow-x-hidden">
+      <main className="flex-grow p-4 pb-24 md:pb-20 overflow-x-hidden max-w-6xl mx-auto w-full">
         {children}
       </main>
       
       {/* Bottom Navigation Bar - Material Design Style */}
-      <nav className="fixed bottom-0 left-0 right-0 p-2 bg-background/90 backdrop-blur-lg border-t border-border/30 material-shadow-3 z-10">
+      <nav className="fixed bottom-0 left-0 right-0 p-2 bg-background/90 backdrop-blur-lg border-t border-border/30 material-shadow-3 z-10 safe-area-inset-bottom">
         <div className="max-w-screen-lg mx-auto flex justify-around items-center">
           {navItems.map((item) => (
             <Link key={item.path} to={item.path} className="relative flex-1">

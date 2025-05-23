@@ -34,10 +34,10 @@ const PlaylistContent: React.FC<PlaylistContentProps> = ({
 }) => {
   return (
     <Card className="bg-background/30 backdrop-blur-md border-none shadow-lg">
-      <CardHeader className="pb-2">
+      <CardHeader className="pb-2 px-3 sm:px-6">
         <CardTitle className="text-lg text-foreground">My Playlist</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="px-3 sm:px-6">
         {favoriteStations.length > 0 && (
           <div className="mb-8">
             <h3 className="font-medium text-base mb-4">Favorites</h3>
@@ -54,13 +54,13 @@ const PlaylistContent: React.FC<PlaylistContentProps> = ({
         )}
       
         <Tabs defaultValue="popular" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="popular" className="text-xs sm:text-sm">Popular</TabsTrigger>
-            <TabsTrigger value="mystations" className="text-xs sm:text-sm">My Stations</TabsTrigger>
-            <TabsTrigger value="prebuilt" className="text-xs sm:text-sm">Prebuilt</TabsTrigger>
+          <TabsList className="w-full grid grid-cols-3 mb-2 h-auto p-1">
+            <TabsTrigger value="popular" className="text-xs py-1.5 sm:py-2 sm:text-sm px-1 h-auto">Popular</TabsTrigger>
+            <TabsTrigger value="mystations" className="text-xs py-1.5 sm:py-2 sm:text-sm px-1 h-auto">My Stations</TabsTrigger>
+            <TabsTrigger value="prebuilt" className="text-xs py-1.5 sm:py-2 sm:text-sm px-1 h-auto">Prebuilt</TabsTrigger>
           </TabsList>
           
-          <TabsContent value="popular" className="mt-4">
+          <TabsContent value="popular" className="mt-4 focus-visible:outline-none focus-visible:ring-0">
             <StationGrid
               stations={popularStations}
               currentIndex={currentIndex}
@@ -78,7 +78,7 @@ const PlaylistContent: React.FC<PlaylistContentProps> = ({
             )}
           </TabsContent>
           
-          <TabsContent value="mystations" className="mt-4">
+          <TabsContent value="mystations" className="mt-4 focus-visible:outline-none focus-visible:ring-0">
             <StationGrid
               stations={userStations}
               currentIndex={currentIndex}
@@ -97,7 +97,7 @@ const PlaylistContent: React.FC<PlaylistContentProps> = ({
             )}
           </TabsContent>
           
-          <TabsContent value="prebuilt" className="mt-4">
+          <TabsContent value="prebuilt" className="mt-4 focus-visible:outline-none focus-visible:ring-0">
             <StationGrid
               stations={prebuiltStations}
               currentIndex={currentIndex}

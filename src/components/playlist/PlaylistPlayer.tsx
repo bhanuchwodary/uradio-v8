@@ -2,6 +2,7 @@
 import React from "react";
 import { MusicPlayer } from "@/components/ui/player/MusicPlayer";
 import { Track } from "@/types/track";
+import { cn } from "@/lib/utils";
 
 interface PlaylistPlayerProps {
   currentTrack: Track | null;
@@ -25,7 +26,10 @@ const PlaylistPlayer: React.FC<PlaylistPlayerProps> = ({
   loading
 }) => {
   return (
-    <div className="mb-6">
+    <div className={cn(
+      "mb-6 transition-all duration-300 ease-in-out",
+      currentTrack ? "opacity-100 transform translate-y-0" : "opacity-90"
+    )}>
       <MusicPlayer
         currentTrack={currentTrack}
         isPlaying={isPlaying}

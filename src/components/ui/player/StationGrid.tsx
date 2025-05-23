@@ -12,7 +12,7 @@ interface StationGridProps {
   onEditStation?: (station: Track) => void;
   onDeleteStation?: (station: Track) => void;
   onToggleFavorite?: (station: Track) => void;
-  actionIcon?: "play" | "add"; // New prop to specify the primary action icon
+  actionIcon?: "play" | "add";
 }
 
 export const StationGrid: React.FC<StationGridProps> = ({
@@ -24,7 +24,7 @@ export const StationGrid: React.FC<StationGridProps> = ({
   onEditStation,
   onDeleteStation,
   onToggleFavorite,
-  actionIcon = "play" // Default is play
+  actionIcon = "play"
 }) => {
   if (!stations || stations.length === 0) {
     return (
@@ -35,7 +35,7 @@ export const StationGrid: React.FC<StationGridProps> = ({
   }
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-4">
       {stations.map((station, index) => {
         const isCurrentlyPlaying = station.url === currentTrackUrl && isPlaying;
         const isSelected = station.url === currentTrackUrl;
