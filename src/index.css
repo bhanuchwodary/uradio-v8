@@ -92,11 +92,31 @@
 
   html, body, #root {
     @apply h-full w-full m-0 p-0 overflow-x-hidden;
+    /* iOS specific fixes */
+    -webkit-overflow-scrolling: touch;
+    -webkit-text-size-adjust: 100%;
   }
 
   body {
     @apply bg-background text-foreground antialiased;
     text-rendering: optimizeLegibility;
+    /* Prevent iOS zoom on input focus */
+    font-size: 16px;
+  }
+  
+  /* iOS Safari specific fixes */
+  input, select, textarea {
+    /* Prevent iOS zoom on focus */
+    font-size: 16px !important;
+    /* Remove iOS input styling */
+    -webkit-appearance: none;
+    border-radius: 0;
+  }
+  
+  button {
+    /* Remove iOS button styling */
+    -webkit-appearance: none;
+    border-radius: 0;
   }
 }
 
@@ -159,6 +179,29 @@
   .responsive-grid {
     @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4;
   }
+  
+  /* iOS Safe Area Support */
+  .ios-safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+  
+  .ios-safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  .ios-safe-left {
+    padding-left: env(safe-area-inset-left);
+  }
+  
+  .ios-safe-right {
+    padding-right: env(safe-area-inset-right);
+  }
+  
+  /* iOS specific touch improvements */
+  .ios-touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
 }
 
 /* Material Design Animation Keyframes */
@@ -198,7 +241,7 @@
   transition: 0s;
 }
 
-/* Safe area handling for modern devices */
+/* Enhanced Safe area handling for iOS devices */
 @supports (padding: max(0px)) {
   .safe-area-inset-bottom {
     padding-bottom: max(env(safe-area-inset-bottom), 1rem);
@@ -207,12 +250,61 @@
   .safe-area-inset-top {
     padding-top: max(env(safe-area-inset-top), 1rem);
   }
-}
-
-/* Better form elements for mobile */
-@media (max-width: 640px) {
-  input, select, textarea, button {
-    @apply text-base;
-    min-height: 44px;
+  
+  .safe-area-inset-left {
+    padding-left: max(env(safe-area-inset-left), 0px);
+  }
+  
+  .safe-area-inset-right {
+    padding-right: max(env(safe-area-inset-right), 0px);
   }
 }
+
+/* iOS specific improvements */
+@media (max-width: 640px) {
+  input, select, textarea, button {
+    @apply text-base ios-touch-target;
+  }
+  
+  /* Improve touch targets on small screens */
+  .touch-target {
+    @apply ios-touch-target;
+  }
+}
+
+/* iPad specific improvements */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .responsive-grid {
+    @apply grid-cols-2 lg:grid-cols-3;
+  }
+}
+
+/* iOS device specific fixes */
+@supports (-webkit-touch-callout: none) {
+  /* This targets iOS Safari */
+  
+  /* Fix viewport height issues on iOS */
+  .ios-vh-fix {
+    height: -webkit-fill-available;
+    min-height: -webkit-fill-available;
+  }
+  
+  /* Prevent rubber band scrolling */
+  .ios-no-bounce {
+    overscroll-behavior: none;
+  }
+  
+  /* Improve scrolling performance */
+  .ios-smooth-scroll {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+}
+
+/* Fix for iOS home indicator */
+@media screen and (max-width: 640px) {
+  .bottom-nav-ios {
+    padding-bottom: calc(env(safe-area-inset-bottom) + 0.5rem);
+  }
+}
+

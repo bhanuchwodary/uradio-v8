@@ -48,33 +48,33 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
     <Card className="p-4 bg-gradient-to-br from-background/80 to-background border-none shadow-lg backdrop-blur-md">
       <div className="flex flex-col space-y-4">
         {/* Station info */}
-        <div className="text-center">
-          <h2 className="text-xl font-bold truncate">
+        <div className="text-center px-2">
+          <h2 className="text-xl font-bold truncate leading-tight">
             {currentTrack?.name || "Select a station"}
           </h2>
-          <p className="text-xs text-muted-foreground truncate">
+          <p className="text-xs text-muted-foreground truncate mt-1">
             {currentTrack?.url ? getHostnameFromUrl(currentTrack.url) : "No station selected"}
           </p>
           {currentTrack?.language && (
-            <div className="flex items-center justify-center text-xs text-blue-400 mt-1">
-              <span>{currentTrack.language}</span>
+            <div className="flex items-center justify-center text-xs text-blue-400 mt-2">
+              <span className="bg-blue-500/10 px-2 py-1 rounded-full">{currentTrack.language}</span>
             </div>
           )}
           {loading && (
-            <p className="text-xs text-blue-400 animate-pulse mt-1">Loading stream...</p>
+            <p className="text-xs text-blue-400 animate-pulse mt-2">Loading stream...</p>
           )}
         </div>
 
-        {/* Controls */}
-        <div className="flex items-center justify-center space-x-4">
+        {/* Controls - iOS optimized */}
+        <div className="flex items-center justify-center space-x-4 py-2">
           <Button
             variant="ghost"
             size="icon"
             onClick={onPrevious}
             disabled={!currentTrack}
-            className="h-10 w-10 rounded-full bg-accent hover:bg-accent/80 dark:bg-gray-800 dark:hover:bg-gray-700"
+            className="h-12 w-12 rounded-full bg-accent hover:bg-accent/80 dark:bg-gray-800 dark:hover:bg-gray-700 ios-touch-target active:scale-95 transition-transform"
           >
-            <SkipBack className="h-5 w-5" />
+            <SkipBack className="h-6 w-6" />
           </Button>
           
           <Button
@@ -83,14 +83,14 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
             onClick={onPlayPause}
             disabled={!currentTrack}
             className={cn(
-              "h-12 w-12 rounded-full",
+              "h-16 w-16 rounded-full ios-touch-target active:scale-95 transition-transform",
               isPlaying ? "bg-primary/90" : "bg-primary"
             )}
           >
             {isPlaying ? (
-              <Pause className="h-6 w-6" />
+              <Pause className="h-8 w-8" />
             ) : (
-              <Play className="h-6 w-6 ml-0.5" />
+              <Play className="h-8 w-8 ml-1" />
             )}
           </Button>
           
@@ -99,22 +99,24 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
             size="icon"
             onClick={onNext}
             disabled={!currentTrack}
-            className="h-10 w-10 rounded-full bg-accent hover:bg-accent/80 dark:bg-gray-800 dark:hover:bg-gray-700"
+            className="h-12 w-12 rounded-full bg-accent hover:bg-accent/80 dark:bg-gray-800 dark:hover:bg-gray-700 ios-touch-target active:scale-95 transition-transform"
           >
-            <SkipForward className="h-5 w-5" />
+            <SkipForward className="h-6 w-6" />
           </Button>
         </div>
 
-        {/* Volume control */}
-        <div className="flex items-center space-x-2">
-          <Volume2 className="h-4 w-4 text-muted-foreground" />
-          <Slider
-            value={[volume * 100]}
-            max={100}
-            step={1}
-            onValueChange={(values) => onVolumeChange(values[0] / 100)}
-            className="flex-1"
-          />
+        {/* Volume control - iOS optimized */}
+        <div className="flex items-center space-x-3 px-2">
+          <Volume2 className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+          <div className="flex-1 py-2">
+            <Slider
+              value={[volume * 100]}
+              max={100}
+              step={1}
+              onValueChange={(values) => onVolumeChange(values[0] / 100)}
+              className="flex-1"
+            />
+          </div>
         </div>
       </div>
     </Card>

@@ -36,51 +36,51 @@ export const StationCard: React.FC<StationCardProps> = ({
   // Determine the main action icon
   const renderActionIcon = () => {
     if (actionIcon === "add") {
-      return <Plus className="w-7 h-7" />;
+      return <Plus className="w-8 h-8" />;
     }
     
-    return isPlaying ? <Pause className="w-7 h-7" /> : <Play className="w-7 h-7 ml-0.5" />;
+    return isPlaying ? <Pause className="w-8 h-8" /> : <Play className="w-8 h-8 ml-0.5" />;
   };
 
   return (
     <Card 
       className={cn(
-        "relative overflow-hidden group transition-all duration-300 cursor-pointer material-transition elevation-hover h-full",
+        "relative overflow-hidden group transition-all duration-300 cursor-pointer material-transition elevation-hover h-full active:scale-95",
         isSelected 
           ? "bg-primary/10 border-primary/50 material-shadow-2" 
-          : "bg-background/70 hover:bg-accent/30 border-border/50 material-shadow-1"
+          : "bg-background/70 hover:bg-accent/30 border-border/50 material-shadow-1 active:bg-accent/40"
       )}
       onClick={onPlay} // Make entire card clickable
     >
-      <div className="px-2.5 py-3 flex flex-col items-center space-y-2 h-full">
+      <div className="px-3 py-4 flex flex-col items-center space-y-3 h-full">
         <div 
           className={cn(
-            "w-14 h-14 rounded-full flex items-center justify-center transition-colors material-shadow-1",
+            "w-16 h-16 rounded-full flex items-center justify-center transition-all duration-300 material-shadow-1 ios-touch-target",
             isPlaying 
-              ? "bg-primary text-primary-foreground material-shadow-2 animate-pulse" 
-              : "bg-secondary text-secondary-foreground group-hover:bg-primary/20"
+              ? "bg-primary text-primary-foreground material-shadow-2 animate-pulse scale-110" 
+              : "bg-secondary text-secondary-foreground group-hover:bg-primary/20 group-active:scale-95"
           )}
         >
           {renderActionIcon()}
         </div>
         
-        <h3 className="font-medium text-sm line-clamp-2 w-full text-center pt-1 min-h-[2.5rem]">
+        <h3 className="font-medium text-sm line-clamp-2 w-full text-center pt-1 min-h-[2.5rem] leading-tight">
           {station.name}
         </h3>
         
         {station.language && (
           <div className="flex items-center justify-center text-xs text-muted-foreground">
-            <span>{station.language}</span>
+            <span className="bg-muted/50 px-2 py-1 rounded-full">{station.language}</span>
           </div>
         )}
         
-        <div className="flex justify-center space-x-1 mt-auto pt-1">
+        <div className="flex justify-center space-x-2 mt-auto pt-2">
           {onToggleFavorite && (
             <Button 
               size="icon" 
               variant="ghost" 
               className={cn(
-                "h-7 w-7 material-transition rounded-full", 
+                "h-9 w-9 material-transition rounded-full ios-touch-target active:scale-90", 
                 station.isFavorite ? "text-yellow-500" : "text-muted-foreground"
               )}
               onClick={(e) => handleButtonClick(e, onToggleFavorite)}
@@ -97,11 +97,11 @@ export const StationCard: React.FC<StationCardProps> = ({
             <Button 
               size="icon" 
               variant="ghost" 
-              className="h-7 w-7 text-blue-500 hover:bg-accent/50 material-transition rounded-full"
+              className="h-9 w-9 text-blue-500 hover:bg-accent/50 material-transition rounded-full ios-touch-target active:scale-90"
               onClick={(e) => handleButtonClick(e, onEdit)}
               aria-label="Edit station"
             >
-              <Edit className="h-3.5 w-3.5" />
+              <Edit className="h-4 w-4" />
             </Button>
           )}
           
@@ -109,11 +109,11 @@ export const StationCard: React.FC<StationCardProps> = ({
             <Button 
               size="icon" 
               variant="ghost" 
-              className="h-7 w-7 text-destructive hover:bg-accent/50 material-transition rounded-full"
+              className="h-9 w-9 text-destructive hover:bg-accent/50 material-transition rounded-full ios-touch-target active:scale-90"
               onClick={(e) => handleButtonClick(e, onDelete)}
               aria-label="Delete station"
             >
-              <Trash2 className="h-3.5 w-3.5" />
+              <Trash2 className="h-4 w-4" />
             </Button>
           )}
         </div>
