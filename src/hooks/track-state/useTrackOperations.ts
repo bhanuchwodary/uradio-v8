@@ -1,4 +1,3 @@
-
 import { useCallback } from "react";
 import { Track } from "@/types/track";
 import { saveTracksToLocalStorage } from "./trackStorage";
@@ -10,7 +9,7 @@ import {
   removeStationByValue as removeByValue,
   removeTrackByIndex,
   toggleTrackFavorite
-} from "./trackModifications";
+} from "./index";
 
 export const useTrackOperations = (
   tracks: Track[],
