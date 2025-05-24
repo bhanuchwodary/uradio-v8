@@ -42,8 +42,10 @@ export const StationCard: React.FC<StationCardProps> = ({
     return isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 ml-0.5" />;
   };
 
-  // Ensure language is preserved from station data with fallback
-  const stationLanguage = station?.language || "Unknown";
+  // Ensure language is preserved from station data with proper fallback
+  const stationLanguage = station?.language && station.language !== "" ? station.language : "Unknown";
+
+  console.log("StationCard rendering:", { name: station.name, language: stationLanguage, isPlaying, isSelected });
 
   return (
     <Card 
@@ -56,12 +58,12 @@ export const StationCard: React.FC<StationCardProps> = ({
       onClick={onPlay}
     >
       <div className="px-2 py-2.5 flex flex-col items-center space-y-1.5 h-full">
-        {/* Play Button */}
+        {/* Play Button - Remove animate-pulse to stop blinking */}
         <div 
           className={cn(
             "w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 shadow-sm",
             isPlaying 
-              ? "bg-primary text-primary-foreground shadow-md animate-pulse scale-105" 
+              ? "bg-primary text-primary-foreground shadow-md scale-105" 
               : "bg-secondary/80 text-secondary-foreground group-hover:bg-primary/30 group-hover:scale-105 group-active:scale-95"
           )}
         >
@@ -73,7 +75,7 @@ export const StationCard: React.FC<StationCardProps> = ({
           {station.name}
         </h3>
         
-        {/* Language Badge - Always visible */}
+        {/* Language Badge - Always visible with proper language */}
         <div className="flex items-center justify-center">
           <span className={cn(
             "bg-gradient-to-r px-2 py-0.5 rounded-full text-[10px] font-medium border shadow-sm",

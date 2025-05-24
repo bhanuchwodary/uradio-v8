@@ -27,71 +27,143 @@ export const useMediaSession = ({
   onSkipPrevious,
   onSeek,
 }: UseMediaSessionProps) => {
-  // Set up media session controls
+  // Enhanced media session controls for iOS
   useEffect(() => {
     if ('mediaSession' in navigator) {
-      // Set metadata
+      // Set metadata with enhanced iOS compatibility
       if (tracks.length > 0 && currentIndex < tracks.length) {
         const currentTrack = tracks[currentIndex];
         
-        navigator.mediaSession.metadata = new MediaMetadata({
-          title: currentTrack?.name || 'Unknown Station',
-          artist: 'Streamify Jukebox',
-          album: 'My Stations',
-          artwork: [
-            { src: '/og-image.png', sizes: '512x512', type: 'image/png' }
-          ]
-        });
+        try {
+          navigator.mediaSession.metadata = new MediaMetadata({
+            title: currentTrack?.name || 'Unknown Station',
+            artist: 'Streamify Jukebox',
+            album: 'Radio Stations',
+            artwork: [
+              { src: '/og-image.png', sizes: '96x96', type: 'image/png' },
+              { src: '/og-image.png', sizes: '128x128', type: 'image/png' },
+              { src: '/og-image.png', sizes: '192x192', type: 'image/png' },
+              { src: '/og-image.png', sizes: '256x256', type: 'image/png' },
+              { src: '/og-image.png', sizes: '384x384', type: 'image/png' },
+              { src: '/og-image.png', sizes: '512x512', type: 'image/png' }
+            ]
+          });
 
-        // Log media session metadata update
-        console.log("Updated media session metadata:", {
-          title: currentTrack?.name,
-          stationUrl: currentTrack?.url
-        });
+          console.log("Updated media session metadata:", {
+            title: currentTrack?.name,
+            stationUrl: currentTrack?.url
+          });
+        } catch (error) {
+          console.warn("Error setting media session metadata:", error);
+        }
       }
 
       // Set playback state
-      navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused';
+      try {
+        navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused';
+      } catch (error) {
+        console.warn("Error setting playback state:", error);
+      }
 
-      // Set action handlers
-      navigator.mediaSession.setActionHandler('play', () => setIsPlaying(true));
-      navigator.mediaSession.setActionHandler('pause', () => setIsPlaying(false));
-      navigator.mediaSession.setActionHandler('previoustrack', onSkipPrevious);
-      navigator.mediaSession.setActionHandler('nexttrack', onSkipNext);
-      navigator.mediaSession.setActionHandler('seekto', (details) => {
-        if (details.seekTime) {
-          onSeek(details.seekTime);
-        }
-      });
-
-      // Update position state
-      if (trackDuration) {
-        navigator.mediaSession.setPositionState({
-          duration: trackDuration,
-          position: trackPosition,
-          playbackRate: 1,
+      // Enhanced action handlers with better iOS support
+      try {
+        navigator.mediaSession.setActionHandler('play', () => {
+          console.log("Media session play action triggered");
+          setIsPlaying(true);
         });
+        
+        navigator.mediaSession.setActionHandler('pause', () => {
+          console.log("Media session pause action triggered");
+          setIsPlaying(false);
+        });
+        
+        navigator.mediaSession.setActionHandler('previoustrack', () => {
+          console.log("Media session previous track action triggered");
+          onSkipPrevious();
+        });
+        
+        navigator.mediaSession.setActionHandler('nexttrack', () => {
+          console.log("Media session next track action triggered");
+          onSkipNext();
+        });
+        
+        // Enhanced seek handling for iOS
+        navigator.mediaSession.setActionHandler('seekto', (details) => {
+          console.log("Media session seek action triggered:", details);
+          if (details.seekTime !== undefined && details.seekTime !== null) {
+            onSeek(details.seekTime);
+          }
+        });
+
+        // Additional iOS-specific handlers
+        navigator.mediaSession.setActionHandler('stop', () => {
+          console.log("Media session stop action triggered");
+          setIsPlaying(false);
+        });
+
+      } catch (error) {
+        console.warn("Error setting media session action handlers:", error);
+      }
+
+      // Enhanced position state for iOS
+      try {
+        if (trackDuration && trackDuration !== Infinity && !isNaN(trackDuration)) {
+          navigator.mediaSession.setPositionState({
+            duration: trackDuration,
+            position: Math.min(trackPosition || 0, trackDuration),
+            playbackRate: isPlaying ? 1.0 : 0,
+          });
+        }
+      } catch (error) {
+        console.warn("Error setting position state:", error);
       }
     }
   }, [tracks, currentIndex, isPlaying, trackDuration, trackPosition, tracks[currentIndex]?.name]);
 
-  // Initialize Android Auto service
+  // Enhanced initialization with iOS focus
   useEffect(() => {
-    androidAutoService.initialize().catch(err => 
-      console.warn('Error initializing Android Auto service:', err)
-    );
+    const initializeServices = async () => {
+      try {
+        await androidAutoService.initialize();
+        console.log("Android Auto service initialized");
+      } catch (err) {
+        console.warn('Error initializing Android Auto service:', err);
+      }
 
-    // Register callbacks for Android Auto and media controls
-    androidAutoService.registerCallbacks({
-      onPlay: () => setIsPlaying(true),
-      onPause: () => setIsPlaying(false),
-      onSkipNext,
-      onSkipPrevious,
-      onSeek,
-    });
-    
-    // Request wake lock when music player initializes
-    audioWakeLockService.requestWakeLock();
+      // Enhanced callbacks for iOS compatibility
+      androidAutoService.registerCallbacks({
+        onPlay: () => {
+          console.log("Android Auto play callback triggered");
+          setIsPlaying(true);
+        },
+        onPause: () => {
+          console.log("Android Auto pause callback triggered");
+          setIsPlaying(false);
+        },
+        onSkipNext: () => {
+          console.log("Android Auto skip next callback triggered");
+          onSkipNext();
+        },
+        onSkipPrevious: () => {
+          console.log("Android Auto skip previous callback triggered");
+          onSkipPrevious();
+        },
+        onSeek: (position) => {
+          console.log("Android Auto seek callback triggered:", position);
+          onSeek(position);
+        },
+      });
+      
+      // Enhanced wake lock for iOS
+      try {
+        await audioWakeLockService.requestWakeLock();
+        console.log("Wake lock requested successfully");
+      } catch (err) {
+        console.warn('Error requesting wake lock:', err);
+      }
+    };
+
+    initializeServices();
     
     return () => {
       androidAutoService.cleanup().catch(err => 
@@ -101,7 +173,7 @@ export const useMediaSession = ({
     };
   }, []);
 
-  // Update Android Auto with current track info
+  // Enhanced track info updates for iOS
   useEffect(() => {
     if (tracks.length > 0 && currentIndex < tracks.length) {
       const currentTrack = tracks[currentIndex];
@@ -110,10 +182,10 @@ export const useMediaSession = ({
         const trackInfo = {
           title: currentTrack.name || 'Unknown Station',
           artist: "Streamify Jukebox",
-          album: "My Stations",
-          duration: trackDuration || 0,
+          album: "Radio Stations",
+          duration: trackDuration && trackDuration !== Infinity ? trackDuration : 0,
           position: trackPosition || 0,
-          artworkUrl: 'https://example.com/artwork.jpg',
+          artworkUrl: '/og-image.png',
         };
         
         console.log("Updating track info for notifications:", trackInfo);
@@ -125,12 +197,15 @@ export const useMediaSession = ({
     }
   }, [tracks, currentIndex, trackDuration, trackPosition, tracks[currentIndex]?.name]);
 
-  // Update Android Auto with playback state
+  // Enhanced playback state updates for iOS
   useEffect(() => {
+    console.log("Updating Android Auto playback state:", isPlaying ? "playing" : "paused");
     androidAutoService.updatePlaybackState(isPlaying);
     
     if (isPlaying) {
-      audioWakeLockService.requestWakeLock();
+      audioWakeLockService.requestWakeLock().catch(err => 
+        console.warn('Error requesting wake lock on play:', err)
+      );
     }
   }, [isPlaying]);
 };

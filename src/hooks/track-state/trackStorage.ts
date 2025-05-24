@@ -1,9 +1,8 @@
-
 import { Track } from "@/types/track";
 
 // Storage key for consistency
 const TRACKS_STORAGE_KEY = 'musicTracks';
-const STORAGE_VERSION = 'v3'; // Updated version for better stability
+const STORAGE_VERSION = 'v4'; // Updated version for language fix
 
 // Helper to create a structured storage format
 const createStorageStructure = (tracks: Track[]) => ({
@@ -54,21 +53,18 @@ export const loadTracksFromLocalStorage = (): Track[] => {
       return isValid;
     });
     
-    // Fill in any missing optional properties with defaults - PRESERVE LANGUAGE
+    // Fill in any missing optional properties with defaults - ALWAYS PRESERVE LANGUAGE
     const normalizedTracks = validatedTracks.map((track: any) => ({
       url: track.url,
       name: track.name,
       isFavorite: track.isFavorite !== undefined ? Boolean(track.isFavorite) : false,
       playTime: track.playTime !== undefined ? Number(track.playTime) : 0,
       isPrebuilt: track.isPrebuilt !== undefined ? Boolean(track.isPrebuilt) : false,
-      // CRITICAL FIX: Always preserve language property
-      language: track.language || ""
+      // CRITICAL: Always preserve language, don't default to empty string if it exists
+      language: track.language !== undefined && track.language !== null ? String(track.language) : "Unknown"
     }));
     
-    console.log("Normalized tracks:", normalizedTracks.length);
-    if (normalizedTracks.length > 0) {
-      console.log("All loaded tracks:", JSON.stringify(normalizedTracks));
-    }
+    console.log("Normalized tracks with languages:", normalizedTracks.map(t => ({ name: t.name, language: t.language })));
     
     return normalizedTracks;
   } catch (error) {
@@ -91,18 +87,15 @@ export const saveTracksToLocalStorage = (tracks: Track[]): boolean => {
       isFavorite: track.isFavorite || false,
       playTime: track.playTime || 0,
       isPrebuilt: track.isPrebuilt || false,
-      // CRITICAL FIX: Always preserve language property during save
-      language: track.language || ""
+      // CRITICAL: Always preserve language exactly as it is
+      language: track.language || "Unknown"
     }));
     
     // Use the structured storage format
     const storageData = createStorageStructure(tracksToSave);
     
     // Log before saving
-    console.log("About to save tracks to localStorage:", tracksToSave.length);
-    if (tracksToSave.length > 0) {
-      console.log("All tracks to save:", JSON.stringify(tracksToSave));
-    }
+    console.log("About to save tracks with languages:", tracksToSave.map(t => ({ name: t.name, language: t.language })));
     
     localStorage.setItem(TRACKS_STORAGE_KEY, JSON.stringify(storageData));
     
@@ -117,7 +110,7 @@ export const saveTracksToLocalStorage = (tracks: Track[]): boolean => {
       const parsedData = JSON.parse(savedJson);
       const savedTracks = parsedData.tracks || [];
       
-      console.log("Tracks saved to localStorage:", savedTracks.length);
+      console.log("Tracks saved to localStorage with languages:", savedTracks.map((t: any) => ({ name: t.name, language: t.language })));
       
       if (savedTracks.length !== tracks.length) {
         console.warn("Track count mismatch after saving:", 
