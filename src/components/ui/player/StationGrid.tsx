@@ -35,14 +35,17 @@ export const StationGrid: React.FC<StationGridProps> = ({
   }
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-4">
+    <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 md:gap-3">
       {stations.map((station, index) => {
         const isCurrentlyPlaying = station.url === currentTrackUrl && isPlaying;
         const isSelected = station.url === currentTrackUrl;
         
+        // Create a unique key that includes language to force re-render when language changes
+        const stationKey = `${station.url}-${station.name}-${station.language || 'no-lang'}-${isSelected}`;
+        
         return (
           <StationCard
-            key={`${station.url}-${index}-${isSelected}`}
+            key={stationKey}
             station={station}
             isPlaying={isCurrentlyPlaying}
             isSelected={isSelected}

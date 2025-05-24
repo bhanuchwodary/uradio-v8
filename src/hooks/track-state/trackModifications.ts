@@ -1,4 +1,3 @@
-
 import { Track } from "@/types/track";
 
 export const addStationUrl = (
@@ -16,7 +15,6 @@ export const addStationUrl = (
   
   console.log(`Adding URL: ${url}, Name: ${name}, IsPrebuilt: ${isPrebuilt}, IsFavorite: ${isFavorite}, Language: ${language}`);
   console.log("Current tracks count before add:", tracks.length);
-  console.log("Current tracks before add:", JSON.stringify(tracks));
   
   // Create a deep clone of the tracks array to ensure we don't modify the original
   const tracksClone = JSON.parse(JSON.stringify(tracks));
@@ -34,23 +32,23 @@ export const addStationUrl = (
   if (existingIndex !== -1) {
     // If found, create a new array and update the existing station
     console.log("Station already exists in playlist, updating at index:", existingIndex);
-    console.log("Current station data:", JSON.stringify(tracksClone[existingIndex]));
     
     // Create a completely new array to ensure React detects the state change
     updatedTracks = [...tracksClone];
     
-    // Update all properties explicitly
+    // Update all properties explicitly, ensuring language is preserved
     updatedTracks[existingIndex] = {
       ...updatedTracks[existingIndex],  // Keep existing properties first
       url: url,  // Then update what we need to update
       name: name || updatedTracks[existingIndex].name,
       isPrebuilt: isPrebuilt !== undefined ? isPrebuilt : updatedTracks[existingIndex].isPrebuilt,
       isFavorite: isFavorite !== undefined ? isFavorite : updatedTracks[existingIndex].isFavorite,
-      language: language || updatedTracks[existingIndex].language,
+      // CRITICAL FIX: Ensure language is always preserved and not overwritten with empty string
+      language: language || updatedTracks[existingIndex].language || "",
       playTime: updatedTracks[existingIndex].playTime || 0
     };
     
-    console.log("Updated station data:", JSON.stringify(updatedTracks[existingIndex]));
+    console.log("Updated station data with language:", updatedTracks[existingIndex].language);
     resultMessage = "Station updated in playlist";
   } else {
     // If not found, add as a new station
@@ -61,10 +59,11 @@ export const addStationUrl = (
       isFavorite: !!isFavorite,
       playTime: 0,
       isPrebuilt: !!isPrebuilt,
+      // CRITICAL FIX: Ensure language is always set and not lost
       language: language || ""
     };
     
-    console.log("New track being added:", JSON.stringify(newTrack));
+    console.log("New track being added with language:", newTrack.language);
     
     // Critical fix: create a fresh array to ensure state change detection
     updatedTracks = [...tracksClone, newTrack];
@@ -72,7 +71,6 @@ export const addStationUrl = (
   }
   
   console.log("Updated tracks array now has", updatedTracks.length, "tracks");
-  console.log("All tracks after modification:", JSON.stringify(updatedTracks));
   
   // Sanity check our data before returning
   const hasInvalidTracks = updatedTracks.some((track: Track) => !track.url || !track.name);
@@ -128,6 +126,7 @@ export const editTrackInfo = (
       ...newTracks[index],
       url: data.url,
       name: data.name || `Station ${index + 1}`,
+      // CRITICAL FIX: Preserve language properly during edits
       language: data.language !== undefined ? data.language : newTracks[index].language
     };
   }
@@ -150,6 +149,7 @@ export const editStationByValue = (
       ...newTracks[index],
       url: data.url,
       name: data.name,
+      // CRITICAL FIX: Preserve language properly during edits
       language: data.language !== undefined ? data.language : newTracks[index].language
     };
     return newTracks;
