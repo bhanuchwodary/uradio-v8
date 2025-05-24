@@ -54,13 +54,15 @@ export const loadTracksFromLocalStorage = (): Track[] => {
       return isValid;
     });
     
-    // Fill in any missing optional properties with defaults
+    // Fill in any missing optional properties with defaults - PRESERVE LANGUAGE
     const normalizedTracks = validatedTracks.map((track: any) => ({
       url: track.url,
       name: track.name,
       isFavorite: track.isFavorite !== undefined ? Boolean(track.isFavorite) : false,
       playTime: track.playTime !== undefined ? Number(track.playTime) : 0,
-      isPrebuilt: track.isPrebuilt !== undefined ? Boolean(track.isPrebuilt) : false
+      isPrebuilt: track.isPrebuilt !== undefined ? Boolean(track.isPrebuilt) : false,
+      // CRITICAL FIX: Always preserve language property
+      language: track.language || ""
     }));
     
     console.log("Normalized tracks:", normalizedTracks.length);
@@ -82,8 +84,16 @@ export const saveTracksToLocalStorage = (tracks: Track[]): boolean => {
       return false;
     }
     
-    // Deep clone tracks to avoid reference issues
-    const tracksToSave = JSON.parse(JSON.stringify(tracks));
+    // Deep clone tracks to avoid reference issues and ensure language is preserved
+    const tracksToSave = tracks.map(track => ({
+      url: track.url,
+      name: track.name,
+      isFavorite: track.isFavorite || false,
+      playTime: track.playTime || 0,
+      isPrebuilt: track.isPrebuilt || false,
+      // CRITICAL FIX: Always preserve language property during save
+      language: track.language || ""
+    }));
     
     // Use the structured storage format
     const storageData = createStorageStructure(tracksToSave);

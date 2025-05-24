@@ -28,8 +28,8 @@ export const StationGrid: React.FC<StationGridProps> = ({
 }) => {
   if (!stations || stations.length === 0) {
     return (
-      <div className="text-center p-6 bg-background/50 rounded-lg">
-        <p className="text-muted-foreground">No stations available</p>
+      <div className="text-center p-6 bg-gradient-to-br from-background/50 to-background/30 rounded-xl border border-border/50 backdrop-blur-sm">
+        <p className="text-muted-foreground text-sm">No stations available</p>
       </div>
     );
   }
@@ -40,8 +40,8 @@ export const StationGrid: React.FC<StationGridProps> = ({
         const isCurrentlyPlaying = station.url === currentTrackUrl && isPlaying;
         const isSelected = station.url === currentTrackUrl;
         
-        // Create a unique key that includes language to force re-render when language changes
-        const stationKey = `${station.url}-${station.name}-${station.language || 'no-lang'}-${isSelected}`;
+        // Create a comprehensive unique key that forces re-render when any property changes
+        const stationKey = `${station.url}-${station.name}-${station.language || 'no-lang'}-${station.isFavorite}-${isSelected}-${Date.now()}`;
         
         return (
           <StationCard
