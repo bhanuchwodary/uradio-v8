@@ -9,9 +9,10 @@ import AdminStationsHeader from "./stations/AdminStationsHeader";
 import StationGrid from "./stations/StationGrid";
 import StationImportSection from "./stations/StationImportSection";
 import { useStationManagement } from "./stations/useStationManagement";
+import { Loader2 } from "lucide-react";
 
 interface AdminStationsManagerProps {
-  onSave: (stations: any[]) => void;
+  onSave: (stations: any[], adminPassword: string) => void;
   onCancel: () => void;
 }
 
@@ -25,6 +26,7 @@ const AdminStationsManager: React.FC<AdminStationsManagerProps> = ({ onSave, onC
     stationToDelete,
     editError,
     showImport,
+    loading,
     handleAddStation,
     handleEditStation,
     handleDeleteStation,
@@ -40,8 +42,20 @@ const AdminStationsManager: React.FC<AdminStationsManagerProps> = ({ onSave, onC
 
   const handleSaveChanges = () => {
     const stationsToSave = prepareStationsForSave();
-    onSave(stationsToSave);
+    const adminPassword = 'J@b1tw$tr3@w'; // In production, get this securely
+    onSave(stationsToSave, adminPassword);
   };
+
+  if (loading) {
+    return (
+      <Card className="w-full max-w-4xl mx-auto bg-background/30 backdrop-blur-md border-none shadow-lg material-shadow-2">
+        <CardContent className="flex items-center justify-center p-8">
+          <Loader2 className="h-8 w-8 animate-spin mr-2" />
+          <span>Loading stations from database...</span>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="w-full max-w-4xl mx-auto bg-background/30 backdrop-blur-md border-none shadow-lg material-shadow-2">
@@ -94,7 +108,7 @@ const AdminStationsManager: React.FC<AdminStationsManagerProps> = ({ onSave, onC
             <AlertDialogHeader>
               <AlertDialogTitle>Are you sure?</AlertDialogTitle>
               <AlertDialogDescription>
-                This will remove {stationToDelete?.station.name} from the prebuilt stations list.
+                This will permanently remove {stationToDelete?.station.name} from the prebuilt stations list for all users.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter className="flex-col sm:flex-row gap-2">
