@@ -43,9 +43,13 @@ export const adminManageStations = async (
 ) => {
   try {
     console.log('Calling admin-stations function with action:', action);
+    console.log('Request data:', JSON.stringify(data));
+    
+    const requestBody = { action, ...data };
+    console.log('Full request body:', JSON.stringify(requestBody));
     
     const { data: result, error } = await supabase.functions.invoke('admin-stations', {
-      body: { action, ...data },
+      body: requestBody,
       headers: {
         'x-admin-password': adminPassword,
         'Content-Type': 'application/json'
@@ -53,8 +57,14 @@ export const adminManageStations = async (
     });
 
     if (error) {
-      console.error('Error in admin manage stations:', error);
+      console.error('Supabase function error:', error);
       throw new Error(error.message || 'Failed to manage stations');
+    }
+
+    // Check if the result contains an error
+    if (result && result.error) {
+      console.error('Function returned error:', result.error);
+      throw new Error(result.error);
     }
 
     console.log('Admin stations function result:', result);

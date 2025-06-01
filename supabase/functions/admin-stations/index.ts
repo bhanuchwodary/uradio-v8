@@ -70,16 +70,52 @@ serve(async (req) => {
     }
 
     if (req.method === 'POST') {
-      const body = await req.json();
-      console.log('POST request body:', body);
+      let body;
+      try {
+        const requestText = await req.text();
+        console.log('Raw request body:', requestText);
+        
+        if (!requestText || requestText.trim() === '') {
+          console.error('Empty request body received');
+          return new Response(JSON.stringify({ error: 'Empty request body' }), {
+            status: 400,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        }
+        
+        body = JSON.parse(requestText);
+        console.log('Parsed request body:', JSON.stringify(body));
+      } catch (parseError) {
+        console.error('Error parsing request body:', parseError);
+        return new Response(JSON.stringify({ error: 'Invalid JSON in request body' }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      if (!body.action) {
+        console.error('No action specified in request');
+        return new Response(JSON.stringify({ error: 'No action specified' }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
 
       if (body.action === 'add') {
         console.log('Adding new station:', body.name);
         const { name, url, language } = body as Station;
         
+        if (!name || !url) {
+          console.error('Missing required fields for add operation');
+          return new Response(JSON.stringify({ error: 'Name and URL are required' }), {
+            status: 400,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        }
+        
         const { data, error } = await supabase
           .from('prebuilt_stations')
-          .insert({ name, url, language })
+          .insert({ name, url, language: language || 'Unknown' })
           .select()
           .single();
 
@@ -101,9 +137,17 @@ serve(async (req) => {
         console.log('Updating station:', body.id);
         const { id, name, url, language } = body as Station;
         
+        if (!id || !name || !url) {
+          console.error('Missing required fields for update operation');
+          return new Response(JSON.stringify({ error: 'ID, name and URL are required' }), {
+            status: 400,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        }
+        
         const { data, error } = await supabase
           .from('prebuilt_stations')
-          .update({ name, url, language, updated_at: new Date().toISOString() })
+          .update({ name, url, language: language || 'Unknown', updated_at: new Date().toISOString() })
           .eq('id', id)
           .select()
           .single();
@@ -118,6 +162,37 @@ serve(async (req) => {
 
         console.log('Station updated successfully:', data);
         return new Response(JSON.stringify({ station: data }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      if (body.action === 'delete') {
+        console.log('Deleting station:', body.id);
+        const { id } = body;
+        
+        if (!id) {
+          console.error('Missing ID for delete operation');
+          return new Response(JSON.stringify({ error: 'Station ID is required' }), {
+            status: 400,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        }
+        
+        const { error } = await supabase
+          .from('prebuilt_stations')
+          .delete()
+          .eq('id', id);
+
+        if (error) {
+          console.error('Error deleting station:', error);
+          return new Response(JSON.stringify({ error: 'Failed to delete station' }), {
+            status: 400,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        }
+
+        console.log('Station deleted successfully');
+        return new Response(JSON.stringify({ success: true }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       }
@@ -173,29 +248,6 @@ serve(async (req) => {
         });
       }
 
-      if (body.action === 'delete') {
-        console.log('Deleting station:', body.id);
-        const { id } = body;
-        
-        const { error } = await supabase
-          .from('prebuilt_stations')
-          .delete()
-          .eq('id', id);
-
-        if (error) {
-          console.error('Error deleting station:', error);
-          return new Response(JSON.stringify({ error: 'Failed to delete station' }), {
-            status: 400,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          });
-        }
-
-        console.log('Station deleted successfully');
-        return new Response(JSON.stringify({ success: true }), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
-
       return new Response(JSON.stringify({ error: 'Invalid action' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -209,7 +261,10 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Error in admin-stations function:', error);
-    return new Response(JSON.stringify({ error: 'Internal server error' }), {
+    return new Response(JSON.stringify({ 
+      error: 'Internal server error',
+      details: error.message 
+    }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });

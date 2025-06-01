@@ -94,12 +94,19 @@ export const useStationManagement = ({ checkIfStationExists }: UseStationManagem
       try {
         console.log("Confirming deletion of station:", stationToDelete.station.name);
         
-        // Get admin password from session or prompt
-        const adminPassword = 'J@b1tw$tr3@w'; // In production, get this securely
+        const adminPassword = 'J@b1tw$tr3@w';
         
-        if (stationToDelete.station.id) {
-          await adminManageStations('delete', { id: stationToDelete.station.id }, adminPassword);
+        if (!stationToDelete.station.id) {
+          console.error("No station ID found for deletion");
+          toast({
+            title: "Error",
+            description: "Cannot delete station - no ID found",
+            variant: "destructive"
+          });
+          return;
         }
+        
+        await adminManageStations('delete', { id: stationToDelete.station.id }, adminPassword);
         
         const newStations = [...stations];
         newStations.splice(stationToDelete.index, 1);
@@ -113,9 +120,10 @@ export const useStationManagement = ({ checkIfStationExists }: UseStationManagem
         setStationToDelete(null);
       } catch (error) {
         console.error("Failed to delete station:", error);
+        const errorMessage = error instanceof Error ? error.message : "Failed to delete station";
         toast({
           title: "Error",
-          description: "Failed to delete station",
+          description: errorMessage,
           variant: "destructive"
         });
       }
@@ -128,6 +136,12 @@ export const useStationManagement = ({ checkIfStationExists }: UseStationManagem
     console.log("Saving station edit:", data);
     
     try {
+      // Validate required fields
+      if (!data.url || !data.name) {
+        setEditError("URL and name are required");
+        return;
+      }
+
       // Check if this is a new station or editing an existing one
       if (editingStation.index === -1) {
         // For new stations, check if URL already exists
@@ -148,12 +162,16 @@ export const useStationManagement = ({ checkIfStationExists }: UseStationManagem
         }
 
         // Add new station via API
-        const adminPassword = 'J@b1tw$tr3@w'; // In production, get this securely
+        const adminPassword = 'J@b1tw$tr3@w';
         const result = await adminManageStations('add', {
           name: data.name,
           url: data.url,
           language: data.language || "English"
         }, adminPassword);
+
+        if (!result || !result.station) {
+          throw new Error("Failed to create station - no data returned");
+        }
 
         const newStation: Track = {
           ...result.station,
@@ -191,26 +209,32 @@ export const useStationManagement = ({ checkIfStationExists }: UseStationManagem
         }
 
         // Update existing station via API
-        const adminPassword = 'J@b1tw$tr3@w'; // In production, get this securely
+        const adminPassword = 'J@b1tw$tr3@w';
         const stationToUpdate = stations[editingStation.index];
         
-        if (stationToUpdate.id) {
-          const result = await adminManageStations('update', {
-            id: stationToUpdate.id,
-            name: data.name,
-            url: data.url,
-            language: data.language || "English"
-          }, adminPassword);
-
-          const newStations = [...stations];
-          newStations[editingStation.index] = {
-            ...result.station,
-            isFavorite: false,
-            isPrebuilt: true,
-            playTime: 0
-          };
-          setStations(newStations);
+        if (!stationToUpdate.id) {
+          throw new Error("Cannot update station - no ID found");
         }
+
+        const result = await adminManageStations('update', {
+          id: stationToUpdate.id,
+          name: data.name,
+          url: data.url,
+          language: data.language || "English"
+        }, adminPassword);
+
+        if (!result || !result.station) {
+          throw new Error("Failed to update station - no data returned");
+        }
+
+        const newStations = [...stations];
+        newStations[editingStation.index] = {
+          ...result.station,
+          isFavorite: false,
+          isPrebuilt: true,
+          playTime: 0
+        };
+        setStations(newStations);
         
         toast({
           title: "Station updated",
@@ -222,10 +246,11 @@ export const useStationManagement = ({ checkIfStationExists }: UseStationManagem
       setEditError(null);
     } catch (error) {
       console.error("Failed to save station:", error);
-      setEditError("Failed to save station. Please try again.");
+      const errorMessage = error instanceof Error ? error.message : "Failed to save station. Please try again.";
+      setEditError(errorMessage);
       toast({
         title: "Error",
-        description: "Failed to save station",
+        description: errorMessage,
         variant: "destructive"
       });
     }
@@ -258,20 +283,24 @@ export const useStationManagement = ({ checkIfStationExists }: UseStationManagem
       if (!urlExists && !exists) {
         try {
           // Add via API
-          const adminPassword = 'J@b1tw$tr3@w'; // In production, get this securely
+          const adminPassword = 'J@b1tw$tr3@w';
           const result = await adminManageStations('add', {
             name: station.name,
             url: station.url,
             language: station.language || "Unknown"
           }, adminPassword);
 
-          newStations.push({
-            ...result.station,
-            isFavorite: false,
-            isPrebuilt: true,
-            playTime: 0
-          });
-          addedCount++;
+          if (result && result.station) {
+            newStations.push({
+              ...result.station,
+              isFavorite: false,
+              isPrebuilt: true,
+              playTime: 0
+            });
+            addedCount++;
+          } else {
+            skippedCount++;
+          }
         } catch (error) {
           console.error("Failed to add imported station:", error);
           skippedCount++;
