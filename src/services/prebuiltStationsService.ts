@@ -43,7 +43,7 @@ export const adminManageStations = async (
 ) => {
   try {
     console.log('Calling admin-stations function with action:', action);
-    console.log('Data to send:', data);
+    console.log('Data to send:', JSON.stringify(data, null, 2));
     
     // Prepare the request body based on action
     let requestBody: any = { action };
@@ -80,7 +80,7 @@ export const adminManageStations = async (
         break;
     }
     
-    console.log('Final request body:', requestBody);
+    console.log('Final request body:', JSON.stringify(requestBody, null, 2));
     
     const { data: result, error } = await supabase.functions.invoke('admin-stations', {
       body: requestBody,

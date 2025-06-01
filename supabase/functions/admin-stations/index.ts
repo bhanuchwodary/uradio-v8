@@ -19,7 +19,6 @@ serve(async (req) => {
   console.log('=== Admin stations function called ===');
   console.log('Method:', req.method);
   console.log('URL:', req.url);
-  console.log('Headers:', Object.fromEntries(req.headers));
 
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -77,29 +76,19 @@ serve(async (req) => {
     if (req.method === 'POST') {
       let body;
       try {
-        const contentType = req.headers.get('content-type');
-        console.log('Content-Type:', contentType);
+        const requestText = await req.text();
+        console.log('Raw request body received:', requestText);
         
-        if (contentType?.includes('application/json')) {
-          const requestText = await req.text();
-          console.log('Raw request body:', requestText);
-          
-          if (!requestText || requestText.trim() === '') {
-            console.error('Empty request body received');
-            return new Response(JSON.stringify({ error: 'Request body is required' }), {
-              status: 400,
-              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-            });
-          }
-          
-          body = JSON.parse(requestText);
-        } else {
-          console.error('Invalid content type. Expected application/json');
-          return new Response(JSON.stringify({ error: 'Content-Type must be application/json' }), {
+        if (!requestText || requestText.trim() === '') {
+          console.error('Empty request body received');
+          return new Response(JSON.stringify({ error: 'Request body is required' }), {
             status: 400,
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           });
         }
+        
+        body = JSON.parse(requestText);
+        console.log('Parsed request body:', JSON.stringify(body, null, 2));
       } catch (parseError) {
         console.error('Error parsing request body:', parseError);
         return new Response(JSON.stringify({ error: 'Invalid JSON in request body' }), {
@@ -107,8 +96,6 @@ serve(async (req) => {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       }
-
-      console.log('Parsed request body:', body);
 
       if (!body || !body.action) {
         console.error('No action specified in request body');
@@ -120,171 +107,171 @@ serve(async (req) => {
 
       console.log('Processing action:', body.action);
 
-      if (body.action === 'add') {
-        const { name, url, language } = body;
-        console.log('Adding station:', { name, url, language });
-        
-        if (!name || !url) {
-          console.error('Missing required fields for add operation');
-          return new Response(JSON.stringify({ error: 'Name and URL are required' }), {
-            status: 400,
+      switch (body.action) {
+        case 'add': {
+          const { name, url, language } = body;
+          console.log('Adding station:', { name, url, language });
+          
+          if (!name || !url) {
+            return new Response(JSON.stringify({ error: 'Name and URL are required' }), {
+              status: 400,
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            });
+          }
+          
+          const { data, error } = await supabase
+            .from('prebuilt_stations')
+            .insert({ 
+              name: name.trim(), 
+              url: url.trim(), 
+              language: language?.trim() || 'Unknown' 
+            })
+            .select()
+            .single();
+
+          if (error) {
+            console.error('Database error adding station:', error);
+            return new Response(JSON.stringify({ 
+              error: error.code === '23505' ? 'Station URL already exists' : 'Failed to add station'
+            }), {
+              status: 400,
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            });
+          }
+
+          console.log('Station added successfully:', data);
+          return new Response(JSON.stringify({ station: data, success: true }), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           });
         }
-        
-        const { data, error } = await supabase
-          .from('prebuilt_stations')
-          .insert({ 
-            name: name.trim(), 
-            url: url.trim(), 
-            language: language?.trim() || 'Unknown' 
-          })
-          .select()
-          .single();
 
-        if (error) {
-          console.error('Database error adding station:', error);
-          return new Response(JSON.stringify({ 
-            error: error.code === '23505' ? 'Station URL already exists' : 'Failed to add station'
-          }), {
-            status: 400,
+        case 'update': {
+          const { id, name, url, language } = body;
+          console.log('Updating station:', { id, name, url, language });
+          
+          if (!id || !name || !url) {
+            return new Response(JSON.stringify({ error: 'ID, name and URL are required' }), {
+              status: 400,
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            });
+          }
+          
+          const { data, error } = await supabase
+            .from('prebuilt_stations')
+            .update({ 
+              name: name.trim(), 
+              url: url.trim(), 
+              language: language?.trim() || 'Unknown', 
+              updated_at: new Date().toISOString() 
+            })
+            .eq('id', id)
+            .select()
+            .single();
+
+          if (error) {
+            console.error('Database error updating station:', error);
+            return new Response(JSON.stringify({ 
+              error: error.code === '23505' ? 'Station URL already exists' : 'Failed to update station'
+            }), {
+              status: 400,
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            });
+          }
+
+          console.log('Station updated successfully:', data);
+          return new Response(JSON.stringify({ station: data, success: true }), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           });
         }
 
-        console.log('Station added successfully:', data);
-        return new Response(JSON.stringify({ station: data }), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
+        case 'delete': {
+          const { id } = body;
+          console.log('Deleting station with ID:', id);
+          
+          if (!id) {
+            return new Response(JSON.stringify({ error: 'Station ID is required' }), {
+              status: 400,
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            });
+          }
+          
+          const { error } = await supabase
+            .from('prebuilt_stations')
+            .delete()
+            .eq('id', id);
+
+          if (error) {
+            console.error('Database error deleting station:', error);
+            return new Response(JSON.stringify({ error: 'Failed to delete station' }), {
+              status: 500,
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            });
+          }
+
+          console.log('Station deleted successfully');
+          return new Response(JSON.stringify({ success: true }), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        }
+
+        case 'bulk-update': {
+          const { stations } = body;
+          console.log('Bulk updating stations, count:', stations?.length);
+          
+          if (!Array.isArray(stations)) {
+            return new Response(JSON.stringify({ error: 'Stations array is required' }), {
+              status: 400,
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            });
+          }
+
+          // Delete all existing stations
+          console.log('Deleting existing stations');
+          const { error: deleteError } = await supabase
+            .from('prebuilt_stations')
+            .delete()
+            .neq('id', '00000000-0000-0000-0000-000000000000');
+
+          if (deleteError) {
+            console.error('Error deleting existing stations:', deleteError);
+            return new Response(JSON.stringify({ error: 'Failed to clear existing stations' }), {
+              status: 500,
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            });
+          }
+
+          // Insert new stations
+          console.log('Inserting new stations');
+          const { data, error: insertError } = await supabase
+            .from('prebuilt_stations')
+            .insert(stations.map((station: Station) => ({
+              name: station.name?.trim() || '',
+              url: station.url?.trim() || '',
+              language: station.language?.trim() || 'Unknown'
+            })))
+            .select();
+
+          if (insertError) {
+            console.error('Error inserting new stations:', insertError);
+            return new Response(JSON.stringify({ error: 'Failed to insert new stations' }), {
+              status: 500,
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            });
+          }
+
+          console.log('Bulk update successful, inserted:', data?.length);
+          return new Response(JSON.stringify({ stations: data, success: true }), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        }
+
+        default:
+          console.error('Invalid action specified:', body.action);
+          return new Response(JSON.stringify({ error: 'Invalid action specified' }), {
+            status: 400,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
       }
-
-      if (body.action === 'update') {
-        const { id, name, url, language } = body;
-        console.log('Updating station:', { id, name, url, language });
-        
-        if (!id || !name || !url) {
-          console.error('Missing required fields for update operation');
-          return new Response(JSON.stringify({ error: 'ID, name and URL are required' }), {
-            status: 400,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          });
-        }
-        
-        const { data, error } = await supabase
-          .from('prebuilt_stations')
-          .update({ 
-            name: name.trim(), 
-            url: url.trim(), 
-            language: language?.trim() || 'Unknown', 
-            updated_at: new Date().toISOString() 
-          })
-          .eq('id', id)
-          .select()
-          .single();
-
-        if (error) {
-          console.error('Database error updating station:', error);
-          return new Response(JSON.stringify({ 
-            error: error.code === '23505' ? 'Station URL already exists' : 'Failed to update station'
-          }), {
-            status: 400,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          });
-        }
-
-        console.log('Station updated successfully:', data);
-        return new Response(JSON.stringify({ station: data }), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
-
-      if (body.action === 'delete') {
-        const { id } = body;
-        console.log('Deleting station with ID:', id);
-        
-        if (!id) {
-          console.error('Missing ID for delete operation');
-          return new Response(JSON.stringify({ error: 'Station ID is required' }), {
-            status: 400,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          });
-        }
-        
-        const { error } = await supabase
-          .from('prebuilt_stations')
-          .delete()
-          .eq('id', id);
-
-        if (error) {
-          console.error('Database error deleting station:', error);
-          return new Response(JSON.stringify({ error: 'Failed to delete station' }), {
-            status: 500,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          });
-        }
-
-        console.log('Station deleted successfully');
-        return new Response(JSON.stringify({ success: true }), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
-
-      if (body.action === 'bulk-update') {
-        const { stations } = body;
-        console.log('Bulk updating stations, count:', stations?.length);
-        
-        if (!Array.isArray(stations)) {
-          return new Response(JSON.stringify({ error: 'Stations array is required' }), {
-            status: 400,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          });
-        }
-
-        // Delete all existing stations
-        console.log('Deleting existing stations');
-        const { error: deleteError } = await supabase
-          .from('prebuilt_stations')
-          .delete()
-          .neq('id', '00000000-0000-0000-0000-000000000000');
-
-        if (deleteError) {
-          console.error('Error deleting existing stations:', deleteError);
-          return new Response(JSON.stringify({ error: 'Failed to clear existing stations' }), {
-            status: 500,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          });
-        }
-
-        // Insert new stations
-        console.log('Inserting new stations');
-        const { data, error: insertError } = await supabase
-          .from('prebuilt_stations')
-          .insert(stations.map((station: Station) => ({
-            name: station.name?.trim() || '',
-            url: station.url?.trim() || '',
-            language: station.language?.trim() || 'Unknown'
-          })))
-          .select();
-
-        if (insertError) {
-          console.error('Error inserting new stations:', insertError);
-          return new Response(JSON.stringify({ error: 'Failed to insert new stations' }), {
-            status: 500,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          });
-        }
-
-        console.log('Bulk update successful, inserted:', data?.length);
-        return new Response(JSON.stringify({ stations: data }), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
-
-      console.error('Invalid action specified:', body.action);
-      return new Response(JSON.stringify({ error: 'Invalid action specified' }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
     }
 
     console.error('Method not allowed:', req.method);

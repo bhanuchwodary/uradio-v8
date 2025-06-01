@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Track } from "@/types/track";
 import { fetchPrebuiltStations, adminManageStations } from "@/services/prebuiltStationsService";
@@ -104,16 +103,21 @@ export const useStationManagement = ({ checkIfStationExists }: UseStationManagem
           return;
         }
         
-        await adminManageStations('delete', { id: stationToDelete.station.id }, adminPassword);
+        const result = await adminManageStations('delete', { id: stationToDelete.station.id }, adminPassword);
+        console.log("Delete result:", result);
         
-        const newStations = [...stations];
-        newStations.splice(stationToDelete.index, 1);
-        setStations(newStations);
-        
-        toast({
-          title: "Station deleted",
-          description: `${stationToDelete.station.name} has been removed`
-        });
+        if (result && result.success) {
+          const newStations = [...stations];
+          newStations.splice(stationToDelete.index, 1);
+          setStations(newStations);
+          
+          toast({
+            title: "Station deleted",
+            description: `${stationToDelete.station.name} has been removed`
+          });
+        } else {
+          throw new Error("Delete operation failed");
+        }
         
         setStationToDelete(null);
       } catch (error) {
@@ -124,6 +128,7 @@ export const useStationManagement = ({ checkIfStationExists }: UseStationManagem
           description: errorMessage,
           variant: "destructive"
         });
+        setStationToDelete(null);
       }
     }
   };
@@ -168,6 +173,7 @@ export const useStationManagement = ({ checkIfStationExists }: UseStationManagem
 
         console.log("Adding new station with clean data:", cleanData);
         const result = await adminManageStations('add', cleanData, adminPassword);
+        console.log("Add result:", result);
 
         if (!result || !result.station) {
           throw new Error("Failed to create station - no data returned");
@@ -219,6 +225,7 @@ export const useStationManagement = ({ checkIfStationExists }: UseStationManagem
 
         console.log("Updating station with clean data:", updateData);
         const result = await adminManageStations('update', updateData, adminPassword);
+        console.log("Update result:", result);
 
         if (!result || !result.station) {
           throw new Error("Failed to update station - no data returned");
