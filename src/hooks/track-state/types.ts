@@ -27,7 +27,13 @@ export interface TrackStateResult {
   getTopStations: () => Track[];
   checkIfStationExists: (url: string) => Promise<{ exists: boolean; isUserStation: boolean; }>;
   
-  // Debug functions
+  // Debug functions (matching actual implementation)
+  debugState: () => {
+    tracksCount: number;
+    isInitialized: boolean;
+    localStorageWorking: boolean;
+    stateVersion: number;
+  };
   logCurrentState: () => void;
   getDebugInfo: () => {
     tracksCount: number;

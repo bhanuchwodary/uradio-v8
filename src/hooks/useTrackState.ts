@@ -63,6 +63,16 @@ export const useTrackState = (): TrackStateResult => {
     getUserStations: management.getMyStations,
     getTopStations: management.getPopularStations,
     checkIfStationExists: management.stationExists,
-    ...debug
+    // Map debug functions correctly
+    debugState: debug.debugState,
+    logCurrentState: debug.debugState, // Use debugState as logCurrentState
+    getDebugInfo: () => ({
+      tracksCount: tracks.length,
+      currentTrack: currentIndex >= 0 && currentIndex < tracks.length ? tracks[currentIndex] : null,
+      isPlaying,
+      isInitialized,
+      needsSaving: needsSaving.current,
+      stateVersion: stateVersion.current
+    })
   };
 };

@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -18,16 +19,6 @@ interface AdminStationsManagerProps {
 const AdminStationsManager: React.FC<AdminStationsManagerProps> = ({ onSave, onCancel }) => {
   const { checkIfStationExists } = useTrackStateContext();
   
-  // Create a wrapper function to handle the async checkIfStationExists
-  const checkIfStationExistsSync = async (url: string) => {
-    try {
-      return await checkIfStationExists(url);
-    } catch (error) {
-      console.error('Error checking station existence:', error);
-      return { exists: false, isUserStation: false };
-    }
-  };
-  
   const {
     stations,
     gridCols,
@@ -47,7 +38,7 @@ const AdminStationsManager: React.FC<AdminStationsManagerProps> = ({ onSave, onC
     handleImportStations,
     prepareStationsForSave,
     isMobile
-  } = useStationManagement({ checkIfStationExists: checkIfStationExistsSync });
+  } = useStationManagement({ checkIfStationExists });
 
   const handleSaveChanges = () => {
     const stationsToSave = prepareStationsForSave();

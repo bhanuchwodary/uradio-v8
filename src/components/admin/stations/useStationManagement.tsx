@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Track } from "@/types/track";
 import { fetchPrebuiltStations, adminManageStations } from "@/services/prebuiltStationsService";
@@ -5,7 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 interface UseStationManagementProps {
-  checkIfStationExists: (url: string) => { exists: boolean; isUserStation: boolean };
+  checkIfStationExists: (url: string) => Promise<{ exists: boolean; isUserStation: boolean }>;
 }
 
 export const useStationManagement = ({ checkIfStationExists }: UseStationManagementProps) => {
@@ -130,7 +131,7 @@ export const useStationManagement = ({ checkIfStationExists }: UseStationManagem
       // Check if this is a new station or editing an existing one
       if (editingStation.index === -1) {
         // For new stations, check if URL already exists
-        const { exists, isUserStation } = checkIfStationExists(data.url);
+        const { exists, isUserStation } = await checkIfStationExists(data.url);
         if (exists) {
           setEditError(`This URL already exists ${isUserStation ? 'in your stations' : 'in another prebuilt station'}`);
           return;
@@ -172,7 +173,7 @@ export const useStationManagement = ({ checkIfStationExists }: UseStationManagem
         const currentUrl = stations[editingStation.index].url;
         if (currentUrl.toLowerCase() !== data.url.toLowerCase()) {
           // URL is being changed, check if new URL exists
-          const { exists, isUserStation } = checkIfStationExists(data.url);
+          const { exists, isUserStation } = await checkIfStationExists(data.url);
           if (exists) {
             setEditError(`This URL already exists ${isUserStation ? 'in your stations' : 'in another prebuilt station'}`);
             return;
@@ -252,7 +253,7 @@ export const useStationManagement = ({ checkIfStationExists }: UseStationManagem
       );
 
       // Check if URL exists in user stations
-      const { exists, isUserStation } = checkIfStationExists(station.url);
+      const { exists, isUserStation } = await checkIfStationExists(station.url);
 
       if (!urlExists && !exists) {
         try {
