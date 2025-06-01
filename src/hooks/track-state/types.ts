@@ -2,25 +2,39 @@
 import { Track } from "@/types/track";
 
 export interface TrackStateResult {
+  // State
   tracks: Track[];
   currentIndex: number;
   isPlaying: boolean;
+  
+  // Core actions
   setCurrentIndex: (index: number) => void;
   setIsPlaying: (playing: boolean) => void;
-  addUrl: (url: string, name?: string, isPrebuilt?: boolean, isFavorite?: boolean, language?: string) => { success: boolean, message: string };
-  removeUrl: (index: number) => void;
-  toggleFavorite: (index: number) => void;
-  editTrack: (index: number, data: { url: string; name: string; language?: string }) => void;
-  updatePlayTime: (index: number, seconds: number) => void;
-  getTopStations: () => Track[];
+  
+  // Track operations
+  addStation: (url: string, name?: string) => Promise<boolean>;
+  removeTrackByIndex: (index: number) => boolean;
+  editTrackInfo: (index: number, newName: string, newUrl: string) => boolean;
+  toggleTrackFavorite: (index: number) => boolean;
+  updateTrackPlayTime: (index: number, playTime: number) => boolean;
+  
+  // Station operations (by value)
+  editStationByValue: (oldUrl: string, newName: string, newUrl: string) => boolean;
+  removeStationByValue: (url: string) => boolean;
+  
+  // Station queries
   getUserStations: () => Track[];
-  checkIfStationExists: (url: string) => { exists: boolean, isUserStation: boolean };
-  editStationByValue: (station: Track, data: { url: string; name: string; language?: string }) => void;
-  removeStationByValue: (station: Track) => void;
-  debugState?: () => { 
+  getTopStations: () => Track[];
+  checkIfStationExists: (url: string) => Promise<{ exists: boolean; isUserStation: boolean; }>; // Fixed: Made async
+  
+  // Debug functions
+  logCurrentState: () => void;
+  getDebugInfo: () => {
     tracksCount: number;
+    currentTrack: Track | null;
+    isPlaying: boolean;
     isInitialized: boolean;
-    localStorageWorking: boolean;
+    needsSaving: boolean;
     stateVersion: number;
   };
 }
