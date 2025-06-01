@@ -11,21 +11,21 @@ export interface TrackStateResult {
   setCurrentIndex: (index: number) => void;
   setIsPlaying: (playing: boolean) => void;
   
-  // Track operations
-  addStation: (url: string, name?: string) => Promise<boolean>;
-  removeTrackByIndex: (index: number) => boolean;
-  editTrackInfo: (index: number, newName: string, newUrl: string) => boolean;
-  toggleTrackFavorite: (index: number) => boolean;
-  updateTrackPlayTime: (index: number, playTime: number) => boolean;
+  // Track operations (matching actual implementation)
+  addUrl: (url: string, name?: string, isPrebuilt?: boolean, isFavorite?: boolean, language?: string) => { success: boolean, message: string };
+  removeUrl: (index: number) => void;
+  toggleFavorite: (index: number) => void;
+  editTrack: (index: number, data: { url: string; name: string; language?: string }) => void;
+  updatePlayTime: (index: number, seconds: number) => void;
   
-  // Station operations (by value)
-  editStationByValue: (oldUrl: string, newName: string, newUrl: string) => boolean;
-  removeStationByValue: (url: string) => boolean;
+  // Station operations (by value) - matching actual implementation
+  editStationByValue: (station: Track, data: { url: string; name: string; language?: string }) => void;
+  removeStationByValue: (station: Track) => void;
   
   // Station queries
   getUserStations: () => Track[];
   getTopStations: () => Track[];
-  checkIfStationExists: (url: string) => Promise<{ exists: boolean; isUserStation: boolean; }>; // Fixed: Made async
+  checkIfStationExists: (url: string) => Promise<{ exists: boolean; isUserStation: boolean; }>;
   
   // Debug functions
   logCurrentState: () => void;
