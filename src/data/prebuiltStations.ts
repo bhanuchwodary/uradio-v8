@@ -81,11 +81,6 @@ export const prebuiltStations = [
     language: "Telugu"
   },
   {
-    name: "MyInd Radio",
-    url: "https://radioindia.net/radio/myndmedia/icecast.audio",
-    language: "Telugu"
-  },
-  {
     name: "Melody Radio",
     url: "https://a1.asurahosting.com:9580/radio.mp3",
     language: "Telugu"
@@ -119,5 +114,10 @@ export const prebuiltStations = [
     name: "Channel4 FM",
     url: "https://streams.radio.co/sce558c2e6/listen",
     language: "English"
+  },
+  {
+    name: "Rainbow Vijayawada",
+    url: "https://air.pc.cdn.bitgravity.com/air/live/pbaudio174/playlist.m3u8",
+    language: "Telugu"
   }
 ];
