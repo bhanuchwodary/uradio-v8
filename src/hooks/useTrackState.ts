@@ -44,22 +44,35 @@ export const useTrackState = (): TrackStateResult => {
     stateVersion
   );
 
-  // Return the public interface with properties that match TrackStateResult interface exactly
+  // Return the public interface matching TrackStateResult interface exactly
   return {
     tracks,
     currentIndex,
     isPlaying,
     setCurrentIndex,
     setIsPlaying,
-    ...operations,
-    // Map management functions to match TrackStateResult interface
-    getUserStations: management.getMyStations,
-    getTopStations: management.getPopularStations,
-    // Map stationExists to checkIfStationExists as required by TrackStateResult
-    checkIfStationExists: management.stationExists,
-    // Include other operations from operations interface
+    // Map operations to match interface
+    addUrl: operations.addUrl,
+    removeUrl: operations.removeUrl,
+    toggleFavorite: operations.toggleFavorite,
+    editTrack: operations.editTrack,
+    updatePlayTime: operations.updatePlayTime,
     editStationByValue: operations.editStationByValue,
     removeStationByValue: operations.removeStationByValue,
-    ...debug
+    // Map management functions to match interface
+    getUserStations: management.getMyStations,
+    getTopStations: management.getPopularStations,
+    checkIfStationExists: management.stationExists,
+    // Map debug functions correctly
+    debugState: debug.debugState,
+    logCurrentState: debug.debugState, // Use debugState as logCurrentState
+    getDebugInfo: () => ({
+      tracksCount: tracks.length,
+      currentTrack: currentIndex >= 0 && currentIndex < tracks.length ? tracks[currentIndex] : null,
+      isPlaying,
+      isInitialized,
+      needsSaving: needsSaving.current,
+      stateVersion: stateVersion.current
+    })
   };
 };

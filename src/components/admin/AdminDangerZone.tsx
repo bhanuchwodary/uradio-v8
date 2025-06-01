@@ -16,7 +16,8 @@ const AdminDangerZone: React.FC<AdminDangerZoneProps> = ({ isMobile }) => {
   const handleResetToDefault = () => {
     setIsResetting(true);
     setTimeout(() => {
-      if (resetPrebuiltStations(true)) {
+      const adminPassword = 'J@b1tw$tr3@w'; // In production, get this securely
+      if (resetPrebuiltStations(adminPassword, true)) {
         toast({
           title: "Reset complete",
           description: "Prebuilt stations have been reset to default values"

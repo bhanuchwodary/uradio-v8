@@ -42,21 +42,75 @@ export const adminManageStations = async (
   adminPassword: string
 ) => {
   try {
+    console.log('=== Admin manage stations called ===');
+    console.log('Action:', action);
+    console.log('Data:', JSON.stringify(data, null, 2));
+    
+    // Prepare the request body based on action
+    let requestBody: any = { action };
+    
+    switch (action) {
+      case 'add':
+        requestBody = {
+          action: 'add',
+          name: data.name || '',
+          url: data.url || '',
+          language: data.language || 'Unknown'
+        };
+        break;
+      case 'update':
+        requestBody = {
+          action: 'update',
+          id: data.id || '',
+          name: data.name || '',
+          url: data.url || '',
+          language: data.language || 'Unknown'
+        };
+        break;
+      case 'delete':
+        requestBody = {
+          action: 'delete',
+          id: data.id || ''
+        };
+        break;
+      case 'bulk-update':
+        requestBody = {
+          action: 'bulk-update',
+          stations: data.stations || []
+        };
+        break;
+      default:
+        throw new Error(`Invalid action: ${action}`);
+    }
+    
+    console.log('Request body to send:', JSON.stringify(requestBody, null, 2));
+    
+    // Use the supabase.functions.invoke method with proper body serialization
     const { data: result, error } = await supabase.functions.invoke('admin-stations', {
-      body: { action, ...data },
+      body: JSON.stringify(requestBody),
       headers: {
-        'x-admin-password': adminPassword
+        'x-admin-password': adminPassword,
+        'Content-Type': 'application/json'
       }
     });
 
+    console.log('Function response:', { result, error });
+
     if (error) {
-      console.error('Error in admin manage stations:', error);
-      throw new Error(error.message || 'Failed to manage stations');
+      console.error('Supabase function error:', error);
+      throw new Error(`Function error: ${error.message || 'Unknown error'}`);
     }
 
+    // Check if the result contains an error
+    if (result && result.error) {
+      console.error('Function returned error:', result.error);
+      throw new Error(result.error);
+    }
+
+    console.log('Admin stations function successful result:', result);
     return result;
   } catch (error) {
-    console.error('Error calling admin-stations function:', error);
+    console.error('Error in adminManageStations:', error);
     throw error;
   }
 };

@@ -1,6 +1,6 @@
 
 import { Track } from "@/types/track";
-import { prebuiltStations } from "@/data/prebuiltStations";
+import { fetchPrebuiltStations } from "@/services/prebuiltStationsService";
 
 export const getUserStations = (tracks: Track[]): Track[] => {
   return tracks.filter(track => !track.isPrebuilt);
@@ -12,9 +12,8 @@ export const getTopStations = (tracks: Track[]): Track[] => {
     .slice(0, 5);
 };
 
-export const checkIfStationExists = (url: string, tracks: Track[]): { exists: boolean, isUserStation: boolean } => {
-  // CRITICAL FIX: Ensure case-insensitive comparison
-  // Check in user tracks
+export const checkIfStationExists = async (url: string, tracks: Track[]): Promise<{ exists: boolean, isUserStation: boolean }> => {
+  // Check in user tracks first
   const existsInUserTracks = tracks.some(track => 
     track.url.toLowerCase() === url.toLowerCase() && !track.isPrebuilt
   );
@@ -23,10 +22,16 @@ export const checkIfStationExists = (url: string, tracks: Track[]): { exists: bo
     return { exists: true, isUserStation: true };
   }
   
-  // Check in prebuilt stations
-  const existsInPrebuilt = prebuiltStations.some(
-    station => station.url.toLowerCase() === url.toLowerCase()
-  );
-  
-  return { exists: existsInPrebuilt, isUserStation: false };
+  // Check in prebuilt stations from database
+  try {
+    const prebuiltStations = await fetchPrebuiltStations();
+    const existsInPrebuilt = prebuiltStations.some(
+      station => station.url.toLowerCase() === url.toLowerCase()
+    );
+    
+    return { exists: existsInPrebuilt, isUserStation: false };
+  } catch (error) {
+    console.error("Error checking prebuilt stations:", error);
+    return { exists: false, isUserStation: false };
+  }
 };
