@@ -27,8 +27,7 @@ export const savePrebuiltStations = async (
   try {
     console.log("Saving custom prebuilt stations to database:", stations.length);
     
-    const result = await adminManageStations('bulk-update', { stations }, adminPassword);
-    console.log("Bulk update result:", result);
+    await adminManageStations('bulk-update', { stations }, adminPassword);
     
     console.log("Saved custom prebuilt stations to database:", stations.length);
     
@@ -48,7 +47,7 @@ export const savePrebuiltStations = async (
 };
 
 /**
- * Reset prebuilt stations to default
+ * Reset prebuilt stations to default (this would restore the original database entries)
  */
 export const resetPrebuiltStations = async (
   adminPassword: string,
@@ -57,9 +56,8 @@ export const resetPrebuiltStations = async (
   try {
     console.log("Resetting prebuilt stations to default");
     
-    // For now, we'll implement a basic reset by reloading the default stations
-    // In a full implementation, you might want to store the original stations
-    // and restore them, or have a separate reset endpoint
+    // For reset, we could implement a restore-defaults endpoint
+    // For now, we'll just redirect and let the admin manually manage
     
     // Clear admin authentication state
     sessionStorage.removeItem("admin_authenticated");

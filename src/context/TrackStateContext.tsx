@@ -47,7 +47,7 @@ export const TrackStateProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     trackState.currentIndex,
     trackState.isPlaying,
     // Only add other dependencies that should trigger context updates
-    trackState.getDebugInfo
+    trackState.debugState
   ]);
   
   return (
