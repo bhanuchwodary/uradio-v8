@@ -16,16 +16,20 @@ interface Station {
 }
 
 serve(async (req) => {
+  console.log('=== Admin stations function called ===');
+  console.log('Method:', req.method);
+  console.log('URL:', req.url);
+  console.log('Headers:', Object.fromEntries(req.headers));
+
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
+    console.log('Handling CORS preflight request');
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    console.log('Admin stations function called:', req.method, req.url);
-    
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
     
     if (!supabaseUrl || !supabaseServiceKey) {
       console.error('Missing Supabase environment variables');
@@ -73,19 +77,29 @@ serve(async (req) => {
     if (req.method === 'POST') {
       let body;
       try {
-        const requestText = await req.text();
-        console.log('Raw request body received:', requestText);
+        const contentType = req.headers.get('content-type');
+        console.log('Content-Type:', contentType);
         
-        if (!requestText || requestText.trim() === '') {
-          console.error('Empty request body received');
-          return new Response(JSON.stringify({ error: 'Request body is required' }), {
+        if (contentType?.includes('application/json')) {
+          const requestText = await req.text();
+          console.log('Raw request body:', requestText);
+          
+          if (!requestText || requestText.trim() === '') {
+            console.error('Empty request body received');
+            return new Response(JSON.stringify({ error: 'Request body is required' }), {
+              status: 400,
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            });
+          }
+          
+          body = JSON.parse(requestText);
+        } else {
+          console.error('Invalid content type. Expected application/json');
+          return new Response(JSON.stringify({ error: 'Content-Type must be application/json' }), {
             status: 400,
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           });
         }
-        
-        body = JSON.parse(requestText);
-        console.log('Parsed request body:', body);
       } catch (parseError) {
         console.error('Error parsing request body:', parseError);
         return new Response(JSON.stringify({ error: 'Invalid JSON in request body' }), {
@@ -94,7 +108,9 @@ serve(async (req) => {
         });
       }
 
-      if (!body.action) {
+      console.log('Parsed request body:', body);
+
+      if (!body || !body.action) {
         console.error('No action specified in request body');
         return new Response(JSON.stringify({ error: 'Action is required' }), {
           status: 400,
@@ -105,7 +121,7 @@ serve(async (req) => {
       console.log('Processing action:', body.action);
 
       if (body.action === 'add') {
-        const { name, url, language } = body as Station;
+        const { name, url, language } = body;
         console.log('Adding station:', { name, url, language });
         
         if (!name || !url) {
@@ -143,7 +159,7 @@ serve(async (req) => {
       }
 
       if (body.action === 'update') {
-        const { id, name, url, language } = body as Station;
+        const { id, name, url, language } = body;
         console.log('Updating station:', { id, name, url, language });
         
         if (!id || !name || !url) {
@@ -264,12 +280,14 @@ serve(async (req) => {
         });
       }
 
+      console.error('Invalid action specified:', body.action);
       return new Response(JSON.stringify({ error: 'Invalid action specified' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
+    console.error('Method not allowed:', req.method);
     return new Response(JSON.stringify({ error: 'Method not allowed' }), {
       status: 405,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

@@ -45,15 +45,45 @@ export const adminManageStations = async (
     console.log('Calling admin-stations function with action:', action);
     console.log('Data to send:', data);
     
-    const requestPayload = {
-      action,
-      ...data
-    };
+    // Prepare the request body based on action
+    let requestBody: any = { action };
     
-    console.log('Complete request payload:', requestPayload);
+    switch (action) {
+      case 'add':
+        requestBody = {
+          action: 'add',
+          name: data.name,
+          url: data.url,
+          language: data.language || 'Unknown'
+        };
+        break;
+      case 'update':
+        requestBody = {
+          action: 'update',
+          id: data.id,
+          name: data.name,
+          url: data.url,
+          language: data.language || 'Unknown'
+        };
+        break;
+      case 'delete':
+        requestBody = {
+          action: 'delete',
+          id: data.id
+        };
+        break;
+      case 'bulk-update':
+        requestBody = {
+          action: 'bulk-update',
+          stations: data.stations
+        };
+        break;
+    }
+    
+    console.log('Final request body:', requestBody);
     
     const { data: result, error } = await supabase.functions.invoke('admin-stations', {
-      body: requestPayload,
+      body: requestBody,
       headers: {
         'x-admin-password': adminPassword,
         'Content-Type': 'application/json'
