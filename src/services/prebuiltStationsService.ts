@@ -42,8 +42,9 @@ export const adminManageStations = async (
   adminPassword: string
 ) => {
   try {
-    console.log('Calling admin-stations function with action:', action);
-    console.log('Data to send:', JSON.stringify(data, null, 2));
+    console.log('=== Admin manage stations called ===');
+    console.log('Action:', action);
+    console.log('Data:', JSON.stringify(data, null, 2));
     
     // Prepare the request body based on action
     let requestBody: any = { action };
@@ -52,48 +53,51 @@ export const adminManageStations = async (
       case 'add':
         requestBody = {
           action: 'add',
-          name: data.name,
-          url: data.url,
+          name: data.name || '',
+          url: data.url || '',
           language: data.language || 'Unknown'
         };
         break;
       case 'update':
         requestBody = {
           action: 'update',
-          id: data.id,
-          name: data.name,
-          url: data.url,
+          id: data.id || '',
+          name: data.name || '',
+          url: data.url || '',
           language: data.language || 'Unknown'
         };
         break;
       case 'delete':
         requestBody = {
           action: 'delete',
-          id: data.id
+          id: data.id || ''
         };
         break;
       case 'bulk-update':
         requestBody = {
           action: 'bulk-update',
-          stations: data.stations
+          stations: data.stations || []
         };
         break;
+      default:
+        throw new Error(`Invalid action: ${action}`);
     }
     
-    console.log('Final request body:', JSON.stringify(requestBody, null, 2));
+    console.log('Request body to send:', JSON.stringify(requestBody, null, 2));
     
+    // Use the supabase.functions.invoke method with proper body serialization
     const { data: result, error } = await supabase.functions.invoke('admin-stations', {
-      body: requestBody,
+      body: JSON.stringify(requestBody),
       headers: {
         'x-admin-password': adminPassword,
         'Content-Type': 'application/json'
       }
     });
 
-    console.log('Supabase function response:', { result, error });
+    console.log('Function response:', { result, error });
 
     if (error) {
-      console.error('Supabase function error details:', error);
+      console.error('Supabase function error:', error);
       throw new Error(`Function error: ${error.message || 'Unknown error'}`);
     }
 

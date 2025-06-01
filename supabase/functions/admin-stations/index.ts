@@ -19,6 +19,7 @@ serve(async (req) => {
   console.log('=== Admin stations function called ===');
   console.log('Method:', req.method);
   console.log('URL:', req.url);
+  console.log('Headers:', Object.fromEntries(req.headers.entries()));
 
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -42,7 +43,7 @@ serve(async (req) => {
 
     // Authentication check
     const adminPassword = req.headers.get('x-admin-password');
-    console.log('Admin password received:', !!adminPassword);
+    console.log('Admin password provided:', !!adminPassword);
     
     if (!adminPassword || adminPassword !== 'J@b1tw$tr3@w') {
       console.log('Unauthorized access attempt');
@@ -53,7 +54,7 @@ serve(async (req) => {
     }
 
     if (req.method === 'GET') {
-      console.log('Fetching all stations');
+      console.log('GET request - Fetching all stations');
       const { data: stations, error } = await supabase
         .from('prebuilt_stations')
         .select('*')
@@ -68,29 +69,40 @@ serve(async (req) => {
         });
       }
 
-      return new Response(JSON.stringify({ stations }), {
+      console.log('Successfully fetched stations:', stations?.length || 0);
+      return new Response(JSON.stringify({ stations: stations || [] }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
     if (req.method === 'POST') {
-      let body;
+      let requestBody: string;
       try {
-        const requestText = await req.text();
-        console.log('Raw request body received:', requestText);
-        
-        if (!requestText || requestText.trim() === '') {
-          console.error('Empty request body received');
-          return new Response(JSON.stringify({ error: 'Request body is required' }), {
-            status: 400,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          });
-        }
-        
-        body = JSON.parse(requestText);
+        requestBody = await req.text();
+        console.log('Raw request body length:', requestBody.length);
+        console.log('Raw request body:', requestBody);
+      } catch (error) {
+        console.error('Error reading request body:', error);
+        return new Response(JSON.stringify({ error: 'Failed to read request body' }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      if (!requestBody || requestBody.trim() === '') {
+        console.error('Empty request body received');
+        return new Response(JSON.stringify({ error: 'Request body is required' }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      let body: any;
+      try {
+        body = JSON.parse(requestBody);
         console.log('Parsed request body:', JSON.stringify(body, null, 2));
       } catch (parseError) {
-        console.error('Error parsing request body:', parseError);
+        console.error('Error parsing JSON:', parseError);
         return new Response(JSON.stringify({ error: 'Invalid JSON in request body' }), {
           status: 400,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -124,7 +136,7 @@ serve(async (req) => {
             .insert({ 
               name: name.trim(), 
               url: url.trim(), 
-              language: language?.trim() || 'Unknown' 
+              language: (language || 'Unknown').trim()
             })
             .select()
             .single();
@@ -161,7 +173,7 @@ serve(async (req) => {
             .update({ 
               name: name.trim(), 
               url: url.trim(), 
-              language: language?.trim() || 'Unknown', 
+              language: (language || 'Unknown').trim(),
               updated_at: new Date().toISOString() 
             })
             .eq('id', id)
@@ -241,28 +253,35 @@ serve(async (req) => {
           }
 
           // Insert new stations
-          console.log('Inserting new stations');
-          const { data, error: insertError } = await supabase
-            .from('prebuilt_stations')
-            .insert(stations.map((station: Station) => ({
-              name: station.name?.trim() || '',
-              url: station.url?.trim() || '',
-              language: station.language?.trim() || 'Unknown'
-            })))
-            .select();
+          if (stations.length > 0) {
+            console.log('Inserting new stations');
+            const { data, error: insertError } = await supabase
+              .from('prebuilt_stations')
+              .insert(stations.map((station: Station) => ({
+                name: (station.name || '').trim(),
+                url: (station.url || '').trim(),
+                language: (station.language || 'Unknown').trim()
+              })))
+              .select();
 
-          if (insertError) {
-            console.error('Error inserting new stations:', insertError);
-            return new Response(JSON.stringify({ error: 'Failed to insert new stations' }), {
-              status: 500,
+            if (insertError) {
+              console.error('Error inserting new stations:', insertError);
+              return new Response(JSON.stringify({ error: 'Failed to insert new stations' }), {
+                status: 500,
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+              });
+            }
+
+            console.log('Bulk update successful, inserted:', data?.length);
+            return new Response(JSON.stringify({ stations: data || [], success: true }), {
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            });
+          } else {
+            console.log('Bulk update successful, no stations to insert');
+            return new Response(JSON.stringify({ stations: [], success: true }), {
               headers: { ...corsHeaders, 'Content-Type': 'application/json' },
             });
           }
-
-          console.log('Bulk update successful, inserted:', data?.length);
-          return new Response(JSON.stringify({ stations: data, success: true }), {
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          });
         }
 
         default:
@@ -284,7 +303,7 @@ serve(async (req) => {
     console.error('Unexpected error in admin-stations function:', error);
     return new Response(JSON.stringify({ 
       error: 'Internal server error',
-      details: error.message 
+      details: error instanceof Error ? error.message : 'Unknown error'
     }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

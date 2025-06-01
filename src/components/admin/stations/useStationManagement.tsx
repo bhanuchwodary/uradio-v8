@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Track } from "@/types/track";
 import { fetchPrebuiltStations, adminManageStations } from "@/services/prebuiltStationsService";
@@ -27,8 +28,9 @@ export const useStationManagement = ({ checkIfStationExists }: UseStationManagem
     const loadStations = async () => {
       try {
         setLoading(true);
+        console.log('Loading stations for admin manager...');
         const currentStations = await fetchPrebuiltStations();
-        console.log("Loading stations for admin manager:", currentStations.length);
+        console.log('Loaded stations:', currentStations.length);
         
         const trackStations = currentStations.map(station => ({
           ...station,
@@ -103,6 +105,7 @@ export const useStationManagement = ({ checkIfStationExists }: UseStationManagem
           return;
         }
         
+        console.log('Calling delete with ID:', stationToDelete.station.id);
         const result = await adminManageStations('delete', { id: stationToDelete.station.id }, adminPassword);
         console.log("Delete result:", result);
         
@@ -171,7 +174,7 @@ export const useStationManagement = ({ checkIfStationExists }: UseStationManagem
           return;
         }
 
-        console.log("Adding new station with clean data:", cleanData);
+        console.log("Adding new station with data:", cleanData);
         const result = await adminManageStations('add', cleanData, adminPassword);
         console.log("Add result:", result);
 
@@ -223,7 +226,7 @@ export const useStationManagement = ({ checkIfStationExists }: UseStationManagem
           ...cleanData
         };
 
-        console.log("Updating station with clean data:", updateData);
+        console.log("Updating station with data:", updateData);
         const result = await adminManageStations('update', updateData, adminPassword);
         console.log("Update result:", result);
 
