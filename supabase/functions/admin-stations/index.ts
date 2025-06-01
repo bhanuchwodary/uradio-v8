@@ -5,6 +5,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-admin-password',
+  'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
 };
 
 interface Station {
@@ -36,9 +37,9 @@ serve(async (req) => {
     
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Simple authentication check
+    // Authentication check
     const adminPassword = req.headers.get('x-admin-password');
-    console.log('Admin password provided:', !!adminPassword);
+    console.log('Admin password received:', !!adminPassword);
     
     if (!adminPassword || adminPassword !== 'J@b1tw$tr3@w') {
       console.log('Unauthorized access attempt');
@@ -73,18 +74,18 @@ serve(async (req) => {
       let body;
       try {
         const requestText = await req.text();
-        console.log('Raw request body:', requestText);
+        console.log('Raw request body received:', requestText);
         
         if (!requestText || requestText.trim() === '') {
           console.error('Empty request body received');
-          return new Response(JSON.stringify({ error: 'Empty request body' }), {
+          return new Response(JSON.stringify({ error: 'Request body is required' }), {
             status: 400,
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           });
         }
         
         body = JSON.parse(requestText);
-        console.log('Parsed request body:', JSON.stringify(body));
+        console.log('Parsed request body:', body);
       } catch (parseError) {
         console.error('Error parsing request body:', parseError);
         return new Response(JSON.stringify({ error: 'Invalid JSON in request body' }), {
@@ -94,16 +95,18 @@ serve(async (req) => {
       }
 
       if (!body.action) {
-        console.error('No action specified in request');
-        return new Response(JSON.stringify({ error: 'No action specified' }), {
+        console.error('No action specified in request body');
+        return new Response(JSON.stringify({ error: 'Action is required' }), {
           status: 400,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       }
 
+      console.log('Processing action:', body.action);
+
       if (body.action === 'add') {
-        console.log('Adding new station:', body.name);
         const { name, url, language } = body as Station;
+        console.log('Adding station:', { name, url, language });
         
         if (!name || !url) {
           console.error('Missing required fields for add operation');
@@ -115,13 +118,19 @@ serve(async (req) => {
         
         const { data, error } = await supabase
           .from('prebuilt_stations')
-          .insert({ name, url, language: language || 'Unknown' })
+          .insert({ 
+            name: name.trim(), 
+            url: url.trim(), 
+            language: language?.trim() || 'Unknown' 
+          })
           .select()
           .single();
 
         if (error) {
-          console.error('Error adding station:', error);
-          return new Response(JSON.stringify({ error: 'Failed to add station. URL may already exist.' }), {
+          console.error('Database error adding station:', error);
+          return new Response(JSON.stringify({ 
+            error: error.code === '23505' ? 'Station URL already exists' : 'Failed to add station'
+          }), {
             status: 400,
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           });
@@ -134,8 +143,8 @@ serve(async (req) => {
       }
 
       if (body.action === 'update') {
-        console.log('Updating station:', body.id);
         const { id, name, url, language } = body as Station;
+        console.log('Updating station:', { id, name, url, language });
         
         if (!id || !name || !url) {
           console.error('Missing required fields for update operation');
@@ -147,14 +156,21 @@ serve(async (req) => {
         
         const { data, error } = await supabase
           .from('prebuilt_stations')
-          .update({ name, url, language: language || 'Unknown', updated_at: new Date().toISOString() })
+          .update({ 
+            name: name.trim(), 
+            url: url.trim(), 
+            language: language?.trim() || 'Unknown', 
+            updated_at: new Date().toISOString() 
+          })
           .eq('id', id)
           .select()
           .single();
 
         if (error) {
-          console.error('Error updating station:', error);
-          return new Response(JSON.stringify({ error: 'Failed to update station' }), {
+          console.error('Database error updating station:', error);
+          return new Response(JSON.stringify({ 
+            error: error.code === '23505' ? 'Station URL already exists' : 'Failed to update station'
+          }), {
             status: 400,
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           });
@@ -167,8 +183,8 @@ serve(async (req) => {
       }
 
       if (body.action === 'delete') {
-        console.log('Deleting station:', body.id);
         const { id } = body;
+        console.log('Deleting station with ID:', id);
         
         if (!id) {
           console.error('Missing ID for delete operation');
@@ -184,9 +200,9 @@ serve(async (req) => {
           .eq('id', id);
 
         if (error) {
-          console.error('Error deleting station:', error);
+          console.error('Database error deleting station:', error);
           return new Response(JSON.stringify({ error: 'Failed to delete station' }), {
-            status: 400,
+            status: 500,
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           });
         }
@@ -198,45 +214,45 @@ serve(async (req) => {
       }
 
       if (body.action === 'bulk-update') {
-        console.log('Bulk updating stations, count:', body.stations?.length);
         const { stations } = body;
+        console.log('Bulk updating stations, count:', stations?.length);
         
         if (!Array.isArray(stations)) {
-          return new Response(JSON.stringify({ error: 'Invalid stations data' }), {
+          return new Response(JSON.stringify({ error: 'Stations array is required' }), {
             status: 400,
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           });
         }
 
-        // Delete all existing stations and insert new ones
+        // Delete all existing stations
         console.log('Deleting existing stations');
         const { error: deleteError } = await supabase
           .from('prebuilt_stations')
           .delete()
-          .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all
+          .neq('id', '00000000-0000-0000-0000-000000000000');
 
         if (deleteError) {
-          console.error('Error deleting stations:', deleteError);
+          console.error('Error deleting existing stations:', deleteError);
           return new Response(JSON.stringify({ error: 'Failed to clear existing stations' }), {
             status: 500,
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           });
         }
 
-        console.log('Inserting new stations');
         // Insert new stations
+        console.log('Inserting new stations');
         const { data, error: insertError } = await supabase
           .from('prebuilt_stations')
           .insert(stations.map((station: Station) => ({
-            name: station.name,
-            url: station.url,
-            language: station.language || 'Unknown'
+            name: station.name?.trim() || '',
+            url: station.url?.trim() || '',
+            language: station.language?.trim() || 'Unknown'
           })))
           .select();
 
         if (insertError) {
-          console.error('Error inserting stations:', insertError);
-          return new Response(JSON.stringify({ error: 'Failed to update stations' }), {
+          console.error('Error inserting new stations:', insertError);
+          return new Response(JSON.stringify({ error: 'Failed to insert new stations' }), {
             status: 500,
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           });
@@ -248,7 +264,7 @@ serve(async (req) => {
         });
       }
 
-      return new Response(JSON.stringify({ error: 'Invalid action' }), {
+      return new Response(JSON.stringify({ error: 'Invalid action specified' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -260,7 +276,7 @@ serve(async (req) => {
     });
 
   } catch (error) {
-    console.error('Error in admin-stations function:', error);
+    console.error('Unexpected error in admin-stations function:', error);
     return new Response(JSON.stringify({ 
       error: 'Internal server error',
       details: error.message 

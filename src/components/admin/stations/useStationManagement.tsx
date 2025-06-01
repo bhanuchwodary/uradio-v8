@@ -19,7 +19,6 @@ export const useStationManagement = ({ checkIfStationExists }: UseStationManagem
   const { toast } = useToast();
   const isMobile = useIsMobile();
 
-  // Determine grid columns based on screen size
   const gridCols = isMobile 
     ? "grid-cols-1" 
     : "grid-cols-1 md:grid-cols-2 lg:grid-cols-3";
@@ -32,7 +31,6 @@ export const useStationManagement = ({ checkIfStationExists }: UseStationManagem
         const currentStations = await fetchPrebuiltStations();
         console.log("Loading stations for admin manager:", currentStations.length);
         
-        // Convert to Track objects
         const trackStations = currentStations.map(station => ({
           ...station,
           isFavorite: false,
@@ -142,18 +140,25 @@ export const useStationManagement = ({ checkIfStationExists }: UseStationManagem
         return;
       }
 
-      // Check if this is a new station or editing an existing one
+      // Clean the data
+      const cleanData = {
+        url: data.url.trim(),
+        name: data.name.trim(),
+        language: data.language?.trim() || "English"
+      };
+
+      const adminPassword = 'J@b1tw$tr3@w';
+
       if (editingStation.index === -1) {
-        // For new stations, check if URL already exists
-        const { exists, isUserStation } = await checkIfStationExists(data.url);
+        // Adding new station
+        const { exists, isUserStation } = await checkIfStationExists(cleanData.url);
         if (exists) {
           setEditError(`This URL already exists ${isUserStation ? 'in your stations' : 'in another prebuilt station'}`);
           return;
         }
         
-        // Also check if URL exists in current prebuilt stations being edited
         const urlExists = stations.some(station => 
-          station.url.toLowerCase() === data.url.toLowerCase()
+          station.url.toLowerCase() === cleanData.url.toLowerCase()
         );
         
         if (urlExists) {
@@ -161,13 +166,8 @@ export const useStationManagement = ({ checkIfStationExists }: UseStationManagem
           return;
         }
 
-        // Add new station via API
-        const adminPassword = 'J@b1tw$tr3@w';
-        const result = await adminManageStations('add', {
-          name: data.name,
-          url: data.url,
-          language: data.language || "English"
-        }, adminPassword);
+        console.log("Adding new station with clean data:", cleanData);
+        const result = await adminManageStations('add', cleanData, adminPassword);
 
         if (!result || !result.station) {
           throw new Error("Failed to create station - no data returned");
@@ -184,22 +184,20 @@ export const useStationManagement = ({ checkIfStationExists }: UseStationManagem
         
         toast({
           title: "Station added",
-          description: `${data.name} has been added to prebuilt stations`
+          description: `${cleanData.name} has been added to prebuilt stations`
         });
       } else {
         // Editing existing station
         const currentUrl = stations[editingStation.index].url;
-        if (currentUrl.toLowerCase() !== data.url.toLowerCase()) {
-          // URL is being changed, check if new URL exists
-          const { exists, isUserStation } = await checkIfStationExists(data.url);
+        if (currentUrl.toLowerCase() !== cleanData.url.toLowerCase()) {
+          const { exists, isUserStation } = await checkIfStationExists(cleanData.url);
           if (exists) {
             setEditError(`This URL already exists ${isUserStation ? 'in your stations' : 'in another prebuilt station'}`);
             return;
           }
           
-          // Check within current stations list (excluding the one being edited)
           const urlExists = stations.some((station, idx) => 
-            idx !== editingStation.index && station.url.toLowerCase() === data.url.toLowerCase()
+            idx !== editingStation.index && station.url.toLowerCase() === cleanData.url.toLowerCase()
           );
           
           if (urlExists) {
@@ -208,20 +206,19 @@ export const useStationManagement = ({ checkIfStationExists }: UseStationManagem
           }
         }
 
-        // Update existing station via API
-        const adminPassword = 'J@b1tw$tr3@w';
         const stationToUpdate = stations[editingStation.index];
         
         if (!stationToUpdate.id) {
           throw new Error("Cannot update station - no ID found");
         }
 
-        const result = await adminManageStations('update', {
+        const updateData = {
           id: stationToUpdate.id,
-          name: data.name,
-          url: data.url,
-          language: data.language || "English"
-        }, adminPassword);
+          ...cleanData
+        };
+
+        console.log("Updating station with clean data:", updateData);
+        const result = await adminManageStations('update', updateData, adminPassword);
 
         if (!result || !result.station) {
           throw new Error("Failed to update station - no data returned");
@@ -238,7 +235,7 @@ export const useStationManagement = ({ checkIfStationExists }: UseStationManagem
         
         toast({
           title: "Station updated",
-          description: `${data.name} has been updated`
+          description: `${cleanData.name} has been updated`
         });
       }
       
@@ -266,28 +263,24 @@ export const useStationManagement = ({ checkIfStationExists }: UseStationManagem
       return;
     }
 
-    // Filter out stations that already exist
     const newStations = [...stations];
     let addedCount = 0;
     let skippedCount = 0;
 
     for (const station of importedStations) {
-      // Check if URL already exists in current stations
       const urlExists = stations.some(
         existingStation => existingStation.url.toLowerCase() === station.url.toLowerCase()
       );
 
-      // Check if URL exists in user stations
-      const { exists, isUserStation } = await checkIfStationExists(station.url);
+      const { exists } = await checkIfStationExists(station.url);
 
       if (!urlExists && !exists) {
         try {
-          // Add via API
           const adminPassword = 'J@b1tw$tr3@w';
           const result = await adminManageStations('add', {
-            name: station.name,
-            url: station.url,
-            language: station.language || "Unknown"
+            name: station.name.trim(),
+            url: station.url.trim(),
+            language: station.language?.trim() || "Unknown"
           }, adminPassword);
 
           if (result && result.station) {
@@ -327,7 +320,6 @@ export const useStationManagement = ({ checkIfStationExists }: UseStationManagem
   };
 
   const prepareStationsForSave = () => {
-    // Return the stations in the format expected by the bulk update
     console.log("Preparing stations for bulk save");
     return stations.map(station => ({
       name: station.name,
