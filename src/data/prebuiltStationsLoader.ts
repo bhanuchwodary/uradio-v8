@@ -1,18 +1,13 @@
 
-import { fetchPrebuiltStations } from "@/services/prebuiltStationsService";
+import { getPrebuiltStations } from "@/utils/prebuiltStationsManager";
 
 /**
- * Get the current stations list from Supabase database
+ * Get the current stations list - either from the prebuilt stations manager
+ * (which checks localStorage first) or from the default prebuilt list.
  */
-export const getStations = async () => {
-  console.log("Loading prebuilt stations from Supabase");
-  try {
-    const stations = await fetchPrebuiltStations();
-    console.log(`Loaded ${stations.length} stations from database`);
-    return stations;
-  } catch (error) {
-    console.error("Failed to load stations from database:", error);
-    // Return empty array as fallback
-    return [];
-  }
+export const getStations = () => {
+  console.log("Loading prebuilt stations");
+  const stations = getPrebuiltStations();
+  console.log(`Loaded ${stations.length} stations`);
+  return stations;
 };

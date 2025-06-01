@@ -33,7 +33,7 @@ const AddUrlForm: React.FC<AddUrlFormProps> = ({ onAddUrl }) => {
   const [error, setError] = useState<string | null>(null);
   const { checkIfStationExists } = useTrackStateContext();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     
@@ -58,16 +58,11 @@ const AddUrlForm: React.FC<AddUrlFormProps> = ({ onAddUrl }) => {
       return;
     }
     
-    // Check if the station already exists (await the Promise)
-    try {
-      const { exists, isUserStation } = await checkIfStationExists(url);
-      if (exists) {
-        setError(`Station already exists ${isUserStation ? 'in your stations' : 'in prebuilt stations'}`);
-        return;
-      }
-    } catch (error) {
-      console.error('Error checking station existence:', error);
-      // Continue with submission if check fails
+    // Check if the station already exists
+    const { exists, isUserStation } = checkIfStationExists(url);
+    if (exists) {
+      setError(`Station already exists ${isUserStation ? 'in your stations' : 'in prebuilt stations'}`);
+      return;
     }
     
     // Submit form if validation passes

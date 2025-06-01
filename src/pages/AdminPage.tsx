@@ -37,7 +37,7 @@ const AdminPage = () => {
     sessionStorage.setItem("admin_authenticated", "true");
   };
 
-  const handleSaveStations = async (stations: any[], adminPassword: string) => {
+  const handleSaveStations = (stations: any[]) => {
     // Validate stations before saving
     if (!Array.isArray(stations) || stations.length === 0) {
       toast({
@@ -48,18 +48,16 @@ const AdminPage = () => {
       return;
     }
     
-    try {
-      await savePrebuiltStations(stations, adminPassword, true);
+    if (savePrebuiltStations(stations, true)) {
       toast({
         title: "Changes saved",
-        description: "Prebuilt stations have been updated successfully and saved to database"
+        description: "Prebuilt stations have been updated successfully"
       });
       // savePrebuiltStations will handle the redirect
-    } catch (error) {
-      console.error("Failed to save stations:", error);
+    } else {
       toast({
         title: "Error",
-        description: "Failed to save changes to database",
+        description: "Failed to save changes",
         variant: "destructive"
       });
     }
@@ -74,7 +72,7 @@ const AdminPage = () => {
       <div className="container mx-auto max-w-5xl px-4 space-y-6 py-6">
         <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
           <h1 className="text-xl sm:text-2xl font-bold text-foreground flex items-center gap-2">
-            <Shield className="h-5 w-5 sm:h-6 sm:w-6 text-primary" /> Admin Controls (Server-Side)
+            <Shield className="h-5 w-5 sm:h-6 sm:w-6 text-primary" /> Admin Controls
           </h1>
         </div>
 

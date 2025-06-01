@@ -1,77 +1,83 @@
 
-import { fetchPrebuiltStations, adminManageStations } from "@/services/prebuiltStationsService";
+import { prebuiltStations as defaultPrebuiltStations } from "@/data/prebuiltStations";
+
+// Storage key for the prebuilt stations
+const CUSTOM_PREBUILT_STATIONS_KEY = "streamify_custom_prebuilt_stations";
 
 /**
- * Get the current prebuilt stations from Supabase database
+ * Get the current prebuilt stations (from localStorage if available, otherwise from default)
  */
-export const getPrebuiltStations = async (): Promise<any[]> => {
+export const getPrebuiltStations = (): any[] => {
   try {
-    console.log("Fetching prebuilt stations from database");
-    const stations = await fetchPrebuiltStations();
-    console.log("Loaded prebuilt stations from database:", stations.length);
-    return stations;
+    const customStations = localStorage.getItem(CUSTOM_PREBUILT_STATIONS_KEY);
+    if (customStations) {
+      const parsedStations = JSON.parse(customStations);
+      // Validate the data to ensure it's an array
+      if (Array.isArray(parsedStations)) {
+        console.log("Loaded custom prebuilt stations:", parsedStations.length);
+        return parsedStations;
+      } else {
+        console.error("Custom prebuilt stations is not an array");
+        return defaultPrebuiltStations;
+      }
+    }
   } catch (error) {
-    console.error("Failed to load prebuilt stations from database:", error);
-    return [];
+    console.error("Failed to load custom prebuilt stations:", error);
+    // If there's an error, remove the corrupted data
+    localStorage.removeItem(CUSTOM_PREBUILT_STATIONS_KEY);
   }
+  
+  return defaultPrebuiltStations;
 };
 
 /**
- * Save custom prebuilt stations to Supabase database
+ * Save custom prebuilt stations to localStorage and redirect to station list
  */
-export const savePrebuiltStations = async (
-  stations: any[], 
-  adminPassword: string,
-  redirectToStationList: boolean = true
-): Promise<boolean> => {
+export const savePrebuiltStations = (stations: any[], redirectToStationList: boolean = true): boolean => {
   try {
-    console.log("Saving custom prebuilt stations to database:", stations.length);
+    console.log("Saving custom prebuilt stations:", stations.length);
+    // Force reload any cached stations data
+    localStorage.setItem(CUSTOM_PREBUILT_STATIONS_KEY, JSON.stringify(stations));
+    console.log("Saved custom prebuilt stations:", stations.length);
     
-    const result = await adminManageStations('bulk-update', { stations }, adminPassword);
-    console.log("Bulk update result:", result);
-    
-    console.log("Saved custom prebuilt stations to database:", stations.length);
-    
-    // Clear admin authentication state
+    // Clear admin authentication state to ensure fresh authentication next time
     sessionStorage.removeItem("admin_authenticated");
     
     if (redirectToStationList) {
+      // Navigate to the station list page instead of reloading
       window.location.href = "/station-list";
     } else {
+      // Force a page reload to update all components that might be using the stations
       window.location.reload();
     }
     return true;
   } catch (error) {
-    console.error("Failed to save custom prebuilt stations to database:", error);
-    throw error;
+    console.error("Failed to save custom prebuilt stations:", error);
+    return false;
   }
 };
 
 /**
  * Reset prebuilt stations to default
  */
-export const resetPrebuiltStations = async (
-  adminPassword: string,
-  redirectToStationList: boolean = true
-): Promise<boolean> => {
+export const resetPrebuiltStations = (redirectToStationList: boolean = true): boolean => {
   try {
     console.log("Resetting prebuilt stations to default");
+    localStorage.removeItem(CUSTOM_PREBUILT_STATIONS_KEY);
     
-    // For now, we'll implement a basic reset by reloading the default stations
-    // In a full implementation, you might want to store the original stations
-    // and restore them, or have a separate reset endpoint
-    
-    // Clear admin authentication state
+    // Clear admin authentication state to ensure fresh authentication next time
     sessionStorage.removeItem("admin_authenticated");
     
     if (redirectToStationList) {
+      // Navigate to the station list page instead of reloading
       window.location.href = "/station-list";
     } else {
+      // Force a page reload to update all components
       window.location.reload();
     }
     return true;
   } catch (error) {
     console.error("Failed to reset prebuilt stations:", error);
-    throw error;
+    return false;
   }
 };

@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+
+import React, { useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StationGrid } from "@/components/ui/player/StationGrid";
@@ -7,7 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { getStations } from "@/data/prebuiltStationsLoader";
 import { Track } from "@/types/track";
 import EditStationDialog from "@/components/EditStationDialog";
-import { Plus, Shield, Loader2 } from "lucide-react";
+import { Plus, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import AdminPasswordDialog from "@/components/admin/AdminPasswordDialog";
@@ -16,8 +17,6 @@ const StationListPage: React.FC = () => {
   const { toast } = useToast();
   const [editingStation, setEditingStation] = useState<Track | null>(null);
   const [isAdminDialogOpen, setIsAdminDialogOpen] = useState(false);
-  const [prebuiltStations, setPrebuiltStations] = useState<Track[]>([]);
-  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   
   const { 
@@ -33,36 +32,16 @@ const StationListPage: React.FC = () => {
   // Get user stations
   const userStations = getUserStations();
   
-  // Load prebuilt stations from Supabase
-  useEffect(() => {
-    const loadPrebuiltStations = async () => {
-      try {
-        setLoading(true);
-        const stationsList = await getStations();
-        
-        // Create proper track objects from prebuilt stations data
-        const prebuiltStationTracks: Track[] = stationsList.map(station => ({
-          ...station,
-          isFavorite: false,
-          isPrebuilt: true,
-          playTime: 0
-        }));
-        
-        setPrebuiltStations(prebuiltStationTracks);
-      } catch (error) {
-        console.error("Failed to load prebuilt stations:", error);
-        toast({
-          title: "Error",
-          description: "Failed to load prebuilt stations from database",
-          variant: "destructive"
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadPrebuiltStations();
-  }, [toast]);
+  // Get prebuilt stations from loader (which checks for custom stations)
+  const prebuiltStationsList = getStations();
+  
+  // Create proper track objects from prebuilt stations data
+  const prebuiltStationTracks: Track[] = prebuiltStationsList.map(station => ({
+    ...station,
+    isFavorite: false,
+    isPrebuilt: true,
+    playTime: 0
+  }));
   
   // Get current track
   const currentTrack = tracks[currentIndex];
@@ -70,7 +49,7 @@ const StationListPage: React.FC = () => {
   // Group prebuilt stations by language
   const stationsByLanguage: Record<string, Track[]> = {};
   
-  prebuiltStations.forEach(station => {
+  prebuiltStationTracks.forEach(station => {
     const language = station.language || "Unknown";
     if (!stationsByLanguage[language]) {
       stationsByLanguage[language] = [];
@@ -176,34 +155,24 @@ const StationListPage: React.FC = () => {
           </CardContent>
         </Card>
         
-        {/* Loading state for prebuilt stations */}
-        {loading ? (
-          <Card className="bg-background/30 backdrop-blur-md border-none shadow-lg material-shadow-2">
-            <CardContent className="flex items-center justify-center p-8">
-              <Loader2 className="h-8 w-8 animate-spin mr-2" />
-              <span>Loading prebuilt stations from database...</span>
+        {/* Prebuilt Stations - Now grouped by language */}
+        {Object.entries(stationsByLanguage).map(([language, stations]) => (
+          <Card key={language} className="bg-background/30 backdrop-blur-md border-none shadow-lg material-shadow-2">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg text-foreground">Prebuilt {language} Stations</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <StationGrid
+                stations={stations}
+                currentIndex={currentIndex}
+                currentTrackUrl={currentTrack?.url}
+                isPlaying={isPlaying}
+                onSelectStation={(index) => handleAddStation(stations[index])}
+                actionIcon="add"
+              />
             </CardContent>
           </Card>
-        ) : (
-          /* Prebuilt Stations - Now grouped by language */
-          Object.entries(stationsByLanguage).map(([language, stations]) => (
-            <Card key={language} className="bg-background/30 backdrop-blur-md border-none shadow-lg material-shadow-2">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-lg text-foreground">Prebuilt {language} Stations</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <StationGrid
-                  stations={stations}
-                  currentIndex={currentIndex}
-                  currentTrackUrl={currentTrack?.url}
-                  isPlaying={isPlaying}
-                  onSelectStation={(index) => handleAddStation(stations[index])}
-                  actionIcon="add"
-                />
-              </CardContent>
-            </Card>
-          ))
-        )}
+        ))}
         
         {/* Edit station dialog */}
         {editingStation && (
