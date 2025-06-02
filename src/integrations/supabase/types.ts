@@ -9,16 +9,120 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      prebuilt_stations: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          is_active: boolean
+          language: string
+          name: string
+          updated_at: string
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          language?: string
+          name: string
+          updated_at?: string
+          url: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          language?: string
+          name?: string
+          updated_at?: string
+          url?: string
+        }
+        Relationships: []
+      }
+      station_analytics: {
+        Row: {
+          created_at: string
+          id: string
+          last_played_at: string
+          play_count: number
+          station_id: string
+          total_play_time: number
+          user_session_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_played_at?: string
+          play_count?: number
+          station_id: string
+          total_play_time?: number
+          user_session_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_played_at?: string
+          play_count?: number
+          station_id?: string
+          total_play_time?: number
+          user_session_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "station_analytics_station_id_fkey"
+            columns: ["station_id"]
+            isOneToOne: false
+            referencedRelation: "prebuilt_stations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          user_id: string
+          check_role: Database["public"]["Enums"]["app_role"]
+        }
+        Returns: boolean
+      }
+      is_admin: {
+        Args: { user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "super_admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -133,6 +237,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "super_admin"],
+    },
   },
 } as const

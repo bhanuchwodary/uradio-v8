@@ -1,5 +1,4 @@
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StationGrid } from "@/components/ui/player/StationGrid";
@@ -17,6 +16,8 @@ const StationListPage: React.FC = () => {
   const { toast } = useToast();
   const [editingStation, setEditingStation] = useState<Track | null>(null);
   const [isAdminDialogOpen, setIsAdminDialogOpen] = useState(false);
+  const [prebuiltStations, setPrebuiltStations] = useState<Track[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
   
   const { 
@@ -29,19 +30,30 @@ const StationListPage: React.FC = () => {
     getUserStations
   } = useTrackStateContext();
   
+  // Load prebuilt stations on component mount
+  useEffect(() => {
+    const loadPrebuiltStations = async () => {
+      try {
+        setIsLoading(true);
+        const stations = await getStations();
+        setPrebuiltStations(stations);
+      } catch (error) {
+        console.error("Error loading prebuilt stations:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load prebuilt stations",
+          variant: "destructive"
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadPrebuiltStations();
+  }, [toast]);
+  
   // Get user stations
   const userStations = getUserStations();
-  
-  // Get prebuilt stations from loader (which checks for custom stations)
-  const prebuiltStationsList = getStations();
-  
-  // Create proper track objects from prebuilt stations data
-  const prebuiltStationTracks: Track[] = prebuiltStationsList.map(station => ({
-    ...station,
-    isFavorite: false,
-    isPrebuilt: true,
-    playTime: 0
-  }));
   
   // Get current track
   const currentTrack = tracks[currentIndex];
@@ -49,7 +61,7 @@ const StationListPage: React.FC = () => {
   // Group prebuilt stations by language
   const stationsByLanguage: Record<string, Track[]> = {};
   
-  prebuiltStationTracks.forEach(station => {
+  prebuiltStations.forEach(station => {
     const language = station.language || "Unknown";
     if (!stationsByLanguage[language]) {
       stationsByLanguage[language] = [];
@@ -111,10 +123,21 @@ const StationListPage: React.FC = () => {
   const handleAdminSuccess = () => {
     console.log("Admin authentication successful, navigating to admin page");
     setIsAdminDialogOpen(false);
-    // Store authentication state to prevent re-authentication in the AdminPage
     sessionStorage.setItem("admin_authenticated", "true");
     navigate("/admin");
   };
+
+  if (isLoading) {
+    return (
+      <AppLayout>
+        <div className="container mx-auto max-w-5xl space-y-6">
+          <div className="flex justify-center items-center py-12">
+            <div className="text-lg">Loading stations...</div>
+          </div>
+        </div>
+      </AppLayout>
+    );
+  }
 
   return (
     <AppLayout>

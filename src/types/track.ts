@@ -5,5 +5,6 @@ export interface Track {
   isFavorite: boolean;
   playTime: number;
   isPrebuilt?: boolean;
-  language?: string; // New language attribute
+  language?: string;
+  supabaseId?: string; // Reference to Supabase station ID for analytics
 }
