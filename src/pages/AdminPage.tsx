@@ -7,7 +7,7 @@ import AdminPasswordDialog from "@/components/admin/AdminPasswordDialog";
 import AdminStationsManager from "@/components/admin/AdminStationsManager";
 import AdminDangerZone from "@/components/admin/AdminDangerZone";
 import AdminAuthenticationCard from "@/components/admin/AdminAuthenticationCard";
-import { savePrebuiltStations } from "@/utils/prebuiltStationsManager";
+import AdminAnalytics from "@/components/admin/AdminAnalytics";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -37,30 +37,10 @@ const AdminPage = () => {
     sessionStorage.setItem("admin_authenticated", "true");
   };
 
-  const handleSaveStations = (stations: any[]) => {
-    // Validate stations before saving
-    if (!Array.isArray(stations) || stations.length === 0) {
-      toast({
-        title: "Error",
-        description: "Invalid stations data. Cannot save empty stations list.",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    if (savePrebuiltStations(stations, true)) {
-      toast({
-        title: "Changes saved",
-        description: "Prebuilt stations have been updated successfully"
-      });
-      // savePrebuiltStations will handle the redirect
-    } else {
-      toast({
-        title: "Error",
-        description: "Failed to save changes",
-        variant: "destructive"
-      });
-    }
+  // Remove the old localStorage-based save function - now handled in AdminStationsManager
+  const handleSaveStations = () => {
+    // This is now handled directly in AdminStationsManager component
+    console.log("Save stations called - handled by AdminStationsManager");
   };
 
   const handleCancel = () => {
@@ -79,6 +59,7 @@ const AdminPage = () => {
         {isAuthenticated ? (
           <>
             <AdminStationsManager onSave={handleSaveStations} onCancel={handleCancel} />
+            <AdminAnalytics />
             <AdminDangerZone isMobile={isMobile} />
           </>
         ) : (

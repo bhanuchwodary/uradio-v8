@@ -183,6 +183,44 @@ class SupabaseStationsService {
     }
   }
 
+  // New method for bulk operations needed by admin interface
+  async bulkUpdateStations(stations: Array<{ name: string; url: string; language: string }>): Promise<{ success: boolean; error?: string }> {
+    try {
+      console.log(`Bulk updating ${stations.length} stations`);
+
+      // First, deactivate all existing stations
+      const { error: deactivateError } = await supabase
+        .from('prebuilt_stations')
+        .update({ is_active: false })
+        .eq('is_active', true);
+
+      if (deactivateError) {
+        console.error("Error deactivating existing stations:", deactivateError);
+        return { success: false, error: deactivateError.message };
+      }
+
+      // Then insert all new stations
+      const { error: insertError } = await supabase
+        .from('prebuilt_stations')
+        .insert(stations.map(station => ({
+          name: station.name,
+          url: station.url,
+          language: station.language || 'Unknown'
+        })));
+
+      if (insertError) {
+        console.error("Error inserting new stations:", insertError);
+        return { success: false, error: insertError.message };
+      }
+
+      console.log("Bulk update completed successfully");
+      return { success: true };
+    } catch (error) {
+      console.error("Failed to bulk update stations:", error);
+      return { success: false, error: 'Failed to bulk update stations' };
+    }
+  }
+
   async getAnalytics(): Promise<StationAnalytics[]> {
     try {
       const { data, error } = await supabase.functions.invoke('analytics');

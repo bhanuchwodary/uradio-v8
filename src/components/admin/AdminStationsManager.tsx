@@ -9,6 +9,8 @@ import AdminStationsHeader from "./stations/AdminStationsHeader";
 import StationGrid from "./stations/StationGrid";
 import StationImportSection from "./stations/StationImportSection";
 import { useStationManagement } from "./stations/useStationManagement";
+import { supabaseStationsService } from "@/services/supabaseStationsService";
+import { useToast } from "@/hooks/use-toast";
 
 interface AdminStationsManagerProps {
   onSave: (stations: any[]) => void;
@@ -17,6 +19,7 @@ interface AdminStationsManagerProps {
 
 const AdminStationsManager: React.FC<AdminStationsManagerProps> = ({ onSave, onCancel }) => {
   const { checkIfStationExists } = useTrackStateContext();
+  const { toast } = useToast();
   
   const {
     stations,
@@ -38,9 +41,36 @@ const AdminStationsManager: React.FC<AdminStationsManagerProps> = ({ onSave, onC
     isMobile
   } = useStationManagement({ checkIfStationExists });
 
-  const handleSaveChanges = () => {
-    const stationsToSave = prepareStationsForSave();
-    onSave(stationsToSave);
+  const handleSaveChanges = async () => {
+    try {
+      const stationsToSave = prepareStationsForSave();
+      
+      // Use Supabase service to bulk update stations
+      const result = await supabaseStationsService.bulkUpdateStations(stationsToSave);
+      
+      if (result.success) {
+        toast({
+          title: "Success",
+          description: "Prebuilt stations have been updated successfully"
+        });
+        // Clear admin authentication and navigate back
+        sessionStorage.removeItem("admin_authenticated");
+        window.location.href = "/station-list";
+      } else {
+        toast({
+          title: "Error", 
+          description: result.error || "Failed to save changes",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error("Error saving stations:", error);
+      toast({
+        title: "Error",
+        description: "Failed to save changes",
+        variant: "destructive"
+      });
+    }
   };
 
   return (
