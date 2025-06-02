@@ -1,17 +1,21 @@
+
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Track } from "@/types/track";
 import { Howl } from 'howler';
-
+import { getVolumePreference } from "@/utils/volumeStorage";
 import { supabaseStationsService } from "@/services/supabaseStationsService";
 
 export const useMusicPlayer = () => {
   const [tracks, setTracks] = useState<Track[]>([]);
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
-  const [volume, setVolume] = useState<number>(0.5);
+  const [volume, setVolume] = useState<number>(getVolumePreference());
   const [isMuted, setIsMuted] = useState<boolean>(false);
   const [sound, setSound] = useState<Howl | null>(null);
   const [currentTrack, setCurrentTrack] = useState<Track | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [currentTime, setCurrentTime] = useState<number>(0);
+  const [duration, setDuration] = useState<number>(0);
 
   const prevVolume = useRef(volume);
 
@@ -42,6 +46,7 @@ export const useMusicPlayer = () => {
 
     const track = tracks[index];
     console.log("Playing track:", track.name);
+    setLoading(true);
 
     // Track analytics for prebuilt stations
     trackStationPlay(track);
@@ -57,13 +62,19 @@ export const useMusicPlayer = () => {
       src: [track.url],
       html5: true,
       volume: volume,
+      onload: () => {
+        setLoading(false);
+        setDuration(newSound.duration());
+      },
       onplay: () => {
         setIsPlaying(true);
         setCurrentTrack(track);
+        setLoading(false);
         console.log("Playing:", track.name);
       },
       onend: () => {
         console.log("Track ended:", track.name);
+        setCurrentTime(0);
         // Play the next track if available
         if (index < tracks.length - 1) {
           playTrack(index + 1);
@@ -76,6 +87,7 @@ export const useMusicPlayer = () => {
       },
       onloaderror: () => {
         console.error("Failed to load:", track.name);
+        setLoading(false);
         // Handle the error, possibly by playing the next track
         if (index < tracks.length - 1) {
           playTrack(index + 1);
@@ -90,7 +102,7 @@ export const useMusicPlayer = () => {
     setSound(newSound);
     setCurrentIndex(index);
     newSound.play();
-  }, [tracks, volume, trackStationPlay]);
+  }, [tracks, volume, trackStationPlay, sound]);
 
   const togglePlayPause = useCallback(() => {
     if (!sound) return;
@@ -137,6 +149,25 @@ export const useMusicPlayer = () => {
     }
   }, [isMuted, volume, adjustVolume]);
 
+  const handleSeek = useCallback((value: number[]) => {
+    if (sound && duration) {
+      const newTime = value[0];
+      sound.seek(newTime);
+      setCurrentTime(newTime);
+    }
+  }, [sound, duration]);
+
+  // Update current time
+  useEffect(() => {
+    if (sound && isPlaying) {
+      const interval = setInterval(() => {
+        setCurrentTime(sound.seek());
+      }, 1000);
+
+      return () => clearInterval(interval);
+    }
+  }, [sound, isPlaying]);
+
   // Add periodic tracking of play time (every 30 seconds)
   useEffect(() => {
     if (isPlaying && currentTrack) {
@@ -154,13 +185,22 @@ export const useMusicPlayer = () => {
     currentIndex,
     isPlaying,
     playTrack,
-    togglePlayPause,
+    togglePlayPause: togglePlayPause,
     playPrevious,
     playNext,
     volume,
     adjustVolume,
     isMuted,
     toggleMute,
-    currentTrack
+    currentTrack,
+    loading,
+    currentTime,
+    duration,
+    // Add handler functions for compatibility
+    handlePlayPause: togglePlayPause,
+    handleNext: playNext,
+    handlePrevious: playPrevious,
+    handleSeek,
+    setVolume: adjustVolume
   };
 };
