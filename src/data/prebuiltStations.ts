@@ -119,5 +119,10 @@ export const prebuiltStations = [
     name: "Rainbow Vijayawada",
     url: "https://air.pc.cdn.bitgravity.com/air/live/pbaudio174/playlist.m3u8",
     language: "Telugu"
+  },
+  {
+    name: "Rainbow Delhi",
+    url: "https://airhlspush.pc.cdn.bitgravity.com/httppush/hlspbaudio004/hlspbaudio004_Auto.m3u8'",
+    language: "Hindi"
   }
 ];
