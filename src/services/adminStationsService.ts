@@ -11,7 +11,7 @@ export interface AdminStationData {
 class AdminStationsService {
   async getPrebuiltStations(): Promise<Track[]> {
     try {
-      console.log("Admin: Fetching prebuilt stations from Supabase...");
+      console.log("Admin: Fetching prebuilt stations...");
       
       const { data, error } = await supabase
         .from('prebuilt_stations')
@@ -21,14 +21,13 @@ class AdminStationsService {
         .order('name');
 
       if (error) {
-        console.error("Admin: Error fetching prebuilt stations:", error);
+        console.error("Admin: Error fetching stations:", error);
         throw error;
       }
 
-      console.log(`Admin: Loaded ${data?.length || 0} prebuilt stations from Supabase`);
+      console.log(`Admin: Loaded ${data?.length || 0} stations`);
       
-      // Convert to Track format
-      const tracks: Track[] = (data || []).map(station => ({
+      return (data || []).map(station => ({
         url: station.url,
         name: station.name,
         language: station.language,
@@ -37,29 +36,24 @@ class AdminStationsService {
         playTime: 0,
         supabaseId: station.id
       }));
-
-      return tracks;
     } catch (error) {
-      console.error("Admin: Failed to fetch prebuilt stations:", error);
+      console.error("Admin: Failed to fetch stations:", error);
       throw error;
     }
   }
 
   async bulkReplaceStations(stations: AdminStationData[]): Promise<{ success: boolean; error?: string }> {
     try {
-      console.log(`Admin: Starting bulk replace of ${stations.length} stations`);
-
-      // Use the service role key for admin operations
-      const adminSupabase = supabase;
-
+      console.log(`Admin: Bulk replacing ${stations.length} stations`);
+      
       // First, deactivate all existing stations
-      const { error: deactivateError } = await adminSupabase
+      const { error: deactivateError } = await supabase
         .from('prebuilt_stations')
         .update({ is_active: false })
         .eq('is_active', true);
 
       if (deactivateError) {
-        console.error("Admin: Error deactivating existing stations:", deactivateError);
+        console.error("Admin: Error deactivating stations:", deactivateError);
         return { success: false, error: deactivateError.message };
       }
 
@@ -68,15 +62,16 @@ class AdminStationsService {
         name: station.name,
         url: station.url,
         language: station.language || 'Unknown',
-        is_active: true
+        is_active: true,
+        created_by: null
       }));
 
-      const { error: insertError } = await adminSupabase
+      const { error: insertError } = await supabase
         .from('prebuilt_stations')
         .insert(stationsToInsert);
 
       if (insertError) {
-        console.error("Admin: Error inserting new stations:", insertError);
+        console.error("Admin: Error inserting stations:", insertError);
         return { success: false, error: insertError.message };
       }
 
@@ -90,7 +85,7 @@ class AdminStationsService {
 
   async addStation(station: AdminStationData): Promise<{ success: boolean; error?: string }> {
     try {
-      console.log(`Admin: Adding station: ${station.name} - ${station.url}`);
+      console.log(`Admin: Adding station: ${station.name}`);
       
       const { error } = await supabase
         .from('prebuilt_stations')
@@ -98,7 +93,8 @@ class AdminStationsService {
           name: station.name,
           url: station.url,
           language: station.language || 'Unknown',
-          is_active: true
+          is_active: true,
+          created_by: null
         });
 
       if (error) {
@@ -116,7 +112,7 @@ class AdminStationsService {
 
   async updateStation(id: string, updates: Partial<AdminStationData>): Promise<{ success: boolean; error?: string }> {
     try {
-      console.log(`Admin: Updating station ${id}:`, updates);
+      console.log(`Admin: Updating station ${id}`);
       
       const { error } = await supabase
         .from('prebuilt_stations')
@@ -138,7 +134,7 @@ class AdminStationsService {
 
   async deleteStation(id: string): Promise<{ success: boolean; error?: string }> {
     try {
-      console.log(`Admin: Soft deleting station ${id}`);
+      console.log(`Admin: Deleting station ${id}`);
       
       const { error } = await supabase
         .from('prebuilt_stations')

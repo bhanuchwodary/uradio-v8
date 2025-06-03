@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Track } from "@/types/track";
 import { newAdminStationsService, AdminStationData } from "@/services/newAdminStationsService";
@@ -29,6 +28,7 @@ export const useNewAdminStationManagement = () => {
 
       try {
         setLoading(true);
+        console.log("Loading admin stations...");
         const supabaseStations = await newAdminStationsService.getPrebuiltStations();
         console.log(`Admin loaded ${supabaseStations.length} stations`);
         setStations(supabaseStations);
@@ -36,10 +36,12 @@ export const useNewAdminStationManagement = () => {
       } catch (error) {
         console.error("Error loading stations:", error);
         toast({
-          title: "Error",
-          description: "Failed to load stations",
+          title: "Error Loading Stations",
+          description: "Failed to load stations. Please check your connection and try again.",
           variant: "destructive"
         });
+        // Set empty array so UI doesn't crash
+        setStations([]);
       } finally {
         setLoading(false);
       }
@@ -221,7 +223,7 @@ export const useNewAdminStationManagement = () => {
       }
     } catch (error) {
       console.error("Error saving stations:", error);
-      return { success: false, error: "Failed to save changes" };
+      return { success: false, error: "Failed to save changes. Please try again." };
     }
   };
 

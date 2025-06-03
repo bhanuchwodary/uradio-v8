@@ -13,7 +13,7 @@ import { useNavigate } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const AdminPage = () => {
-  const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(true);
+  const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -22,10 +22,14 @@ const AdminPage = () => {
   // Check for existing authentication
   useEffect(() => {
     const hasAuth = adminAuthService.isAdminAuthenticated();
+    console.log("Checking admin authentication:", hasAuth);
     if (hasAuth) {
       console.log("Admin already authenticated, showing admin interface");
       setIsAuthenticated(true);
       setIsPasswordDialogOpen(false);
+    } else {
+      console.log("Admin not authenticated, showing password dialog");
+      setIsPasswordDialogOpen(true);
     }
   }, []);
 
@@ -33,6 +37,10 @@ const AdminPage = () => {
     console.log("Authentication successful, showing admin interface");
     setIsPasswordDialogOpen(false);
     setIsAuthenticated(true);
+    toast({
+      title: "Authentication Successful",
+      description: "Welcome to the admin panel"
+    });
   };
 
   const handleSaveStations = () => {
@@ -41,6 +49,10 @@ const AdminPage = () => {
 
   const handleCancel = () => {
     adminAuthService.logout();
+    toast({
+      title: "Logged Out",
+      description: "You have been logged out of the admin panel"
+    });
     navigate("/station-list");
   };
 
@@ -49,7 +61,7 @@ const AdminPage = () => {
       <div className="container mx-auto max-w-5xl px-4 space-y-6 py-6">
         <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
           <h1 className="text-xl sm:text-2xl font-bold text-foreground flex items-center gap-2">
-            <Shield className="h-5 w-5 sm:h-6 sm:w-6 text-primary" /> Admin Controls (New System)
+            <Shield className="h-5 w-5 sm:h-6 sm:w-6 text-primary" /> Admin Controls
           </h1>
         </div>
 
