@@ -174,5 +174,10 @@ export const prebuiltStations = [
     name: "Music Masti",
     url: "https://stream.zeno.fm/bv9ccpufh5zuv",
     language: "Telugu"
+  },
+  {
+    name: "Radio Kokila",
+    url: "https://stream.zeno.fm/mchekv2irwnvv",
+    language: "Telugu"
   }
 ];
