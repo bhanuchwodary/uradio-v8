@@ -154,5 +154,10 @@ export const prebuiltStations = [
     name: "Hit 96.7",
     url: "https://stream.radiojar.com/3yygc0pwuueuv",
     language: "Malayalam"
+  },
+  {
+    name: "AR Rahman Hits",
+    url: "https://stream.zeno.fm/z78dpahfewzuv",
+    language: "Telugu"
   }
 ];
