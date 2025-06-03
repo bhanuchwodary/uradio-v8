@@ -129,5 +129,25 @@ export const prebuiltStations = [
     name: "FM Gold",
     url: "https://airhlspush.pc.cdn.bitgravity.com/httppush/hlspbaudio005/hlspbaudio005_Auto.m3u8",
     language: "Hindi"
+  },
+  {
+    name: "TORI",
+    url: "https://stream.teluguoneradio.com:8164/;stream/1",
+    language: "Telugu"
+  },
+  {
+    name: "90's Bollywood",
+    url: "https://stream.zeno.fm/rm4i9pdex3cuv",
+    language: "Hindi"
+  },
+  {
+    name: "Radio Hungama",
+    url: "https://stream.zeno.fm/rm4i9pdex3cuv",
+    language: "Telugu"
+  },
+  {
+    name: "BBC World",
+    url: "https://stream.live.vc.bbcmedia.co.uk/bbc_world_service",
+    language: "English"
   }
 ];
