@@ -122,7 +122,12 @@ export const prebuiltStations = [
   },
   {
     name: "Rainbow Delhi",
-    url: "https://airhlspush.pc.cdn.bitgravity.com/httppush/hlspbaudio004/hlspbaudio004_Auto.m3u8'",
+    url: "https://airhlspush.pc.cdn.bitgravity.com/httppush/hlspbaudio004/hlspbaudio004_Auto.m3u8",
+    language: "Hindi"
+  },
+  {
+    name: "FM Gold",
+    url: "https://airhlspush.pc.cdn.bitgravity.com/httppush/hlspbaudio005/hlspbaudio005_Auto.m3u8",
     language: "Hindi"
   }
 ];
