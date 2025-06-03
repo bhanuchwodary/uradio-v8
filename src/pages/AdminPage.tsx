@@ -3,10 +3,11 @@ import React, { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Shield } from "lucide-react";
 import AdminPasswordDialog from "@/components/admin/AdminPasswordDialog";
-import AdminStationsManager from "@/components/admin/AdminStationsManager";
+import NewAdminStationsManager from "@/components/admin/NewAdminStationsManager";
 import AdminDangerZone from "@/components/admin/AdminDangerZone";
 import AdminAuthenticationCard from "@/components/admin/AdminAuthenticationCard";
 import AdminAnalytics from "@/components/admin/AdminAnalytics";
+import { adminAuthService } from "@/services/adminAuthService";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -18,11 +19,11 @@ const AdminPage = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   
-  // Skip the authentication step if coming from StationListPage with successful auth
+  // Check for existing authentication
   useEffect(() => {
-    const hasAuth = sessionStorage.getItem("admin_authenticated");
-    if (hasAuth === "true") {
-      console.log("Admin already authenticated, skipping password dialog");
+    const hasAuth = adminAuthService.isAdminAuthenticated();
+    if (hasAuth) {
+      console.log("Admin already authenticated, showing admin interface");
       setIsAuthenticated(true);
       setIsPasswordDialogOpen(false);
     }
@@ -32,16 +33,14 @@ const AdminPage = () => {
     console.log("Authentication successful, showing admin interface");
     setIsPasswordDialogOpen(false);
     setIsAuthenticated(true);
-    // Save authentication state to session storage
-    sessionStorage.setItem("admin_authenticated", "true");
   };
 
   const handleSaveStations = () => {
-    // This is now handled directly in AdminStationsManager component
-    console.log("Save stations called - handled by AdminStationsManager");
+    console.log("Save stations called - handled by NewAdminStationsManager");
   };
 
   const handleCancel = () => {
+    adminAuthService.logout();
     navigate("/station-list");
   };
 
@@ -50,13 +49,13 @@ const AdminPage = () => {
       <div className="container mx-auto max-w-5xl px-4 space-y-6 py-6">
         <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
           <h1 className="text-xl sm:text-2xl font-bold text-foreground flex items-center gap-2">
-            <Shield className="h-5 w-5 sm:h-6 sm:w-6 text-primary" /> Admin Controls
+            <Shield className="h-5 w-5 sm:h-6 sm:w-6 text-primary" /> Admin Controls (New System)
           </h1>
         </div>
 
         {isAuthenticated ? (
           <>
-            <AdminStationsManager onSave={handleSaveStations} onCancel={handleCancel} />
+            <NewAdminStationsManager onSave={handleSaveStations} onCancel={handleCancel} />
             <AdminAnalytics />
             <AdminDangerZone isMobile={isMobile} />
           </>
