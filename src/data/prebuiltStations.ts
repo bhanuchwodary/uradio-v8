@@ -149,5 +149,10 @@ export const prebuiltStations = [
     name: "BBC World",
     url: "https://stream.live.vc.bbcmedia.co.uk/bbc_world_service",
     language: "English"
+  },
+  {
+    name: "Hit 96.7",
+    url: "https://stream.radiojar.com/3yygc0pwuueuv",
+    language: "Malayalam"
   }
 ];
