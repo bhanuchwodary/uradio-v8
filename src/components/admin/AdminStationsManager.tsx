@@ -4,12 +4,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import EditStationDialog from "@/components/EditStationDialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { useTrackStateContext } from "@/context/TrackStateContext";
 import AdminStationsHeader from "./stations/AdminStationsHeader";
 import StationGrid from "./stations/StationGrid";
 import StationImportSection from "./stations/StationImportSection";
-import { useAdminStationManagement } from "./stations/useAdminStationManagement";
-import { useToast } from "@/hooks/use-toast";
-import { Badge } from "@/components/ui/badge";
+import { useStationManagement } from "./stations/useStationManagement";
 
 interface AdminStationsManagerProps {
   onSave: (stations: any[]) => void;
@@ -17,7 +16,7 @@ interface AdminStationsManagerProps {
 }
 
 const AdminStationsManager: React.FC<AdminStationsManagerProps> = ({ onSave, onCancel }) => {
-  const { toast } = useToast();
+  const { checkIfStationExists } = useTrackStateContext();
   
   const {
     stations,
@@ -26,8 +25,6 @@ const AdminStationsManager: React.FC<AdminStationsManagerProps> = ({ onSave, onC
     stationToDelete,
     editError,
     showImport,
-    loading,
-    hasChanges,
     handleAddStation,
     handleEditStation,
     handleDeleteStation,
@@ -37,38 +34,14 @@ const AdminStationsManager: React.FC<AdminStationsManagerProps> = ({ onSave, onC
     setStationToDelete,
     setShowImport,
     handleImportStations,
-    handleSaveChanges,
+    prepareStationsForSave,
     isMobile
-  } = useAdminStationManagement();
+  } = useStationManagement({ checkIfStationExists });
 
-  const onSaveChanges = async () => {
-    const result = await handleSaveChanges();
-    if (result.success) {
-      toast({
-        title: "Success",
-        description: "Prebuilt stations have been updated successfully"
-      });
-      // Clear admin authentication and navigate back
-      sessionStorage.removeItem("admin_authenticated");
-      window.location.href = "/station-list";
-    } else {
-      toast({
-        title: "Error", 
-        description: result.error || "Failed to save changes",
-        variant: "destructive"
-      });
-    }
+  const handleSaveChanges = () => {
+    const stationsToSave = prepareStationsForSave();
+    onSave(stationsToSave);
   };
-
-  if (loading) {
-    return (
-      <Card className="w-full max-w-4xl mx-auto bg-background/30 backdrop-blur-md border-none shadow-lg material-shadow-2">
-        <CardContent className="flex justify-center items-center py-12">
-          <div className="text-lg">Loading stations...</div>
-        </CardContent>
-      </Card>
-    );
-  }
 
   return (
     <Card className="w-full max-w-4xl mx-auto bg-background/30 backdrop-blur-md border-none shadow-lg material-shadow-2">
@@ -80,15 +53,6 @@ const AdminStationsManager: React.FC<AdminStationsManagerProps> = ({ onSave, onC
       />
 
       <CardContent>
-        {hasChanges && (
-          <div className="mb-4 p-3 bg-orange-100 dark:bg-orange-900 rounded-lg border border-orange-200 dark:border-orange-800">
-            <div className="flex items-center gap-2">
-              <Badge variant="secondary">Unsaved Changes</Badge>
-              <span className="text-sm">You have unsaved changes. Remember to save them before leaving.</span>
-            </div>
-          </div>
-        )}
-
         {showImport && (
           <StationImportSection onImport={handleImportStations} />
         )}
@@ -104,12 +68,8 @@ const AdminStationsManager: React.FC<AdminStationsManagerProps> = ({ onSave, onC
           <Button variant="outline" onClick={onCancel} className="w-full sm:w-auto">
             Cancel
           </Button>
-          <Button 
-            onClick={onSaveChanges} 
-            className="w-full sm:w-auto" 
-            disabled={!hasChanges}
-          >
-            {hasChanges ? "Save Changes" : "No Changes to Save"}
+          <Button onClick={handleSaveChanges} className="w-full sm:w-auto">
+            Save Changes
           </Button>
         </div>
         

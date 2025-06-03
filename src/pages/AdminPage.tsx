@@ -2,34 +2,30 @@
 import React, { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Shield } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import AdminPasswordDialog from "@/components/admin/AdminPasswordDialog";
-import NewAdminStationsManager from "@/components/admin/NewAdminStationsManager";
+import AdminStationsManager from "@/components/admin/AdminStationsManager";
 import AdminDangerZone from "@/components/admin/AdminDangerZone";
 import AdminAuthenticationCard from "@/components/admin/AdminAuthenticationCard";
-import AdminAnalytics from "@/components/admin/AdminAnalytics";
-import { adminAuthService } from "@/services/adminAuthService";
+import { savePrebuiltStations } from "@/utils/prebuiltStationsManager";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const AdminPage = () => {
-  const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false);
+  const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   
-  // Check for existing authentication
+  // Skip the authentication step if coming from StationListPage with successful auth
   useEffect(() => {
-    const hasAuth = adminAuthService.isAdminAuthenticated();
-    console.log("Checking admin authentication:", hasAuth);
-    if (hasAuth) {
-      console.log("Admin already authenticated, showing admin interface");
+    const hasAuth = sessionStorage.getItem("admin_authenticated");
+    if (hasAuth === "true") {
+      console.log("Admin already authenticated, skipping password dialog");
       setIsAuthenticated(true);
       setIsPasswordDialogOpen(false);
-    } else {
-      console.log("Admin not authenticated, showing password dialog");
-      setIsPasswordDialogOpen(true);
     }
   }, []);
 
@@ -37,22 +33,37 @@ const AdminPage = () => {
     console.log("Authentication successful, showing admin interface");
     setIsPasswordDialogOpen(false);
     setIsAuthenticated(true);
-    toast({
-      title: "Authentication Successful",
-      description: "Welcome to the admin panel"
-    });
+    // Save authentication state to session storage
+    sessionStorage.setItem("admin_authenticated", "true");
   };
 
-  const handleSaveStations = () => {
-    console.log("Save stations called - handled by NewAdminStationsManager");
+  const handleSaveStations = (stations: any[]) => {
+    // Validate stations before saving
+    if (!Array.isArray(stations) || stations.length === 0) {
+      toast({
+        title: "Error",
+        description: "Invalid stations data. Cannot save empty stations list.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (savePrebuiltStations(stations, true)) {
+      toast({
+        title: "Changes saved",
+        description: "Prebuilt stations have been updated successfully"
+      });
+      // savePrebuiltStations will handle the redirect
+    } else {
+      toast({
+        title: "Error",
+        description: "Failed to save changes",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleCancel = () => {
-    adminAuthService.logout();
-    toast({
-      title: "Logged Out",
-      description: "You have been logged out of the admin panel"
-    });
     navigate("/station-list");
   };
 
@@ -67,8 +78,7 @@ const AdminPage = () => {
 
         {isAuthenticated ? (
           <>
-            <NewAdminStationsManager onSave={handleSaveStations} onCancel={handleCancel} />
-            <AdminAnalytics />
+            <AdminStationsManager onSave={handleSaveStations} onCancel={handleCancel} />
             <AdminDangerZone isMobile={isMobile} />
           </>
         ) : (

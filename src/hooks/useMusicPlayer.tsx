@@ -1,206 +1,116 @@
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useRef } from "react";
 import { Track } from "@/types/track";
-import { Howl } from 'howler';
-import { getVolumePreference } from "@/utils/volumeStorage";
-import { supabaseStationsService } from "@/services/supabaseStationsService";
+import { globalAudioRef } from "@/components/music-player/audioInstance";
+import { useMediaSession } from "@/hooks/useMediaSession";
+import { useHlsHandler } from "./music-player/useHlsHandler";
+import { useAudioEvents } from "./music-player/useAudioEvents";
+import { useAudioInitialization } from "./music-player/useAudioInitialization";
+import { usePlayerControls } from "./music-player/usePlayerControls";
 
-export const useMusicPlayer = () => {
-  const [tracks, setTracks] = useState<Track[]>([]);
-  const [currentIndex, setCurrentIndex] = useState<number>(0);
-  const [isPlaying, setIsPlaying] = useState<boolean>(false);
-  const [volume, setVolume] = useState<number>(getVolumePreference());
-  const [isMuted, setIsMuted] = useState<boolean>(false);
-  const [sound, setSound] = useState<Howl | null>(null);
-  const [currentTrack, setCurrentTrack] = useState<Track | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [currentTime, setCurrentTime] = useState<number>(0);
+interface UseMusicPlayerProps {
+  urls: string[];
+  currentIndex: number;
+  setCurrentIndex: (index: number) => void;
+  isPlaying: boolean;
+  setIsPlaying: (playing: boolean) => void;
+  tracks?: Track[];
+  initialVolume?: number;
+}
+
+export const useMusicPlayer = (props?: UseMusicPlayerProps) => {
+  // If we don't have props, provide default values
+  const {
+    urls = [],
+    currentIndex = 0,
+    setCurrentIndex = () => {},
+    isPlaying = false,
+    setIsPlaying = () => {},
+    tracks = [],
+    initialVolume = 0.7,
+  } = props || {};
+
   const [duration, setDuration] = useState<number>(0);
+  const [currentTime, setCurrentTime] = useState<number>(0);
+  const [volume, setVolume] = useState<number>(initialVolume);
+  const [loading, setLoading] = useState<boolean>(false);
+  
+  // Updated to use MutableRefObject since we need to assign to audioRef.current
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  // Updated to use lowercase symbol primitive type instead of Symbol object
+  const playerInstanceRef = useRef<symbol>(Symbol("playerInstance"));
 
-  const prevVolume = useRef(volume);
+  // Initialize audio
+  useAudioInitialization({
+    audioRef,
+    playerInstanceRef,
+    volume
+  });
 
-  // Track analytics when song starts playing
-  const trackStationPlay = useCallback(async (track: Track) => {
-    if (track?.isPrebuilt && track.url) {
-      try {
-        await supabaseStationsService.trackStationPlay(track.url, 0);
-      } catch (error) {
-        console.error("Failed to track station play:", error);
-      }
-    }
-  }, []);
+  // Set up player controls
+  const {
+    handleNext,
+    handlePrevious,
+    handlePlayPause,
+    handleSeek
+  } = usePlayerControls({
+    audioRef,
+    isPlaying,
+    setIsPlaying,
+    urls,
+    currentIndex,
+    setCurrentIndex,
+    volume
+  });
 
-  // Update play time analytics periodically
-  const trackPlayTime = useCallback(async (track: Track, playTime: number) => {
-    if (track?.isPrebuilt && track.url && playTime > 0) {
-      try {
-        await supabaseStationsService.trackStationPlay(track.url, playTime);
-      } catch (error) {
-        console.error("Failed to track play time:", error);
-      }
-    }
-  }, []);
+  // Handle HLS streaming
+  useHlsHandler({
+    audioRef,
+    url: urls[currentIndex],
+    isPlaying,
+    setIsPlaying,
+    setLoading
+  });
 
-  const playTrack = useCallback((index: number) => {
-    if (index < 0 || index >= tracks.length) return;
+  // Set up audio event listeners
+  useAudioEvents({
+    audioRef,
+    setCurrentTime,
+    setDuration,
+    onEnded: handleNext,
+    setLoading
+  });
 
-    const track = tracks[index];
-    console.log("Playing track:", track.name);
-    setLoading(true);
-
-    // Track analytics for prebuilt stations
-    trackStationPlay(track);
-
-    // Stop any currently playing sound
-    if (sound) {
-      sound.stop();
-      sound.unload();
-    }
-
-    // Create and play the new sound
-    const newSound = new Howl({
-      src: [track.url],
-      html5: true,
-      volume: volume,
-      onload: () => {
-        setLoading(false);
-        setDuration(newSound.duration());
-      },
-      onplay: () => {
-        setIsPlaying(true);
-        setCurrentTrack(track);
-        setLoading(false);
-        console.log("Playing:", track.name);
-      },
-      onend: () => {
-        console.log("Track ended:", track.name);
-        setCurrentTime(0);
-        // Play the next track if available
-        if (index < tracks.length - 1) {
-          playTrack(index + 1);
-        } else {
-          // If it's the last track, stop playing
-          setIsPlaying(false);
-          setCurrentIndex(0);
-          setCurrentTrack(null);
-        }
-      },
-      onloaderror: () => {
-        console.error("Failed to load:", track.name);
-        setLoading(false);
-        // Handle the error, possibly by playing the next track
-        if (index < tracks.length - 1) {
-          playTrack(index + 1);
-        } else {
-          setIsPlaying(false);
-          setCurrentIndex(0);
-          setCurrentTrack(null);
-        }
-      }
-    });
-
-    setSound(newSound);
-    setCurrentIndex(index);
-    newSound.play();
-  }, [tracks, volume, trackStationPlay, sound]);
-
-  const togglePlayPause = useCallback(() => {
-    if (!sound) return;
-
-    if (isPlaying) {
-      sound.pause();
-      setIsPlaying(false);
-      console.log("Paused:", tracks[currentIndex].name);
-    } else {
-      sound.play();
-      setIsPlaying(true);
-      console.log("Resumed:", tracks[currentIndex].name);
-    }
-  }, [isPlaying, sound, tracks, currentIndex]);
-
-  const playPrevious = useCallback(() => {
-    playTrack((currentIndex - 1 + tracks.length) % tracks.length);
-  }, [currentIndex, tracks, playTrack]);
-
-  const playNext = useCallback(() => {
-    playTrack((currentIndex + 1) % tracks.length);
-  }, [currentIndex, tracks, playTrack]);
-
-  const adjustVolume = useCallback((newVolume: number) => {
-    if (newVolume < 0) newVolume = 0;
-    if (newVolume > 1) newVolume = 1;
-
-    setVolume(newVolume);
-    if (sound) {
-      sound.volume(newVolume);
-    }
-  }, [sound]);
-
-  const toggleMute = useCallback(() => {
-    if (isMuted) {
-      // Unmute: Restore volume to the previous value
-      adjustVolume(prevVolume.current);
-      setIsMuted(false);
-    } else {
-      // Mute: Store current volume and set volume to 0
-      prevVolume.current = volume;
-      adjustVolume(0);
-      setIsMuted(true);
-    }
-  }, [isMuted, volume, adjustVolume]);
-
-  const handleSeek = useCallback((value: number[]) => {
-    if (sound && duration) {
-      const newTime = value[0];
-      sound.seek(newTime);
-      setCurrentTime(newTime);
-    }
-  }, [sound, duration]);
-
-  // Update current time
-  useEffect(() => {
-    if (sound && isPlaying) {
-      const interval = setInterval(() => {
-        setCurrentTime(sound.seek());
-      }, 1000);
-
-      return () => clearInterval(interval);
-    }
-  }, [sound, isPlaying]);
-
-  // Add periodic tracking of play time (every 30 seconds)
-  useEffect(() => {
-    if (isPlaying && currentTrack) {
-      const interval = setInterval(() => {
-        trackPlayTime(currentTrack, 30); // Track 30 seconds of play time
-      }, 30000);
-
-      return () => clearInterval(interval);
-    }
-  }, [isPlaying, currentTrack, trackPlayTime]);
-
-  return {
+  // Set up media session API
+  useMediaSession({
     tracks,
-    setTracks,
     currentIndex,
     isPlaying,
-    playTrack,
-    togglePlayPause: togglePlayPause,
-    playPrevious,
-    playNext,
-    volume,
-    adjustVolume,
-    isMuted,
-    toggleMute,
-    currentTrack,
-    loading,
-    currentTime,
+    trackDuration: duration,
+    trackPosition: currentTime,
+    setIsPlaying,
+    onSkipNext: handleNext,
+    onSkipPrevious: handlePrevious,
+    onSeek: (position) => {
+      handleSeek([position]);
+    },
+  });
+
+  return {
     duration,
-    // Add handler functions for compatibility
-    handlePlayPause: togglePlayPause,
-    handleNext: playNext,
-    handlePrevious: playPrevious,
+    currentTime,
+    volume,
+    setVolume,
+    loading,
+    handlePlayPause,
+    handleNext,
+    handlePrevious,
     handleSeek,
-    setVolume: adjustVolume
+    // Include these properties for compatibility with existing code
+    urls,
+    tracks,
+    removeUrl: (index: number) => console.warn("removeUrl not implemented"),
+    editTrack: (index: number, data: { url: string; name: string }) => 
+      console.warn("editTrack not implemented"),
   };
 };

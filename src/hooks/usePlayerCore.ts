@@ -1,6 +1,7 @@
 
 import { useMusicPlayer } from "./useMusicPlayer";
 import { Track } from "@/types/track";
+import { getVolumePreference } from "@/utils/volumeStorage";
 
 interface UsePlayerCoreProps {
   urls: string[];
@@ -19,8 +20,19 @@ export const usePlayerCore = ({
   setIsPlaying,
   tracks = []
 }: UsePlayerCoreProps) => {
-  // Use the music player hook directly without passing initial volume
-  const playerProps = useMusicPlayer();
+  // Get initial volume from stored preference
+  const initialVolume = getVolumePreference();
+  
+  // Pass all props to useMusicPlayer with the initial volume
+  const playerProps = useMusicPlayer({
+    urls,
+    currentIndex,
+    setCurrentIndex,
+    isPlaying,
+    setIsPlaying,
+    tracks,
+    initialVolume
+  });
 
   // Return all properties from useMusicPlayer for use in components
   return playerProps;

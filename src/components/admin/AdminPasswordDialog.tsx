@@ -1,11 +1,12 @@
 
-import React, { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import React, { useState, useEffect } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Shield, AlertCircle } from "lucide-react";
-import { adminAuthService } from "@/services/adminAuthService";
+import { useToast } from "@/hooks/use-toast";
+import { verifyPassword } from "@/utils/adminAuth";
+import { Shield } from "lucide-react";
 
 interface AdminPasswordDialogProps {
   isOpen: boolean;
@@ -13,91 +14,95 @@ interface AdminPasswordDialogProps {
   onSuccess: () => void;
 }
 
-const AdminPasswordDialog: React.FC<AdminPasswordDialogProps> = ({ 
-  isOpen, 
-  onClose, 
-  onSuccess 
+const AdminPasswordDialog: React.FC<AdminPasswordDialogProps> = ({
+  isOpen,
+  onClose,
+  onSuccess,
 }) => {
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { toast } = useToast();
+  
+  // Reset password field when dialog opens
+  useEffect(() => {
+    if (isOpen) {
+      setPassword("");
+      setIsSubmitting(false);
+    }
+  }, [isOpen]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    setError("");
-
+    setIsSubmitting(true);
+    
     try {
-      const isAuthenticated = adminAuthService.authenticate(password);
+      console.log("Verifying admin password...");
+      const isValid = verifyPassword(password);
+      console.log("Password verification result:", isValid);
       
-      if (isAuthenticated) {
-        console.log("Admin authentication successful");
+      if (isValid) {
+        toast({
+          title: "Access granted",
+          description: "You now have admin access",
+        });
+        // Store authentication state in session storage
+        sessionStorage.setItem("admin_authenticated", "true");
+        // Call onSuccess callback first
         onSuccess();
-        setPassword("");
+        // Close the dialog after successful authentication
+        onClose();
       } else {
-        setError("Invalid admin password");
+        toast({
+          title: "Access denied",
+          description: "Incorrect password",
+          variant: "destructive",
+        });
+        setPassword("");
       }
     } catch (error) {
       console.error("Authentication error:", error);
-      setError("Authentication failed");
-    } finally {
-      setIsLoading(false);
+      toast({
+        title: "Authentication error",
+        description: "There was a problem verifying the password",
+        variant: "destructive",
+      });
     }
-  };
-
-  const handleClose = () => {
-    setPassword("");
-    setError("");
-    onClose();
+    setIsSubmitting(false);
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-md">
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[425px] bg-background/95 backdrop-blur-md material-shadow-3">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Shield className="h-5 w-5 text-primary" />
-            Admin Authentication
-          </DialogTitle>
+          <div className="flex items-center justify-center mb-2">
+            <Shield className="w-8 h-8 text-primary" />
+          </div>
+          <DialogTitle className="text-center">Admin Authentication Required</DialogTitle>
         </DialogHeader>
-        
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="admin-password">Admin Password</Label>
+            <Label htmlFor="password">Admin Password</Label>
             <Input
-              id="admin-password"
+              id="password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Enter admin password"
-              disabled={isLoading}
+              className="bg-background/60"
+              autoComplete="current-password"
               autoFocus
             />
           </div>
-          
-          {error && (
-            <div className="flex items-center gap-2 text-sm text-destructive">
-              <AlertCircle className="h-4 w-4" />
-              {error}
-            </div>
-          )}
-          
-          <div className="flex justify-end gap-2">
-            <Button 
-              type="button" 
-              variant="outline" 
-              onClick={handleClose}
-              disabled={isLoading}
-            >
+
+          <DialogFooter>
+            <Button variant="outline" onClick={onClose} disabled={isSubmitting} className="mr-2">
               Cancel
             </Button>
-            <Button 
-              type="submit" 
-              disabled={isLoading || !password.trim()}
-            >
-              {isLoading ? "Authenticating..." : "Authenticate"}
+            <Button type="submit" disabled={isSubmitting || !password.trim()}>
+              {isSubmitting ? "Verifying..." : "Authenticate"}
             </Button>
-          </div>
+          </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>
