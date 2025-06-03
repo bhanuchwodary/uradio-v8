@@ -9,6 +9,7 @@ import StationGrid from "./stations/StationGrid";
 import StationImportSection from "./stations/StationImportSection";
 import { useAdminStationManagement } from "./stations/useAdminStationManagement";
 import { useToast } from "@/hooks/use-toast";
+import { Badge } from "@/components/ui/badge";
 
 interface AdminStationsManagerProps {
   onSave: (stations: any[]) => void;
@@ -26,6 +27,7 @@ const AdminStationsManager: React.FC<AdminStationsManagerProps> = ({ onSave, onC
     editError,
     showImport,
     loading,
+    hasChanges,
     handleAddStation,
     handleEditStation,
     handleDeleteStation,
@@ -78,6 +80,15 @@ const AdminStationsManager: React.FC<AdminStationsManagerProps> = ({ onSave, onC
       />
 
       <CardContent>
+        {hasChanges && (
+          <div className="mb-4 p-3 bg-orange-100 dark:bg-orange-900 rounded-lg border border-orange-200 dark:border-orange-800">
+            <div className="flex items-center gap-2">
+              <Badge variant="secondary">Unsaved Changes</Badge>
+              <span className="text-sm">You have unsaved changes. Remember to save them before leaving.</span>
+            </div>
+          </div>
+        )}
+
         {showImport && (
           <StationImportSection onImport={handleImportStations} />
         )}
@@ -93,8 +104,12 @@ const AdminStationsManager: React.FC<AdminStationsManagerProps> = ({ onSave, onC
           <Button variant="outline" onClick={onCancel} className="w-full sm:w-auto">
             Cancel
           </Button>
-          <Button onClick={onSaveChanges} className="w-full sm:w-auto">
-            Save Changes
+          <Button 
+            onClick={onSaveChanges} 
+            className="w-full sm:w-auto" 
+            disabled={!hasChanges}
+          >
+            {hasChanges ? "Save Changes" : "No Changes to Save"}
           </Button>
         </div>
         

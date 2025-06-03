@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { Track } from "@/types/track";
-import { supabaseStationsService } from "@/services/supabaseStationsService";
+import { adminStationsService, AdminStationData } from "@/services/adminStationsService";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -12,6 +12,7 @@ export const useAdminStationManagement = () => {
   const [editError, setEditError] = useState<string | null>(null);
   const [showImport, setShowImport] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [hasChanges, setHasChanges] = useState(false);
   const { toast } = useToast();
   const isMobile = useIsMobile();
 
@@ -25,9 +26,10 @@ export const useAdminStationManagement = () => {
     const loadStations = async () => {
       try {
         setLoading(true);
-        const supabaseStations = await supabaseStationsService.getPrebuiltStations();
-        console.log("Loaded stations for admin:", supabaseStations.length);
+        const supabaseStations = await adminStationsService.getPrebuiltStations();
+        console.log("Admin loaded stations:", supabaseStations.length);
         setStations(supabaseStations);
+        setHasChanges(false);
       } catch (error) {
         console.error("Error loading stations:", error);
         toast({
@@ -82,10 +84,11 @@ export const useAdminStationManagement = () => {
       const newStations = [...stations];
       newStations.splice(stationToDelete.index, 1);
       setStations(newStations);
+      setHasChanges(true);
       
       toast({
-        title: "Station deleted",
-        description: `${stationToDelete.station.name} has been removed`
+        title: "Station removed",
+        description: `${stationToDelete.station.name} will be removed when you save changes`
       });
       
       setStationToDelete(null);
@@ -139,18 +142,19 @@ export const useAdminStationManagement = () => {
       newStations.push(station);
       toast({
         title: "Station added",
-        description: `${data.name} has been added to prebuilt stations`
+        description: `${data.name} will be added when you save changes`
       });
     } else {
       // Editing existing station
       newStations[editingStation.index] = station;
       toast({
         title: "Station updated",
-        description: `${data.name} has been updated`
+        description: `${data.name} changes will be saved when you save all changes`
       });
     }
     
     setStations(newStations);
+    setHasChanges(true);
     setEditingStation(null);
     setEditError(null);
   };
@@ -194,9 +198,10 @@ export const useAdminStationManagement = () => {
 
     if (addedCount > 0) {
       setStations(newStations);
+      setHasChanges(true);
       toast({
         title: "Stations Imported",
-        description: `Added ${addedCount} stations${skippedCount > 0 ? `, skipped ${skippedCount} duplicates` : ''}.`,
+        description: `Added ${addedCount} stations${skippedCount > 0 ? `, skipped ${skippedCount} duplicates` : ''}. Save changes to apply.`,
       });
       setShowImport(false);
     } else {
@@ -211,14 +216,20 @@ export const useAdminStationManagement = () => {
   const handleSaveChanges = async () => {
     try {
       console.log("Saving all station changes to Supabase");
-      const stationsToSave = stations.map(station => ({
+      const stationsToSave: AdminStationData[] = stations.map(station => ({
         name: station.name,
         url: station.url,
         language: station.language || "Unknown"
       }));
       
-      const result = await supabaseStationsService.bulkUpdateStations(stationsToSave);
-      return result;
+      const result = await adminStationsService.bulkReplaceStations(stationsToSave);
+      
+      if (result.success) {
+        setHasChanges(false);
+        return { success: true };
+      } else {
+        return { success: false, error: result.error };
+      }
     } catch (error) {
       console.error("Error saving stations:", error);
       return { success: false, error: "Failed to save changes" };
@@ -233,6 +244,7 @@ export const useAdminStationManagement = () => {
     editError,
     showImport,
     loading,
+    hasChanges,
     handleAddStation,
     handleEditStation,
     handleDeleteStation,
