@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Shield } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import AdminPasswordDialog from "@/components/admin/AdminPasswordDialog";
 import AdminStationsManager from "@/components/admin/AdminStationsManager";
 import AdminDangerZone from "@/components/admin/AdminDangerZone";
@@ -37,7 +36,6 @@ const AdminPage = () => {
     sessionStorage.setItem("admin_authenticated", "true");
   };
 
-  // Remove the old localStorage-based save function - now handled in AdminStationsManager
   const handleSaveStations = () => {
     // This is now handled directly in AdminStationsManager component
     console.log("Save stations called - handled by AdminStationsManager");
