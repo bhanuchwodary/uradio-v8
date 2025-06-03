@@ -159,5 +159,20 @@ export const prebuiltStations = [
     name: "AR Rahman Hits",
     url: "https://stream.zeno.fm/z78dpahfewzuv",
     language: "Telugu"
+  },
+  {
+    name: "Flame FM",
+    url: "https://stream.zeno.fm/9z2ra2brkxhvv",
+    language: "Telugu"
+  },
+  {
+    name: "DO FM",
+    url: "https://stream.zeno.fm/c44y7qz3vwzuv",
+    language: "Telugu"
+  },
+  {
+    name: "Music Masti",
+    url: "https://stream.zeno.fm/bv9ccpufh5zuv",
+    language: "Telugu"
   }
 ];
