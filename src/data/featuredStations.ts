@@ -11,11 +11,6 @@ export const featuredStations = [
     language: "Telugu"
   },
   {
-    name: "FM Gold",
-    url: "https://airhlspush.pc.cdn.bitgravity.com/httppush/hlspbaudio007/hlspbaudio007_Auto.m3u8",
-    language: "Hindi"
-  },
-  {
     name: "Big Melodies",
     url: "https://funasia.streamguys1.com/live9",
     language: "Hindi"
@@ -179,5 +174,30 @@ export const featuredStations = [
     name: "Radio Kokila",
     url: "https://stream.zeno.fm/mchekv2irwnvv",
     language: "Telugu"
+  },
+  {
+    name: "Melody Masti",
+    url: "https://stream.zeno.fm/tu66eh1xpnhvv",
+    language: "Telugu"
+  },
+  {
+    name: "Fidaa FM",
+    url: "https://stream.zeno.fm/kvd13ixo31vvv",
+    language: "Telugu"
+  },
+  {
+    name: "Telugu Top 40",
+    url: "https://stream.zeno.fm/rfrzu1lxw8atv",
+    language: "Telugu"
+  },
+  {
+    name: "Bollywood Hits",
+    url: "https://stream.zeno.fm/a2gyqzwpwfeuv",
+    language: "Hindi"
+  },
+  {
+    name: "Mohabbat Radio",
+    url: "https://stream.zeno.fm/u7dyh8zsgtzuv",
+    language: "Hindi"
   }
 ];
