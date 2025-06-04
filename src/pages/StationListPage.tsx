@@ -8,16 +8,10 @@ import { useToast } from "@/hooks/use-toast";
 import { getStations } from "@/data/prebuiltStationsLoader";
 import { Track } from "@/types/track";
 import EditStationDialog from "@/components/EditStationDialog";
-import { Plus, Shield } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
-import AdminPasswordDialog from "@/components/admin/AdminPasswordDialog";
 
 const StationListPage: React.FC = () => {
   const { toast } = useToast();
   const [editingStation, setEditingStation] = useState<Track | null>(null);
-  const [isAdminDialogOpen, setIsAdminDialogOpen] = useState(false);
-  const navigate = useNavigate();
   
   const { 
     tracks,
@@ -106,28 +100,12 @@ const StationListPage: React.FC = () => {
       setEditingStation(null);
     }
   };
-  
-  // Handle admin authentication success
-  const handleAdminSuccess = () => {
-    console.log("Admin authentication successful, navigating to admin page");
-    setIsAdminDialogOpen(false);
-    // Store authentication state to prevent re-authentication in the AdminPage
-    sessionStorage.setItem("admin_authenticated", "true");
-    navigate("/admin");
-  };
 
   return (
     <AppLayout>
       <div className="container mx-auto max-w-5xl space-y-6">
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-bold text-foreground">Station List</h1>
-          <Button 
-            variant="outline" 
-            className="flex items-center gap-1"
-            onClick={() => setIsAdminDialogOpen(true)}
-          >
-            <Shield className="h-4 w-4" /> Admin
-          </Button>
         </div>
         
         {/* User Stations */}
@@ -187,13 +165,6 @@ const StationListPage: React.FC = () => {
             }}
           />
         )}
-        
-        {/* Admin password dialog */}
-        <AdminPasswordDialog 
-          isOpen={isAdminDialogOpen}
-          onClose={() => setIsAdminDialogOpen(false)}
-          onSuccess={handleAdminSuccess}
-        />
       </div>
     </AppLayout>
   );
