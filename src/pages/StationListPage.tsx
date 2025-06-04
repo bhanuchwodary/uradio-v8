@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -55,7 +56,7 @@ const StationListPage: React.FC = () => {
     const result = addUrl(
       station.url, 
       station.name, 
-      station.isPrebuilt || false,
+      station.isFeatured || false,
       station.isFavorite || false,
       station.language || ""
     );
