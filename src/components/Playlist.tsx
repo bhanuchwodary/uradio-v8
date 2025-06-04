@@ -31,7 +31,7 @@ const Playlist: React.FC<PlaylistProps> = ({
   // Force re-render only when tracks length changes or when tracks content genuinely changes
   useEffect(() => {
     const tracksSignature = JSON.stringify(
-      tracks.map(t => ({ url: t.url, name: t.name, isFeatured: t.isFeatured }))
+      tracks.map(t => ({ url: t.url, name: t.name, isPrebuilt: t.isPrebuilt }))
     );
     setRenderKey(prev => {
       // Only update if something meaningful changed
@@ -41,15 +41,15 @@ const Playlist: React.FC<PlaylistProps> = ({
   }, [tracks.length, JSON.stringify(tracks)]);
 
   // Memoize the filtered tracks to prevent unnecessary re-rendering
-  const { userStations, featuredStations } = useMemo(() => {
+  const { userStations, prebuiltStations } = useMemo(() => {
     if (process.env.NODE_ENV === 'development') {
       console.log(`Recomputing stations with ${tracks.length} tracks`);
     }
     
-    const user = tracks.filter(track => !track.isFeatured);
-    const featured = tracks.filter(track => track.isFeatured === true);
+    const user = tracks.filter(track => !track.isPrebuilt);
+    const prebuilt = tracks.filter(track => track.isPrebuilt === true);
     
-    return { userStations: user, featuredStations: featured };
+    return { userStations: user, prebuiltStations: prebuilt };
   }, [tracks]);
 
   // Handle edit with useCallback for better performance
@@ -117,7 +117,7 @@ const Playlist: React.FC<PlaylistProps> = ({
                 const index = tracks.findIndex(t => 
                   t.url === station.url && 
                   t.name === station.name &&
-                  t.isFeatured === station.isFeatured
+                  t.isPrebuilt === station.isPrebuilt
                 );
                 
                 if (index === -1) {
@@ -150,7 +150,7 @@ const Playlist: React.FC<PlaylistProps> = ({
                       {station.name}
                     </button>
                     <div className="flex justify-center gap-2">
-                      {onEditTrack && !station.isFeatured && (
+                      {onEditTrack && !station.isPrebuilt && (
                         <Button
                           variant="ghost"
                           size="icon"
@@ -184,7 +184,7 @@ const Playlist: React.FC<PlaylistProps> = ({
   return (
     <ScrollArea className={`h-[${scrollHeight}] pr-4`}>
       {renderStationsList(userStations, "My Stations")}
-      {renderStationsList(featuredStations, "Featured Stations")}
+      {renderStationsList(prebuiltStations, "Prebuilt Stations")}
       {editingTrack && (
         <EditStationDialog
           isOpen={editingTrack !== null}

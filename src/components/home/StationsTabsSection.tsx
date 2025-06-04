@@ -1,15 +1,14 @@
-
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { StationGrid } from "@/components/ui/player/StationGrid";
 import { Track } from "@/types/track";
-import { getStations } from "@/data/featuredStationsLoader";
+import { getStations } from "@/data/prebuiltStationsLoader";
 
 interface StationsTabsSectionProps {
   popularStations: Track[];
   userStations: Track[];
-  featuredStations: Track[];
+  prebuiltStations: Track[];
   currentIndex: number;
   currentTrackUrl?: string;
   isPlaying: boolean;
@@ -22,7 +21,7 @@ interface StationsTabsSectionProps {
 const StationsTabsSection: React.FC<StationsTabsSectionProps> = ({
   popularStations,
   userStations,
-  featuredStations,
+  prebuiltStations,
   currentIndex,
   currentTrackUrl,
   isPlaying,
@@ -31,15 +30,15 @@ const StationsTabsSection: React.FC<StationsTabsSectionProps> = ({
   onDeleteStation,
   onToggleFavorite
 }) => {
-  // Group featured stations by language
-  const featuredByLanguage: Record<string, Track[]> = {};
+  // Group prebuilt stations by language
+  const prebuiltByLanguage: Record<string, Track[]> = {};
   
-  featuredStations.forEach(station => {
+  prebuiltStations.forEach(station => {
     const language = station.language || "Unknown";
-    if (!featuredByLanguage[language]) {
-      featuredByLanguage[language] = [];
+    if (!prebuiltByLanguage[language]) {
+      prebuiltByLanguage[language] = [];
     }
-    featuredByLanguage[language].push(station);
+    prebuiltByLanguage[language].push(station);
   });
 
   return (
@@ -52,7 +51,7 @@ const StationsTabsSection: React.FC<StationsTabsSectionProps> = ({
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="popular">Popular</TabsTrigger>
             <TabsTrigger value="mystations">My Stations</TabsTrigger>
-            <TabsTrigger value="featured">Featured</TabsTrigger>
+            <TabsTrigger value="prebuilt">Prebuilt</TabsTrigger>
           </TabsList>
           
           <TabsContent value="popular" className="mt-4">
@@ -80,8 +79,8 @@ const StationsTabsSection: React.FC<StationsTabsSectionProps> = ({
             />
           </TabsContent>
           
-          <TabsContent value="featured" className="mt-4 space-y-6">
-            {Object.entries(featuredByLanguage).map(([language, stations]) => (
+          <TabsContent value="prebuilt" className="mt-4 space-y-6">
+            {Object.entries(prebuiltByLanguage).map(([language, stations]) => (
               <div key={language} className="mb-4">
                 <h3 className="font-medium text-lg mb-2 text-foreground">{language}</h3>
                 <StationGrid

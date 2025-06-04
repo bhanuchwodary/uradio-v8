@@ -29,7 +29,7 @@ const PlaylistPage: React.FC = () => {
   
   // Split stations into different categories
   const userStations = getUserStations();
-  const featuredStations = tracks.filter(track => track.isFeatured);
+  const prebuiltStations = tracks.filter(track => track.isPrebuilt);
   const favoriteStations = tracks.filter(track => track.isFavorite);
   
   // Calculate popular stations based on play time
@@ -141,7 +141,7 @@ const PlaylistPage: React.FC = () => {
         {/* Playlist Content Component */}
         <PlaylistContent
           userStations={userStations}
-          featuredStations={featuredStations}
+          prebuiltStations={prebuiltStations}
           favoriteStations={favoriteStations}
           popularStations={popularStations}
           currentIndex={currentIndex}

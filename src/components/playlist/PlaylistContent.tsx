@@ -7,7 +7,7 @@ import { Track } from "@/types/track";
 
 interface PlaylistContentProps {
   userStations: Track[];
-  featuredStations: Track[];
+  prebuiltStations: Track[];
   favoriteStations: Track[];
   popularStations: Track[];
   currentIndex: number;
@@ -21,7 +21,7 @@ interface PlaylistContentProps {
 
 const PlaylistContent: React.FC<PlaylistContentProps> = ({
   userStations,
-  featuredStations,
+  prebuiltStations,
   favoriteStations,
   popularStations,
   currentIndex,
@@ -73,10 +73,10 @@ const PlaylistContent: React.FC<PlaylistContentProps> = ({
               My Stations
             </TabsTrigger>
             <TabsTrigger 
-              value="featured" 
+              value="prebuilt" 
               className="text-sm py-2 px-3 data-[state=active]:bg-primary/20 data-[state=active]:text-primary font-medium transition-all"
             >
-              Featured
+              Prebuilt
             </TabsTrigger>
           </TabsList>
           
@@ -119,20 +119,20 @@ const PlaylistContent: React.FC<PlaylistContentProps> = ({
             )}
           </TabsContent>
           
-          <TabsContent value="featured" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
+          <TabsContent value="prebuilt" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
             <StationGrid
-              stations={featuredStations}
+              stations={prebuiltStations}
               currentIndex={currentIndex}
               currentTrackUrl={currentTrack?.url}
               isPlaying={isPlaying}
-              onSelectStation={(index) => onSelectStation(index, featuredStations)}
+              onSelectStation={(index) => onSelectStation(index, prebuiltStations)}
               onToggleFavorite={onToggleFavorite}
               onDeleteStation={onConfirmDelete}
             />
             
-            {featuredStations.length === 0 && (
+            {prebuiltStations.length === 0 && (
               <div className="text-center p-8 bg-gradient-to-br from-background/50 to-background/30 rounded-xl border border-border/50">
-                <p className="text-muted-foreground">No featured stations available</p>
+                <p className="text-muted-foreground">No prebuilt stations available</p>
               </div>
             )}
           </TabsContent>

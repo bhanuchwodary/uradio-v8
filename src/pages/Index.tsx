@@ -9,7 +9,6 @@ import HomePagePlayer from "@/components/home/HomePagePlayer";
 import FavoritesSection from "@/components/home/FavoritesSection";
 import StationsTabsSection from "@/components/home/StationsTabsSection";
 import HomePageDialogs from "@/components/home/HomePageDialogs";
-import { getStations } from "@/data/featuredStationsLoader";
 
 const Index: React.FC = () => {
   const { toast } = useToast();
@@ -36,15 +35,10 @@ const Index: React.FC = () => {
     .sort((a, b) => (b.playTime || 0) - (a.playTime || 0))
     .slice(0, 8);
     
-  // Get user stations (not featured)
+  // Get user stations (not prebuilt)
   const userStations = getUserStations();
-  // Get featured stations from loader
-  const featuredStations = getStations().map(station => ({
-    ...station,
-    isFavorite: false,
-    isFeatured: true,
-    playTime: 0
-  }));
+  // Get prebuilt stations
+  const prebuiltStations = tracks.filter(track => track.isPrebuilt);
   
   // Derive URLs from tracks
   const urls = tracks.map(track => track.url);
@@ -152,7 +146,7 @@ const Index: React.FC = () => {
         <StationsTabsSection
           popularStations={popularStations}
           userStations={userStations}
-          featuredStations={featuredStations}
+          prebuiltStations={prebuiltStations}
           currentIndex={currentIndex}
           currentTrackUrl={currentTrack?.url}
           isPlaying={isPlaying}

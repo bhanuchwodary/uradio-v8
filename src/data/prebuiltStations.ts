@@ -1,5 +1,5 @@
 
-export const featuredStations = [
+export const prebuiltStations = [
   {
     name: "Radio Kushi",
     url: "https://centova.aarenworld.com/proxy/922radiokhushi/stream",

@@ -28,18 +28,18 @@ export const useTrackOperations = (
   const addUrl = useCallback((
     url: string, 
     name: string = "", 
-    isFeatured: boolean = false, 
+    isPrebuilt: boolean = false, 
     isFavorite: boolean = false,
     language: string = ""
   ) => {
-    console.log("addUrl called with:", url, name, isFeatured, isFavorite, language);
+    console.log("addUrl called with:", url, name, isPrebuilt, isFavorite, language);
     console.log("Current tracks count:", tracks.length);
     
     // Use tracksRef for most up-to-date value when available
     const currentTracks = tracksRef?.current || tracks;
     
     const { tracks: updatedTracks, result } = addStationUrl(
-      url, name, isFeatured, isFavorite, currentTracks, language
+      url, name, isPrebuilt, isFavorite, currentTracks, language
     );
     
     console.log("Result of addStationUrl:", result.success, result.message);

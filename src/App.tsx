@@ -9,6 +9,7 @@ import AddStationPage from "@/pages/AddStationPage";
 import SettingsPage from "@/pages/SettingsPage";
 import NotFound from "@/pages/NotFound";
 import StationListPage from "@/pages/StationListPage";
+import AdminPage from "@/pages/AdminPage";
 
 const App = () => {
   return (
@@ -22,6 +23,7 @@ const App = () => {
             <Route path="/add-station" element={<AddStationPage />} />
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="/station-list" element={<StationListPage />} />
+            <Route path="/admin" element={<AdminPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Router>

@@ -1,9 +1,9 @@
 
 import { Track } from "@/types/track";
-import { featuredStations } from "@/data/featuredStations";
+import { prebuiltStations } from "@/data/prebuiltStations";
 
 export const getUserStations = (tracks: Track[]): Track[] => {
-  return tracks.filter(track => !track.isFeatured);
+  return tracks.filter(track => !track.isPrebuilt);
 };
 
 export const getTopStations = (tracks: Track[]): Track[] => {
@@ -16,17 +16,17 @@ export const checkIfStationExists = (url: string, tracks: Track[]): { exists: bo
   // CRITICAL FIX: Ensure case-insensitive comparison
   // Check in user tracks
   const existsInUserTracks = tracks.some(track => 
-    track.url.toLowerCase() === url.toLowerCase() && !track.isFeatured
+    track.url.toLowerCase() === url.toLowerCase() && !track.isPrebuilt
   );
   
   if (existsInUserTracks) {
     return { exists: true, isUserStation: true };
   }
   
-  // Check in featured stations
-  const existsInFeatured = featuredStations.some(
+  // Check in prebuilt stations
+  const existsInPrebuilt = prebuiltStations.some(
     station => station.url.toLowerCase() === url.toLowerCase()
   );
   
-  return { exists: existsInFeatured, isUserStation: false };
+  return { exists: existsInPrebuilt, isUserStation: false };
 };

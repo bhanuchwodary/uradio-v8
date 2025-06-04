@@ -4,7 +4,7 @@ import { Track } from "@/types/track";
 export const addStationUrl = (
   url: string, 
   name: string = "", 
-  isFeatured: boolean = false, 
+  isPrebuilt: boolean = false, 
   isFavorite: boolean = false, 
   tracks: Track[],
   language: string = ""
@@ -14,7 +14,7 @@ export const addStationUrl = (
     return { tracks, result: { success: false, message: "URL cannot be empty" } };
   }
   
-  console.log(`Adding URL: ${url}, Name: ${name}, IsFeatured: ${isFeatured}, IsFavorite: ${isFavorite}, Language: ${language}`);
+  console.log(`Adding URL: ${url}, Name: ${name}, IsPrebuilt: ${isPrebuilt}, IsFavorite: ${isFavorite}, Language: ${language}`);
   console.log("Current tracks count before add:", tracks.length);
   
   // Create a deep clone of the tracks array to ensure we don't modify the original
@@ -42,7 +42,7 @@ export const addStationUrl = (
       ...updatedTracks[existingIndex],  // Keep existing properties first
       url: url,  // Then update what we need to update
       name: name || updatedTracks[existingIndex].name,
-      isFeatured: isFeatured !== undefined ? isFeatured : updatedTracks[existingIndex].isFeatured,
+      isPrebuilt: isPrebuilt !== undefined ? isPrebuilt : updatedTracks[existingIndex].isPrebuilt,
       isFavorite: isFavorite !== undefined ? isFavorite : updatedTracks[existingIndex].isFavorite,
       // CRITICAL FIX: Ensure language is always preserved and not overwritten with empty string
       language: language || updatedTracks[existingIndex].language || "",
@@ -59,7 +59,7 @@ export const addStationUrl = (
       name: name || `Station ${tracksClone.length + 1}`,
       isFavorite: !!isFavorite,
       playTime: 0,
-      isFeatured: !!isFeatured,
+      isPrebuilt: !!isPrebuilt,
       // CRITICAL FIX: Ensure language is always set and not lost
       language: language || ""
     };

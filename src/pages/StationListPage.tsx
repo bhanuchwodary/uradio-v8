@@ -5,13 +5,19 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StationGrid } from "@/components/ui/player/StationGrid";
 import { useTrackStateContext } from "@/context/TrackStateContext";
 import { useToast } from "@/hooks/use-toast";
-import { getStations } from "@/data/featuredStationsLoader";
+import { getStations } from "@/data/prebuiltStationsLoader";
 import { Track } from "@/types/track";
 import EditStationDialog from "@/components/EditStationDialog";
+import { Plus, Shield } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
+import AdminPasswordDialog from "@/components/admin/AdminPasswordDialog";
 
 const StationListPage: React.FC = () => {
   const { toast } = useToast();
   const [editingStation, setEditingStation] = useState<Track | null>(null);
+  const [isAdminDialogOpen, setIsAdminDialogOpen] = useState(false);
+  const navigate = useNavigate();
   
   const { 
     tracks,
@@ -26,24 +32,24 @@ const StationListPage: React.FC = () => {
   // Get user stations
   const userStations = getUserStations();
   
-  // Get featured stations from loader
-  const featuredStationsList = getStations();
+  // Get prebuilt stations from loader (which checks for custom stations)
+  const prebuiltStationsList = getStations();
   
-  // Create proper track objects from featured stations data
-  const featuredStationTracks: Track[] = featuredStationsList.map(station => ({
+  // Create proper track objects from prebuilt stations data
+  const prebuiltStationTracks: Track[] = prebuiltStationsList.map(station => ({
     ...station,
     isFavorite: false,
-    isFeatured: true,
+    isPrebuilt: true,
     playTime: 0
   }));
   
   // Get current track
   const currentTrack = tracks[currentIndex];
   
-  // Group featured stations by language
+  // Group prebuilt stations by language
   const stationsByLanguage: Record<string, Track[]> = {};
   
-  featuredStationTracks.forEach(station => {
+  prebuiltStationTracks.forEach(station => {
     const language = station.language || "Unknown";
     if (!stationsByLanguage[language]) {
       stationsByLanguage[language] = [];
@@ -56,7 +62,7 @@ const StationListPage: React.FC = () => {
     const result = addUrl(
       station.url, 
       station.name, 
-      station.isFeatured || false,
+      station.isPrebuilt || false,
       station.isFavorite || false,
       station.language || ""
     );
@@ -101,11 +107,27 @@ const StationListPage: React.FC = () => {
     }
   };
   
+  // Handle admin authentication success
+  const handleAdminSuccess = () => {
+    console.log("Admin authentication successful, navigating to admin page");
+    setIsAdminDialogOpen(false);
+    // Store authentication state to prevent re-authentication in the AdminPage
+    sessionStorage.setItem("admin_authenticated", "true");
+    navigate("/admin");
+  };
+
   return (
     <AppLayout>
       <div className="container mx-auto max-w-5xl space-y-6">
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-bold text-foreground">Station List</h1>
+          <Button 
+            variant="outline" 
+            className="flex items-center gap-1"
+            onClick={() => setIsAdminDialogOpen(true)}
+          >
+            <Shield className="h-4 w-4" /> Admin
+          </Button>
         </div>
         
         {/* User Stations */}
@@ -133,11 +155,11 @@ const StationListPage: React.FC = () => {
           </CardContent>
         </Card>
         
-        {/* Featured Stations - Now grouped by language */}
+        {/* Prebuilt Stations - Now grouped by language */}
         {Object.entries(stationsByLanguage).map(([language, stations]) => (
           <Card key={language} className="bg-background/30 backdrop-blur-md border-none shadow-lg material-shadow-2">
             <CardHeader className="pb-2">
-              <CardTitle className="text-lg text-foreground">Featured {language} Stations</CardTitle>
+              <CardTitle className="text-lg text-foreground">Prebuilt {language} Stations</CardTitle>
             </CardHeader>
             <CardContent>
               <StationGrid
@@ -165,6 +187,13 @@ const StationListPage: React.FC = () => {
             }}
           />
         )}
+        
+        {/* Admin password dialog */}
+        <AdminPasswordDialog 
+          isOpen={isAdminDialogOpen}
+          onClose={() => setIsAdminDialogOpen(false)}
+          onSuccess={handleAdminSuccess}
+        />
       </div>
     </AppLayout>
   );
