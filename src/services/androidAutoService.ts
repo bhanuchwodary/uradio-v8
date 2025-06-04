@@ -16,19 +16,6 @@ interface AndroidAutoCallbacks {
   onSeek: (position: number) => void;
 }
 
-// Define an interface for the Media plugin compatible with v6
-interface MediaPlugin {
-  updateMediaNotification(options: {
-    title: string;
-    artist: string;
-    album: string;
-    artwork: string;
-    duration: number;
-    position: number;
-  }): Promise<void>;
-  updatePlaybackState(options: { isPlaying: boolean }): Promise<void>;
-}
-
 class AndroidAutoService {
   private initialized = false;
   private callbacks: AndroidAutoCallbacks | null = null;
@@ -36,12 +23,10 @@ class AndroidAutoService {
 
   async initialize() {
     try {
-      // Check if we're in a Capacitor environment with the Media plugin
+      // Check if we're in a Capacitor environment
       const { Capacitor } = await import('@capacitor/core');
-      if (Capacitor.isPluginAvailable('Media')) {
-        // This would be the actual implementation if the Media plugin is available
+      if (Capacitor.isNativePlatform() && Capacitor.isPluginAvailable('Media')) {
         console.log("Android Auto service initializing with Capacitor Media plugin");
-        // Media plugin initialization would go here
         this.initialized = true;
         return;
       }
@@ -65,33 +50,19 @@ class AndroidAutoService {
       await this.initialize();
     }
     
-    // Store the current track info for notification updates
+    // Store the current track info
     this.currentTrackInfo = trackInfo;
     
     // Log for debugging
     console.log("Updated media session metadata for notifications:", trackInfo);
     
-    // Try to update the Android notification via Capacitor plugin if available
+    // Only try to update native notification if we're on a native platform
     try {
-      const { Capacitor, registerPlugin } = await import('@capacitor/core');
+      const { Capacitor } = await import('@capacitor/core');
       
-      if (Capacitor.isPluginAvailable('Media')) {
-        try {
-          const MediaPlugin = registerPlugin<MediaPlugin>('Media');
-          if (MediaPlugin) {
-            await MediaPlugin.updateMediaNotification({
-              title: trackInfo.title,
-              artist: trackInfo.artist,
-              album: trackInfo.album,
-              artwork: trackInfo.artworkUrl,
-              duration: trackInfo.duration,
-              position: trackInfo.position
-            });
-            console.log("Updated native media notification with track info");
-          }
-        } catch (pluginErr) {
-          console.warn("Error updating media notification:", pluginErr);
-        }
+      if (Capacitor.isNativePlatform() && Capacitor.isPluginAvailable('Media')) {
+        // This would be implemented when the native plugin is properly configured
+        console.log("Native media notification would be updated here");
       }
     } catch (err) {
       // Silently fail on web platforms
@@ -114,22 +85,13 @@ class AndroidAutoService {
       this.updateTrackInfo(this.currentTrackInfo);
     }
     
-    // Try to update the Android notification state via Capacitor plugin if available
+    // Only try to update native notification if we're on a native platform
     try {
-      const { Capacitor, registerPlugin } = await import('@capacitor/core');
+      const { Capacitor } = await import('@capacitor/core');
       
-      if (Capacitor.isPluginAvailable('Media')) {
-        try {
-          const MediaPlugin = registerPlugin<MediaPlugin>('Media');
-          if (MediaPlugin) {
-            await MediaPlugin.updatePlaybackState({
-              isPlaying: isPlaying
-            });
-            console.log("Updated native media notification playback state");
-          }
-        } catch (pluginErr) {
-          console.warn("Error updating playback state:", pluginErr);
-        }
+      if (Capacitor.isNativePlatform() && Capacitor.isPluginAvailable('Media')) {
+        // This would be implemented when the native plugin is properly configured
+        console.log("Native media notification playback state would be updated here");
       }
     } catch (err) {
       // Silently fail on web platforms
