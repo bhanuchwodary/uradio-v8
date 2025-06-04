@@ -11,7 +11,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@capacitor-community/media": "^5.4.1",
+    "@capacitor-community/media": "^6.0.0",
     "@capacitor/android": "^7.1.0",
     "@capacitor/cli": "^7.1.0",
     "@capacitor/core": "^7.1.0",

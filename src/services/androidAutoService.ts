@@ -16,7 +16,7 @@ interface AndroidAutoCallbacks {
   onSeek: (position: number) => void;
 }
 
-// Define an interface for the Media plugin
+// Define an interface for the Media plugin compatible with v6
 interface MediaPlugin {
   updateMediaNotification(options: {
     title: string;
