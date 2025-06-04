@@ -1,3 +1,4 @@
+
 import { Track } from "@/types/track";
 
 // Storage key for consistency
@@ -59,7 +60,7 @@ export const loadTracksFromLocalStorage = (): Track[] => {
       name: track.name,
       isFavorite: track.isFavorite !== undefined ? Boolean(track.isFavorite) : false,
       playTime: track.playTime !== undefined ? Number(track.playTime) : 0,
-      isPrebuilt: track.isPrebuilt !== undefined ? Boolean(track.isPrebuilt) : false,
+      isFeatured: track.isFeatured !== undefined ? Boolean(track.isFeatured) : false,
       // CRITICAL: Always preserve language, don't default to empty string if it exists
       language: track.language !== undefined && track.language !== null ? String(track.language) : "Unknown"
     }));
@@ -86,7 +87,7 @@ export const saveTracksToLocalStorage = (tracks: Track[]): boolean => {
       name: track.name,
       isFavorite: track.isFavorite || false,
       playTime: track.playTime || 0,
-      isPrebuilt: track.isPrebuilt || false,
+      isFeatured: track.isFeatured || false,
       // CRITICAL: Always preserve language exactly as it is
       language: track.language || "Unknown"
     }));

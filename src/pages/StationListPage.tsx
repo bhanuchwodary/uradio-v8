@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StationGrid } from "@/components/ui/player/StationGrid";
 import { useTrackStateContext } from "@/context/TrackStateContext";
 import { useToast } from "@/hooks/use-toast";
-import { getStations } from "@/data/prebuiltStationsLoader";
+import { getStations } from "@/data/featuredStationsLoader";
 import { Track } from "@/types/track";
 import EditStationDialog from "@/components/EditStationDialog";
 
@@ -26,24 +26,24 @@ const StationListPage: React.FC = () => {
   // Get user stations
   const userStations = getUserStations();
   
-  // Get prebuilt stations from loader (which checks for custom stations)
-  const prebuiltStationsList = getStations();
+  // Get featured stations from loader
+  const featuredStationsList = getStations();
   
-  // Create proper track objects from prebuilt stations data
-  const prebuiltStationTracks: Track[] = prebuiltStationsList.map(station => ({
+  // Create proper track objects from featured stations data
+  const featuredStationTracks: Track[] = featuredStationsList.map(station => ({
     ...station,
     isFavorite: false,
-    isPrebuilt: true,
+    isFeatured: true,
     playTime: 0
   }));
   
   // Get current track
   const currentTrack = tracks[currentIndex];
   
-  // Group prebuilt stations by language
+  // Group featured stations by language
   const stationsByLanguage: Record<string, Track[]> = {};
   
-  prebuiltStationTracks.forEach(station => {
+  featuredStationTracks.forEach(station => {
     const language = station.language || "Unknown";
     if (!stationsByLanguage[language]) {
       stationsByLanguage[language] = [];
@@ -56,7 +56,7 @@ const StationListPage: React.FC = () => {
     const result = addUrl(
       station.url, 
       station.name, 
-      station.isPrebuilt || false,
+      station.isFeatured || false,
       station.isFavorite || false,
       station.language || ""
     );
@@ -100,7 +100,7 @@ const StationListPage: React.FC = () => {
       setEditingStation(null);
     }
   };
-
+  
   return (
     <AppLayout>
       <div className="container mx-auto max-w-5xl space-y-6">
@@ -133,11 +133,11 @@ const StationListPage: React.FC = () => {
           </CardContent>
         </Card>
         
-        {/* Prebuilt Stations - Now grouped by language */}
+        {/* Featured Stations - Now grouped by language */}
         {Object.entries(stationsByLanguage).map(([language, stations]) => (
           <Card key={language} className="bg-background/30 backdrop-blur-md border-none shadow-lg material-shadow-2">
             <CardHeader className="pb-2">
-              <CardTitle className="text-lg text-foreground">Prebuilt {language} Stations</CardTitle>
+              <CardTitle className="text-lg text-foreground">Featured {language} Stations</CardTitle>
             </CardHeader>
             <CardContent>
               <StationGrid

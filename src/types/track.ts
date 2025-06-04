@@ -4,6 +4,6 @@ export interface Track {
   name: string;
   isFavorite: boolean;
   playTime: number;
-  isPrebuilt?: boolean;
-  language?: string; // New language attribute
+  isFeatured?: boolean;
+  language?: string;
 }

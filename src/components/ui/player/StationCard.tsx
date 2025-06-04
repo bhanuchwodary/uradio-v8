@@ -109,7 +109,7 @@ export const StationCard: React.FC<StationCardProps> = ({
             </Button>
           )}
           
-          {onEdit && !station.isPrebuilt && (
+          {onEdit && !station.isFeatured && (
             <Button 
               size="icon" 
               variant="ghost" 
