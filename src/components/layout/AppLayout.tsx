@@ -2,8 +2,9 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Music, List, Plus, Settings } from "lucide-react";
+import { Music, List, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -16,14 +17,21 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const navItems = [
     { icon: Music, label: "Playlist", path: "/" },
     { icon: List, label: "Stations", path: "/station-list" },
-    { icon: Plus, label: "Add", path: "/add" },
-    { icon: Settings, label: "Settings", path: "/settings" }
+    { icon: Plus, label: "Add", path: "/add" }
   ];
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-secondary/80 via-background to-accent/30 dark:from-background dark:via-card dark:to-muted/30 ios-vh-fix ios-no-bounce">
+      {/* Header with Theme Toggle */}
+      <header className="fixed top-0 left-0 right-0 p-4 bg-background/95 backdrop-blur-xl border-b border-border/30 z-20 ios-safe-top ios-safe-left ios-safe-right">
+        <div className="max-w-6xl mx-auto flex justify-between items-center">
+          <h1 className="text-xl font-bold text-foreground">Uradio</h1>
+          <ThemeToggle />
+        </div>
+      </header>
+      
       {/* Main Content */}
-      <main className="flex-grow p-4 pb-28 md:pb-24 overflow-x-hidden max-w-6xl mx-auto w-full ios-smooth-scroll ios-safe-top ios-safe-left ios-safe-right">
+      <main className="flex-grow p-4 pt-24 pb-28 md:pb-24 overflow-x-hidden max-w-6xl mx-auto w-full ios-smooth-scroll ios-safe-left ios-safe-right">
         {children}
       </main>
       
