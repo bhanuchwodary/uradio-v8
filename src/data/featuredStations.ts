@@ -71,9 +71,9 @@ export const featuredStations = [
     language: "Telugu"
   },
   {
-    name: "NRI Telugu Radio",
-    url: "https://vobook.ru/http://104.167.4.67:8332/;stream.mp3",
-    language: "Telugu"
+    name: "Radio 4",
+    url: "https://stream.radio.co/s6004eac2f/listen",
+    language: "Hindi"
   },
   {
     name: "Melody Radio",
@@ -186,11 +186,6 @@ export const featuredStations = [
     language: "Telugu"
   },
   {
-    name: "Telugu Top 40",
-    url: "https://stream.zeno.fm/rfrzu1lxw8atv",
-    language: "Telugu"
-  },
-  {
     name: "Bollywood Hits",
     url: "https://stream.zeno.fm/a2gyqzwpwfeuv",
     language: "Hindi"
@@ -199,5 +194,10 @@ export const featuredStations = [
     name: "Mohabbat Radio",
     url: "https://stream.zeno.fm/u7dyh8zsgtzuv",
     language: "Hindi"
+  },
+  {
+    name: "VB Telugu Hyderabad",
+    url: "https://air.pc.cdn.bitgravity.com/air/live/pbaudio034/playlist.m3u8",
+    language: "Telugu"
   }
 ];
