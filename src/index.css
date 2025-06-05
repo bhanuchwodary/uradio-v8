@@ -5,101 +5,83 @@
 
 @layer base {
   :root {
-    --background: 248 250 252;
-    --foreground: 30 41 59;
+    --background: 210 40% 98%;
+    --foreground: 222.2 84% 4.9%;
 
-    --card: 255 255 255;
-    --card-foreground: 30 41 59;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
 
-    --popover: 255 255 255;
-    --popover-foreground: 30 41 59;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 99 102 241;
-    --primary-foreground: 248 250 252;
+    --primary: 262 83% 58%;
+    --primary-foreground: 210 40% 98%;
 
-    --secondary: 241 245 249;
-    --secondary-foreground: 51 65 85;
+    --secondary: 220 14.3% 95.9%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
 
-    --muted: 248 250 252;
-    --muted-foreground: 100 116 139;
+    --muted: 210 40% 93%;
+    --muted-foreground: 215.4 16.3% 46.9%;
 
-    --accent: 241 245 249;
-    --accent-foreground: 51 65 85;
+    --accent: 262 83% 96%;
+    --accent-foreground: 262 60% 40%;
 
-    --destructive: 239 68 68;
-    --destructive-foreground: 248 250 252;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
 
-    --border: 226 232 240;
-    --input: 226 232 240;
-    --ring: 99 102 241;
+    --border: 214.3 31.8% 85%;
+    --input: 214.3 31.8% 85%;
+    --ring: 262 83% 58%;
 
     --radius: 0.75rem;
 
-    /* Radio-themed colors inspired by the logo */
-    --radio-primary: 99 102 241;
-    --radio-secondary: 148 163 184;
-    --radio-accent-light: 219 234 254;
-    --radio-accent-dark: 30 58 138;
-    --radio-bg-light: 248 250 252;
-    --radio-bg-dark: 15 23 42;
-    --radio-border: 203 213 225;
-
-    --sidebar-background: 248 250 252;
-    --sidebar-foreground: 30 41 59;
-    --sidebar-primary: 99 102 241;
-    --sidebar-primary-foreground: 248 250 252;
-    --sidebar-accent: 241 245 249;
-    --sidebar-accent-foreground: 51 65 85;
-    --sidebar-border: 226 232 240;
-    --sidebar-ring: 99 102 241;
+    --sidebar-background: 262 59% 97%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 262 83% 58%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 262 83% 96%;
+    --sidebar-accent-foreground: 262 60% 40%;
+    --sidebar-border: 262 83% 90%;
+    --sidebar-ring: 262 91.2% 59.8%;
   }
 
   .dark {
-    --background: 15 23 42;
-    --foreground: 248 250 252;
+    --background: 220 40% 13%;
+    --foreground: 210 40% 98%;
 
-    --card: 30 41 59;
-    --card-foreground: 248 250 252;
+    --card: 222.2 84% 8%;
+    --card-foreground: 210 40% 98%;
 
-    --popover: 30 41 59;
-    --popover-foreground: 248 250 252;
+    --popover: 222.2 84% 8%;
+    --popover-foreground: 210 40% 98%;
 
-    --primary: 129 140 248;
-    --primary-foreground: 15 23 42;
+    --primary: 262 83% 68%;
+    --primary-foreground: 222.2 47.4% 11.2%;
 
-    --secondary: 30 41 59;
-    --secondary-foreground: 203 213 225;
+    --secondary: 217.2 32.6% 20%;
+    --secondary-foreground: 210 40% 98%;
 
-    --muted: 30 41 59;
-    --muted-foreground: 148 163 184;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
 
-    --accent: 51 65 85;
-    --accent-foreground: 203 213 225;
+    --accent: 262 40% 20%;
+    --accent-foreground: 262 83% 68%;
 
-    --destructive: 239 68 68;
-    --destructive-foreground: 248 250 252;
+    --destructive: 0 62.8% 40.6%;
+    --destructive-foreground: 210 40% 98%;
 
-    --border: 51 65 85;
-    --input: 51 65 85;
-    --ring: 129 140 248;
+    --border: 217.2 32.6% 22.5%;
+    --input: 217.2 32.6% 22.5%;
+    --ring: 262.7 66.8% 70%;
 
-    /* Dark theme radio colors */
-    --radio-primary: 129 140 248;
-    --radio-secondary: 100 116 139;
-    --radio-accent-light: 51 65 85;
-    --radio-accent-dark: 129 140 248;
-    --radio-bg-light: 30 41 59;
-    --radio-bg-dark: 15 23 42;
-    --radio-border: 71 85 105;
-
-    --sidebar-background: 30 41 59;
-    --sidebar-foreground: 248 250 252;
-    --sidebar-primary: 129 140 248;
-    --sidebar-primary-foreground: 15 23 42;
-    --sidebar-accent: 51 65 85;
-    --sidebar-accent-foreground: 203 213 225;
-    --sidebar-border: 51 65 85;
-    --sidebar-ring: 129 140 248;
+    --sidebar-background: 224 40% 16%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 262 83% 68%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 262 40% 20%;
+    --sidebar-accent-foreground: 262 83% 68%;
+    --sidebar-border: 224 40% 22%;
+    --sidebar-ring: 262 91.2% 69.8%;
   }
 }
 
@@ -110,6 +92,7 @@
 
   html, body, #root {
     @apply h-full w-full m-0 p-0 overflow-x-hidden;
+    /* Enhanced iOS specific fixes */
     -webkit-overflow-scrolling: touch;
     -webkit-text-size-adjust: 100%;
     -webkit-tap-highlight-color: transparent;
@@ -118,44 +101,40 @@
   body {
     @apply bg-background text-foreground antialiased;
     text-rendering: optimizeLegibility;
+    /* Enhanced iOS font size fix */
     font-size: max(16px, 1rem);
+    /* iOS safe area support */
     padding-top: env(safe-area-inset-top);
     padding-bottom: env(safe-area-inset-bottom);
   }
   
+  /* Enhanced iOS Safari specific fixes */
   input, select, textarea {
+    /* Prevent iOS zoom on focus */
     font-size: max(16px, 1rem) !important;
+    /* Remove iOS input styling */
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
     border-radius: 0;
+    /* Fix iOS input rendering */
     background-clip: padding-box;
   }
   
   button {
+    /* Remove iOS button styling */
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
     border-radius: 0;
+    /* Enhanced touch feedback */
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
   }
 }
 
+/* Enhanced Material Design Utilities */
 @layer utilities {
-  /* Radio-themed utilities */
-  .radio-gradient-light {
-    @apply bg-gradient-to-br from-radio-bg-light via-white to-radio-accent-light/20;
-  }
-  
-  .radio-gradient-dark {
-    @apply bg-gradient-to-br from-radio-bg-dark via-slate-800 to-radio-accent-dark/20;
-  }
-  
-  .radio-glass {
-    @apply backdrop-blur-md bg-white/20 border-radio-border/20 dark:bg-slate-800/30 dark:border-radio-border/10;
-  }
-
   .material-shadow-1 {
     box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
   }
@@ -168,10 +147,53 @@
     box-shadow: 0 10px 20px rgba(0,0,0,0.15), 0 3px 6px rgba(0,0,0,0.10);
   }
   
+  .material-shadow-4 {
+    box-shadow: 0 15px 25px rgba(0,0,0,0.15), 0 5px 10px rgba(0,0,0,0.05);
+  }
+  
+  .material-shadow-5 {
+    box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+  }
+  
+  .glass {
+    @apply backdrop-blur-md bg-white/15 border-white/10;
+  }
+  
+  .dark-glass {
+    @apply backdrop-blur-md bg-black/25 border-white/10;
+  }
+  
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
   .material-transition {
     @apply transition-all duration-300 ease-in-out;
   }
+
+  .elevation-hover {
+    @apply material-transition hover:material-shadow-3;
+  }
   
+  /* Enhanced responsive utilities */
+  .responsive-container {
+    @apply w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+  
+  .responsive-padding {
+    @apply px-4 sm:px-6 md:px-8;
+  }
+  
+  .responsive-grid {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4;
+  }
+  
+  /* Enhanced iOS Safe Area Support */
   .ios-safe-top {
     padding-top: max(env(safe-area-inset-top), 1rem);
   }
@@ -188,6 +210,7 @@
     padding-right: max(env(safe-area-inset-right), 0px);
   }
   
+  /* Enhanced iOS specific touch improvements */
   .ios-touch-target {
     min-height: 44px;
     min-width: 44px;
@@ -195,22 +218,64 @@
     -webkit-tap-highlight-color: transparent;
   }
 
+  /* iOS viewport height fix */
   .ios-vh-fix {
     min-height: 100vh;
     min-height: -webkit-fill-available;
   }
   
+  /* Prevent rubber band scrolling */
   .ios-no-bounce {
     overscroll-behavior: none;
     -webkit-overflow-scrolling: touch;
   }
   
+  /* Improve scrolling performance */
   .ios-smooth-scroll {
     -webkit-overflow-scrolling: touch;
     scroll-behavior: smooth;
   }
 }
 
+/* Enhanced Material Design Animation Keyframes */
+@keyframes material-ripple {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+/* Enhanced Ink Ripple Effect for buttons */
+.ink-ripple {
+  position: relative;
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.ink-ripple:after {
+  content: '';
+  display: block;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  background-image: radial-gradient(circle, #fff 10%, transparent 10.01%);
+  background-repeat: no-repeat;
+  background-position: 50%;
+  transform: scale(10, 10);
+  opacity: 0;
+  transition: transform .3s, opacity 1s;
+}
+
+.ink-ripple:active:after {
+  transform: scale(0, 0);
+  opacity: .3;
+  transition: 0s;
+}
+
+/* Enhanced Safe area handling for iOS devices */
 @supports (padding: max(0px)) {
   .safe-area-inset-bottom {
     padding-bottom: max(env(safe-area-inset-bottom), 1rem);
@@ -219,16 +284,47 @@
   .safe-area-inset-top {
     padding-top: max(env(safe-area-inset-top), 1rem);
   }
+  
+  .safe-area-inset-left {
+    padding-left: max(env(safe-area-inset-left), 0px);
+  }
+  
+  .safe-area-inset-right {
+    padding-right: max(env(safe-area-inset-right), 0px);
+  }
 }
 
+/* Enhanced iOS specific improvements */
 @media (max-width: 640px) {
   input, select, textarea, button {
     @apply text-base ios-touch-target;
     font-size: max(16px, 1rem) !important;
   }
+  
+  /* Improve touch targets on small screens */
+  .touch-target {
+    @apply ios-touch-target;
+  }
 }
 
+/* Enhanced iPad specific improvements */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .responsive-grid {
+    @apply grid-cols-2 lg:grid-cols-3;
+  }
+  
+  /* iPad specific safe area */
+  body {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+}
+
+/* Enhanced iOS device specific fixes */
 @supports (-webkit-touch-callout: none) {
+  /* This targets iOS Safari */
+  
+  /* Enhanced viewport height fix for iOS */
   .ios-vh-fix {
     height: 100vh;
     height: -webkit-fill-available;
@@ -236,14 +332,37 @@
     min-height: -webkit-fill-available;
   }
   
+  /* Enhanced rubber band scrolling prevention */
   .ios-no-bounce {
     overscroll-behavior: none;
     overscroll-behavior-y: none;
   }
+  
+  /* Enhanced scrolling performance */
+  .ios-smooth-scroll {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+
+  /* Fix iOS input zoom */
+  input, select, textarea {
+    font-size: max(16px, 1rem) !important;
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+  }
 }
 
+/* Enhanced fix for iOS home indicator */
 @media screen and (max-width: 640px) {
   .bottom-nav-ios {
     padding-bottom: max(calc(env(safe-area-inset-bottom) + 0.5rem), 1rem);
+  }
+}
+
+/* iOS notification bar compatibility */
+@media screen and (orientation: landscape) and (max-device-width: 896px) {
+  .ios-landscape-fix {
+    padding-left: max(env(safe-area-inset-left), 0px);
+    padding-right: max(env(safe-area-inset-right), 0px);
   }
 }
