@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,7 +62,15 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
-				}
+				},
+				// Radio-themed colors
+				'radio-primary': 'hsl(var(--radio-primary))',
+				'radio-secondary': 'hsl(var(--radio-secondary))',
+				'radio-accent-light': 'hsl(var(--radio-accent-light))',
+				'radio-accent-dark': 'hsl(var(--radio-accent-dark))',
+				'radio-bg-light': 'hsl(var(--radio-bg-light))',
+				'radio-bg-dark': 'hsl(var(--radio-bg-dark))',
+				'radio-border': 'hsl(var(--radio-border))'
 			},
 			borderRadius: {
 				lg: 'var(--radius)',

@@ -21,11 +21,17 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   ];
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-secondary/80 via-background to-accent/30 dark:from-background dark:via-card dark:to-muted/30 ios-vh-fix ios-no-bounce">
-      {/* Header with Theme Toggle */}
-      <header className="fixed top-0 left-0 right-0 p-4 bg-background/95 backdrop-blur-xl border-b border-border/30 z-20 ios-safe-top ios-safe-left ios-safe-right">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-radio-bg-light via-background to-radio-accent-light/20 dark:from-radio-bg-dark dark:via-background dark:to-radio-accent-dark/20 ios-vh-fix ios-no-bounce">
+      {/* Header with Logo and Theme Toggle */}
+      <header className="fixed top-0 left-0 right-0 p-4 bg-background/95 backdrop-blur-xl border-b border-radio-border/30 z-20 ios-safe-top ios-safe-left ios-safe-right">
         <div className="max-w-6xl mx-auto flex justify-between items-center">
-          <h1 className="text-xl font-bold text-foreground">Uradio</h1>
+          <div className="flex items-center">
+            <img 
+              src="/lovable-uploads/23e96200-8f69-4de1-8d6a-9fb092961dc1.png" 
+              alt="Uradio" 
+              className="h-8 w-auto"
+            />
+          </div>
           <ThemeToggle />
         </div>
       </header>
@@ -35,8 +41,8 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
         {children}
       </main>
       
-      {/* Bottom Navigation Bar - iOS Optimized */}
-      <nav className="fixed bottom-0 left-0 right-0 p-2 bg-background/95 backdrop-blur-xl border-t border-border/30 material-shadow-3 z-10 bottom-nav-ios ios-safe-left ios-safe-right">
+      {/* Bottom Navigation Bar - Radio Themed */}
+      <nav className="fixed bottom-0 left-0 right-0 p-2 bg-background/95 backdrop-blur-xl border-t border-radio-border/30 material-shadow-3 z-10 bottom-nav-ios ios-safe-left ios-safe-right">
         <div className="max-w-screen-lg mx-auto flex justify-around items-center">
           {navItems.map((item) => (
             <Link key={item.path} to={item.path} className="relative flex-1">
@@ -45,8 +51,8 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
                 className={cn(
                   "flex flex-col items-center gap-1 h-auto py-3 px-0 w-full material-transition bg-transparent ios-touch-target",
                   path === item.path 
-                    ? "text-primary after:absolute after:bottom-0 after:left-1/4 after:w-1/2 after:h-0.5 after:bg-primary after:rounded-full" 
-                    : "text-muted-foreground hover:text-foreground hover:bg-transparent active:bg-accent/20"
+                    ? "text-radio-primary after:absolute after:bottom-0 after:left-1/4 after:w-1/2 after:h-0.5 after:bg-radio-primary after:rounded-full" 
+                    : "text-muted-foreground hover:text-radio-primary hover:bg-transparent active:bg-radio-accent-light/20 dark:active:bg-radio-accent-dark/20"
                 )}
               >
                 <item.icon className={cn(
