@@ -22,10 +22,19 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-secondary/80 via-background to-accent/30 dark:from-background dark:via-card dark:to-muted/30 ios-vh-fix ios-no-bounce">
-      {/* Header with Theme Toggle */}
+      {/* Header with Logo and Theme Toggle */}
       <header className="fixed top-0 left-0 right-0 p-4 bg-background/95 backdrop-blur-xl border-b border-border/30 z-20 ios-safe-top ios-safe-left ios-safe-right">
         <div className="max-w-6xl mx-auto flex justify-between items-center">
-          <h1 className="text-xl font-bold text-foreground">Uradio</h1>
+          {/* Responsive Logo */}
+          <div className="flex items-center">
+            <img 
+              src="/lovable-uploads/f6bddacc-e4ab-42a4-bdd9-3ea0d18320c0.png" 
+              alt="Uradio Logo" 
+              className="h-8 w-auto sm:h-10 md:h-12 object-contain transition-all duration-200"
+            />
+          </div>
+          
+          {/* Theme Toggle */}
           <ThemeToggle />
         </div>
       </header>
