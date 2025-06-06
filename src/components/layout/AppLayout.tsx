@@ -66,25 +66,23 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-surface-container-lowest via-surface to-surface-container dark:from-surface-dim dark:via-surface dark:to-surface-bright ios-vh-fix ios-no-bounce">
-      {/* Enhanced Header with Integrated Player */}
+      {/* Compact Header with Integrated Player */}
       <header className="fixed top-0 left-0 right-0 bg-surface-container/98 backdrop-blur-xl border-b border-outline-variant/30 z-20 ios-safe-top ios-safe-left ios-safe-right elevation-3">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Top row with logo and theme toggle */}
-          <div className="flex justify-between items-center py-3 sm:py-4">
-            <div className="flex items-center">
+          {/* Single row with logo, player, and theme toggle */}
+          <div className="flex items-center justify-between py-3 sm:py-4 min-h-[72px]">
+            {/* Logo */}
+            <div className="flex items-center flex-shrink-0 w-24 sm:w-32">
               <img 
                 src={getLogoSrc()}
                 alt="uRadio Logo" 
-                className="h-12 w-auto sm:h-14 md:h-16 lg:h-18 object-contain transition-all duration-300 ease-out hover:scale-105"
+                className="h-12 w-auto sm:h-14 md:h-16 object-contain transition-all duration-300 ease-out hover:scale-105"
               />
             </div>
-            <ThemeToggle />
-          </div>
-          
-          {/* Integrated Player Row */}
-          {currentTrack && (
-            <div className="pb-3 border-t border-outline-variant/20 pt-3">
-              <div className="max-w-2xl mx-auto">
+            
+            {/* Compact Player - Center */}
+            <div className="flex-1 max-w-2xl mx-4">
+              {currentTrack && (
                 <MusicPlayer
                   currentTrack={currentTrack}
                   isPlaying={isPlaying}
@@ -94,17 +92,23 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
                   volume={volume}
                   onVolumeChange={setVolume}
                   loading={loading}
+                  compact={true}
                 />
-              </div>
+              )}
             </div>
-          )}
+            
+            {/* Theme Toggle */}
+            <div className="flex items-center flex-shrink-0">
+              <ThemeToggle />
+            </div>
+          </div>
         </div>
       </header>
       
-      {/* Enhanced Main Content with adjusted spacing for header player */}
+      {/* Main Content with original spacing */}
       <main className={cn(
         "flex-grow p-3 sm:p-4 pb-32 md:pb-28 overflow-x-hidden max-w-7xl mx-auto w-full ios-smooth-scroll ios-safe-left ios-safe-right px-4 sm:px-6 lg:px-8",
-        currentTrack ? "pt-40 sm:pt-44 md:pt-48" : "pt-28 sm:pt-32"
+        "pt-24 sm:pt-28"
       )}>
         {children}
       </main>
