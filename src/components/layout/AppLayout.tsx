@@ -70,13 +70,13 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
       <header className="fixed top-0 left-0 right-0 bg-surface-container/98 backdrop-blur-xl border-b border-outline-variant/30 z-20 ios-safe-top ios-safe-left ios-safe-right elevation-3">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Single row with logo, player, and theme toggle */}
-          <div className="flex items-center justify-between py-3 sm:py-4 min-h-[72px]">
+          <div className="flex items-center justify-between py-3 sm:py-4 h-16 sm:h-16">
             {/* Logo */}
-            <div className="flex items-center flex-shrink-0 w-24 sm:w-32">
+            <div className="flex items-center flex-shrink-0 w-16 sm:w-20">
               <img 
                 src={getLogoSrc()}
                 alt="uRadio Logo" 
-                className="h-12 w-auto sm:h-14 md:h-16 object-contain transition-all duration-300 ease-out hover:scale-105"
+                className="h-10 w-auto sm:h-12 object-contain transition-opacity duration-300 ease-out"
               />
             </div>
             
@@ -98,17 +98,17 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
             </div>
             
             {/* Theme Toggle */}
-            <div className="flex items-center flex-shrink-0">
+            <div className="flex items-center flex-shrink-0 w-16 sm:w-20 justify-end">
               <ThemeToggle />
             </div>
           </div>
         </div>
       </header>
       
-      {/* Main Content with original spacing */}
+      {/* Main Content with adjusted spacing */}
       <main className={cn(
         "flex-grow p-3 sm:p-4 pb-32 md:pb-28 overflow-x-hidden max-w-7xl mx-auto w-full ios-smooth-scroll ios-safe-left ios-safe-right px-4 sm:px-6 lg:px-8",
-        "pt-24 sm:pt-28"
+        "pt-20 sm:pt-20" // Reduced padding to account for smaller header
       )}>
         {children}
       </main>

@@ -101,17 +101,22 @@ const PlaylistContent: React.FC<PlaylistContentProps> = ({
           
           <TabsContent value="mystations" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
             <StationGrid
-              stations={userStations}
+              stations={userStations.filter(station => !station.isFeatured)}
               currentIndex={currentIndex}
               currentTrackUrl={currentTrack?.url}
               isPlaying={isPlaying}
-              onSelectStation={(index) => onSelectStation(index, userStations)}
+              onSelectStation={(index) => {
+                // Find the actual index in the userStations array
+                const userStation = userStations.filter(station => !station.isFeatured)[index];
+                const actualIndex = userStations.findIndex(s => s.url === userStation.url);
+                onSelectStation(actualIndex, userStations);
+              }}
               onEditStation={onEditStation}
               onDeleteStation={onConfirmDelete}
               onToggleFavorite={onToggleFavorite}
             />
             
-            {userStations.length === 0 && (
+            {userStations.filter(station => !station.isFeatured).length === 0 && (
               <div className="text-center p-8 bg-gradient-to-br from-background/50 to-background/30 rounded-xl border border-border/50">
                 <p className="text-muted-foreground">You haven't added any stations yet</p>
                 <p className="text-sm text-muted-foreground/70 mt-1">Add stations to build your collection</p>

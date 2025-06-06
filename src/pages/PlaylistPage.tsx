@@ -21,12 +21,11 @@ const PlaylistPage: React.FC = () => {
     setIsPlaying,
     editStationByValue,
     removeStationByValue,
-    toggleFavorite,
-    getUserStations
+    toggleFavorite
   } = useTrackStateContext();
   
-  // Split stations into different categories
-  const userStations = getUserStations();
+  // Split stations into different categories - ensure proper filtering
+  const userStations = tracks.filter(track => !track.isFeatured);
   const featuredStations = tracks.filter(track => track.isFeatured);
   const favoriteStations = tracks.filter(track => track.isFavorite);
   

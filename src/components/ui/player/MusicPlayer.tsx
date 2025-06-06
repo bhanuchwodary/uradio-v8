@@ -1,4 +1,3 @@
-
 import React, { useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Track } from "@/types/track";
@@ -49,20 +48,7 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
   if (compact) {
     return (
       <div className="flex items-center space-x-2 sm:space-x-4 bg-transparent">
-        {/* Station info - compact */}
-        <div className="flex-1 min-w-0 text-center sm:text-left">
-          <h2 className="text-sm sm:text-base font-semibold truncate leading-tight">
-            {currentTrack?.name || "Select a station"}
-          </h2>
-          <p className="text-xs text-muted-foreground truncate hidden sm:block">
-            {currentTrack?.url ? getHostnameFromUrl(currentTrack.url) : "No station selected"}
-          </p>
-          {loading && (
-            <p className="text-xs text-blue-400 animate-pulse">Loading...</p>
-          )}
-        </div>
-
-        {/* Controls - horizontal compact */}
+        {/* Controls - left side */}
         <div className="flex items-center space-x-1 sm:space-x-2">
           <Button
             variant="ghost"
@@ -99,7 +85,17 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
           </Button>
         </div>
 
-        {/* Volume control - vertical compact */}
+        {/* Station info - center */}
+        <div className="flex-1 min-w-0 text-center">
+          <h2 className="text-sm sm:text-base font-semibold truncate leading-tight text-foreground">
+            {currentTrack?.name || "Select a station"}
+          </h2>
+          {loading && (
+            <p className="text-xs text-blue-400 animate-pulse">Loading...</p>
+          )}
+        </div>
+
+        {/* Volume control - right side */}
         <div className="hidden md:flex items-center space-x-2 w-24 lg:w-32">
           <Volume2 className="h-4 w-4 text-muted-foreground flex-shrink-0" />
           <Slider
