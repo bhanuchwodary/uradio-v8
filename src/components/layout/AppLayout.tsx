@@ -64,16 +64,11 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   useEffect(() => {
     const lightLogo = new Image();
     lightLogo.src = "/lovable-uploads/92c8140b-84fe-439c-a2f8-4d1758ab0998.png";
+    lightLogo.onload = () => setLogoLoaded(true);
     
     const darkLogo = new Image();
     darkLogo.src = "/lovable-uploads/f6bddacc-e4ab-42a4-bdd9-3ea0d18320c0.png";
-    
-    Promise.all([
-      new Promise(resolve => { lightLogo.onload = resolve; }),
-      new Promise(resolve => { darkLogo.onload = resolve; })
-    ]).then(() => {
-      setLogoLoaded(true);
-    });
+    darkLogo.onload = () => setLogoLoaded(true);
   }, []);
 
   // Audio visualization effect
@@ -106,16 +101,16 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-surface-container-lowest via-surface to-surface-container dark:from-surface-dim dark:via-surface dark:to-surface-bright ios-vh-fix ios-no-bounce">
       {/* Compact Header with Integrated Player */}
-      <header className="fixed top-0 left-0 right-0 bg-surface-container/98 backdrop-blur-xl border-b border-outline-variant/30 z-20 ios-safe-top ios-safe-left ios-safe-right elevation-3">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Single row with logo, player, and theme toggle */}
+      <header className="fixed top-0 left-0 right-0 bg-surface-container/95 backdrop-blur-xl border-b border-outline-variant/30 z-20 ios-safe-top ios-safe-left ios-safe-right elevation-3">
+        <div className="container mx-auto px-0">
+          {/* Single row with logo, player, and theme toggle - better alignment */}
           <div className="flex items-center h-16 sm:h-16">
             {/* Logo with Audio Visualization */}
-            <div className="flex items-center justify-center relative flex-shrink-0 w-16 sm:w-20">
+            <div className="flex items-center justify-center relative flex-shrink-0 w-16 sm:w-20 ml-0">
               <img 
                 src={getLogoSrc()}
                 alt="uRadio Logo" 
-                className={`h-10 w-auto sm:h-12 object-contain transition-opacity duration-200 ease-out ${logoLoaded ? 'opacity-100' : 'opacity-0'}`}
+                className={`h-10 w-auto sm:h-12 object-contain transition-opacity duration-100 ease-in-out ${logoLoaded ? 'opacity-100' : 'opacity-0'}`}
               />
               
               {/* Audio visualization bars */}
@@ -132,34 +127,36 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
               )}
             </div>
             
-            {/* Compact Player - Center */}
-            <div className="flex-1 max-w-2xl mx-2 sm:mx-4 flex items-center justify-center">
+            {/* Compact Player - Center with glass effect */}
+            <div className="flex-1 max-w-2xl mx-0 flex items-center justify-center">
               {currentTrack && (
-                <MusicPlayer
-                  currentTrack={currentTrack}
-                  isPlaying={isPlaying}
-                  onPlayPause={handlePlayPause}
-                  onNext={handleNext}
-                  onPrevious={handlePrevious}
-                  volume={volume}
-                  onVolumeChange={setVolume}
-                  loading={loading}
-                  compact={true}
-                />
+                <div className="w-full bg-surface-container-high/60 backdrop-blur-md rounded-lg">
+                  <MusicPlayer
+                    currentTrack={currentTrack}
+                    isPlaying={isPlaying}
+                    onPlayPause={handlePlayPause}
+                    onNext={handleNext}
+                    onPrevious={handlePrevious}
+                    volume={volume}
+                    onVolumeChange={setVolume}
+                    loading={loading}
+                    compact={true}
+                  />
+                </div>
               )}
             </div>
             
             {/* Theme Toggle */}
-            <div className="flex items-center flex-shrink-0 w-16 sm:w-20 justify-end">
+            <div className="flex items-center flex-shrink-0 w-16 sm:w-20 justify-end mr-0">
               <ThemeToggle />
             </div>
           </div>
         </div>
       </header>
       
-      {/* Main Content with adjusted spacing */}
+      {/* Main Content with adjusted spacing - better alignment */}
       <main className={cn(
-        "flex-grow p-3 sm:p-4 pb-32 md:pb-28 overflow-x-hidden container mx-auto w-full ios-smooth-scroll ios-safe-left ios-safe-right px-4 sm:px-6 lg:px-8",
+        "flex-grow p-3 sm:p-4 pb-32 md:pb-28 overflow-x-hidden container mx-auto w-full ios-smooth-scroll ios-safe-left ios-safe-right px-0 sm:px-0 lg:px-0",
         "pt-20 sm:pt-20" // Reduced padding to account for smaller header
       )}>
         {children}
@@ -167,7 +164,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
       
       {/* Enhanced Bottom Navigation with Material Design 3 */}
       <nav className="fixed bottom-0 left-0 right-0 p-2 sm:p-3 bg-surface-container/98 backdrop-blur-xl border-t border-outline-variant/20 elevation-3 z-10 bottom-nav-ios ios-safe-left ios-safe-right">
-        <div className="container mx-auto flex justify-around items-center">
+        <div className="container mx-auto flex justify-around items-center px-0">
           {navItems.map((item) => (
             <Link key={item.path} to={item.path} className="relative flex-1">
               <Button
