@@ -6,6 +6,9 @@ import { Music, List, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useTheme } from "@/components/ThemeProvider";
+import { useTrackStateContext } from "@/context/TrackStateContext";
+import { usePlayerCore } from "@/hooks/usePlayerCore";
+import { MusicPlayer } from "@/components/ui/player/MusicPlayer";
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -15,6 +18,35 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const location = useLocation();
   const path = location.pathname;
   const { theme } = useTheme();
+  
+  // Get track state for integrated player
+  const { 
+    tracks,
+    currentIndex,
+    isPlaying,
+    setCurrentIndex,
+    setIsPlaying
+  } = useTrackStateContext();
+  
+  // Use player core for player functionality
+  const {
+    volume,
+    setVolume,
+    loading,
+    handlePlayPause,
+    handleNext,
+    handlePrevious,
+  } = usePlayerCore({
+    urls: tracks.map(track => track.url),
+    currentIndex,
+    setCurrentIndex,
+    isPlaying,
+    setIsPlaying,
+    tracks
+  });
+  
+  // Calculate current track
+  const currentTrack = tracks[currentIndex] || null;
   
   // Determine which logo to use based on theme
   const getLogoSrc = () => {
@@ -34,25 +66,46 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-surface-container-lowest via-surface to-surface-container dark:from-surface-dim dark:via-surface dark:to-surface-bright ios-vh-fix ios-no-bounce">
-      {/* Enhanced Header with Material Design 3 principles */}
-      <header className="fixed top-0 left-0 right-0 p-3 sm:p-4 bg-surface-container/95 backdrop-blur-xl border-b border-outline-variant/20 z-20 ios-safe-top ios-safe-left ios-safe-right elevation-2">
-        <div className="max-w-7xl mx-auto flex justify-between items-center px-4 sm:px-6 lg:px-8">
-          {/* Enhanced Logo with smooth transitions */}
-          <div className="flex items-center">
-            <img 
-              src={getLogoSrc()}
-              alt="Uradio Logo" 
-              className="h-14 w-auto sm:h-16 md:h-18 lg:h-20 object-contain transition-all duration-300 ease-out hover:scale-105"
-            />
+      {/* Enhanced Header with Integrated Player */}
+      <header className="fixed top-0 left-0 right-0 bg-surface-container/98 backdrop-blur-xl border-b border-outline-variant/30 z-20 ios-safe-top ios-safe-left ios-safe-right elevation-3">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Top row with logo and theme toggle */}
+          <div className="flex justify-between items-center py-3 sm:py-4">
+            <div className="flex items-center">
+              <img 
+                src={getLogoSrc()}
+                alt="uRadio Logo" 
+                className="h-12 w-auto sm:h-14 md:h-16 lg:h-18 object-contain transition-all duration-300 ease-out hover:scale-105"
+              />
+            </div>
+            <ThemeToggle />
           </div>
           
-          {/* Enhanced Theme Toggle */}
-          <ThemeToggle />
+          {/* Integrated Player Row */}
+          {currentTrack && (
+            <div className="pb-3 border-t border-outline-variant/20 pt-3">
+              <div className="max-w-2xl mx-auto">
+                <MusicPlayer
+                  currentTrack={currentTrack}
+                  isPlaying={isPlaying}
+                  onPlayPause={handlePlayPause}
+                  onNext={handleNext}
+                  onPrevious={handlePrevious}
+                  volume={volume}
+                  onVolumeChange={setVolume}
+                  loading={loading}
+                />
+              </div>
+            </div>
+          )}
         </div>
       </header>
       
-      {/* Enhanced Main Content with better spacing */}
-      <main className="flex-grow p-3 sm:p-4 pt-24 sm:pt-28 pb-32 md:pb-28 overflow-x-hidden max-w-7xl mx-auto w-full ios-smooth-scroll ios-safe-left ios-safe-right px-4 sm:px-6 lg:px-8">
+      {/* Enhanced Main Content with adjusted spacing for header player */}
+      <main className={cn(
+        "flex-grow p-3 sm:p-4 pb-32 md:pb-28 overflow-x-hidden max-w-7xl mx-auto w-full ios-smooth-scroll ios-safe-left ios-safe-right px-4 sm:px-6 lg:px-8",
+        currentTrack ? "pt-40 sm:pt-44 md:pt-48" : "pt-28 sm:pt-32"
+      )}>
         {children}
       </main>
       

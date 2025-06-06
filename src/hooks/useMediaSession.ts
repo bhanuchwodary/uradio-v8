@@ -1,4 +1,3 @@
-
 import { useEffect } from "react";
 import androidAutoService from "../services/androidAutoService";
 import audioWakeLockService from "../services/audioWakeLockService";
@@ -27,30 +26,31 @@ export const useMediaSession = ({
   onSkipPrevious,
   onSeek,
 }: UseMediaSessionProps) => {
-  // Enhanced media session controls for iOS
+  // Enhanced media session controls with uRadio branding
   useEffect(() => {
     if ('mediaSession' in navigator) {
-      // Set metadata with enhanced iOS compatibility
+      // Set metadata with uRadio branding
       if (tracks.length > 0 && currentIndex < tracks.length) {
         const currentTrack = tracks[currentIndex];
         
         try {
           navigator.mediaSession.metadata = new MediaMetadata({
             title: currentTrack?.name || 'Unknown Station',
-            artist: 'Streamify Jukebox',
+            artist: 'uRadio',
             album: 'Radio Stations',
             artwork: [
-              { src: '/og-image.png', sizes: '96x96', type: 'image/png' },
-              { src: '/og-image.png', sizes: '128x128', type: 'image/png' },
-              { src: '/og-image.png', sizes: '192x192', type: 'image/png' },
-              { src: '/og-image.png', sizes: '256x256', type: 'image/png' },
-              { src: '/og-image.png', sizes: '384x384', type: 'image/png' },
-              { src: '/og-image.png', sizes: '512x512', type: 'image/png' }
+              { src: '/lovable-uploads/f6bddacc-e4ab-42a4-bdd9-3ea0d18320c0.png', sizes: '96x96', type: 'image/png' },
+              { src: '/lovable-uploads/f6bddacc-e4ab-42a4-bdd9-3ea0d18320c0.png', sizes: '128x128', type: 'image/png' },
+              { src: '/lovable-uploads/f6bddacc-e4ab-42a4-bdd9-3ea0d18320c0.png', sizes: '192x192', type: 'image/png' },
+              { src: '/lovable-uploads/f6bddacc-e4ab-42a4-bdd9-3ea0d18320c0.png', sizes: '256x256', type: 'image/png' },
+              { src: '/lovable-uploads/f6bddacc-e4ab-42a4-bdd9-3ea0d18320c0.png', sizes: '384x384', type: 'image/png' },
+              { src: '/lovable-uploads/f6bddacc-e4ab-42a4-bdd9-3ea0d18320c0.png', sizes: '512x512', type: 'image/png' }
             ]
           });
 
-          console.log("Updated media session metadata:", {
+          console.log("Updated media session metadata with uRadio branding:", {
             title: currentTrack?.name,
+            artist: 'uRadio',
             stationUrl: currentTrack?.url
           });
         } catch (error) {
@@ -120,7 +120,7 @@ export const useMediaSession = ({
     }
   }, [tracks, currentIndex, isPlaying, trackDuration, trackPosition, tracks[currentIndex]?.name]);
 
-  // Enhanced initialization with iOS focus
+  // Enhanced initialization with uRadio branding
   useEffect(() => {
     const initializeServices = async () => {
       try {
@@ -173,7 +173,7 @@ export const useMediaSession = ({
     };
   }, []);
 
-  // Enhanced track info updates for iOS
+  // Enhanced track info updates with uRadio branding
   useEffect(() => {
     if (tracks.length > 0 && currentIndex < tracks.length) {
       const currentTrack = tracks[currentIndex];
@@ -181,14 +181,14 @@ export const useMediaSession = ({
       if (currentTrack) {
         const trackInfo = {
           title: currentTrack.name || 'Unknown Station',
-          artist: "Streamify Jukebox",
+          artist: "uRadio",
           album: "Radio Stations",
           duration: trackDuration && trackDuration !== Infinity ? trackDuration : 0,
           position: trackPosition || 0,
-          artworkUrl: '/og-image.png',
+          artworkUrl: '/lovable-uploads/f6bddacc-e4ab-42a4-bdd9-3ea0d18320c0.png',
         };
         
-        console.log("Updating track info for notifications:", trackInfo);
+        console.log("Updating track info for notifications with uRadio branding:", trackInfo);
         
         androidAutoService.updateTrackInfo(trackInfo).catch(err => 
           console.warn('Error updating track info:', err)

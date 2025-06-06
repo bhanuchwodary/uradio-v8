@@ -2,10 +2,8 @@
 import React, { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useTrackStateContext } from "@/context/TrackStateContext";
-import { usePlayerCore } from "@/hooks/usePlayerCore";
 import { Track } from "@/types/track";
 import { useToast } from "@/hooks/use-toast";
-import PlaylistPlayer from "@/components/playlist/PlaylistPlayer";
 import PlaylistContent from "@/components/playlist/PlaylistContent";
 import PlaylistDialogs from "@/components/playlist/PlaylistDialogs";
 
@@ -37,29 +35,8 @@ const PlaylistPage: React.FC = () => {
     .sort((a, b) => (b.playTime || 0) - (a.playTime || 0))
     .slice(0, 8);
   
-  // Derive URLs from tracks
-  const urls = tracks.map(track => track.url);
-  
-  // Use player core for player functionality
-  const {
-    volume,
-    setVolume,
-    loading,
-    handlePlayPause,
-    handleNext,
-    handlePrevious,
-  } = usePlayerCore({
-    urls,
-    currentIndex,
-    setCurrentIndex,
-    isPlaying,
-    setIsPlaying,
-    tracks
-  });
-  
   // Add effect for smooth transition on page load
   useEffect(() => {
-    // Small delay to ensure DOM is ready before animation
     const timer = setTimeout(() => {
       setIsPageReady(true);
     }, 50);
@@ -70,13 +47,18 @@ const PlaylistPage: React.FC = () => {
   // Calculate current track
   const currentTrack = tracks[currentIndex] || null;
   
-  // Handle selecting a station from a grid
+  // Handle selecting a station from a grid with pause functionality
   const handleSelectStation = (stationIndex: number, stationList: typeof tracks) => {
     // Find the corresponding index in the full tracks list
     const mainIndex = tracks.findIndex(t => t.url === stationList[stationIndex].url);
     if (mainIndex !== -1) {
-      setCurrentIndex(mainIndex);
-      setIsPlaying(true);
+      // If clicking on the currently playing station, toggle pause/play
+      if (mainIndex === currentIndex && isPlaying) {
+        setIsPlaying(false);
+      } else {
+        setCurrentIndex(mainIndex);
+        setIsPlaying(true);
+      }
     }
   };
   
@@ -126,19 +108,7 @@ const PlaylistPage: React.FC = () => {
   return (
     <AppLayout>
       <div className={`container mx-auto max-w-5xl space-y-6 transition-opacity duration-300 ease-in-out ${isPageReady ? 'opacity-100' : 'opacity-0'}`}>
-        {/* Player Component */}
-        <PlaylistPlayer
-          currentTrack={currentTrack}
-          isPlaying={isPlaying}
-          handlePlayPause={handlePlayPause}
-          handleNext={handleNext}
-          handlePrevious={handlePrevious}
-          volume={volume}
-          setVolume={setVolume}
-          loading={loading}
-        />
-        
-        {/* Playlist Content Component */}
+        {/* Playlist Content Component - Player is now in header */}
         <PlaylistContent
           userStations={userStations}
           featuredStations={featuredStations}
