@@ -20,8 +20,8 @@ export function ThemeToggle() {
           size="icon"
           className="h-10 w-10 sm:h-12 sm:w-12 elevation-1 hover:elevation-2 transition-all duration-200 ease-out bg-surface-container/80 hover:bg-primary-container/60 border border-outline-variant/30 dark:bg-surface-container-high/80 dark:hover:bg-primary-container/40 ios-touch-target rounded-xl"
         >
-          <Sun className="h-5 w-5 sm:h-6 sm:w-6 absolute transition-all duration-200 ease-out opacity-100 scale-100 dark:opacity-0 dark:scale-50 text-on-surface" />
-          <Moon className="h-5 w-5 sm:h-6 sm:w-6 absolute transition-all duration-200 ease-out opacity-0 scale-50 dark:opacity-100 dark:scale-100 text-on-surface" />
+          <Sun className="h-5 w-5 sm:h-6 sm:w-6 absolute transition-all duration-300 ease-in-out rotate-0 opacity-100 scale-100 dark:-rotate-90 dark:opacity-0 dark:scale-50 text-on-surface" />
+          <Moon className="h-5 w-5 sm:h-6 sm:w-6 absolute transition-all duration-300 ease-in-out rotate-90 opacity-0 scale-50 dark:rotate-0 dark:opacity-100 dark:scale-100 text-on-surface" />
           <span className="sr-only">Toggle theme</span>
         </Button>
       </DropdownMenuTrigger>

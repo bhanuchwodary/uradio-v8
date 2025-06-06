@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Music, List, Plus } from "lucide-react";
@@ -18,6 +18,8 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const location = useLocation();
   const path = location.pathname;
   const { theme } = useTheme();
+  const [logoLoaded, setLogoLoaded] = useState(false);
+  const [audioLevel, setAudioLevel] = useState<number[]>([0, 0, 0, 0]);
   
   // Get track state for integrated player
   const { 
@@ -48,7 +50,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   // Calculate current track
   const currentTrack = tracks[currentIndex] || null;
   
-  // Determine which logo to use based on theme
+  // Determine which logo to use based on theme with preload
   const getLogoSrc = () => {
     const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
     const currentTheme = theme === "system" ? systemTheme : theme;
@@ -57,6 +59,43 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
       ? "/lovable-uploads/92c8140b-84fe-439c-a2f8-4d1758ab0998.png" 
       : "/lovable-uploads/f6bddacc-e4ab-42a4-bdd9-3ea0d18320c0.png";
   };
+
+  // Preload both theme logos for instant switching
+  useEffect(() => {
+    const lightLogo = new Image();
+    lightLogo.src = "/lovable-uploads/92c8140b-84fe-439c-a2f8-4d1758ab0998.png";
+    
+    const darkLogo = new Image();
+    darkLogo.src = "/lovable-uploads/f6bddacc-e4ab-42a4-bdd9-3ea0d18320c0.png";
+    
+    Promise.all([
+      new Promise(resolve => { lightLogo.onload = resolve; }),
+      new Promise(resolve => { darkLogo.onload = resolve; })
+    ]).then(() => {
+      setLogoLoaded(true);
+    });
+  }, []);
+
+  // Audio visualization effect
+  useEffect(() => {
+    if (!isPlaying) {
+      // Reset bars when not playing
+      setAudioLevel([0, 0, 0, 0]);
+      return;
+    }
+
+    // Simulate audio level for visualization
+    const interval = setInterval(() => {
+      setAudioLevel([
+        Math.random() * 0.8 + 0.2,
+        Math.random() * 0.8 + 0.2,
+        Math.random() * 0.8 + 0.2,
+        Math.random() * 0.8 + 0.2
+      ]);
+    }, 200);
+
+    return () => clearInterval(interval);
+  }, [isPlaying]);
   
   const navItems = [
     { icon: Music, label: "Playlist", path: "/" },
@@ -68,20 +107,33 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-surface-container-lowest via-surface to-surface-container dark:from-surface-dim dark:via-surface dark:to-surface-bright ios-vh-fix ios-no-bounce">
       {/* Compact Header with Integrated Player */}
       <header className="fixed top-0 left-0 right-0 bg-surface-container/98 backdrop-blur-xl border-b border-outline-variant/30 z-20 ios-safe-top ios-safe-left ios-safe-right elevation-3">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           {/* Single row with logo, player, and theme toggle */}
-          <div className="flex items-center justify-between py-3 sm:py-4 h-16 sm:h-16">
-            {/* Logo */}
-            <div className="flex items-center flex-shrink-0 w-16 sm:w-20">
+          <div className="flex items-center h-16 sm:h-16">
+            {/* Logo with Audio Visualization */}
+            <div className="flex items-center justify-center relative flex-shrink-0 w-16 sm:w-20">
               <img 
                 src={getLogoSrc()}
                 alt="uRadio Logo" 
-                className="h-10 w-auto sm:h-12 object-contain transition-opacity duration-300 ease-out"
+                className={`h-10 w-auto sm:h-12 object-contain transition-opacity duration-200 ease-out ${logoLoaded ? 'opacity-100' : 'opacity-0'}`}
               />
+              
+              {/* Audio visualization bars */}
+              {isPlaying && (
+                <div className="absolute bottom-0 left-0 right-0 flex justify-center gap-[2px] h-2">
+                  {audioLevel.map((level, i) => (
+                    <div 
+                      key={i}
+                      className="w-1 bg-primary rounded-t-sm transition-all duration-200 ease-out"
+                      style={{ height: `${level * 100}%` }}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
             
             {/* Compact Player - Center */}
-            <div className="flex-1 max-w-2xl mx-4">
+            <div className="flex-1 max-w-2xl mx-2 sm:mx-4 flex items-center justify-center">
               {currentTrack && (
                 <MusicPlayer
                   currentTrack={currentTrack}
@@ -107,7 +159,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
       
       {/* Main Content with adjusted spacing */}
       <main className={cn(
-        "flex-grow p-3 sm:p-4 pb-32 md:pb-28 overflow-x-hidden max-w-7xl mx-auto w-full ios-smooth-scroll ios-safe-left ios-safe-right px-4 sm:px-6 lg:px-8",
+        "flex-grow p-3 sm:p-4 pb-32 md:pb-28 overflow-x-hidden container mx-auto w-full ios-smooth-scroll ios-safe-left ios-safe-right px-4 sm:px-6 lg:px-8",
         "pt-20 sm:pt-20" // Reduced padding to account for smaller header
       )}>
         {children}
@@ -115,7 +167,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
       
       {/* Enhanced Bottom Navigation with Material Design 3 */}
       <nav className="fixed bottom-0 left-0 right-0 p-2 sm:p-3 bg-surface-container/98 backdrop-blur-xl border-t border-outline-variant/20 elevation-3 z-10 bottom-nav-ios ios-safe-left ios-safe-right">
-        <div className="max-w-screen-lg mx-auto flex justify-around items-center">
+        <div className="container mx-auto flex justify-around items-center">
           {navItems.map((item) => (
             <Link key={item.path} to={item.path} className="relative flex-1">
               <Button
