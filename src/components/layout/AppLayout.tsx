@@ -79,12 +79,12 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-surface-container-lowest via-surface to-surface-container dark:from-surface-dim dark:via-surface dark:to-surface-bright ios-vh-fix ios-no-bounce">
-      {/* Header with proper vertical alignment */}
+      {/* FIXED Header with reduced gap between logo and player */}
       <header className="fixed top-0 left-0 right-0 bg-surface-container/95 backdrop-blur-xl border-b border-outline-variant/30 z-20 ios-safe-top ios-safe-left ios-safe-right elevation-3">
         <div className="container mx-auto px-0">
-          <div className="flex items-center justify-center h-16 sm:h-16">
-            {/* Logo with proper centering */}
-            <div className="flex items-center justify-center flex-shrink-0 w-20 sm:w-24">
+          <div className="flex items-center justify-center h-16 sm:h-16 gap-1">
+            {/* Logo with proper centering - reduced width */}
+            <div className="flex items-center justify-center flex-shrink-0 w-16 sm:w-18">
               <img 
                 src={getLogoSrc()}
                 alt="uRadio Logo" 
@@ -92,8 +92,8 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
               />
             </div>
             
-            {/* Extended Player with proper centering */}
-            <div className="flex-1 mx-2 flex items-center justify-center">
+            {/* Extended Player with proper centering - increased flex */}
+            <div className="flex-1 mx-1 flex items-center justify-center">
               {currentTrack && (
                 <div className="w-full bg-surface-container-high/60 backdrop-blur-md rounded-lg">
                   <MusicPlayer
@@ -122,7 +122,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
         {children}
       </main>
       
-      {/* FIXED Enhanced Bottom Navigation with matching width and equal button sizes */}
+      {/* FIXED Enhanced Bottom Navigation with proper theme button styling */}
       <nav className="fixed bottom-0 left-0 right-0 p-2 sm:p-3 bg-surface-container/98 backdrop-blur-xl border-t border-outline-variant/20 elevation-3 z-10 bottom-nav-ios ios-safe-left ios-safe-right">
         <div className="container mx-auto px-0">
           <div className="flex justify-between items-center gap-2">
@@ -151,19 +151,16 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
               </Link>
             ))}
             
-            {/* FIXED Theme Toggle to match other footer buttons exactly */}
+            {/* FIXED Theme Toggle to match other footer buttons exactly with proper structure */}
             <div className="flex-1">
-              <Button
-                variant="ghost"
-                className="flex flex-col items-center gap-1.5 h-auto py-3 px-2 w-full transition-all duration-200 ease-out bg-transparent ios-touch-target rounded-xl text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high/60 active:bg-primary-container/20"
-              >
+              <div className="flex flex-col items-center gap-1.5 h-auto py-3 px-2 w-full transition-all duration-200 ease-out bg-transparent ios-touch-target rounded-xl text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high/60 active:bg-primary-container/20">
                 <div className="h-5 w-5 hover:scale-105 transition-all duration-200 ease-out">
                   <ThemeToggle />
                 </div>
                 <span className="text-xs transition-all duration-200 ease-out font-medium opacity-90">
                   Theme
                 </span>
-              </Button>
+              </div>
             </div>
           </div>
         </div>

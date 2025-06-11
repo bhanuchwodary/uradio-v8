@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useTrackStateContext } from "@/context/TrackStateContext";
@@ -99,14 +98,17 @@ const PlaylistPage: React.FC = () => {
     setShowClearDialog(true);
   };
   
-  // FIXED: Clear all function now properly removes ALL stations from the playlist only
+  // FIXED: Clear all function now properly removes ONLY user-added stations (not featured ones)
   const confirmClearAll = () => {
-    // Get count before clearing
-    const stationCount = tracks.length;
+    // Get only the user stations (non-featured stations) to remove
+    const userStationsToRemove = tracks.filter(station => !station.isFeatured);
+    const stationCount = userStationsToRemove.length;
     
-    // Remove ALL stations from the tracks array (this is the playlist)
-    const allStationsToRemove = [...tracks];
-    allStationsToRemove.forEach(station => {
+    console.log("Clearing playlist - removing user stations:", userStationsToRemove.length);
+    console.log("Featured stations will remain:", tracks.filter(station => station.isFeatured).length);
+    
+    // Remove ONLY user stations, keep featured stations
+    userStationsToRemove.forEach(station => {
       removeStationByValue(station);
     });
     
@@ -164,7 +166,7 @@ const PlaylistPage: React.FC = () => {
             <div className="bg-background p-6 rounded-lg shadow-lg max-w-md mx-4">
               <h3 className="text-lg font-semibold mb-4">Clear All Stations</h3>
               <p className="text-muted-foreground mb-6">
-                Are you sure you want to remove all stations from your playlist? This action cannot be undone.
+                Are you sure you want to remove all your added stations from your playlist? Featured stations will remain. This action cannot be undone.
               </p>
               <div className="flex gap-3 justify-end">
                 <Button variant="outline" onClick={() => setShowClearDialog(false)}>
