@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -78,11 +79,11 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-surface-container-lowest via-surface to-surface-container dark:from-surface-dim dark:via-surface dark:to-surface-bright ios-vh-fix ios-no-bounce">
-      {/* FIXED Header with proper vertical alignment */}
+      {/* Header with proper vertical alignment */}
       <header className="fixed top-0 left-0 right-0 bg-surface-container/95 backdrop-blur-xl border-b border-outline-variant/30 z-20 ios-safe-top ios-safe-left ios-safe-right elevation-3">
         <div className="container mx-auto px-0">
           <div className="flex items-center justify-center h-16 sm:h-16">
-            {/* FIXED Logo with proper centering */}
+            {/* Logo with proper centering */}
             <div className="flex items-center justify-center flex-shrink-0 w-20 sm:w-24">
               <img 
                 src={getLogoSrc()}
@@ -91,7 +92,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
               />
             </div>
             
-            {/* FIXED Extended Player with proper centering */}
+            {/* Extended Player with proper centering */}
             <div className="flex-1 mx-2 flex items-center justify-center">
               {currentTrack && (
                 <div className="w-full bg-surface-container-high/60 backdrop-blur-md rounded-lg">
@@ -121,39 +122,48 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
         {children}
       </main>
       
-      {/* FIXED Enhanced Bottom Navigation with properly styled Theme Toggle */}
+      {/* FIXED Enhanced Bottom Navigation with matching width and equal button sizes */}
       <nav className="fixed bottom-0 left-0 right-0 p-2 sm:p-3 bg-surface-container/98 backdrop-blur-xl border-t border-outline-variant/20 elevation-3 z-10 bottom-nav-ios ios-safe-left ios-safe-right">
-        <div className="container mx-auto flex justify-around items-center px-0">
-          {navItems.map((item) => (
-            <Link key={item.path} to={item.path} className="relative flex-1">
+        <div className="container mx-auto px-0">
+          <div className="flex justify-between items-center gap-2">
+            {navItems.map((item) => (
+              <Link key={item.path} to={item.path} className="flex-1">
+                <Button
+                  variant="ghost"
+                  className={cn(
+                    "flex flex-col items-center gap-1.5 h-auto py-3 px-2 w-full transition-all duration-200 ease-out bg-transparent ios-touch-target rounded-xl",
+                    path === item.path 
+                      ? "text-primary bg-primary-container/40 after:absolute after:bottom-1 after:left-1/4 after:w-1/2 after:h-1 after:bg-primary after:rounded-full after:shadow-sm" 
+                      : "text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high/60 active:bg-primary-container/20"
+                  )}
+                >
+                  <item.icon className={cn(
+                    "transition-all duration-200 ease-out", 
+                    path === item.path ? "h-6 w-6 scale-110" : "h-5 w-5 hover:scale-105"
+                  )} />
+                  <span className={cn(
+                    "text-xs transition-all duration-200 ease-out font-medium",
+                    path === item.path ? "opacity-100 font-semibold" : "opacity-90"
+                  )}>
+                    {item.label}
+                  </span>
+                </Button>
+              </Link>
+            ))}
+            
+            {/* FIXED Theme Toggle to match other footer buttons exactly */}
+            <div className="flex-1">
               <Button
                 variant="ghost"
-                className={cn(
-                  "flex flex-col items-center gap-1.5 h-auto py-3 px-2 w-full transition-all duration-200 ease-out bg-transparent ios-touch-target rounded-xl",
-                  path === item.path 
-                    ? "text-primary bg-primary-container/40 after:absolute after:bottom-1 after:left-1/4 after:w-1/2 after:h-1 after:bg-primary after:rounded-full after:shadow-sm" 
-                    : "text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high/60 active:bg-primary-container/20"
-                )}
+                className="flex flex-col items-center gap-1.5 h-auto py-3 px-2 w-full transition-all duration-200 ease-out bg-transparent ios-touch-target rounded-xl text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high/60 active:bg-primary-container/20"
               >
-                <item.icon className={cn(
-                  "transition-all duration-200 ease-out", 
-                  path === item.path ? "h-6 w-6 scale-110" : "h-5 w-5 hover:scale-105"
-                )} />
-                <span className={cn(
-                  "text-xs transition-all duration-200 ease-out font-medium",
-                  path === item.path ? "opacity-100 font-semibold" : "opacity-90"
-                )}>
-                  {item.label}
+                <div className="h-5 w-5 hover:scale-105 transition-all duration-200 ease-out">
+                  <ThemeToggle />
+                </div>
+                <span className="text-xs transition-all duration-200 ease-out font-medium opacity-90">
+                  Theme
                 </span>
               </Button>
-            </Link>
-          ))}
-          
-          {/* FIXED Theme Toggle styled to match other footer icons */}
-          <div className="flex items-center flex-shrink-0 w-16 sm:w-20 justify-center">
-            <div className="flex flex-col items-center gap-1.5 py-3 px-2">
-              <ThemeToggle />
-              <span className="text-xs text-on-surface-variant/90 font-medium">Theme</span>
             </div>
           </div>
         </div>

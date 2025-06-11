@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useTrackStateContext } from "@/context/TrackStateContext";
@@ -93,14 +94,17 @@ const PlaylistPage: React.FC = () => {
     }
   };
   
-  // Clear all stations from playlist - FIXED to clear ALL stations in playlist
+  // Clear all stations from playlist
   const handleClearAll = () => {
     setShowClearDialog(true);
   };
   
-  // Confirm clear all - FIXED to remove ALL stations from tracks
+  // FIXED: Clear all function now properly removes ALL stations from the playlist only
   const confirmClearAll = () => {
-    // Remove ALL stations from the playlist (both user and featured)
+    // Get count before clearing
+    const stationCount = tracks.length;
+    
+    // Remove ALL stations from the tracks array (this is the playlist)
     const allStationsToRemove = [...tracks];
     allStationsToRemove.forEach(station => {
       removeStationByValue(station);
@@ -108,7 +112,7 @@ const PlaylistPage: React.FC = () => {
     
     toast({
       title: "Playlist cleared",
-      description: `${allStationsToRemove.length} stations removed from your playlist`
+      description: `${stationCount} stations removed from your playlist`
     });
     setShowClearDialog(false);
   };

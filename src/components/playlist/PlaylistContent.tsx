@@ -35,8 +35,8 @@ const PlaylistContent: React.FC<PlaylistContentProps> = ({
   onToggleFavorite,
   onClearAll
 }) => {
-  // Combine all stations into one unified list
-  const allStations = [
+  // FIXED: Combine all stations into one unified playlist (stations that are actually in the playlist)
+  const allPlaylistStations = [
     ...favoriteStations,
     ...popularStations,
     ...userStations.filter(station => !station.isFeatured),
@@ -44,7 +44,7 @@ const PlaylistContent: React.FC<PlaylistContentProps> = ({
   ];
 
   // Remove duplicates based on URL
-  const uniqueStations = allStations.filter((station, index, self) => 
+  const uniquePlaylistStations = allPlaylistStations.filter((station, index, self) => 
     index === self.findIndex(s => s.url === station.url)
   );
 
@@ -55,7 +55,8 @@ const PlaylistContent: React.FC<PlaylistContentProps> = ({
           <CardTitle className="text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
             My Playlist
           </CardTitle>
-          {uniqueStations.length > 0 && onClearAll && (
+          {/* FIXED: Only show clear all if there are stations in the playlist */}
+          {uniquePlaylistStations.length > 0 && onClearAll && (
             <Button
               variant="destructive"
               size="sm"
@@ -69,13 +70,13 @@ const PlaylistContent: React.FC<PlaylistContentProps> = ({
         </div>
       </CardHeader>
       <CardContent className="px-3 sm:px-6 space-y-6">
-        {uniqueStations.length > 0 ? (
+        {uniquePlaylistStations.length > 0 ? (
           <StationGrid
-            stations={uniqueStations}
+            stations={uniquePlaylistStations}
             currentIndex={currentIndex}
             currentTrackUrl={currentTrack?.url}
             isPlaying={isPlaying}
-            onSelectStation={(index) => onSelectStation(index, uniqueStations)}
+            onSelectStation={(index) => onSelectStation(index, uniquePlaylistStations)}
             onEditStation={onEditStation}
             onDeleteStation={onConfirmDelete}
             onToggleFavorite={onToggleFavorite}

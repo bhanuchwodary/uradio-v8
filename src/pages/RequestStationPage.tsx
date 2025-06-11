@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -103,7 +104,8 @@ This request was submitted via uRadio app.
 
   return (
     <AppLayout>
-      <div className="container mx-auto max-w-2xl space-y-6">
+      {/* FIXED Added proper gap between header and content */}
+      <div className="container mx-auto max-w-2xl space-y-6 pt-4">
         <Card className="bg-gradient-to-br from-background/40 to-background/20 backdrop-blur-md border-border/30 shadow-xl">
           <CardHeader className="pb-3">
             <CardTitle className="text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent flex items-center gap-2">
@@ -139,13 +141,13 @@ This request was submitted via uRadio app.
               {/* Station Name */}
               <div className="space-y-2">
                 <Label htmlFor="stationName" className="text-base font-medium">
-                  Station Name <span className="text-red-500">*</span>
+                  {formData.requestType === "modify" ? "Existing Station Name" : "Station Name"} <span className="text-red-500">*</span>
                 </Label>
                 <Input
                   id="stationName"
                   value={formData.stationName}
                   onChange={(e) => handleInputChange("stationName", e.target.value)}
-                  placeholder="Enter station name"
+                  placeholder={formData.requestType === "modify" ? "Enter existing station name to be modified" : "Enter station name"}
                   required
                 />
               </div>
@@ -167,18 +169,18 @@ This request was submitted via uRadio app.
                 </div>
               )}
 
-              {/* Existing Station URL - for modifications */}
+              {/* FIXED New Station URL - for modifications */}
               {formData.requestType === "modify" && (
                 <div className="space-y-2">
                   <Label htmlFor="existingStationUrl" className="text-base font-medium">
-                    Existing Station URL <span className="text-red-500">*</span>
+                    New Station URL <span className="text-red-500">*</span>
                   </Label>
                   <Input
                     id="existingStationUrl"
                     type="url"
                     value={formData.existingStationUrl}
                     onChange={(e) => handleInputChange("existingStationUrl", e.target.value)}
-                    placeholder="Current station URL to be modified"
+                    placeholder="Enter new station URL to replace the existing one"
                     required
                   />
                 </div>
