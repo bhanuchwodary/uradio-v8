@@ -4,6 +4,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { useTrackStateContext } from "@/context/TrackStateContext";
 import { Track } from "@/types/track";
 import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
 import PlaylistContent from "@/components/playlist/PlaylistContent";
 import PlaylistDialogs from "@/components/playlist/PlaylistDialogs";
 
