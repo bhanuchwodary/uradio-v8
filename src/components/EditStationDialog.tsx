@@ -28,13 +28,14 @@ const EditStationDialog: React.FC<EditStationDialogProps> = ({
   initialValues,
   error
 }) => {
-  const [url, setUrl] = useState(initialValues.url);
+  // FIXED: Start with empty URL for new input instead of current URL
+  const [url, setUrl] = useState("");
   const [name, setName] = useState(initialValues.name);
   const [language, setLanguage] = useState(initialValues.language || "English");
 
   // Update state when initialValues changes
   useEffect(() => {
-    setUrl(initialValues.url);
+    setUrl(""); // Always start with empty URL for new input
     setName(initialValues.name);
     setLanguage(initialValues.language || "English");
   }, [initialValues]);
@@ -49,19 +50,20 @@ const EditStationDialog: React.FC<EditStationDialogProps> = ({
         <DialogHeader>
           <DialogTitle>Edit Station</DialogTitle>
           <DialogDescription>
-            Update the station details below.
+            Update the station details below. Enter a new URL to change the station source.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="station-url" className="text-right">
-              URL
+              New URL
             </Label>
             <Input
               id="station-url"
               value={url}
               onChange={(e) => setUrl(e.target.value)}
               className="col-span-3"
+              placeholder="Enter new station URL"
             />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">

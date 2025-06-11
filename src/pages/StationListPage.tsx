@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -103,17 +102,17 @@ const StationListPage: React.FC = () => {
   
   return (
     <AppLayout>
-      <div className="container mx-auto max-w-5xl space-y-6">
+      <div className="container mx-auto max-w-5xl space-y-6 pt-4">
         <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-foreground">Station List</h1>
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">Station List</h1>
         </div>
         
-        {/* User Stations */}
-        <Card className="bg-background/30 backdrop-blur-md border-none shadow-lg material-shadow-2">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg text-foreground">My Stations</CardTitle>
+        {/* FIXED User Stations to match playlist design */}
+        <Card className="bg-gradient-to-br from-background/40 to-background/20 backdrop-blur-md border-border/30 shadow-xl">
+          <CardHeader className="pb-3 px-3 sm:px-6">
+            <CardTitle className="text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">My Stations</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-3 sm:px-6">
             {userStations.length > 0 ? (
               <StationGrid
                 stations={userStations}
@@ -126,20 +125,21 @@ const StationListPage: React.FC = () => {
                 actionIcon="add"
               />
             ) : (
-              <div className="text-center p-6 bg-background/50 rounded-lg">
+              <div className="text-center p-8 bg-gradient-to-br from-background/50 to-background/30 rounded-xl border border-border/50">
                 <p className="text-muted-foreground">No stations added yet</p>
+                <p className="text-sm text-muted-foreground/70 mt-1">Add stations to build your collection</p>
               </div>
             )}
           </CardContent>
         </Card>
         
-        {/* Featured Stations - Now grouped by language */}
+        {/* FIXED Featured Stations to match playlist design */}
         {Object.entries(stationsByLanguage).map(([language, stations]) => (
-          <Card key={language} className="bg-background/30 backdrop-blur-md border-none shadow-lg material-shadow-2">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg text-foreground">Featured {language} Stations</CardTitle>
+          <Card key={language} className="bg-gradient-to-br from-background/40 to-background/20 backdrop-blur-md border-border/30 shadow-xl">
+            <CardHeader className="pb-3 px-3 sm:px-6">
+              <CardTitle className="text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">Featured {language} Stations</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="px-3 sm:px-6">
               <StationGrid
                 stations={stations}
                 currentIndex={currentIndex}

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useTrackStateContext } from "@/context/TrackStateContext";
@@ -94,22 +93,22 @@ const PlaylistPage: React.FC = () => {
     }
   };
   
-  // Clear all stations from playlist
+  // Clear all stations from playlist - FIXED to clear ALL stations in playlist
   const handleClearAll = () => {
     setShowClearDialog(true);
   };
   
-  // Confirm clear all
+  // Confirm clear all - FIXED to remove ALL stations from tracks
   const confirmClearAll = () => {
-    // Remove all non-featured stations (user added stations)
-    const stationsToRemove = tracks.filter(track => !track.isFeatured);
-    stationsToRemove.forEach(station => {
+    // Remove ALL stations from the playlist (both user and featured)
+    const allStationsToRemove = [...tracks];
+    allStationsToRemove.forEach(station => {
       removeStationByValue(station);
     });
     
     toast({
       title: "Playlist cleared",
-      description: `${stationsToRemove.length} stations removed from your playlist`
+      description: `${allStationsToRemove.length} stations removed from your playlist`
     });
     setShowClearDialog(false);
   };
@@ -128,7 +127,7 @@ const PlaylistPage: React.FC = () => {
 
   return (
     <AppLayout>
-      <div className={`container mx-auto max-w-5xl space-y-6 transition-opacity duration-300 ease-in-out ${isPageReady ? 'opacity-100' : 'opacity-0'}`}>
+      <div className={`container mx-auto max-w-5xl space-y-6 transition-opacity duration-300 ease-in-out pt-4 ${isPageReady ? 'opacity-100' : 'opacity-0'}`}>
         {/* Playlist Content Component - Now unified layout */}
         <PlaylistContent
           userStations={userStations}

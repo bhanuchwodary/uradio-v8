@@ -61,34 +61,36 @@ const AddStationPage: React.FC = () => {
 
   return (
     <AppLayout>
-      <div className="container mx-auto max-w-lg space-y-6 py-4">
-        <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
+      <div className="container mx-auto max-w-5xl space-y-6 pt-4">
+        <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent flex items-center gap-2">
           <Plus className="h-5 w-5 text-primary" />
           Add Station
         </h1>
         
-        <Card className="bg-background/30 backdrop-blur-md border-none shadow-lg material-shadow-2">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg">Add Radio Station</CardTitle>
-            <CardDescription>Enter the URL and name of the radio station you want to add</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <AddUrlForm onAddUrl={handleAddUrl} />
-          </CardContent>
-        </Card>
+        <div className="max-w-lg mx-auto space-y-6">
+          <Card className="bg-gradient-to-br from-background/40 to-background/20 backdrop-blur-md border-border/30 shadow-xl">
+            <CardHeader className="pb-3 px-3 sm:px-6">
+              <CardTitle className="text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">Add Radio Station</CardTitle>
+              <CardDescription>Enter the URL and name of the radio station you want to add</CardDescription>
+            </CardHeader>
+            <CardContent className="px-3 sm:px-6">
+              <AddUrlForm onAddUrl={handleAddUrl} />
+            </CardContent>
+          </Card>
 
-        <Card className="bg-background/30 backdrop-blur-md border-none shadow-lg material-shadow-2">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Upload className="h-4 w-4" />
-              Import Stations
-            </CardTitle>
-            <CardDescription>Import multiple stations from a CSV file</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ImportStationsFromCsv onImport={handleImport} />
-          </CardContent>
-        </Card>
+          <Card className="bg-gradient-to-br from-background/40 to-background/20 backdrop-blur-md border-border/30 shadow-xl">
+            <CardHeader className="pb-3 px-3 sm:px-6">
+              <CardTitle className="text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent flex items-center gap-2">
+                <Upload className="h-4 w-4" />
+                Import Stations
+              </CardTitle>
+              <CardDescription>Import multiple stations from a CSV file</CardDescription>
+            </CardHeader>
+            <CardContent className="px-3 sm:px-6">
+              <ImportStationsFromCsv onImport={handleImport} />
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </AppLayout>
   );

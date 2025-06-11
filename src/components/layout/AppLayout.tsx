@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -79,21 +78,21 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-surface-container-lowest via-surface to-surface-container dark:from-surface-dim dark:via-surface dark:to-surface-bright ios-vh-fix ios-no-bounce">
-      {/* Updated Header with Extended Player */}
+      {/* FIXED Header with proper vertical alignment */}
       <header className="fixed top-0 left-0 right-0 bg-surface-container/95 backdrop-blur-xl border-b border-outline-variant/30 z-20 ios-safe-top ios-safe-left ios-safe-right elevation-3">
         <div className="container mx-auto px-0">
-          <div className="flex items-center h-16 sm:h-16">
-            {/* Larger Logo without animation */}
-            <div className="flex items-center justify-center flex-shrink-0 w-20 sm:w-24 ml-0">
+          <div className="flex items-center justify-center h-16 sm:h-16">
+            {/* FIXED Logo with proper centering */}
+            <div className="flex items-center justify-center flex-shrink-0 w-20 sm:w-24">
               <img 
                 src={getLogoSrc()}
                 alt="uRadio Logo" 
-                className={`h-14 w-auto sm:h-16 object-contain transition-opacity duration-100 ease-in-out ${logoLoaded ? 'opacity-100' : 'opacity-0'}`}
+                className={`h-12 w-auto sm:h-14 object-contain transition-opacity duration-100 ease-in-out ${logoLoaded ? 'opacity-100' : 'opacity-0'}`}
               />
             </div>
             
-            {/* Extended Player - Takes remaining space */}
-            <div className="flex-1 mx-2">
+            {/* FIXED Extended Player with proper centering */}
+            <div className="flex-1 mx-2 flex items-center justify-center">
               {currentTrack && (
                 <div className="w-full bg-surface-container-high/60 backdrop-blur-md rounded-lg">
                   <MusicPlayer
@@ -122,7 +121,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
         {children}
       </main>
       
-      {/* Enhanced Bottom Navigation with Theme Toggle */}
+      {/* FIXED Enhanced Bottom Navigation with properly styled Theme Toggle */}
       <nav className="fixed bottom-0 left-0 right-0 p-2 sm:p-3 bg-surface-container/98 backdrop-blur-xl border-t border-outline-variant/20 elevation-3 z-10 bottom-nav-ios ios-safe-left ios-safe-right">
         <div className="container mx-auto flex justify-around items-center px-0">
           {navItems.map((item) => (
@@ -150,9 +149,12 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
             </Link>
           ))}
           
-          {/* Theme Toggle in Footer */}
+          {/* FIXED Theme Toggle styled to match other footer icons */}
           <div className="flex items-center flex-shrink-0 w-16 sm:w-20 justify-center">
-            <ThemeToggle />
+            <div className="flex flex-col items-center gap-1.5 py-3 px-2">
+              <ThemeToggle />
+              <span className="text-xs text-on-surface-variant/90 font-medium">Theme</span>
+            </div>
           </div>
         </div>
       </nav>
