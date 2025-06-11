@@ -104,11 +104,12 @@ const PlaylistPage: React.FC = () => {
     const userStationsToRemove = tracks.filter(station => !station.isFeatured);
     const stationCount = userStationsToRemove.length;
     
-    console.log("Clearing playlist - removing user stations:", userStationsToRemove.length);
-    console.log("Featured stations will remain:", tracks.filter(station => station.isFeatured).length);
+    console.log("PlaylistPage - Clearing playlist - removing user stations:", userStationsToRemove.length);
+    console.log("PlaylistPage - Featured stations will remain:", tracks.filter(station => station.isFeatured).length);
     
     // Remove ONLY user stations, keep featured stations
     userStationsToRemove.forEach(station => {
+      console.log("PlaylistPage - Removing user station:", station.name);
       removeStationByValue(station);
     });
     
@@ -164,16 +165,16 @@ const PlaylistPage: React.FC = () => {
         {showClearDialog && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
             <div className="bg-background p-6 rounded-lg shadow-lg max-w-md mx-4">
-              <h3 className="text-lg font-semibold mb-4">Clear All Stations</h3>
+              <h3 className="text-lg font-semibold mb-4">Clear Playlist</h3>
               <p className="text-muted-foreground mb-6">
-                Are you sure you want to remove all your added stations from your playlist? Featured stations will remain. This action cannot be undone.
+                Are you sure you want to remove all your added stations from your playlist? Featured stations and stations on other pages will remain unaffected. This action cannot be undone.
               </p>
               <div className="flex gap-3 justify-end">
                 <Button variant="outline" onClick={() => setShowClearDialog(false)}>
                   Cancel
                 </Button>
                 <Button variant="destructive" onClick={confirmClearAll}>
-                  Clear All
+                  Clear Playlist
                 </Button>
               </div>
             </div>

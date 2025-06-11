@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,6 +17,8 @@ const StationListPage: React.FC = () => {
     tracks,
     currentIndex,
     isPlaying,
+    setCurrentIndex,
+    setIsPlaying,
     addUrl,
     editStationByValue,
     removeStationByValue,
@@ -50,15 +53,37 @@ const StationListPage: React.FC = () => {
     stationsByLanguage[language].push(station);
   });
   
+  // Handle selecting a station (play it directly)
+  const handleSelectStation = (stationIndex: number, stationList: Track[]) => {
+    const selectedStation = stationList[stationIndex];
+    console.log("StationListPage - Selecting station:", selectedStation);
+    
+    // Find the corresponding index in the full tracks list
+    const mainIndex = tracks.findIndex(t => t.url === selectedStation.url);
+    if (mainIndex !== -1) {
+      console.log("StationListPage - Found station at index:", mainIndex);
+      setCurrentIndex(mainIndex);
+      setIsPlaying(true);
+    } else {
+      console.log("StationListPage - Station not found in tracks, adding first");
+      // If station not in playlist, add it first then play
+      handleAddStation(selectedStation);
+    }
+  };
+  
   // Add station to playlist handler
   const handleAddStation = (station: Track) => {
+    console.log("StationListPage - Adding station to playlist:", station);
+    
     const result = addUrl(
       station.url, 
       station.name, 
-      station.isFeatured || false,
+      false, // Don't mark as featured when adding to user playlist
       station.isFavorite || false,
       station.language || ""
     );
+    
+    console.log("StationListPage - Add station result:", result);
     
     if (result.success) {
       toast({
@@ -107,7 +132,7 @@ const StationListPage: React.FC = () => {
           <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">Station List</h1>
         </div>
         
-        {/* FIXED User Stations to match playlist design */}
+        {/* My Stations Section */}
         <Card className="bg-gradient-to-br from-background/40 to-background/20 backdrop-blur-md border-border/30 shadow-xl">
           <CardHeader className="pb-3 px-3 sm:px-6">
             <CardTitle className="text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">My Stations</CardTitle>
@@ -119,10 +144,10 @@ const StationListPage: React.FC = () => {
                 currentIndex={currentIndex}
                 currentTrackUrl={currentTrack?.url}
                 isPlaying={isPlaying}
-                onSelectStation={(index) => handleAddStation(userStations[index])}
+                onSelectStation={handleSelectStation}
                 onEditStation={handleEditStation}
                 onDeleteStation={handleDeleteStation}
-                actionIcon="add"
+                actionIcon="play"
               />
             ) : (
               <div className="text-center p-8 bg-gradient-to-br from-background/50 to-background/30 rounded-xl border border-border/50">
@@ -133,7 +158,7 @@ const StationListPage: React.FC = () => {
           </CardContent>
         </Card>
         
-        {/* FIXED Featured Stations to match playlist design */}
+        {/* Featured Stations by Language */}
         {Object.entries(stationsByLanguage).map(([language, stations]) => (
           <Card key={language} className="bg-gradient-to-br from-background/40 to-background/20 backdrop-blur-md border-border/30 shadow-xl">
             <CardHeader className="pb-3 px-3 sm:px-6">

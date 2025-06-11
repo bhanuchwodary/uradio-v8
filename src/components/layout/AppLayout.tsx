@@ -17,7 +17,7 @@ interface AppLayoutProps {
 export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const location = useLocation();
   const path = location.pathname;
-  const { theme } = useTheme();
+  const { theme, setTheme } = useTheme();
   const [logoLoaded, setLogoLoaded] = useState(false);
   
   // Get track state for integrated player
@@ -76,6 +76,14 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
     { icon: Plus, label: "Add", path: "/add" },
     { icon: Mail, label: "Request", path: "/request-station" }
   ];
+
+  // Function to cycle through themes
+  const handleThemeToggle = () => {
+    const themes = ["light", "dark", "system"];
+    const currentIndex = themes.indexOf(theme);
+    const nextIndex = (currentIndex + 1) % themes.length;
+    setTheme(themes[nextIndex] as "light" | "dark" | "system");
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-surface-container-lowest via-surface to-surface-container dark:from-surface-dim dark:via-surface dark:to-surface-bright ios-vh-fix ios-no-bounce">
@@ -151,16 +159,20 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
               </Link>
             ))}
             
-            {/* FIXED Theme Toggle to match other footer buttons exactly with proper structure */}
+            {/* FIXED Theme Toggle to work on full button click */}
             <div className="flex-1">
-              <div className="flex flex-col items-center gap-1.5 h-auto py-3 px-2 w-full transition-all duration-200 ease-out bg-transparent ios-touch-target rounded-xl text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high/60 active:bg-primary-container/20">
+              <Button
+                variant="ghost"
+                onClick={handleThemeToggle}
+                className="flex flex-col items-center gap-1.5 h-auto py-3 px-2 w-full transition-all duration-200 ease-out bg-transparent ios-touch-target rounded-xl text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high/60 active:bg-primary-container/20"
+              >
                 <div className="h-5 w-5 hover:scale-105 transition-all duration-200 ease-out">
                   <ThemeToggle />
                 </div>
                 <span className="text-xs transition-all duration-200 ease-out font-medium opacity-90">
                   Theme
                 </span>
-              </div>
+              </Button>
             </div>
           </div>
         </div>
