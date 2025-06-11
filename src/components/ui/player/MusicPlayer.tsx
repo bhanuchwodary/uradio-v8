@@ -46,28 +46,6 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
     }
   };
 
-  // Generate audio levels for visualization
-  const [audioLevels, setAudioLevels] = React.useState<number[]>([0, 0, 0, 0, 0]);
-  
-  useEffect(() => {
-    if (!isPlaying) {
-      setAudioLevels([0, 0, 0, 0, 0]);
-      return;
-    }
-    
-    const interval = setInterval(() => {
-      setAudioLevels([
-        Math.random() * 0.8 + 0.2,
-        Math.random() * 0.8 + 0.2,
-        Math.random() * 0.8 + 0.2,
-        Math.random() * 0.8 + 0.2,
-        Math.random() * 0.8 + 0.2
-      ]);
-    }, 180);
-    
-    return () => clearInterval(interval);
-  }, [isPlaying]);
-
   if (compact) {
     return (
       <div className="flex items-center w-full py-1 px-1">
@@ -108,25 +86,12 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
           </Button>
         </div>
 
-        {/* Station info with audio visualization - center */}
+        {/* Station info - center, removed visualization */}
         <div className="flex-1 min-w-0 px-2 sm:px-4 flex justify-center items-center">
-          <div className="w-full relative">
+          <div className="w-full">
             <h2 className="text-sm font-medium text-center truncate leading-tight text-foreground">
               {currentTrack?.name || "Select a station"}
             </h2>
-            
-            {/* Visualization in compact mode */}
-            {isPlaying && (
-              <div className="absolute -bottom-3 left-0 right-0 flex justify-center items-end gap-[3px] h-2">
-                {audioLevels.map((level, i) => (
-                  <div 
-                    key={i}
-                    className="w-1 bg-primary/80 rounded-t-sm transition-all duration-150 ease-out"
-                    style={{ height: `${level * 100}%` }}
-                  />
-                ))}
-              </div>
-            )}
             
             {loading && (
               <p className="text-xs text-center text-blue-400 animate-pulse">Loading...</p>
@@ -149,39 +114,25 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
     );
   }
 
-  // Original full player layout for non-compact mode with added visualization
+  // Original full player layout for non-compact mode without visualization
   return (
     <Card className="p-4 bg-gradient-to-br from-background/80 to-background/90 backdrop-blur-md border-none shadow-lg">
       <div className="flex flex-col space-y-4">
-        {/* Station info with visualization backdrop */}
-        <div className="text-center px-2 relative">
-          {/* Audio visualization behind station name */}
-          <div className="absolute left-0 right-0 top-1/2 -translate-y-1/2 flex justify-center items-end gap-1 h-8 opacity-30">
-            {[...Array(7)].map((_, i) => (
-              <div 
-                key={i}
-                className={`w-1.5 bg-primary rounded-t-md transition-all duration-150 ease-out ${!isPlaying ? 'h-1' : ''}`}
-                style={isPlaying ? { 
-                  height: `${Math.random() * 100}%`,
-                  animationDelay: `${i * 0.1}s`
-                } : {}}
-              />
-            ))}
-          </div>
-          
-          <h2 className="text-xl font-bold truncate leading-tight relative z-10">
+        {/* Station info without visualization */}
+        <div className="text-center px-2">
+          <h2 className="text-xl font-bold truncate leading-tight">
             {currentTrack?.name || "Select a station"}
           </h2>
-          <p className="text-xs text-muted-foreground truncate mt-1 relative z-10">
+          <p className="text-xs text-muted-foreground truncate mt-1">
             {currentTrack?.url ? getHostnameFromUrl(currentTrack.url) : "No station selected"}
           </p>
           {currentTrack?.language && (
-            <div className="flex items-center justify-center text-xs text-blue-400 mt-2 relative z-10">
+            <div className="flex items-center justify-center text-xs text-blue-400 mt-2">
               <span className="bg-blue-500/10 px-2 py-1 rounded-full">{currentTrack.language}</span>
             </div>
           )}
           {loading && (
-            <p className="text-xs text-blue-400 animate-pulse mt-2 relative z-10">Loading stream...</p>
+            <p className="text-xs text-blue-400 animate-pulse mt-2">Loading stream...</p>
           )}
         </div>
 

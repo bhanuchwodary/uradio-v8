@@ -8,6 +8,7 @@ import PlaylistPage from "@/pages/PlaylistPage";
 import AddStationPage from "@/pages/AddStationPage";
 import NotFound from "@/pages/NotFound";
 import StationListPage from "@/pages/StationListPage";
+import RequestStationPage from "@/pages/RequestStationPage";
 
 const App = () => {
   return (
@@ -20,6 +21,7 @@ const App = () => {
             <Route path="/add" element={<AddStationPage />} />
             <Route path="/add-station" element={<AddStationPage />} />
             <Route path="/station-list" element={<StationListPage />} />
+            <Route path="/request-station" element={<RequestStationPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Router>

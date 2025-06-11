@@ -1,7 +1,8 @@
 
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { Trash2 } from "lucide-react";
 import { StationGrid } from "@/components/ui/player/StationGrid";
 import { Track } from "@/types/track";
 
@@ -17,6 +18,7 @@ interface PlaylistContentProps {
   onEditStation: (station: Track) => void;
   onConfirmDelete: (station: Track) => void;
   onToggleFavorite: (station: Track) => void;
+  onClearAll?: () => void;
 }
 
 const PlaylistContent: React.FC<PlaylistContentProps> = ({
@@ -30,118 +32,60 @@ const PlaylistContent: React.FC<PlaylistContentProps> = ({
   onSelectStation,
   onEditStation,
   onConfirmDelete,
-  onToggleFavorite
+  onToggleFavorite,
+  onClearAll
 }) => {
+  // Combine all stations into one unified list
+  const allStations = [
+    ...favoriteStations,
+    ...popularStations,
+    ...userStations.filter(station => !station.isFeatured),
+    ...featuredStations
+  ];
+
+  // Remove duplicates based on URL
+  const uniqueStations = allStations.filter((station, index, self) => 
+    index === self.findIndex(s => s.url === station.url)
+  );
+
   return (
     <Card className="bg-gradient-to-br from-background/40 to-background/20 backdrop-blur-md border-border/30 shadow-xl">
       <CardHeader className="pb-3 px-3 sm:px-6">
-        <CardTitle className="text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-          My Playlist
-        </CardTitle>
+        <div className="flex justify-between items-center">
+          <CardTitle className="text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+            My Playlist
+          </CardTitle>
+          {uniqueStations.length > 0 && onClearAll && (
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={onClearAll}
+              className="flex items-center gap-2"
+            >
+              <Trash2 className="h-4 w-4" />
+              Clear All
+            </Button>
+          )}
+        </div>
       </CardHeader>
       <CardContent className="px-3 sm:px-6 space-y-6">
-        {favoriteStations.length > 0 && (
-          <div>
-            <h3 className="font-semibold text-base mb-4 text-foreground/90 flex items-center gap-2">
-              <span className="w-2 h-2 bg-yellow-500 rounded-full"></span>
-              Favorites
-            </h3>
-            <StationGrid
-              stations={favoriteStations}
-              currentIndex={currentIndex}
-              currentTrackUrl={currentTrack?.url}
-              isPlaying={isPlaying}
-              onSelectStation={(index) => onSelectStation(index, favoriteStations)}
-              onToggleFavorite={onToggleFavorite}
-              onDeleteStation={onConfirmDelete}
-            />
+        {uniqueStations.length > 0 ? (
+          <StationGrid
+            stations={uniqueStations}
+            currentIndex={currentIndex}
+            currentTrackUrl={currentTrack?.url}
+            isPlaying={isPlaying}
+            onSelectStation={(index) => onSelectStation(index, uniqueStations)}
+            onEditStation={onEditStation}
+            onDeleteStation={onConfirmDelete}
+            onToggleFavorite={onToggleFavorite}
+          />
+        ) : (
+          <div className="text-center p-8 bg-gradient-to-br from-background/50 to-background/30 rounded-xl border border-border/50">
+            <p className="text-muted-foreground">Your playlist is empty</p>
+            <p className="text-sm text-muted-foreground/70 mt-1">Add stations to build your collection</p>
           </div>
         )}
-      
-        <Tabs defaultValue="popular" className="w-full">
-          <TabsList className="w-full grid grid-cols-3 mb-4 h-11 p-1 bg-background/50 backdrop-blur-sm">
-            <TabsTrigger 
-              value="popular" 
-              className="text-sm py-2 px-3 data-[state=active]:bg-primary/20 data-[state=active]:text-primary font-medium transition-all"
-            >
-              Popular
-            </TabsTrigger>
-            <TabsTrigger 
-              value="mystations" 
-              className="text-sm py-2 px-3 data-[state=active]:bg-primary/20 data-[state=active]:text-primary font-medium transition-all"
-            >
-              My Stations
-            </TabsTrigger>
-            <TabsTrigger 
-              value="featured" 
-              className="text-sm py-2 px-3 data-[state=active]:bg-primary/20 data-[state=active]:text-primary font-medium transition-all"
-            >
-              Featured
-            </TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="popular" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
-            <StationGrid
-              stations={popularStations}
-              currentIndex={currentIndex}
-              currentTrackUrl={currentTrack?.url}
-              isPlaying={isPlaying}
-              onSelectStation={(index) => onSelectStation(index, popularStations)}
-              onToggleFavorite={onToggleFavorite}
-              onDeleteStation={onConfirmDelete}
-            />
-            
-            {popularStations.length === 0 && (
-              <div className="text-center p-8 bg-gradient-to-br from-background/50 to-background/30 rounded-xl border border-border/50">
-                <p className="text-muted-foreground">No popular stations available yet</p>
-                <p className="text-sm text-muted-foreground/70 mt-1">Listen to stations to see them here</p>
-              </div>
-            )}
-          </TabsContent>
-          
-          <TabsContent value="mystations" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
-            <StationGrid
-              stations={userStations.filter(station => !station.isFeatured)}
-              currentIndex={currentIndex}
-              currentTrackUrl={currentTrack?.url}
-              isPlaying={isPlaying}
-              onSelectStation={(index) => {
-                // Find the actual index in the userStations array
-                const userStation = userStations.filter(station => !station.isFeatured)[index];
-                const actualIndex = userStations.findIndex(s => s.url === userStation.url);
-                onSelectStation(actualIndex, userStations);
-              }}
-              onEditStation={onEditStation}
-              onDeleteStation={onConfirmDelete}
-              onToggleFavorite={onToggleFavorite}
-            />
-            
-            {userStations.filter(station => !station.isFeatured).length === 0 && (
-              <div className="text-center p-8 bg-gradient-to-br from-background/50 to-background/30 rounded-xl border border-border/50">
-                <p className="text-muted-foreground">You haven't added any stations yet</p>
-                <p className="text-sm text-muted-foreground/70 mt-1">Add stations to build your collection</p>
-              </div>
-            )}
-          </TabsContent>
-          
-          <TabsContent value="featured" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
-            <StationGrid
-              stations={featuredStations}
-              currentIndex={currentIndex}
-              currentTrackUrl={currentTrack?.url}
-              isPlaying={isPlaying}
-              onSelectStation={(index) => onSelectStation(index, featuredStations)}
-              onToggleFavorite={onToggleFavorite}
-              onDeleteStation={onConfirmDelete}
-            />
-            
-            {featuredStations.length === 0 && (
-              <div className="text-center p-8 bg-gradient-to-br from-background/50 to-background/30 rounded-xl border border-border/50">
-                <p className="text-muted-foreground">No featured stations available</p>
-              </div>
-            )}
-          </TabsContent>
-        </Tabs>
       </CardContent>
     </Card>
   );

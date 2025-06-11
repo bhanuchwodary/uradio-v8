@@ -11,6 +11,7 @@ const PlaylistPage: React.FC = () => {
   const { toast } = useToast();
   const [editingStation, setEditingStation] = useState<Track | null>(null);
   const [stationToDelete, setStationToDelete] = useState<Track | null>(null);
+  const [showClearDialog, setShowClearDialog] = useState(false);
   const [isPageReady, setIsPageReady] = useState(false);
   
   const { 
@@ -92,6 +93,26 @@ const PlaylistPage: React.FC = () => {
     }
   };
   
+  // Clear all stations from playlist
+  const handleClearAll = () => {
+    setShowClearDialog(true);
+  };
+  
+  // Confirm clear all
+  const confirmClearAll = () => {
+    // Remove all non-featured stations (user added stations)
+    const stationsToRemove = tracks.filter(track => !track.isFeatured);
+    stationsToRemove.forEach(station => {
+      removeStationByValue(station);
+    });
+    
+    toast({
+      title: "Playlist cleared",
+      description: `${stationsToRemove.length} stations removed from your playlist`
+    });
+    setShowClearDialog(false);
+  };
+  
   // Save edited station
   const handleSaveEdit = (data: { url: string; name: string }) => {
     if (editingStation) {
@@ -107,7 +128,7 @@ const PlaylistPage: React.FC = () => {
   return (
     <AppLayout>
       <div className={`container mx-auto max-w-5xl space-y-6 transition-opacity duration-300 ease-in-out ${isPageReady ? 'opacity-100' : 'opacity-0'}`}>
-        {/* Playlist Content Component - Player is now in header */}
+        {/* Playlist Content Component - Now unified layout */}
         <PlaylistContent
           userStations={userStations}
           featuredStations={featuredStations}
@@ -120,6 +141,7 @@ const PlaylistPage: React.FC = () => {
           onEditStation={handleEditStation}
           onConfirmDelete={handleConfirmDelete}
           onToggleFavorite={handleToggleFavorite}
+          onClearAll={handleClearAll}
         />
         
         {/* Dialogs Component */}
@@ -131,6 +153,26 @@ const PlaylistPage: React.FC = () => {
           onCloseDeleteDialog={() => setStationToDelete(null)}
           onConfirmDelete={handleDeleteStation}
         />
+        
+        {/* Clear All Confirmation Dialog */}
+        {showClearDialog && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div className="bg-background p-6 rounded-lg shadow-lg max-w-md mx-4">
+              <h3 className="text-lg font-semibold mb-4">Clear All Stations</h3>
+              <p className="text-muted-foreground mb-6">
+                Are you sure you want to remove all stations from your playlist? This action cannot be undone.
+              </p>
+              <div className="flex gap-3 justify-end">
+                <Button variant="outline" onClick={() => setShowClearDialog(false)}>
+                  Cancel
+                </Button>
+                <Button variant="destructive" onClick={confirmClearAll}>
+                  Clear All
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </AppLayout>
   );
