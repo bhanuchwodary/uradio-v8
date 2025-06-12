@@ -35,9 +35,9 @@ const PlaylistContent: React.FC<PlaylistContentProps> = ({
   onToggleFavorite,
   onClearAll
 }) => {
-  // FIXED: Only show stations that are actually part of the user's playlist
-  // This should NOT include all stations, only the ones the user has added to their playlist
-  const playlistStations = userStations.filter(station => !station.isFeatured);
+  // FIXED: Show ALL user stations in playlist, including featured ones that were added
+  // This should include both user-added stations AND featured stations that are in the playlist
+  const playlistStations = userStations;
 
   return (
     <Card className="bg-gradient-to-br from-background/40 to-background/20 backdrop-blur-md border-border/30 shadow-xl">
@@ -46,7 +46,6 @@ const PlaylistContent: React.FC<PlaylistContentProps> = ({
           <CardTitle className="text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
             My Playlist
           </CardTitle>
-          {/* FIXED: Only show clear all if there are actual playlist stations */}
           {playlistStations.length > 0 && onClearAll && (
             <Button
               variant="destructive"
