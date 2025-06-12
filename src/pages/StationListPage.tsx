@@ -71,14 +71,14 @@ const StationListPage: React.FC = () => {
     }
   };
   
-  // Add station to playlist handler
+  // FIXED: Add station to playlist handler - preserve featured status
   const handleAddStation = (station: Track) => {
     console.log("StationListPage - Adding station to playlist:", station);
     
     const result = addUrl(
       station.url, 
       station.name, 
-      false, // Don't mark as featured when adding to user playlist
+      station.isFeatured || false, // FIXED: Preserve featured status
       station.isFavorite || false,
       station.language || ""
     );

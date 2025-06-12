@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useTrackStateContext } from "@/context/TrackStateContext";
@@ -22,7 +23,8 @@ const PlaylistPage: React.FC = () => {
     setIsPlaying,
     editStationByValue,
     removeStationByValue,
-    toggleFavorite
+    toggleFavorite,
+    clearPlaylist // FIXED: Use the new clearPlaylist function
   } = useTrackStateContext();
   
   // Split stations into different categories - ensure proper filtering
@@ -98,24 +100,17 @@ const PlaylistPage: React.FC = () => {
     setShowClearDialog(true);
   };
   
-  // FIXED: Clear all function now properly removes ONLY user-added stations (not featured ones)
+  // FIXED: Clear all function now uses the new clearPlaylist function
   const confirmClearAll = () => {
-    // Get only the user stations (non-featured stations) to remove
-    const userStationsToRemove = tracks.filter(station => !station.isFeatured);
-    const stationCount = userStationsToRemove.length;
+    console.log("PlaylistPage - Clearing playlist using clearPlaylist function");
     
-    console.log("PlaylistPage - Clearing playlist - removing user stations:", userStationsToRemove.length);
-    console.log("PlaylistPage - Featured stations will remain:", tracks.filter(station => station.isFeatured).length);
+    const remainingTracks = clearPlaylist();
     
-    // Remove ONLY user stations, keep featured stations
-    userStationsToRemove.forEach(station => {
-      console.log("PlaylistPage - Removing user station:", station.name);
-      removeStationByValue(station);
-    });
+    console.log("PlaylistPage - Playlist cleared, remaining tracks:", remainingTracks);
     
     toast({
       title: "Playlist cleared",
-      description: `${stationCount} stations removed from your playlist`
+      description: `Your playlist has been cleared. Stations remain available on the Stations screen.`
     });
     setShowClearDialog(false);
   };
@@ -161,13 +156,13 @@ const PlaylistPage: React.FC = () => {
           onConfirmDelete={handleDeleteStation}
         />
         
-        {/* Clear All Confirmation Dialog */}
+        {/* FIXED: Clear All Confirmation Dialog with better messaging */}
         {showClearDialog && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
             <div className="bg-background p-6 rounded-lg shadow-lg max-w-md mx-4">
               <h3 className="text-lg font-semibold mb-4">Clear Playlist</h3>
               <p className="text-muted-foreground mb-6">
-                Are you sure you want to remove all your added stations from your playlist? Featured stations and stations on other pages will remain unaffected. This action cannot be undone.
+                Are you sure you want to clear your playlist? This will remove all stations from your current playlist, but they will remain available on the Stations screen. This action cannot be undone.
               </p>
               <div className="flex gap-3 justify-end">
                 <Button variant="outline" onClick={() => setShowClearDialog(false)}>

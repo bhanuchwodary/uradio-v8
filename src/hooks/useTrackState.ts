@@ -60,6 +60,8 @@ export const useTrackState = (): TrackStateResult => {
     // Include other operations from operations interface
     editStationByValue: operations.editStationByValue,
     removeStationByValue: operations.removeStationByValue,
+    // FIXED: Include the new clearPlaylist function
+    clearPlaylist: operations.clearPlaylist,
     ...debug
   };
 };
