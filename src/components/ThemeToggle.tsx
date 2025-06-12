@@ -1,5 +1,5 @@
 
-import { Moon, Sun, Monitor, ChevronUp } from "lucide-react";
+import { Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -10,63 +10,42 @@ import {
 import { useTheme } from "@/components/ThemeProvider";
 
 export function ThemeToggle() {
-  const { theme, setTheme } = useTheme();
-
-  const getThemeIcon = () => {
-    switch (theme) {
-      case "light":
-        return <Sun className="h-4 w-4" />;
-      case "dark":
-        return <Moon className="h-4 w-4" />;
-      default:
-        return <Monitor className="h-4 w-4" />;
-    }
-  };
-
-  const getThemeLabel = () => {
-    switch (theme) {
-      case "light":
-        return "Light";
-      case "dark":
-        return "Dark";
-      default:
-        return "Auto";
-    }
-  };
+  const { setTheme, theme } = useTheme();
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button 
           variant="ghost" 
-          className="flex items-center gap-2 h-10 px-3 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors"
+          size="icon"
+          className="h-10 w-10 sm:h-12 sm:w-12 elevation-1 hover:elevation-2 transition-all duration-150 ease-out bg-surface-container/80 hover:bg-primary-container/60 border border-outline-variant/30 dark:bg-surface-container-high/80 dark:hover:bg-primary-container/40 ios-touch-target rounded-xl"
         >
-          {getThemeIcon()}
-          <span className="hidden sm:inline">{getThemeLabel()}</span>
-          <ChevronUp className="h-3 w-3" />
+          <Sun className="h-5 w-5 sm:h-6 sm:w-6 absolute transition-all duration-150 ease-out rotate-0 opacity-100 scale-100 dark:-rotate-90 dark:opacity-0 dark:scale-50 text-on-surface" />
+          <Moon className="h-5 w-5 sm:h-6 sm:w-6 absolute transition-all duration-150 ease-out rotate-90 opacity-0 scale-50 dark:rotate-0 dark:opacity-100 dark:scale-100 text-on-surface" />
+          <span className="sr-only">Toggle theme</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-40">
+      <DropdownMenuContent 
+        align="end" 
+        className="bg-surface-container/98 backdrop-blur-md border-outline-variant/30 elevation-2 rounded-xl mt-2 min-w-[120px]"
+      >
         <DropdownMenuItem 
-          onClick={() => setTheme("light")}
-          className={theme === "light" ? "bg-accent" : ""}
+          onClick={() => setTheme("light")} 
+          className={`hover:bg-primary-container/60 focus:bg-primary-container/60 transition-all duration-200 ease-out rounded-lg mx-1 my-0.5 ${theme === "light" ? "bg-primary-container/40 text-on-primary-container" : "text-on-surface"}`}
         >
-          <Sun className="mr-2 h-4 w-4" />
           Light
         </DropdownMenuItem>
         <DropdownMenuItem 
-          onClick={() => setTheme("dark")}
-          className={theme === "dark" ? "bg-accent" : ""}
+          onClick={() => setTheme("dark")} 
+          className={`hover:bg-primary-container/60 focus:bg-primary-container/60 transition-all duration-200 ease-out rounded-lg mx-1 my-0.5 ${theme === "dark" ? "bg-primary-container/40 text-on-primary-container" : "text-on-surface"}`}
         >
-          <Moon className="mr-2 h-4 w-4" />
           Dark
         </DropdownMenuItem>
         <DropdownMenuItem 
-          onClick={() => setTheme("system")}
-          className={theme === "system" ? "bg-accent" : ""}
+          onClick={() => setTheme("system")} 
+          className={`hover:bg-primary-container/60 focus:bg-primary-container/60 transition-all duration-200 ease-out rounded-lg mx-1 my-0.5 ${theme === "system" ? "bg-primary-container/40 text-on-primary-container" : "text-on-surface"}`}
         >
-          <Monitor className="mr-2 h-4 w-4" />
-          Auto
+          System
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

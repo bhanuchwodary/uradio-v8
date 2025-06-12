@@ -1,4 +1,3 @@
-
 import { useCallback } from "react";
 import { Track } from "@/types/track";
 import { saveTracksToLocalStorage } from "./trackStorage";
@@ -9,8 +8,7 @@ import {
   editStationByValue as editByValue,
   removeStationByValue as removeByValue,
   removeTrackByIndex,
-  toggleTrackFavorite,
-  clearPlaylistStations
+  toggleTrackFavorite
 } from "./index";
 
 export const useTrackOperations = (
@@ -67,31 +65,6 @@ export const useTrackOperations = (
     
     return result;
   }, [tracks, setTracks, tracksRef]);
-
-  // FIXED: New clearPlaylist function that only clears playlist without affecting stations screen
-  const clearPlaylist = useCallback(() => {
-    console.log("Clearing playlist - keeping stations available on stations screen");
-    
-    // Use tracksRef for most up-to-date value when available
-    const currentTracks = tracksRef?.current || tracks;
-    
-    const clearedTracks = clearPlaylistStations(currentTracks);
-    
-    console.log("Playlist cleared:", clearedTracks.length, "tracks remaining");
-    
-    setTracks([...clearedTracks]);
-    setCurrentIndex(0);
-    setIsPlaying(false);
-    
-    // Force an immediate save to localStorage
-    saveTracksToLocalStorage(clearedTracks);
-    
-    if (tracksRef) {
-      tracksRef.current = clearedTracks;
-    }
-    
-    return clearedTracks.length;
-  }, [tracks, setTracks, setCurrentIndex, setIsPlaying, tracksRef]);
 
   const updatePlayTime = useCallback((index: number, seconds: number) => {
     setTracks(currentTracks => {
@@ -207,7 +180,6 @@ export const useTrackOperations = (
     updatePlayTime,
     checkIfStationExists,
     editStationByValue,
-    removeStationByValue,
-    clearPlaylist // FIXED: Export the new clearPlaylist function
+    removeStationByValue
   };
 };

@@ -104,6 +104,7 @@ This request was submitted via uRadio app.
 
   return (
     <AppLayout>
+      {/* FIXED Added proper gap between header and content */}
       <div className="container mx-auto max-w-2xl space-y-6 pt-4">
         <Card className="bg-gradient-to-br from-background/40 to-background/20 backdrop-blur-md border-border/30 shadow-xl">
           <CardHeader className="pb-3">
@@ -118,21 +119,21 @@ This request was submitted via uRadio app.
           
           <CardContent className="space-y-6">
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* FIXED Request Type with responsive radio buttons */}
+              {/* Request Type */}
               <div className="space-y-3">
                 <Label className="text-base font-medium">Request Type</Label>
                 <RadioGroup
                   value={formData.requestType}
                   onValueChange={(value) => handleInputChange("requestType", value)}
-                  className="flex flex-col sm:flex-row gap-4 sm:gap-6"
+                  className="flex gap-6"
                 >
                   <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="add" id="add" className="h-3 w-3 sm:h-4 sm:w-4" />
-                    <Label htmlFor="add" className="cursor-pointer text-sm sm:text-base">Add New Station</Label>
+                    <RadioGroupItem value="add" id="add" />
+                    <Label htmlFor="add" className="cursor-pointer">Add New Station</Label>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="modify" id="modify" className="h-3 w-3 sm:h-4 sm:w-4" />
-                    <Label htmlFor="modify" className="cursor-pointer text-sm sm:text-base">Modify Existing Station</Label>
+                    <RadioGroupItem value="modify" id="modify" />
+                    <Label htmlFor="modify" className="cursor-pointer">Modify Existing Station</Label>
                   </div>
                 </RadioGroup>
               </div>
@@ -168,7 +169,7 @@ This request was submitted via uRadio app.
                 </div>
               )}
 
-              {/* New Station URL - for modifications */}
+              {/* FIXED New Station URL - for modifications */}
               {formData.requestType === "modify" && (
                 <div className="space-y-2">
                   <Label htmlFor="existingStationUrl" className="text-base font-medium">

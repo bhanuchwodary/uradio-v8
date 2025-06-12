@@ -17,7 +17,6 @@ export interface TrackStateResult {
   checkIfStationExists: (url: string) => { exists: boolean, isUserStation: boolean };
   editStationByValue: (station: Track, data: { url: string; name: string; language?: string }) => void;
   removeStationByValue: (station: Track) => void;
-  clearPlaylist: () => number;
   debugState?: () => { 
     tracksCount: number;
     isInitialized: boolean;

@@ -5,4 +5,3 @@ export { removeTrackByIndex, removeStationByValue } from './removeStation';
 export { editTrackInfo, editStationByValue } from './editStation';
 export { toggleTrackFavorite } from './favoriteStation';
 export { updateTrackPlayTime } from './playTimeStation';
-export { clearPlaylistStations } from './clearPlaylist';

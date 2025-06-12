@@ -23,8 +23,7 @@ const PlaylistPage: React.FC = () => {
     setIsPlaying,
     editStationByValue,
     removeStationByValue,
-    toggleFavorite,
-    clearPlaylist // FIXED: Use the new clearPlaylist function
+    toggleFavorite
   } = useTrackStateContext();
   
   // Split stations into different categories - ensure proper filtering
@@ -100,17 +99,20 @@ const PlaylistPage: React.FC = () => {
     setShowClearDialog(true);
   };
   
-  // FIXED: Clear all function now uses the new clearPlaylist function
+  // FIXED: Clear all function now properly removes ALL stations from the playlist only
   const confirmClearAll = () => {
-    console.log("PlaylistPage - Clearing playlist using clearPlaylist function");
+    // Get count before clearing
+    const stationCount = tracks.length;
     
-    const remainingTracks = clearPlaylist();
-    
-    console.log("PlaylistPage - Playlist cleared, remaining tracks:", remainingTracks);
+    // Remove ALL stations from the tracks array (this is the playlist)
+    const allStationsToRemove = [...tracks];
+    allStationsToRemove.forEach(station => {
+      removeStationByValue(station);
+    });
     
     toast({
       title: "Playlist cleared",
-      description: `Your playlist has been cleared. Stations remain available on the Stations screen.`
+      description: `${stationCount} stations removed from your playlist`
     });
     setShowClearDialog(false);
   };
@@ -156,20 +158,20 @@ const PlaylistPage: React.FC = () => {
           onConfirmDelete={handleDeleteStation}
         />
         
-        {/* FIXED: Clear All Confirmation Dialog with better messaging */}
+        {/* Clear All Confirmation Dialog */}
         {showClearDialog && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
             <div className="bg-background p-6 rounded-lg shadow-lg max-w-md mx-4">
-              <h3 className="text-lg font-semibold mb-4">Clear Playlist</h3>
+              <h3 className="text-lg font-semibold mb-4">Clear All Stations</h3>
               <p className="text-muted-foreground mb-6">
-                Are you sure you want to clear your playlist? This will remove all stations from your current playlist, but they will remain available on the Stations screen. This action cannot be undone.
+                Are you sure you want to remove all stations from your playlist? This action cannot be undone.
               </p>
               <div className="flex gap-3 justify-end">
                 <Button variant="outline" onClick={() => setShowClearDialog(false)}>
                   Cancel
                 </Button>
                 <Button variant="destructive" onClick={confirmClearAll}>
-                  Clear Playlist
+                  Clear All
                 </Button>
               </div>
             </div>

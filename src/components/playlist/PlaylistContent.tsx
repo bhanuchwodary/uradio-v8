@@ -35,9 +35,18 @@ const PlaylistContent: React.FC<PlaylistContentProps> = ({
   onToggleFavorite,
   onClearAll
 }) => {
-  // FIXED: Show ALL user stations in playlist, including featured ones that were added
-  // This should include both user-added stations AND featured stations that are in the playlist
-  const playlistStations = userStations;
+  // FIXED: Combine all stations into one unified playlist (stations that are actually in the playlist)
+  const allPlaylistStations = [
+    ...favoriteStations,
+    ...popularStations,
+    ...userStations.filter(station => !station.isFeatured),
+    ...featuredStations
+  ];
+
+  // Remove duplicates based on URL
+  const uniquePlaylistStations = allPlaylistStations.filter((station, index, self) => 
+    index === self.findIndex(s => s.url === station.url)
+  );
 
   return (
     <Card className="bg-gradient-to-br from-background/40 to-background/20 backdrop-blur-md border-border/30 shadow-xl">
@@ -46,7 +55,8 @@ const PlaylistContent: React.FC<PlaylistContentProps> = ({
           <CardTitle className="text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
             My Playlist
           </CardTitle>
-          {playlistStations.length > 0 && onClearAll && (
+          {/* FIXED: Only show clear all if there are stations in the playlist */}
+          {uniquePlaylistStations.length > 0 && onClearAll && (
             <Button
               variant="destructive"
               size="sm"
@@ -60,13 +70,13 @@ const PlaylistContent: React.FC<PlaylistContentProps> = ({
         </div>
       </CardHeader>
       <CardContent className="px-3 sm:px-6 space-y-6">
-        {playlistStations.length > 0 ? (
+        {uniquePlaylistStations.length > 0 ? (
           <StationGrid
-            stations={playlistStations}
+            stations={uniquePlaylistStations}
             currentIndex={currentIndex}
             currentTrackUrl={currentTrack?.url}
             isPlaying={isPlaying}
-            onSelectStation={(index) => onSelectStation(index, playlistStations)}
+            onSelectStation={(index) => onSelectStation(index, uniquePlaylistStations)}
             onEditStation={onEditStation}
             onDeleteStation={onConfirmDelete}
             onToggleFavorite={onToggleFavorite}
