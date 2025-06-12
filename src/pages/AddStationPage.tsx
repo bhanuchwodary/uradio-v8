@@ -1,98 +1,208 @@
 
-import React from "react";
-import { AppLayout } from "@/components/layout/AppLayout";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import AddUrlForm from "@/components/AddUrlForm";
-import ImportStationsFromCsv from "@/components/ImportStationsFromCsv";
-import { useTrackStateContext } from "@/context/TrackStateContext";
-import { useToast } from "@/hooks/use-toast";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus, Upload } from "lucide-react";
+import { ModernLayout } from "@/components/layout/ModernLayout";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Plus, Radio } from "lucide-react";
+import { useSimpleTrackState } from "@/hooks/useSimpleTrackState";
+import { useMusicPlayer } from "@/hooks/useMusicPlayer";
+import { useToast } from "@/hooks/use-toast";
+import { Track } from "@/types/track";
 
 const AddStationPage: React.FC = () => {
-  const { addUrl } = useTrackStateContext();
-  const { toast } = useToast();
   const navigate = useNavigate();
-
-  const handleAddUrl = (url: string, name: string, language: string) => {
-    const result = addUrl(url, name, false, false, language);
-    
-    if (result.success) {
-      toast({
-        title: "Station Added",
-        description: name
-          ? `${name} has been added to your stations.`
-          : "The station has been added to your stations.",
-      });
-      // Navigate to the playlist page after successful add
-      setTimeout(() => navigate("/playlist"), 500);
-      return true;
-    } else {
-      toast({
-        title: "Station Not Added",
-        description: result.message || "Failed to add station.",
-        variant: "destructive"
-      });
-      return false;
-    }
-  };
+  const { toast } = useToast();
+  const [stationUrl, setStationUrl] = useState("");
+  const [stationName, setStationName] = useState("");
+  const [stationLanguage, setStationLanguage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
-  const handleImport = (stations: Array<{ name: string; url: string; language?: string }>) => {
-    const addedStations = stations.filter(station => {
-      const result = addUrl(station.url, station.name, false, false, station.language);
-      return result.success;
-    });
-    
-    if (addedStations.length > 0) {
+  const {
+    tracks,
+    currentIndex,
+    isPlaying,
+    addTrack
+  } = useSimpleTrackState();
+
+  const {
+    volume,
+    setVolume,
+    handlePlayPause,
+    handleNext,
+    handlePrevious
+  } = useMusicPlayer();
+
+  const currentTrack = tracks[currentIndex] || null;
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    try {
+      if (!stationUrl.trim()) {
+        toast({
+          title: "Error",
+          description: "Please enter a station URL",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Check if station already exists
+      const exists = tracks.some(track => track.url === stationUrl.trim());
+      if (exists) {
+        toast({
+          title: "Station already exists",
+          description: "This station is already in your collection",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      const newTrack: Omit<Track, 'playTime'> = {
+        url: stationUrl.trim(),
+        name: stationName.trim() || `Station ${tracks.length + 1}`,
+        isFavorite: false,
+        isFeatured: false,
+        language: stationLanguage || "Unknown"
+      };
+
+      addTrack(newTrack);
+      
       toast({
-        title: "Stations Imported",
-        description: `${addedStations.length} stations have been imported.`,
+        title: "Success",
+        description: "Station added successfully!"
       });
-      // Navigate to the playlist page after successful import
-      setTimeout(() => navigate("/playlist"), 500);
-    } else {
+
+      // Reset form
+      setStationUrl("");
+      setStationName("");
+      setStationLanguage("");
+      
+      // Navigate back to home after a short delay
+      setTimeout(() => {
+        navigate("/");
+      }, 1000);
+      
+    } catch (error) {
       toast({
-        title: "Import Failed",
-        description: "No stations were imported. Please check the format and try again.",
+        title: "Error",
+        description: "Failed to add station. Please try again.",
         variant: "destructive"
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
+
+  const languages = [
+    "English",
+    "Spanish",
+    "French",
+    "German",
+    "Italian",
+    "Portuguese",
+    "Russian",
+    "Chinese",
+    "Japanese",
+    "Korean",
+    "Arabic",
+    "Hindi",
+    "Unknown"
+  ];
 
   return (
-    <AppLayout>
-      <div className="container mx-auto max-w-5xl space-y-6 pt-4">
-        <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent flex items-center gap-2">
-          <Plus className="h-5 w-5 text-primary" />
-          Add Station
-        </h1>
-        
-        <div className="max-w-lg mx-auto space-y-6">
-          <Card className="bg-gradient-to-br from-background/40 to-background/20 backdrop-blur-md border-border/30 shadow-xl">
-            <CardHeader className="pb-3 px-3 sm:px-6">
-              <CardTitle className="text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">Add Radio Station</CardTitle>
-              <CardDescription>Enter the URL and name of the radio station you want to add</CardDescription>
-            </CardHeader>
-            <CardContent className="px-3 sm:px-6">
-              <AddUrlForm onAddUrl={handleAddUrl} />
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gradient-to-br from-background/40 to-background/20 backdrop-blur-md border-border/30 shadow-xl">
-            <CardHeader className="pb-3 px-3 sm:px-6">
-              <CardTitle className="text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent flex items-center gap-2">
-                <Upload className="h-4 w-4" />
-                Import Stations
-              </CardTitle>
-              <CardDescription>Import multiple stations from a CSV file</CardDescription>
-            </CardHeader>
-            <CardContent className="px-3 sm:px-6">
-              <ImportStationsFromCsv onImport={handleImport} />
-            </CardContent>
-          </Card>
+    <ModernLayout
+      currentTrack={currentTrack}
+      isPlaying={isPlaying}
+      volume={volume}
+      onVolumeChange={setVolume}
+      onPlayPause={handlePlayPause}
+      onNext={handleNext}
+      onPrevious={handlePrevious}
+    >
+      <div className="max-w-2xl mx-auto space-y-6">
+        <div className="text-center">
+          <h1 className="text-3xl font-bold mb-4">Add New Station</h1>
+          <p className="text-muted-foreground">
+            Add a new radio station to your collection
+          </p>
         </div>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <Radio className="h-5 w-5 mr-2" />
+              Station Details
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="url">Station URL *</Label>
+                <Input
+                  id="url"
+                  type="url"
+                  placeholder="https://example.com/stream"
+                  value={stationUrl}
+                  onChange={(e) => setStationUrl(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="name">Station Name</Label>
+                <Input
+                  id="name"
+                  placeholder="My Favorite Station"
+                  value={stationName}
+                  onChange={(e) => setStationName(e.target.value)}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="language">Language</Label>
+                <Select value={stationLanguage} onValueChange={setStationLanguage}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select language" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {languages.map((language) => (
+                      <SelectItem key={language} value={language}>
+                        {language}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex space-x-4 pt-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => navigate("/")}
+                  className="flex-1"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="flex-1"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  {isSubmitting ? "Adding..." : "Add Station"}
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
       </div>
-    </AppLayout>
+    </ModernLayout>
   );
 };
 
