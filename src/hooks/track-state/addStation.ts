@@ -37,11 +37,12 @@ export const addStationUrl = (
     // Create a completely new array to ensure React detects the state change
     updatedTracks = [...tracksClone];
     
-    // Update all properties explicitly, ensuring language is preserved
+    // Update all properties explicitly, ensuring featured status and language are preserved
     updatedTracks[existingIndex] = {
       ...updatedTracks[existingIndex],  // Keep existing properties first
       url: url,  // Then update what we need to update
       name: name || updatedTracks[existingIndex].name,
+      // CRITICAL FIX: Preserve the isFeatured status - don't override it unless explicitly requested
       isFeatured: isFeatured !== undefined ? isFeatured : updatedTracks[existingIndex].isFeatured,
       isFavorite: isFavorite !== undefined ? isFavorite : updatedTracks[existingIndex].isFavorite,
       // CRITICAL FIX: Ensure language is always preserved and not overwritten with empty string
@@ -49,7 +50,7 @@ export const addStationUrl = (
       playTime: updatedTracks[existingIndex].playTime || 0
     };
     
-    console.log("addStationUrl - Updated station data with language:", updatedTracks[existingIndex].language);
+    console.log("addStationUrl - Updated station data with featured status:", updatedTracks[existingIndex].isFeatured);
     resultMessage = "Station updated in playlist";
   } else {
     // If not found, add as a new station
@@ -59,12 +60,13 @@ export const addStationUrl = (
       name: name || `Station ${tracksClone.length + 1}`,
       isFavorite: !!isFavorite,
       playTime: 0,
+      // CRITICAL FIX: Preserve the isFeatured status when adding new stations
       isFeatured: !!isFeatured,
       // CRITICAL FIX: Ensure language is always set and not lost
       language: language || ""
     };
     
-    console.log("addStationUrl - New track being added:", JSON.stringify(newTrack));
+    console.log("addStationUrl - New track being added with featured status:", JSON.stringify(newTrack));
     
     // Critical fix: create a fresh array to ensure state change detection
     updatedTracks = [...tracksClone, newTrack];
