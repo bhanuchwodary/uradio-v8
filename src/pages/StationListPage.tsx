@@ -144,7 +144,7 @@ const StationListPage: React.FC = () => {
                 currentIndex={currentIndex}
                 currentTrackUrl={currentTrack?.url}
                 isPlaying={isPlaying}
-                onSelectStation={handleSelectStation}
+                onSelectStation={(index) => handleSelectStation(index, userStations)}
                 onEditStation={handleEditStation}
                 onDeleteStation={handleDeleteStation}
                 actionIcon="play"
