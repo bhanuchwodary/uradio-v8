@@ -35,7 +35,6 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   } = useTrackStateContext();
   
   const {
-    currentTrack,
     loading,
     volume,
     setVolume,
@@ -43,6 +42,9 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
     handleNext,
     handlePrevious
   } = useMusicPlayer();
+
+  // Get current track from context instead of useMusicPlayer hook
+  const currentTrack = tracks[currentIndex] || null;
 
   // Mute functionality
   const handleMuteToggle = () => {
