@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Trash2, Edit, Heart, HeartOff, Play, Pause } from "lucide-react";
 import { Track } from "@/types/track";
 import { cn } from "@/lib/utils";
-import { EditStationDialog } from "@/components/EditStationDialog";
+import EditStationDialog from "@/components/EditStationDialog";
 
 interface PlaylistProps {
   tracks: Track[];
@@ -70,12 +70,12 @@ const Playlist: React.FC<PlaylistProps> = ({
           )}
         </div>
 
-        {/* Track list */}
+        {/* Track list with improved vertical sizing */}
         {tracks.map((track, index) => (
           <Card
             key={`${track.url}-${index}`}
             className={cn(
-              "p-4 transition-all duration-200 hover:bg-surface-container-high/60 cursor-pointer border-outline-variant/30",
+              "p-3 transition-all duration-200 hover:bg-surface-container-high/60 cursor-pointer border-outline-variant/30",
               index === currentIndex && isPlaying
                 ? "bg-primary-container/20 border-primary/30"
                 : "bg-surface-container/40"
@@ -86,27 +86,27 @@ const Playlist: React.FC<PlaylistProps> = ({
               {/* Play/Pause indicator */}
               <div className="flex-shrink-0">
                 {index === currentIndex && isPlaying ? (
-                  <Pause className="h-5 w-5 text-primary" />
+                  <Pause className="h-4 w-4 text-primary" />
                 ) : (
-                  <Play className="h-5 w-5 text-on-surface-variant" />
+                  <Play className="h-4 w-4 text-on-surface-variant" />
                 )}
               </div>
 
-              {/* Track info */}
+              {/* Track info with better text sizing */}
               <div className="flex-grow min-w-0">
-                <h3 className="font-medium text-on-surface truncate">{track.name}</h3>
-                <p className="text-sm text-on-surface-variant truncate">
+                <h3 className="font-medium text-sm text-on-surface truncate leading-tight">{track.name}</h3>
+                <p className="text-xs text-on-surface-variant truncate leading-tight mt-0.5">
                   {track.url}
                 </p>
                 {track.language && (
-                  <span className="inline-block mt-1 px-2 py-0.5 text-xs bg-primary/10 text-primary rounded-full">
+                  <span className="inline-block mt-1 px-1.5 py-0.5 text-xs bg-primary/10 text-primary rounded-full">
                     {track.language}
                   </span>
                 )}
               </div>
 
-              {/* Action buttons */}
-              <div className="flex items-center gap-1 flex-shrink-0">
+              {/* Action buttons with smaller sizing */}
+              <div className="flex items-center gap-0.5 flex-shrink-0">
                 <Button
                   variant="ghost"
                   size="icon"
@@ -114,12 +114,12 @@ const Playlist: React.FC<PlaylistProps> = ({
                     e.stopPropagation();
                     onToggleFavorite(index);
                   }}
-                  className="h-8 w-8 hover:bg-surface-container-high/60"
+                  className="h-7 w-7 hover:bg-surface-container-high/60"
                 >
                   {track.isFavorite ? (
-                    <Heart className="h-4 w-4 text-red-500 fill-red-500" />
+                    <Heart className="h-3.5 w-3.5 text-red-500 fill-red-500" />
                   ) : (
-                    <HeartOff className="h-4 w-4 text-on-surface-variant" />
+                    <HeartOff className="h-3.5 w-3.5 text-on-surface-variant" />
                   )}
                 </Button>
                 
@@ -130,9 +130,9 @@ const Playlist: React.FC<PlaylistProps> = ({
                     e.stopPropagation();
                     handleEdit(index);
                   }}
-                  className="h-8 w-8 hover:bg-surface-container-high/60"
+                  className="h-7 w-7 hover:bg-surface-container-high/60"
                 >
-                  <Edit className="h-4 w-4 text-on-surface-variant" />
+                  <Edit className="h-3.5 w-3.5 text-on-surface-variant" />
                 </Button>
                 
                 <Button
@@ -142,9 +142,9 @@ const Playlist: React.FC<PlaylistProps> = ({
                     e.stopPropagation();
                     onRemove(index);
                   }}
-                  className="h-8 w-8 hover:bg-surface-container-high/60 text-on-surface-variant hover:text-destructive"
+                  className="h-7 w-7 hover:bg-surface-container-high/60 text-on-surface-variant hover:text-destructive"
                 >
-                  <Trash2 className="h-4 w-4" />
+                  <Trash2 className="h-3.5 w-3.5" />
                 </Button>
               </div>
             </div>
@@ -155,10 +155,14 @@ const Playlist: React.FC<PlaylistProps> = ({
       {/* Edit Dialog */}
       {editingTrack && (
         <EditStationDialog
-          station={editingTrack.track}
           isOpen={true}
           onClose={() => setEditingTrack(null)}
           onSave={handleEditSave}
+          initialValues={{
+            url: editingTrack.track.url,
+            name: editingTrack.track.name,
+            language: editingTrack.track.language
+          }}
         />
       )}
     </>

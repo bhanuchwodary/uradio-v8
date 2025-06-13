@@ -48,17 +48,17 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
 
   if (compact) {
     return (
-      <div className="flex items-center w-full py-1 px-1">
-        {/* Controls - left side */}
-        <div className="flex items-center space-x-1 sm:space-x-2">
+      <div className="flex items-center w-full py-1.5 px-2">
+        {/* Controls - left side, more compact */}
+        <div className="flex items-center space-x-1 flex-shrink-0">
           <Button
             variant="ghost"
             size="icon"
             onClick={onPrevious}
             disabled={!currentTrack}
-            className="h-8 w-8 rounded-full bg-accent/60 hover:bg-accent/80 dark:bg-gray-800/60 dark:hover:bg-gray-700/80 transition-all active:scale-95"
+            className="h-7 w-7 rounded-full bg-accent/60 hover:bg-accent/80 dark:bg-gray-800/60 dark:hover:bg-gray-700/80 transition-all active:scale-95"
           >
-            <SkipBack className="h-4 w-4" />
+            <SkipBack className="h-3.5 w-3.5" />
           </Button>
           
           <Button
@@ -66,12 +66,12 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
             size="icon"
             onClick={onPlayPause}
             disabled={!currentTrack}
-            className="h-9 w-9 rounded-full bg-primary hover:bg-primary/90 transition-all active:scale-95"
+            className="h-8 w-8 rounded-full bg-primary hover:bg-primary/90 transition-all active:scale-95"
           >
             {isPlaying ? (
-              <Pause className="h-4 w-4" />
+              <Pause className="h-3.5 w-3.5" />
             ) : (
-              <Play className="h-4 w-4 ml-0.5" />
+              <Play className="h-3.5 w-3.5 ml-0.5" />
             )}
           </Button>
           
@@ -80,28 +80,28 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
             size="icon"
             onClick={onNext}
             disabled={!currentTrack}
-            className="h-8 w-8 rounded-full bg-accent/60 hover:bg-accent/80 dark:bg-gray-800/60 dark:hover:bg-gray-700/80 transition-all active:scale-95"
+            className="h-7 w-7 rounded-full bg-accent/60 hover:bg-accent/80 dark:bg-gray-800/60 dark:hover:bg-gray-700/80 transition-all active:scale-95"
           >
-            <SkipForward className="h-4 w-4" />
+            <SkipForward className="h-3.5 w-3.5" />
           </Button>
         </div>
 
-        {/* Station info - center, removed visualization */}
-        <div className="flex-1 min-w-0 px-2 sm:px-4 flex justify-center items-center">
-          <div className="w-full">
+        {/* Station info - center, with better text handling */}
+        <div className="flex-1 min-w-0 px-2 flex justify-center items-center">
+          <div className="w-full max-w-full">
             <h2 className="text-sm font-medium text-center truncate leading-tight text-foreground">
               {currentTrack?.name || "Select a station"}
             </h2>
             
             {loading && (
-              <p className="text-xs text-center text-blue-400 animate-pulse">Loading...</p>
+              <p className="text-xs text-center text-blue-400 animate-pulse leading-tight">Loading...</p>
             )}
           </div>
         </div>
 
-        {/* Volume control - right side */}
-        <div className="hidden md:flex items-center space-x-2 w-24">
-          <Volume2 className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+        {/* Volume control - right side, hidden on very small screens */}
+        <div className="hidden sm:flex items-center space-x-2 w-20 flex-shrink-0">
+          <Volume2 className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
           <Slider
             value={[volume * 100]}
             max={100}

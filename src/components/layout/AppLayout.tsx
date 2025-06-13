@@ -105,54 +105,54 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-surface-container-lowest via-surface to-surface-container dark:from-surface-dim dark:via-surface dark:to-surface-bright ios-vh-fix ios-no-bounce">
-      {/* Header with improved layout */}
+      {/* Header with improved mobile layout */}
       <header className="fixed top-0 left-0 right-0 bg-surface-container/95 backdrop-blur-xl border-b border-outline-variant/30 z-20 ios-safe-top ios-safe-left ios-safe-right elevation-3">
         <div className="container mx-auto px-2">
-          <div className="flex items-center h-16 sm:h-16 gap-3">
-            {/* Wider Logo */}
-            <div className="flex items-center justify-center flex-shrink-0 w-28 sm:w-32">
+          <div className="flex items-center h-14 sm:h-16 gap-2">
+            {/* Compact Logo */}
+            <div className="flex items-center justify-center flex-shrink-0 w-16 sm:w-20">
               <img 
                 src={getLogoSrc()}
                 alt="uRadio Logo" 
-                className={`h-12 w-auto sm:h-14 object-contain transition-opacity duration-100 ease-in-out ${logoLoaded ? 'opacity-100' : 'opacity-0'}`}
+                className={`h-8 w-auto sm:h-10 object-contain transition-opacity duration-100 ease-in-out ${logoLoaded ? 'opacity-100' : 'opacity-0'}`}
               />
             </div>
             
-            {/* Wider Player Container with Random Toggle */}
-            <div className="flex-1 flex items-center gap-2">
+            {/* Player Container - takes remaining space */}
+            <div className="flex-1 min-w-0">
               {currentTrack && (
-                <>
-                  <div className="flex-1 bg-surface-container-high/60 backdrop-blur-md rounded-lg">
-                    <MusicPlayer
-                      currentTrack={currentTrack}
-                      isPlaying={isPlaying}
-                      onPlayPause={handlePlayPause}
-                      onNext={handleNext}
-                      onPrevious={handlePrevious}
-                      volume={volume}
-                      onVolumeChange={setVolume}
-                      loading={loading}
-                      compact={true}
-                    />
-                  </div>
-                  
-                  {/* Random Toggle Button */}
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setRandomMode(!randomMode)}
-                    className={cn(
-                      "h-9 w-9 rounded-full transition-all active:scale-95 flex-shrink-0",
-                      randomMode 
-                        ? "bg-primary/20 text-primary hover:bg-primary/30" 
-                        : "bg-accent/60 hover:bg-accent/80 dark:bg-gray-800/60 dark:hover:bg-gray-700/80"
-                    )}
-                    title={randomMode ? "Random mode on" : "Random mode off"}
-                  >
-                    <Shuffle className="h-4 w-4" />
-                  </Button>
-                </>
+                <div className="bg-surface-container-high/60 backdrop-blur-md rounded-lg">
+                  <MusicPlayer
+                    currentTrack={currentTrack}
+                    isPlaying={isPlaying}
+                    onPlayPause={handlePlayPause}
+                    onNext={handleNext}
+                    onPrevious={handlePrevious}
+                    volume={volume}
+                    onVolumeChange={setVolume}
+                    loading={loading}
+                    compact={true}
+                  />
+                </div>
               )}
+            </div>
+            
+            {/* Random Toggle Button - always visible */}
+            <div className="flex-shrink-0">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setRandomMode(!randomMode)}
+                className={cn(
+                  "h-8 w-8 rounded-full transition-all active:scale-95",
+                  randomMode 
+                    ? "bg-primary/20 text-primary hover:bg-primary/30" 
+                    : "bg-accent/60 hover:bg-accent/80 dark:bg-gray-800/60 dark:hover:bg-gray-700/80"
+                )}
+                title={randomMode ? "Random mode on" : "Random mode off"}
+              >
+                <Shuffle className="h-3.5 w-3.5" />
+              </Button>
             </div>
           </div>
         </div>
@@ -161,7 +161,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
       {/* Main Content */}
       <main className={cn(
         "flex-grow p-3 sm:p-4 pb-32 md:pb-28 overflow-x-hidden container mx-auto w-full ios-smooth-scroll ios-safe-left ios-safe-right px-0 sm:px-0 lg:px-0",
-        "pt-20 sm:pt-20"
+        "pt-16 sm:pt-18"
       )}>
         {children}
       </main>
