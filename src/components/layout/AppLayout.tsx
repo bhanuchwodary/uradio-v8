@@ -1,7 +1,8 @@
+
 import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Music, List, Plus, Mail } from "lucide-react";
+import { Music, List, Plus, Mail, Shuffle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useTheme } from "@/components/ThemeProvider";
@@ -18,6 +19,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const path = location.pathname;
   const { theme } = useTheme();
   const [logoLoaded, setLogoLoaded] = useState(false);
+  const [randomMode, setRandomMode] = useState(false);
   
   // Get track state for integrated player
   const { 
@@ -34,8 +36,8 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
     setVolume,
     loading,
     handlePlayPause,
-    handleNext,
-    handlePrevious,
+    handleNext: originalHandleNext,
+    handlePrevious: originalHandlePrevious,
   } = usePlayerCore({
     urls: tracks.map(track => track.url),
     currentIndex,
@@ -44,6 +46,31 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
     setIsPlaying,
     tracks
   });
+
+  // Enhanced next/previous handlers for random mode
+  const handleNext = () => {
+    if (randomMode && tracks.length > 1) {
+      let randomIndex;
+      do {
+        randomIndex = Math.floor(Math.random() * tracks.length);
+      } while (randomIndex === currentIndex && tracks.length > 1);
+      setCurrentIndex(randomIndex);
+    } else {
+      originalHandleNext();
+    }
+  };
+
+  const handlePrevious = () => {
+    if (randomMode && tracks.length > 1) {
+      let randomIndex;
+      do {
+        randomIndex = Math.floor(Math.random() * tracks.length);
+      } while (randomIndex === currentIndex && tracks.length > 1);
+      setCurrentIndex(randomIndex);
+    } else {
+      originalHandlePrevious();
+    }
+  };
   
   // Calculate current track
   const currentTrack = tracks[currentIndex] || null;
@@ -78,12 +105,12 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-surface-container-lowest via-surface to-surface-container dark:from-surface-dim dark:via-surface dark:to-surface-bright ios-vh-fix ios-no-bounce">
-      {/* Header with proper vertical alignment */}
+      {/* Header with improved layout */}
       <header className="fixed top-0 left-0 right-0 bg-surface-container/95 backdrop-blur-xl border-b border-outline-variant/30 z-20 ios-safe-top ios-safe-left ios-safe-right elevation-3">
-        <div className="container mx-auto px-0">
-          <div className="flex items-center justify-center h-16 sm:h-16">
-            {/* Logo with proper centering */}
-            <div className="flex items-center justify-center flex-shrink-0 w-20 sm:w-24">
+        <div className="container mx-auto px-2">
+          <div className="flex items-center h-16 sm:h-16 gap-3">
+            {/* Wider Logo */}
+            <div className="flex items-center justify-center flex-shrink-0 w-28 sm:w-32">
               <img 
                 src={getLogoSrc()}
                 alt="uRadio Logo" 
@@ -91,22 +118,40 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
               />
             </div>
             
-            {/* Extended Player with proper centering */}
-            <div className="flex-1 mx-2 flex items-center justify-center">
+            {/* Wider Player Container with Random Toggle */}
+            <div className="flex-1 flex items-center gap-2">
               {currentTrack && (
-                <div className="w-full bg-surface-container-high/60 backdrop-blur-md rounded-lg">
-                  <MusicPlayer
-                    currentTrack={currentTrack}
-                    isPlaying={isPlaying}
-                    onPlayPause={handlePlayPause}
-                    onNext={handleNext}
-                    onPrevious={handlePrevious}
-                    volume={volume}
-                    onVolumeChange={setVolume}
-                    loading={loading}
-                    compact={true}
-                  />
-                </div>
+                <>
+                  <div className="flex-1 bg-surface-container-high/60 backdrop-blur-md rounded-lg">
+                    <MusicPlayer
+                      currentTrack={currentTrack}
+                      isPlaying={isPlaying}
+                      onPlayPause={handlePlayPause}
+                      onNext={handleNext}
+                      onPrevious={handlePrevious}
+                      volume={volume}
+                      onVolumeChange={setVolume}
+                      loading={loading}
+                      compact={true}
+                    />
+                  </div>
+                  
+                  {/* Random Toggle Button */}
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setRandomMode(!randomMode)}
+                    className={cn(
+                      "h-9 w-9 rounded-full transition-all active:scale-95 flex-shrink-0",
+                      randomMode 
+                        ? "bg-primary/20 text-primary hover:bg-primary/30" 
+                        : "bg-accent/60 hover:bg-accent/80 dark:bg-gray-800/60 dark:hover:bg-gray-700/80"
+                    )}
+                    title={randomMode ? "Random mode on" : "Random mode off"}
+                  >
+                    <Shuffle className="h-4 w-4" />
+                  </Button>
+                </>
               )}
             </div>
           </div>
@@ -150,7 +195,6 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
               </Link>
             ))}
             
-            {/* Theme Toggle that matches other footer buttons exactly */}
             <div className="flex-1">
               <ThemeToggle />
             </div>

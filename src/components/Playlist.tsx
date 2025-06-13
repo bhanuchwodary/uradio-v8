@@ -1,199 +1,167 @@
-import React, { useState, useEffect, useMemo, useCallback } from "react";
+
+import React, { useState } from "react";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Radio, Edit, Trash2, Globe } from "lucide-react";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import EditStationDialog from "./EditStationDialog";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { Trash2, Edit, Heart, HeartOff, Play, Pause } from "lucide-react";
 import { Track } from "@/types/track";
+import { cn } from "@/lib/utils";
+import { EditStationDialog } from "@/components/EditStationDialog";
 
 interface PlaylistProps {
-  urls: string[];
-  tracks?: Track[];
+  tracks: Track[];
   currentIndex: number;
-  onSelectTrack: (index: number) => void;
-  onRemoveTrack: (index: number) => void;
-  onEditTrack?: (index: number, data: { url: string; name: string; language?: string }) => void;
+  isPlaying: boolean;
+  onPlay: (index: number) => void;
+  onRemove: (index: number) => void;
+  onToggleFavorite: (index: number) => void;
+  onEdit: (index: number, data: { url: string; name: string; language?: string }) => void;
+  onClearAll: () => void;
 }
 
 const Playlist: React.FC<PlaylistProps> = ({
-  urls,
-  tracks = [],
+  tracks,
   currentIndex,
-  onSelectTrack,
-  onRemoveTrack,
-  onEditTrack,
+  isPlaying,
+  onPlay,
+  onRemove,
+  onToggleFavorite,
+  onEdit,
+  onClearAll,
 }) => {
-  const [editingTrack, setEditingTrack] = useState<{ index: number; data: { url: string; name: string; language?: string } } | null>(null);
-  const [renderKey, setRenderKey] = useState(Date.now());
-  const mountTime = useMemo(() => Date.now(), []);
-  const isMobile = useIsMobile();
+  const [editingTrack, setEditingTrack] = useState<{ index: number; track: Track } | null>(null);
 
-  // Force re-render only when tracks length changes or when tracks content genuinely changes
-  useEffect(() => {
-    const tracksSignature = JSON.stringify(
-      tracks.map(t => ({ url: t.url, name: t.name, isFeatured: t.isFeatured }))
-    );
-    setRenderKey(prev => {
-      // Only update if something meaningful changed
-      const newKey = Date.now();
-      return newKey !== prev ? newKey : prev;
-    });
-  }, [tracks.length, JSON.stringify(tracks)]);
+  const handleEdit = (index: number) => {
+    setEditingTrack({ index, track: tracks[index] });
+  };
 
-  // Memoize the filtered tracks to prevent unnecessary re-rendering
-  const { userStations, featuredStations } = useMemo(() => {
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`Recomputing stations with ${tracks.length} tracks`);
+  const handleEditSave = (data: { url: string; name: string; language?: string }) => {
+    if (editingTrack) {
+      onEdit(editingTrack.index, data);
+      setEditingTrack(null);
     }
-    
-    const user = tracks.filter(track => !track.isFeatured);
-    const featured = tracks.filter(track => track.isFeatured === true);
-    
-    return { userStations: user, featuredStations: featured };
-  }, [tracks]);
+  };
 
-  // Handle edit with useCallback for better performance
-  const handleEdit = useCallback((index: number) => {
-    if (tracks && tracks[index]) {
-      setEditingTrack({
-        index,
-        data: {
-          url: tracks[index].url,
-          name: tracks[index].name,
-          language: tracks[index].language
-        }
-      });
-    }
-  }, [tracks]);
-
-  // Handle save with useCallback
-  const handleSaveEdit = useCallback((data: { url: string; name: string; language?: string }) => {
-    if (editingTrack !== null && onEditTrack) {
-      onEditTrack(editingTrack.index, data);
-    }
-    setEditingTrack(null);
-  }, [editingTrack, onEditTrack]);
-
-  // We'll keep this check to handle empty playlists gracefully
-  if (!tracks || tracks.length === 0) {
+  if (tracks.length === 0) {
     return (
-      <div className="text-center p-3 text-gray-500">
-        No stations added. Add a URL to get started.
+      <div className="text-center py-8">
+        <p className="text-on-surface-variant">No stations in your playlist yet.</p>
+        <p className="text-sm text-on-surface-variant/70 mt-2">
+          Add some stations to get started!
+        </p>
       </div>
     );
   }
 
-  // Memoized renderStationsList to prevent unnecessary recalculations
-  const renderStationsList = (stationsList: Track[], title: string) => {
-    if (stationsList.length === 0) return null;
+  return (
+    <>
+      <div className="space-y-3">
+        {/* Header with Clear All button using app theme */}
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold text-on-surface">Your Playlist ({tracks.length})</h2>
+          {tracks.length > 0 && (
+            <Button
+              variant="ghost"
+              onClick={onClearAll}
+              className="text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high/60 active:bg-primary-container/20 transition-all duration-200 ease-out rounded-xl"
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Clear All
+            </Button>
+          )}
+        </div>
 
-    const uniqueKey = `${title}-${renderKey}-${mountTime}-${stationsList.length}`;
+        {/* Track list */}
+        {tracks.map((track, index) => (
+          <Card
+            key={`${track.url}-${index}`}
+            className={cn(
+              "p-4 transition-all duration-200 hover:bg-surface-container-high/60 cursor-pointer border-outline-variant/30",
+              index === currentIndex && isPlaying
+                ? "bg-primary-container/20 border-primary/30"
+                : "bg-surface-container/40"
+            )}
+            onClick={() => onPlay(index)}
+          >
+            <div className="flex items-center gap-3">
+              {/* Play/Pause indicator */}
+              <div className="flex-shrink-0">
+                {index === currentIndex && isPlaying ? (
+                  <Pause className="h-5 w-5 text-primary" />
+                ) : (
+                  <Play className="h-5 w-5 text-on-surface-variant" />
+                )}
+              </div>
 
-    // Group stations by language
-    const stationsByLanguage: Record<string, Track[]> = {};
-    
-    stationsList.forEach(station => {
-      const language = station.language || "Unknown";
-      if (!stationsByLanguage[language]) {
-        stationsByLanguage[language] = [];
-      }
-      stationsByLanguage[language].push(station);
-    });
+              {/* Track info */}
+              <div className="flex-grow min-w-0">
+                <h3 className="font-medium text-on-surface truncate">{track.name}</h3>
+                <p className="text-sm text-on-surface-variant truncate">
+                  {track.url}
+                </p>
+                {track.language && (
+                  <span className="inline-block mt-1 px-2 py-0.5 text-xs bg-primary/10 text-primary rounded-full">
+                    {track.language}
+                  </span>
+                )}
+              </div>
 
-    return (
-      <div className="space-y-4 mb-6" key={uniqueKey}>
-        <h3 className="text-lg font-semibold mb-2 text-foreground">{title}</h3>
-        
-        {Object.entries(stationsByLanguage).map(([language, stations]) => (
-          <div key={`${language}-${uniqueKey}`} className="mb-6">
-            <div className="flex items-center gap-2 mb-3 text-primary">
-              <Globe className="h-4 w-4" />
-              <h4 className="text-md font-medium text-foreground">{language}</h4>
+              {/* Action buttons */}
+              <div className="flex items-center gap-1 flex-shrink-0">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onToggleFavorite(index);
+                  }}
+                  className="h-8 w-8 hover:bg-surface-container-high/60"
+                >
+                  {track.isFavorite ? (
+                    <Heart className="h-4 w-4 text-red-500 fill-red-500" />
+                  ) : (
+                    <HeartOff className="h-4 w-4 text-on-surface-variant" />
+                  )}
+                </Button>
+                
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleEdit(index);
+                  }}
+                  className="h-8 w-8 hover:bg-surface-container-high/60"
+                >
+                  <Edit className="h-4 w-4 text-on-surface-variant" />
+                </Button>
+                
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onRemove(index);
+                  }}
+                  className="h-8 w-8 hover:bg-surface-container-high/60 text-on-surface-variant hover:text-destructive"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
-            
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {stations.map((station) => {
-                // Find the original index in the full tracks array with a more reliable method
-                const index = tracks.findIndex(t => 
-                  t.url === station.url && 
-                  t.name === station.name &&
-                  t.isFeatured === station.isFeatured
-                );
-                
-                if (index === -1) {
-                  return null;
-                }
-                
-                const isActive = index === currentIndex;
-                // Create a truly unique key for this card
-                const cardKey = `${station.url}-${station.name}-${isActive}-${renderKey}`;
-                
-                return (
-                  <div
-                    key={cardKey}
-                    className={`flex flex-col p-4 rounded-lg ${
-                      isActive
-                        ? "bg-primary/20 backdrop-blur-sm material-shadow-2"
-                        : "bg-white/10 backdrop-blur-sm hover:bg-white/20 material-shadow-1 hover:material-shadow-2 material-transition"
-                    }`}
-                  >
-                    <div className="flex justify-center mb-3">
-                      <Radio
-                        className={`w-12 h-12 ${isActive ? "text-primary animate-pulse" : "text-gray-400"}`}
-                        onClick={() => onSelectTrack(index)}
-                      />
-                    </div>
-                    <button
-                      className="text-sm font-medium text-center mb-3 hover:text-primary transition-colors line-clamp-2 text-foreground"
-                      onClick={() => onSelectTrack(index)}
-                    >
-                      {station.name}
-                    </button>
-                    <div className="flex justify-center gap-2">
-                      {onEditTrack && !station.isFeatured && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-blue-500 hover:text-blue-700"
-                          onClick={() => handleEdit(index)}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                      )}
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-red-500 hover:text-red-700"
-                        onClick={() => onRemoveTrack(index)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
+          </Card>
         ))}
       </div>
-    );
-  };
 
-  const scrollHeight = isMobile ? "300px" : "500px";
-
-  return (
-    <ScrollArea className={`h-[${scrollHeight}] pr-4`}>
-      {renderStationsList(userStations, "My Stations")}
-      {renderStationsList(featuredStations, "Featured Stations")}
+      {/* Edit Dialog */}
       {editingTrack && (
         <EditStationDialog
-          isOpen={editingTrack !== null}
+          station={editingTrack.track}
+          isOpen={true}
           onClose={() => setEditingTrack(null)}
-          onSave={handleSaveEdit}
-          initialValues={editingTrack.data}
+          onSave={handleEditSave}
         />
       )}
-    </ScrollArea>
+    </>
   );
 };
 
