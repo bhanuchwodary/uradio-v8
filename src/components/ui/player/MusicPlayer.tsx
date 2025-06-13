@@ -48,15 +48,15 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
 
   if (compact) {
     return (
-      <div className="flex items-center w-full py-1.5 px-2">
-        {/* Controls - left side, more compact */}
-        <div className="flex items-center space-x-1 flex-shrink-0">
+      <div className="flex items-center">
+        {/* Compact Controls */}
+        <div className="flex items-center gap-1">
           <Button
             variant="ghost"
             size="icon"
             onClick={onPrevious}
             disabled={!currentTrack}
-            className="h-7 w-7 rounded-full bg-accent/60 hover:bg-accent/80 dark:bg-gray-800/60 dark:hover:bg-gray-700/80 transition-all active:scale-95"
+            className="h-7 w-7 rounded-lg bg-surface-container/60 hover:bg-surface-container/80 border border-outline-variant/20 transition-all active:scale-95"
           >
             <SkipBack className="h-3.5 w-3.5" />
           </Button>
@@ -66,7 +66,7 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
             size="icon"
             onClick={onPlayPause}
             disabled={!currentTrack}
-            className="h-8 w-8 rounded-full bg-primary hover:bg-primary/90 transition-all active:scale-95"
+            className="h-8 w-8 rounded-lg bg-primary hover:bg-primary/90 shadow-sm transition-all active:scale-95"
           >
             {isPlaying ? (
               <Pause className="h-3.5 w-3.5" />
@@ -80,28 +80,15 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
             size="icon"
             onClick={onNext}
             disabled={!currentTrack}
-            className="h-7 w-7 rounded-full bg-accent/60 hover:bg-accent/80 dark:bg-gray-800/60 dark:hover:bg-gray-700/80 transition-all active:scale-95"
+            className="h-7 w-7 rounded-lg bg-surface-container/60 hover:bg-surface-container/80 border border-outline-variant/20 transition-all active:scale-95"
           >
             <SkipForward className="h-3.5 w-3.5" />
           </Button>
         </div>
 
-        {/* Station info - center, with better text handling */}
-        <div className="flex-1 min-w-0 px-2 flex justify-center items-center">
-          <div className="w-full max-w-full">
-            <h2 className="text-sm font-medium text-center truncate leading-tight text-foreground">
-              {currentTrack?.name || "Select a station"}
-            </h2>
-            
-            {loading && (
-              <p className="text-xs text-center text-blue-400 animate-pulse leading-tight">Loading...</p>
-            )}
-          </div>
-        </div>
-
-        {/* Volume control - right side, hidden on very small screens */}
-        <div className="hidden sm:flex items-center space-x-2 w-20 flex-shrink-0">
-          <Volume2 className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
+        {/* Volume control - Compact, hidden on small screens */}
+        <div className="hidden md:flex items-center ml-3 w-16">
+          <Volume2 className="h-3.5 w-3.5 text-on-surface-variant flex-shrink-0 mr-2" />
           <Slider
             value={[volume * 100]}
             max={100}
@@ -114,36 +101,36 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
     );
   }
 
-  // Original full player layout for non-compact mode without visualization
+  // Original full player layout for non-compact mode
   return (
-    <Card className="p-4 bg-gradient-to-br from-background/80 to-background/90 backdrop-blur-md border-none shadow-lg">
+    <Card className="p-4 bg-gradient-to-br from-surface-container/60 to-surface-container/80 backdrop-blur-md border border-outline-variant/30 shadow-lg rounded-2xl">
       <div className="flex flex-col space-y-4">
-        {/* Station info without visualization */}
+        {/* Station info */}
         <div className="text-center px-2">
-          <h2 className="text-xl font-bold truncate leading-tight">
+          <h2 className="text-xl font-bold truncate leading-tight text-on-surface">
             {currentTrack?.name || "Select a station"}
           </h2>
-          <p className="text-xs text-muted-foreground truncate mt-1">
+          <p className="text-xs text-on-surface-variant truncate mt-1">
             {currentTrack?.url ? getHostnameFromUrl(currentTrack.url) : "No station selected"}
           </p>
           {currentTrack?.language && (
-            <div className="flex items-center justify-center text-xs text-blue-400 mt-2">
-              <span className="bg-blue-500/10 px-2 py-1 rounded-full">{currentTrack.language}</span>
+            <div className="flex items-center justify-center text-xs mt-2">
+              <span className="bg-primary/15 text-primary px-2 py-1 rounded-full">{currentTrack.language}</span>
             </div>
           )}
           {loading && (
-            <p className="text-xs text-blue-400 animate-pulse mt-2">Loading stream...</p>
+            <p className="text-xs text-primary animate-pulse mt-2">Loading stream...</p>
           )}
         </div>
 
-        {/* Controls - iOS optimized */}
+        {/* Controls */}
         <div className="flex items-center justify-center space-x-4 py-2">
           <Button
             variant="ghost"
             size="icon"
             onClick={onPrevious}
             disabled={!currentTrack}
-            className="h-12 w-12 rounded-full bg-accent hover:bg-accent/80 dark:bg-gray-800 dark:hover:bg-gray-700 ios-touch-target active:scale-95 transition-transform"
+            className="h-12 w-12 rounded-full bg-surface-container hover:bg-surface-container-high border border-outline-variant/30 ios-touch-target active:scale-95 transition-transform"
           >
             <SkipBack className="h-6 w-6" />
           </Button>
@@ -154,7 +141,7 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
             onClick={onPlayPause}
             disabled={!currentTrack}
             className={cn(
-              "h-16 w-16 rounded-full ios-touch-target active:scale-95 transition-transform",
+              "h-16 w-16 rounded-full ios-touch-target active:scale-95 transition-transform shadow-lg",
               isPlaying ? "bg-primary/90" : "bg-primary"
             )}
           >
@@ -170,15 +157,15 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
             size="icon"
             onClick={onNext}
             disabled={!currentTrack}
-            className="h-12 w-12 rounded-full bg-accent hover:bg-accent/80 dark:bg-gray-800 dark:hover:bg-gray-700 ios-touch-target active:scale-95 transition-transform"
+            className="h-12 w-12 rounded-full bg-surface-container hover:bg-surface-container-high border border-outline-variant/30 ios-touch-target active:scale-95 transition-transform"
           >
             <SkipForward className="h-6 w-6" />
           </Button>
         </div>
 
-        {/* Volume control - iOS optimized */}
+        {/* Volume control */}
         <div className="flex items-center space-x-3 px-2">
-          <Volume2 className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+          <Volume2 className="h-5 w-5 text-on-surface-variant flex-shrink-0" />
           <div className="flex-1 py-2">
             <Slider
               value={[volume * 100]}

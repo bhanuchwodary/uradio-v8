@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Trash2, Edit, Heart, HeartOff, Play, Pause } from "lucide-react";
+import { Trash2, Edit, Heart, HeartOff, Play, Pause, X } from "lucide-react";
 import { Track } from "@/types/track";
 import { cn } from "@/lib/utils";
 import EditStationDialog from "@/components/EditStationDialog";
@@ -55,30 +55,33 @@ const Playlist: React.FC<PlaylistProps> = ({
   return (
     <>
       <div className="space-y-3">
-        {/* Header with Clear All button using app theme */}
+        {/* Header with redesigned Clear All button */}
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-on-surface">Your Playlist ({tracks.length})</h2>
           {tracks.length > 0 && (
             <Button
               variant="ghost"
               onClick={onClearAll}
-              className="text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high/60 active:bg-primary-container/20 transition-all duration-200 ease-out rounded-xl"
+              className="group relative overflow-hidden bg-gradient-to-r from-red-500/10 to-red-600/10 hover:from-red-500/20 hover:to-red-600/20 border border-red-500/20 hover:border-red-500/30 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition-all duration-300 rounded-xl px-4 py-2 shadow-sm hover:shadow-md"
             >
-              <Trash2 className="h-4 w-4 mr-2" />
-              Clear All
+              <div className="absolute inset-0 bg-gradient-to-r from-red-500/5 to-red-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <div className="relative flex items-center gap-2">
+                <X className="h-4 w-4 transition-transform group-hover:rotate-90 duration-300" />
+                <span className="font-medium text-sm">Clear All</span>
+              </div>
             </Button>
           )}
         </div>
 
-        {/* Track list with improved vertical sizing */}
+        {/* Track list */}
         {tracks.map((track, index) => (
           <Card
             key={`${track.url}-${index}`}
             className={cn(
-              "p-3 transition-all duration-200 hover:bg-surface-container-high/60 cursor-pointer border-outline-variant/30",
+              "p-3 transition-all duration-200 hover:bg-surface-container-high/60 cursor-pointer border-outline-variant/30 rounded-xl",
               index === currentIndex && isPlaying
-                ? "bg-primary-container/20 border-primary/30"
-                : "bg-surface-container/40"
+                ? "bg-primary-container/20 border-primary/30 shadow-sm"
+                : "bg-surface-container/40 hover:shadow-sm"
             )}
             onClick={() => onPlay(index)}
           >
@@ -92,7 +95,7 @@ const Playlist: React.FC<PlaylistProps> = ({
                 )}
               </div>
 
-              {/* Track info with better text sizing */}
+              {/* Track info */}
               <div className="flex-grow min-w-0">
                 <h3 className="font-medium text-sm text-on-surface truncate leading-tight">{track.name}</h3>
                 <p className="text-xs text-on-surface-variant truncate leading-tight mt-0.5">
@@ -105,7 +108,7 @@ const Playlist: React.FC<PlaylistProps> = ({
                 )}
               </div>
 
-              {/* Action buttons with smaller sizing */}
+              {/* Action buttons */}
               <div className="flex items-center gap-0.5 flex-shrink-0">
                 <Button
                   variant="ghost"
@@ -114,7 +117,7 @@ const Playlist: React.FC<PlaylistProps> = ({
                     e.stopPropagation();
                     onToggleFavorite(index);
                   }}
-                  className="h-7 w-7 hover:bg-surface-container-high/60"
+                  className="h-7 w-7 hover:bg-surface-container-high/60 rounded-lg transition-all"
                 >
                   {track.isFavorite ? (
                     <Heart className="h-3.5 w-3.5 text-red-500 fill-red-500" />
@@ -130,7 +133,7 @@ const Playlist: React.FC<PlaylistProps> = ({
                     e.stopPropagation();
                     handleEdit(index);
                   }}
-                  className="h-7 w-7 hover:bg-surface-container-high/60"
+                  className="h-7 w-7 hover:bg-surface-container-high/60 rounded-lg transition-all"
                 >
                   <Edit className="h-3.5 w-3.5 text-on-surface-variant" />
                 </Button>
@@ -142,7 +145,7 @@ const Playlist: React.FC<PlaylistProps> = ({
                     e.stopPropagation();
                     onRemove(index);
                   }}
-                  className="h-7 w-7 hover:bg-surface-container-high/60 text-on-surface-variant hover:text-destructive"
+                  className="h-7 w-7 hover:bg-surface-container-high/60 text-on-surface-variant hover:text-destructive rounded-lg transition-all"
                 >
                   <Trash2 className="h-3.5 w-3.5" />
                 </Button>

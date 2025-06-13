@@ -105,63 +105,91 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-surface-container-lowest via-surface to-surface-container dark:from-surface-dim dark:via-surface dark:to-surface-bright ios-vh-fix ios-no-bounce">
-      {/* Header with improved mobile layout */}
-      <header className="fixed top-0 left-0 right-0 bg-surface-container/95 backdrop-blur-xl border-b border-outline-variant/30 z-20 ios-safe-top ios-safe-left ios-safe-right elevation-3">
-        <div className="container mx-auto px-2">
-          <div className="flex items-center h-14 sm:h-16 gap-2">
-            {/* Compact Logo */}
-            <div className="flex items-center justify-center flex-shrink-0 w-16 sm:w-20">
+      {/* Redesigned Header - More compact and integrated */}
+      <header className="fixed top-0 left-0 right-0 bg-surface-container/98 backdrop-blur-xl border-b border-outline-variant/20 z-20 ios-safe-top ios-safe-left ios-safe-right elevation-2">
+        <div className="px-3 py-2">
+          <div className="flex items-center gap-3">
+            {/* Logo - Smaller and more compact */}
+            <div className="flex-shrink-0">
               <img 
                 src={getLogoSrc()}
-                alt="uRadio Logo" 
-                className={`h-8 w-auto sm:h-10 object-contain transition-opacity duration-100 ease-in-out ${logoLoaded ? 'opacity-100' : 'opacity-0'}`}
+                alt="uRadio" 
+                className={`h-7 w-auto object-contain transition-opacity duration-100 ${logoLoaded ? 'opacity-100' : 'opacity-0'}`}
               />
             </div>
             
-            {/* Player Container - takes remaining space */}
-            <div className="flex-1 min-w-0">
-              {currentTrack && (
-                <div className="bg-surface-container-high/60 backdrop-blur-md rounded-lg">
-                  <MusicPlayer
-                    currentTrack={currentTrack}
-                    isPlaying={isPlaying}
-                    onPlayPause={handlePlayPause}
-                    onNext={handleNext}
-                    onPrevious={handlePrevious}
-                    volume={volume}
-                    onVolumeChange={setVolume}
-                    loading={loading}
-                    compact={true}
-                  />
+            {/* Integrated Player - Redesigned for better station name display */}
+            <div className="flex-1 min-w-0 bg-surface-container-high/40 backdrop-blur-sm rounded-xl border border-outline-variant/20">
+              {currentTrack ? (
+                <div className="flex items-center px-3 py-2 gap-3">
+                  {/* Station Info - Better text handling */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-sm font-semibold text-on-surface truncate leading-tight">
+                          {currentTrack.name}
+                        </h3>
+                        {loading && (
+                          <p className="text-xs text-primary animate-pulse leading-tight">Loading...</p>
+                        )}
+                        {currentTrack.language && (
+                          <span className="inline-block mt-0.5 px-1.5 py-0.5 text-xs bg-primary/15 text-primary rounded-full">
+                            {currentTrack.language}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Player Controls - Compact */}
+                  <div className="flex items-center gap-1 flex-shrink-0">
+                    <MusicPlayer
+                      currentTrack={currentTrack}
+                      isPlaying={isPlaying}
+                      onPlayPause={handlePlayPause}
+                      onNext={handleNext}
+                      onPrevious={handlePrevious}
+                      volume={volume}
+                      onVolumeChange={setVolume}
+                      loading={loading}
+                      compact={true}
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div className="px-3 py-2">
+                  <p className="text-sm text-on-surface-variant text-center">
+                    Select a station to start playing
+                  </p>
                 </div>
               )}
             </div>
             
-            {/* Random Toggle Button - always visible */}
+            {/* Random Mode Toggle - Redesigned */}
             <div className="flex-shrink-0">
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => setRandomMode(!randomMode)}
                 className={cn(
-                  "h-8 w-8 rounded-full transition-all active:scale-95",
+                  "h-9 w-9 rounded-xl transition-all duration-200 border",
                   randomMode 
-                    ? "bg-primary/20 text-primary hover:bg-primary/30" 
-                    : "bg-accent/60 hover:bg-accent/80 dark:bg-gray-800/60 dark:hover:bg-gray-700/80"
+                    ? "bg-primary/20 text-primary border-primary/30 hover:bg-primary/30 shadow-sm" 
+                    : "bg-surface-container-high/60 border-outline-variant/30 hover:bg-surface-container-high/80 text-on-surface-variant hover:text-on-surface"
                 )}
                 title={randomMode ? "Random mode on" : "Random mode off"}
               >
-                <Shuffle className="h-3.5 w-3.5" />
+                <Shuffle className="h-4 w-4" />
               </Button>
             </div>
           </div>
         </div>
       </header>
       
-      {/* Main Content */}
+      {/* Main Content - Adjusted padding */}
       <main className={cn(
-        "flex-grow p-3 sm:p-4 pb-32 md:pb-28 overflow-x-hidden container mx-auto w-full ios-smooth-scroll ios-safe-left ios-safe-right px-0 sm:px-0 lg:px-0",
-        "pt-16 sm:pt-18"
+        "flex-grow px-3 pb-32 md:pb-28 overflow-x-hidden container mx-auto w-full ios-smooth-scroll ios-safe-left ios-safe-right",
+        "pt-20"
       )}>
         {children}
       </main>
