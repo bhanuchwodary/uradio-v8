@@ -105,59 +105,60 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-surface-container-lowest via-surface to-surface-container dark:from-surface-dim dark:via-surface dark:to-surface-bright ios-vh-fix ios-no-bounce">
-      {/* Redesigned Header - Now with integrated logo and player */}
+      {/* Redesigned Header - Mobile-optimized layout */}
       <header className="fixed top-0 left-0 right-0 bg-surface-container/98 backdrop-blur-xl border-b border-outline-variant/20 z-20 ios-safe-top ios-safe-left ios-safe-right elevation-2">
         <div className="px-3 py-3">
-          {/* Integrated Player with Logo - Redesigned layout */}
+          {/* Integrated Player with Logo - Mobile-optimized layout */}
           <div className="bg-gradient-to-r from-surface-container-high/60 to-surface-container-high/40 backdrop-blur-sm rounded-2xl border border-outline-variant/30 shadow-lg">
             {currentTrack ? (
-              <div className="flex items-center px-4 py-3 gap-4">
-                {/* Logo - Now larger and integrated into player */}
-                <div className="flex-shrink-0">
-                  <img 
-                    src={getLogoSrc()}
-                    alt="uRadio" 
-                    className={`h-10 w-auto object-contain transition-opacity duration-100 ${logoLoaded ? 'opacity-100' : 'opacity-0'}`}
-                  />
-                </div>
-                
-                {/* Vertical separator */}
-                <div className="w-px h-8 bg-outline-variant/30"></div>
-                
-                {/* Station Info - Better layout */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-3">
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-base font-bold text-on-surface truncate leading-tight">
-                        {currentTrack.name}
-                      </h3>
-                      <div className="flex items-center gap-2 mt-1">
-                        {loading && (
-                          <p className="text-xs text-primary animate-pulse leading-tight">Loading...</p>
-                        )}
-                        {currentTrack.language && (
-                          <span className="inline-block px-2 py-1 text-xs bg-primary/20 text-primary rounded-full font-medium">
-                            {currentTrack.language}
-                          </span>
-                        )}
-                      </div>
+              <div className="px-4 py-3">
+                {/* Mobile Layout: Logo and Station Name on top */}
+                <div className="flex items-center gap-4 mb-3 md:mb-0">
+                  {/* Logo */}
+                  <div className="flex-shrink-0">
+                    <img 
+                      src={getLogoSrc()}
+                      alt="uRadio" 
+                      className={`h-8 md:h-10 w-auto object-contain transition-opacity duration-100 ${logoLoaded ? 'opacity-100' : 'opacity-0'}`}
+                    />
+                  </div>
+                  
+                  {/* Vertical separator - hidden on mobile */}
+                  <div className="w-px h-8 bg-outline-variant/30 hidden md:block"></div>
+                  
+                  {/* Station Info - Full width on mobile */}
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-base font-bold text-on-surface leading-tight">
+                      {currentTrack.name}
+                    </h3>
+                    <div className="flex items-center gap-2 mt-1">
+                      {loading && (
+                        <p className="text-xs text-primary animate-pulse leading-tight">Loading...</p>
+                      )}
+                      {currentTrack.language && (
+                        <span className="inline-block px-2 py-1 text-xs bg-primary/20 text-primary rounded-full font-medium">
+                          {currentTrack.language}
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>
                 
-                {/* Player Controls - Compact */}
-                <div className="flex items-center gap-3 flex-shrink-0">
-                  <MusicPlayer
-                    currentTrack={currentTrack}
-                    isPlaying={isPlaying}
-                    onPlayPause={handlePlayPause}
-                    onNext={handleNext}
-                    onPrevious={handlePrevious}
-                    volume={volume}
-                    onVolumeChange={setVolume}
-                    loading={loading}
-                    compact={true}
-                  />
+                {/* Player Controls Row - Full width on mobile */}
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3 flex-1">
+                    <MusicPlayer
+                      currentTrack={currentTrack}
+                      isPlaying={isPlaying}
+                      onPlayPause={handlePlayPause}
+                      onNext={handleNext}
+                      onPrevious={handlePrevious}
+                      volume={volume}
+                      onVolumeChange={setVolume}
+                      loading={loading}
+                      compact={true}
+                    />
+                  </div>
                   
                   {/* Random Mode Toggle */}
                   <Button
@@ -165,7 +166,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
                     size="icon"
                     onClick={() => setRandomMode(!randomMode)}
                     className={cn(
-                      "h-9 w-9 rounded-xl transition-all duration-200 border",
+                      "h-9 w-9 rounded-xl transition-all duration-200 border flex-shrink-0",
                       randomMode 
                         ? "bg-primary/20 text-primary border-primary/30 hover:bg-primary/30 shadow-sm" 
                         : "bg-surface-container-high/60 border-outline-variant/30 hover:bg-surface-container-high/80 text-on-surface-variant hover:text-on-surface"
@@ -177,28 +178,31 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
                 </div>
               </div>
             ) : (
-              <div className="flex items-center px-4 py-3 gap-4">
-                {/* Logo - Always visible */}
-                <div className="flex-shrink-0">
-                  <img 
-                    src={getLogoSrc()}
-                    alt="uRadio" 
-                    className={`h-10 w-auto object-contain transition-opacity duration-100 ${logoLoaded ? 'opacity-100' : 'opacity-0'}`}
-                  />
+              <div className="px-4 py-3">
+                {/* No station layout */}
+                <div className="flex items-center gap-4 mb-3 md:mb-0">
+                  {/* Logo */}
+                  <div className="flex-shrink-0">
+                    <img 
+                      src={getLogoSrc()}
+                      alt="uRadio" 
+                      className={`h-8 md:h-10 w-auto object-contain transition-opacity duration-100 ${logoLoaded ? 'opacity-100' : 'opacity-0'}`}
+                    />
+                  </div>
+                  
+                  {/* Vertical separator - hidden on mobile */}
+                  <div className="w-px h-8 bg-outline-variant/30 hidden md:block"></div>
+                  
+                  {/* No station message */}
+                  <div className="flex-1">
+                    <p className="text-base font-medium text-on-surface-variant">
+                      Select a station to start playing
+                    </p>
+                  </div>
                 </div>
                 
-                {/* Vertical separator */}
-                <div className="w-px h-8 bg-outline-variant/30"></div>
-                
-                {/* No station message */}
-                <div className="flex-1">
-                  <p className="text-base font-medium text-on-surface-variant">
-                    Select a station to start playing
-                  </p>
-                </div>
-                
-                {/* Random Mode Toggle - Always visible */}
-                <div className="flex-shrink-0">
+                {/* Random Mode Toggle Row */}
+                <div className="flex justify-end">
                   <Button
                     variant="ghost"
                     size="icon"
@@ -223,7 +227,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
       {/* Main Content - Adjusted padding for new header height */}
       <main className={cn(
         "flex-grow px-3 pb-32 md:pb-28 overflow-x-hidden container mx-auto w-full ios-smooth-scroll ios-safe-left ios-safe-right",
-        "pt-24"
+        "pt-28 md:pt-24"
       )}>
         {children}
       </main>
