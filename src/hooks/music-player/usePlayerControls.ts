@@ -25,7 +25,6 @@ export const usePlayerControls = ({
     console.log("usePlayerControls - handleNext called");
     console.log("- Current index:", currentIndex);
     console.log("- URLs array length:", urls.length);
-    console.log("- Current URL:", urls[currentIndex]);
     
     if (urls.length === 0) {
       console.log("- No URLs available");
@@ -35,7 +34,6 @@ export const usePlayerControls = ({
     // Calculate next index within the bounds of the provided URLs
     const nextIndex = (currentIndex + 1) % urls.length;
     console.log("- Next index:", nextIndex);
-    console.log("- Next URL:", urls[nextIndex]);
     console.log("- CONFIRMED: Navigation within provided URLs array only");
     
     setCurrentIndex(nextIndex);
@@ -46,7 +44,6 @@ export const usePlayerControls = ({
     console.log("usePlayerControls - handlePrevious called");
     console.log("- Current index:", currentIndex);
     console.log("- URLs array length:", urls.length);
-    console.log("- Current URL:", urls[currentIndex]);
     
     if (urls.length === 0) {
       console.log("- No URLs available");
@@ -56,7 +53,6 @@ export const usePlayerControls = ({
     // Calculate previous index within the bounds of the provided URLs
     const prevIndex = (currentIndex - 1 + urls.length) % urls.length;
     console.log("- Previous index:", prevIndex);
-    console.log("- Previous URL:", urls[prevIndex]);
     console.log("- CONFIRMED: Navigation within provided URLs array only");
     
     setCurrentIndex(prevIndex);

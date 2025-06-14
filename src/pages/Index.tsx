@@ -1,11 +1,10 @@
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useTrackStateContext } from "@/context/TrackStateContext";
-import { usePlayerCore } from "@/hooks/usePlayerCore";
 import { Track } from "@/types/track";
 import { useToast } from "@/hooks/use-toast";
-import HomePagePlayer from "@/components/home/HomePagePlayer";
+import { PlaylistMusicPlayer } from "@/components/playlist/PlaylistMusicPlayer";
 import FavoritesSection from "@/components/home/FavoritesSection";
 import StationsTabsSection from "@/components/home/StationsTabsSection";
 import HomePageDialogs from "@/components/home/HomePageDialogs";
@@ -15,6 +14,10 @@ const Index: React.FC = () => {
   const { toast } = useToast();
   const [editingStation, setEditingStation] = useState<Track | null>(null);
   const [stationToDelete, setStationToDelete] = useState<Track | null>(null);
+  
+  // Playlist-only state (separate from main track state)
+  const [playlistIndex, setPlaylistIndex] = useState(0);
+  const [playlistIsPlaying, setPlaylistIsPlaying] = useState(false);
   
   const { 
     tracks, 
@@ -28,58 +31,57 @@ const Index: React.FC = () => {
     getUserStations
   } = useTrackStateContext();
   
-  // Get favorite and popular stations
-  const favoriteStations = tracks.filter(track => track.isFavorite);
+  // Extract ONLY playlist stations
+  const playlistStations = useMemo(() => {
+    const filtered = tracks.filter(track => track.inPlaylist === true);
+    console.log("Index - Playlist stations:", filtered.length, filtered.map(s => s.name));
+    return filtered;
+  }, [tracks]);
+
+  // Sync playlist index when playlist changes
+  React.useEffect(() => {
+    if (playlistStations.length === 0) {
+      setPlaylistIndex(0);
+      setPlaylistIsPlaying(false);
+    } else if (playlistIndex >= playlistStations.length) {
+      setPlaylistIndex(0);
+    }
+  }, [playlistStations.length, playlistIndex]);
   
-  // Calculate popular stations based on play time
+  // Get favorite and popular stations for the sections below
+  const favoriteStations = tracks.filter(track => track.isFavorite);
   const popularStations = [...tracks]
     .sort((a, b) => (b.playTime || 0) - (a.playTime || 0))
     .slice(0, 8);
     
-  // Get user stations (not featured)
   const userStations = getUserStations();
-  // Get featured stations from loader
   const featuredStations = getStations().map(station => ({
     ...station,
     isFavorite: false,
     isFeatured: true,
     playTime: 0
   }));
-  
-  // Derive URLs from tracks
-  const urls = tracks.map(track => track.url);
-  
-  // Use player core for player functionality
-  const {
-    volume,
-    setVolume,
-    loading,
-    handlePlayPause,
-    handleNext,
-    handlePrevious,
-  } = usePlayerCore({
-    urls,
-    currentIndex,
-    setCurrentIndex,
-    isPlaying,
-    setIsPlaying,
-    tracks
-  });
-  
-  // Calculate current track
-  const currentTrack = tracks[currentIndex] || null;
 
-  // Handle selecting a station from any list
+  // Handle selecting a station from any list (this updates the main app state)
   const handleSelectStation = (stationIndex: number, stationList: typeof tracks) => {
-    // Find the corresponding index in the full tracks list
     const mainIndex = tracks.findIndex(t => t.url === stationList[stationIndex].url);
     if (mainIndex !== -1) {
       setCurrentIndex(mainIndex);
       setIsPlaying(true);
+      
+      // If this station is in playlist, also update playlist player
+      const station = tracks[mainIndex];
+      if (station.inPlaylist) {
+        const playlistIdx = playlistStations.findIndex(s => s.url === station.url);
+        if (playlistIdx !== -1) {
+          console.log("Station is in playlist, updating playlist index to:", playlistIdx);
+          setPlaylistIndex(playlistIdx);
+          setPlaylistIsPlaying(true);
+        }
+      }
     }
   };
   
-  // Toggle favorite for any station
   const handleToggleFavorite = (station: typeof tracks[0]) => {
     const index = tracks.findIndex(t => t.url === station.url);
     if (index !== -1) {
@@ -87,17 +89,14 @@ const Index: React.FC = () => {
     }
   };
   
-  // Edit station handler
   const handleEditStation = (station: Track) => {
     setEditingStation(station);
   };
   
-  // Open the delete confirmation dialog for a station
   const handleConfirmDelete = (station: Track) => {
     setStationToDelete(station);
   };
   
-  // Handle actual deletion after confirmation
   const handleDeleteStation = () => {
     if (stationToDelete) {
       const stationName = stationToDelete.name;
@@ -110,7 +109,6 @@ const Index: React.FC = () => {
     }
   };
   
-  // Save edited station
   const handleSaveEdit = (data: { url: string; name: string }) => {
     if (editingStation) {
       editStationByValue(editingStation, data);
@@ -125,23 +123,22 @@ const Index: React.FC = () => {
   return (
     <AppLayout>
       <div className="container mx-auto max-w-5xl space-y-6">
-        {/* Player Card */}
-        <HomePagePlayer
-          currentTrack={currentTrack}
-          isPlaying={isPlaying}
-          handlePlayPause={handlePlayPause}
-          handleNext={handleNext}
-          handlePrevious={handlePrevious}
-          volume={volume}
-          setVolume={setVolume}
-          loading={loading}
-        />
+        {/* Playlist-Only Music Player */}
+        <div className="mb-6">
+          <PlaylistMusicPlayer
+            playlistStations={playlistStations}
+            currentPlaylistIndex={playlistIndex}
+            setCurrentPlaylistIndex={setPlaylistIndex}
+            isPlaying={playlistIsPlaying}
+            setIsPlaying={setPlaylistIsPlaying}
+          />
+        </div>
 
         {/* Favorites Section */}
         <FavoritesSection 
           favoriteStations={favoriteStations}
           currentIndex={currentIndex}
-          currentTrackUrl={currentTrack?.url}
+          currentTrackUrl={tracks[currentIndex]?.url}
           isPlaying={isPlaying}
           onSelectStation={handleSelectStation}
           onToggleFavorite={handleToggleFavorite}
@@ -154,7 +151,7 @@ const Index: React.FC = () => {
           userStations={userStations}
           featuredStations={featuredStations}
           currentIndex={currentIndex}
-          currentTrackUrl={currentTrack?.url}
+          currentTrackUrl={tracks[currentIndex]?.url}
           isPlaying={isPlaying}
           onSelectStation={handleSelectStation}
           onEditStation={handleEditStation}
