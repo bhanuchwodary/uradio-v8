@@ -92,10 +92,7 @@ const PlaylistPage: React.FC = () => {
   };
 
   const confirmClearAll = () => {
-    // Check if currently playing station is in playlist before clearing
-    const currentlyPlayingInPlaylist = currentTrack && currentTrack.inPlaylist;
-    
-    // Remove all stations from playlist view (set inPlaylist to false for all tracks)
+    // FIXED: Don't stop playback when clearing playlist - just remove from playlist view
     let countCleared = 0;
     tracks.forEach((station, idx) => {
       if (station.inPlaylist) {
@@ -104,11 +101,8 @@ const PlaylistPage: React.FC = () => {
       }
     });
 
-    // FIXED: Stop playback if the currently playing station was in the playlist
-    if (currentlyPlayingInPlaylist && isPlaying) {
-      console.log("Stopping playback because currently playing station was cleared from playlist");
-      setIsPlaying(false);
-    }
+    // The currently playing station will continue playing, it's just no longer in the playlist view
+    console.log("Cleared", countCleared, "stations from playlist. Player continues with current station.");
 
     toast({
       title: "Playlist cleared",
