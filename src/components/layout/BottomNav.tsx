@@ -2,14 +2,13 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Music, Plus, Mail } from "lucide-react";
+import { Music, List, Plus, Mail } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { cn } from "@/lib/utils";
 
-// Removed Station List from navItems
 export const navItems = [
   { icon: Music, label: "Playlist", path: "/" },
-  // Removed: { icon: List, label: "Stations", path: "/station-list" },
+  { icon: List, label: "Stations", path: "/station-list" },
   { icon: Plus, label: "Add", path: "/add" },
   { icon: Mail, label: "Request", path: "/request-station" }
 ];
