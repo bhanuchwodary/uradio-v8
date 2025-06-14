@@ -6,12 +6,10 @@ import { cn } from "@/lib/utils";
 import { useTheme } from "@/components/ThemeProvider";
 import { MusicPlayer } from "@/components/ui/player/MusicPlayer";
 import { useAppPlayer } from '@/hooks/useAppPlayer';
-import { useIsMobile } from '@/hooks/use-mobile';
 
 const AppHeader: React.FC = () => {
     const { theme } = useTheme();
     const [logoLoaded, setLogoLoaded] = useState(false);
-    const isMobile = useIsMobile();
 
     const {
         currentTrack,
@@ -51,121 +49,65 @@ const AppHeader: React.FC = () => {
     return (
         <header className="fixed top-0 left-0 right-0 bg-background/80 backdrop-blur-lg border-b border-outline-variant/30 z-20 ios-safe-top ios-safe-left ios-safe-right">
             <div className="container mx-auto px-3 py-2.5">
-                {isMobile && currentTrack ? (
-                    // Mobile layout with station name on top
-                    <div className="space-y-2">
-                        {/* Top row: Logo and station info */}
-                        <div className="flex items-center gap-4">
-                            <div className="flex-shrink-0">
-                                <img 
-                                    src={getLogoSrc()}
-                                    alt="uRadio" 
-                                    className={`h-12 w-auto object-contain transition-opacity duration-300 ${logoLoaded ? 'opacity-100' : 'opacity-0'}`}
-                                />
-                            </div>
+                <div className="flex items-center gap-4 h-12">
+                    {/* Logo */}
+                    <div className="flex-shrink-0">
+                        <img 
+                            src={getLogoSrc()}
+                            alt="uRadio" 
+                            className={`h-9 w-auto object-contain transition-opacity duration-300 ${logoLoaded ? 'opacity-100' : 'opacity-0'}`}
+                        />
+                    </div>
+                
+                    {currentTrack ? (
+                        <>
+                            {/* Station Info */}
                             <div className="flex-1 min-w-0">
-                                <h3 className="font-semibold text-on-surface truncate text-lg">
+                                <h3 className="font-semibold text-on-surface truncate">
                                     {currentTrack.name}
                                 </h3>
                                 <div className="flex items-center gap-2 text-xs text-on-surface-variant">
                                     {loading ? "Loading..." : "Now Playing"}
                                 </div>
                             </div>
-                        </div>
-                        
-                        {/* Bottom row: Player controls */}
-                        <div className="flex items-center justify-center gap-1.5">
-                            <MusicPlayer
-                                currentTrack={currentTrack}
-                                isPlaying={isPlaying}
-                                onPlayPause={handlePlayPause}
-                                onNext={handleNext}
-                                onPrevious={handlePrevious}
-                                volume={volume}
-                                onVolumeChange={setVolume}
-                                loading={loading}
-                                compact={true}
-                            />
-                            
-                            {/* Random Mode Toggle */}
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => setRandomMode(!randomMode)}
-                                className={cn(
-                                "h-9 w-9 rounded-full transition-colors duration-200",
-                                randomMode 
-                                    ? "bg-primary/20 text-primary" 
-                                    : "text-on-surface-variant hover:bg-surface-container"
-                                )}
-                                title={randomMode ? "Random mode on" : "Random mode off"}
-                            >
-                                <Shuffle className="h-4 w-4" />
-                            </Button>
-                        </div>
-                    </div>
-                ) : (
-                    // Desktop layout or no current track
-                    <div className="flex items-center gap-4 h-12">
-                        {/* Logo */}
-                        <div className="flex-shrink-0">
-                            <img 
-                                src={getLogoSrc()}
-                                alt="uRadio" 
-                                className={`${isMobile ? 'h-12' : 'h-9'} w-auto object-contain transition-opacity duration-300 ${logoLoaded ? 'opacity-100' : 'opacity-0'}`}
-                            />
-                        </div>
-                    
-                        {currentTrack ? (
-                            <>
-                                {/* Station Info */}
-                                <div className="flex-1 min-w-0">
-                                    <h3 className="font-semibold text-on-surface truncate">
-                                        {currentTrack.name}
-                                    </h3>
-                                    <div className="flex items-center gap-2 text-xs text-on-surface-variant">
-                                        {loading ? "Loading..." : "Now Playing"}
-                                    </div>
-                                </div>
 
-                                {/* Player Controls */}
-                                <div className="flex items-center gap-1.5 flex-shrink-0">
-                                    <MusicPlayer
-                                        currentTrack={currentTrack}
-                                        isPlaying={isPlaying}
-                                        onPlayPause={handlePlayPause}
-                                        onNext={handleNext}
-                                        onPrevious={handlePrevious}
-                                        volume={volume}
-                                        onVolumeChange={setVolume}
-                                        loading={loading}
-                                        compact={true}
-                                    />
-                                    
-                                    {/* Random Mode Toggle */}
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        onClick={() => setRandomMode(!randomMode)}
-                                        className={cn(
-                                        "h-9 w-9 rounded-full transition-colors duration-200",
-                                        randomMode 
-                                            ? "bg-primary/20 text-primary" 
-                                            : "text-on-surface-variant hover:bg-surface-container"
-                                        )}
-                                        title={randomMode ? "Random mode on" : "Random mode off"}
-                                    >
-                                        <Shuffle className="h-4 w-4" />
-                                    </Button>
-                                </div>
-                            </>
-                        ) : (
-                            <div className="flex-1 text-center">
-                                <p className="text-on-surface-variant">Select a station to begin</p>
+                            {/* Player Controls */}
+                            <div className="flex items-center gap-1.5 flex-shrink-0">
+                                <MusicPlayer
+                                    currentTrack={currentTrack}
+                                    isPlaying={isPlaying}
+                                    onPlayPause={handlePlayPause}
+                                    onNext={handleNext}
+                                    onPrevious={handlePrevious}
+                                    volume={volume}
+                                    onVolumeChange={setVolume}
+                                    loading={loading}
+                                    compact={true}
+                                />
+                                
+                                {/* Random Mode Toggle */}
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => setRandomMode(!randomMode)}
+                                    className={cn(
+                                    "h-9 w-9 rounded-full transition-colors duration-200",
+                                    randomMode 
+                                        ? "bg-primary/20 text-primary" 
+                                        : "text-on-surface-variant hover:bg-surface-container"
+                                    )}
+                                    title={randomMode ? "Random mode on" : "Random mode off"}
+                                >
+                                    <Shuffle className="h-4 w-4" />
+                                </Button>
                             </div>
-                        )}
-                    </div>
-                )}
+                        </>
+                    ) : (
+                        <div className="flex-1 text-center">
+                            <p className="text-on-surface-variant">Select a station to begin</p>
+                        </div>
+                    )}
+                </div>
             </div>
         </header>
     );
