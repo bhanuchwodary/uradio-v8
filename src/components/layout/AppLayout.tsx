@@ -18,7 +18,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
       <AppHeader randomMode={randomMode} setRandomMode={setRandomMode} volume={volume} setVolume={setVolume} />
       <main
         className={cn(
-          "flex-grow px-3 pb-32 md:pb-28 overflow-x-hidden container mx-auto w-full ios-smooth-scroll ios-safe-left ios-safe-right",
+          "flex-grow pb-32 md:pb-28 overflow-x-hidden w-full ios-smooth-scroll ios-safe-left ios-safe-right",
           "pt-20"
         )}
       >
@@ -28,4 +28,3 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
     </div>
   );
 };
-
