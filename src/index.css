@@ -394,9 +394,23 @@
     @apply backdrop-blur-xl bg-primary-container/80 border-primary/20;
   }
 
-  .metallic body {
-    text-shadow: 0 1px 1px rgba(0,0,0,0.5);
+  /* Enhanced metallic theme contouring */
+  .metallic body,
+  .metallic h1,
+  .metallic h2,
+  .metallic h3,
+  .metallic p,
+  .metallic span,
+  .metallic a,
+  .metallic button,
+  .metallic label {
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
   }
+
+  .metallic svg {
+    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.6));
+  }
+
   .metallic .elevation-1 {
     box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.5), 0px 1px 3px 1px rgba(0, 0, 0, 0.3);
   }
