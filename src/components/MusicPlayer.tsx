@@ -1,5 +1,6 @@
+
 // Streamlined MusicPlayer component that uses usePlayerCore for logic.
-import React, { memo, useMemo } from "react";
+import React, { memo, useMemo, useCallback } from "react";
 import PlayerLayout from "@/components/music-player/PlayerLayout";
 import PlayerTrackInfo from "@/components/music-player/PlayerTrackInfo";
 import PlayerSlider from "@/components/music-player/PlayerSlider";
@@ -69,12 +70,26 @@ const MusicPlayer: React.FC<MusicPlayerProps> = memo(({
     }
   }, [playlistData.currentIndex, isPlaying]);
 
-  // ISOLATED: Handle playlist index changes (no sync back to main array)
-  const handlePlaylistIndexChange = (newPlaylistIndex: number) => {
+  // CRITICAL FIX: Handle playlist index changes and sync back to main array
+  const handlePlaylistIndexChange = useCallback((newPlaylistIndex: number) => {
     console.log("MusicPlayer - Internal playlist index change:", newPlaylistIndex);
     setInternalPlaylistIndex(newPlaylistIndex);
-    // Do NOT sync back to main array - keep player completely isolated
-  };
+    
+    // SYNC BACK: Find the corresponding index in the full tracks array
+    if (newPlaylistIndex >= 0 && newPlaylistIndex < playlistData.tracks.length) {
+      const selectedPlaylistTrack = playlistData.tracks[newPlaylistIndex];
+      const fullArrayIndex = tracks.findIndex(track => track.url === selectedPlaylistTrack.url);
+      
+      console.log("MusicPlayer - Syncing back to main array:");
+      console.log("- New playlist index:", newPlaylistIndex);
+      console.log("- Selected playlist track:", selectedPlaylistTrack.name);
+      console.log("- Corresponding full array index:", fullArrayIndex);
+      
+      if (fullArrayIndex >= 0) {
+        setCurrentIndex(fullArrayIndex);
+      }
+    }
+  }, [playlistData.tracks, tracks, setCurrentIndex]);
 
   const {
     duration,
