@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { AppHeader } from "./AppHeader";
 import { BottomNav } from "./BottomNav";
@@ -19,7 +18,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
       <main
         className={cn(
           "flex-grow px-3 pb-32 md:pb-28 overflow-x-hidden container mx-auto w-full ios-smooth-scroll ios-safe-left ios-safe-right",
-          "pt-24"
+          "pt-[100px] md:pt-24"
         )}
       >
         {children}
