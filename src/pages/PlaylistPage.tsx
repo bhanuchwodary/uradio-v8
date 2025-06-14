@@ -98,30 +98,22 @@ const PlaylistPage: React.FC = () => {
     setShowClearDialog(true);
   };
   
-  // FIX: Only remove stations that are in the playlist (don't delete user-added stations)
+  // Clear all playlist (featured + favorites only), keep user-added stations
   const confirmClearAll = () => {
-    // Calculate playlist stations exactly as in PlaylistContent
-    const allPlaylistStations = [
-      ...favoriteStations,
-      ...popularStations,
-      ...userStations.filter(station => !station.isFeatured),
-      ...featuredStations
-    ];
-    // Remove duplicates based on URL
-    const uniquePlaylistStations = allPlaylistStations.filter(
-      (station, index, self) =>
-        index === self.findIndex(s => s.url === station.url)
+    // Only remove stations that are marked as featured or favorite (not user stations)
+    const stationsToRemove = tracks.filter(
+      (station) =>
+        station.isFeatured === true || station.isFavorite === true
     );
+    const countToRemove = stationsToRemove.length;
 
-    // Remove only these stations from the tracks array
-    const countToRemove = uniquePlaylistStations.length;
-    uniquePlaylistStations.forEach(station => {
+    stationsToRemove.forEach((station) => {
       removeStationByValue(station);
     });
 
     toast({
       title: "Playlist cleared",
-      description: `${countToRemove} stations removed from your playlist`
+      description: `${countToRemove} station${countToRemove === 1 ? "" : "s"} removed from your playlist`,
     });
     setShowClearDialog(false);
   };
