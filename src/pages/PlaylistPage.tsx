@@ -28,14 +28,28 @@ const PlaylistPage: React.FC = () => {
   // Only show featured and favorites in "playlist" view
   const featuredStations = tracks.filter(track => track.isFeatured);
   const favoriteStations = tracks.filter(track => track.isFavorite);
-  // CHANGE: Show ALL user-added stations in playlist, regardless of favorite status
+  // Show ALL user-added stations in playlist, regardless of favorite status
   const userStations = tracks.filter(track => !track.isFeatured);
-  
+
   // Calculate popular stations based on play time, but restrict to featured/favorites only
   const popularStations = [...tracks]
     .filter(track => track.isFavorite || track.isFeatured)
     .sort((a, b) => (b.playTime || 0) - (a.playTime || 0))
     .slice(0, 8);
+
+  // Gather ALL stations shown in the playlist (just like in PlaylistContent)
+  const allPlaylistStations = [
+    ...favoriteStations,
+    ...popularStations,
+    ...userStations.filter(station => !station.isFeatured),
+    ...featuredStations
+  ];
+
+  // Remove duplicates based on URL
+  const uniquePlaylistStations = allPlaylistStations.filter(
+    (station, index, self) =>
+      index === self.findIndex(s => s.url === station.url)
+  );
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -98,19 +112,7 @@ const PlaylistPage: React.FC = () => {
   };
 
   const confirmClearAll = () => {
-    // Restrict to playlist stations only (featured and favorites)
-    const allPlaylistStations = [
-      ...favoriteStations,
-      ...popularStations,
-      ...featuredStations
-    ];
-
-    // Remove duplicates based on URL
-    const uniquePlaylistStations = allPlaylistStations.filter(
-      (station, index, self) =>
-        index === self.findIndex(s => s.url === station.url)
-    );
-
+    // Remove every station in the current playlist (as shown in the UI grid)
     let countRemoved = 0;
 
     uniquePlaylistStations.forEach(station => {
@@ -120,9 +122,13 @@ const PlaylistPage: React.FC = () => {
       } else if (station.isFavorite) {
         const index = tracks.findIndex(t => t.url === station.url);
         if (index !== -1) {
-          toggleFavorite(index);
+          toggleFavorite(index); // This unfavorites
           countRemoved++;
         }
+      } else {
+        // User station that is not favorite or featured
+        removeStationByValue(station);
+        countRemoved++;
       }
     });
 
