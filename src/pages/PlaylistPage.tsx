@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useTrackStateContext } from "@/context/TrackStateContext";
@@ -25,34 +26,32 @@ const PlaylistPage: React.FC = () => {
     toggleFavorite
   } = useTrackStateContext();
   
-  // Split stations into different categories - ensure proper filtering
-  const userStations = tracks.filter(track => !track.isFeatured);
+  // Only show featured and favorites in "playlist" view
   const featuredStations = tracks.filter(track => track.isFeatured);
   const favoriteStations = tracks.filter(track => track.isFavorite);
+  // User-added (library) stations should NOT show in playlist unless favorited
+  const userStations = tracks.filter(track =>
+    !track.isFeatured && track.isFavorite
+  );
   
-  // Calculate popular stations based on play time
+  // Calculate popular stations based on play time, but restrict to featured/favorites only
   const popularStations = [...tracks]
+    .filter(track => track.isFavorite || track.isFeatured)
     .sort((a, b) => (b.playTime || 0) - (a.playTime || 0))
     .slice(0, 8);
-  
-  // Add effect for smooth transition on page load
+
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsPageReady(true);
     }, 50);
-    
     return () => clearTimeout(timer);
   }, []);
-  
-  // Calculate current track
+
   const currentTrack = tracks[currentIndex] || null;
-  
-  // Handle selecting a station from a grid with pause functionality
+
   const handleSelectStation = (stationIndex: number, stationList: typeof tracks) => {
-    // Find the corresponding index in the full tracks list
     const mainIndex = tracks.findIndex(t => t.url === stationList[stationIndex].url);
     if (mainIndex !== -1) {
-      // If clicking on the currently playing station, toggle pause/play
       if (mainIndex === currentIndex && isPlaying) {
         setIsPlaying(false);
       } else {
@@ -62,30 +61,24 @@ const PlaylistPage: React.FC = () => {
     }
   };
   
-  // Edit station handler
   const handleEditStation = (station: Track) => {
     setEditingStation(station);
   };
-  
-  // Open the delete confirmation dialog for a station
+
   const handleConfirmDelete = (station: Track) => {
     setStationToDelete(station);
   };
   
-  // Handle actual deletion after confirmation
   const handleDeleteStation = () => {
     if (stationToDelete) {
       const stationName = stationToDelete.name;
-      // Prevent removing user-added stations from main list (library)
       if (!stationToDelete.isFeatured) {
-        // For user stations, it should NOT be deleted from the library
         toast({
           title: "Can't remove user station from playlist",
           description: `${stationName} will stay available in your stations`,
           variant: "destructive"
         });
       } else {
-        // Only allow removal for featured stations (from playlist view)
         removeStationByValue(stationToDelete);
         toast({
           title: "Station removed",
@@ -95,27 +88,23 @@ const PlaylistPage: React.FC = () => {
       setStationToDelete(null);
     }
   };
-  
-  // Toggle favorite for a station
+
   const handleToggleFavorite = (station: Track) => {
     const index = tracks.findIndex(t => t.url === station.url);
     if (index !== -1) {
       toggleFavorite(index);
     }
   };
-  
-  // Clear all stations from playlist
+
   const handleClearAll = () => {
     setShowClearDialog(true);
   };
 
-  // Clear all function should NOT remove user-added stations from library
   const confirmClearAll = () => {
-    // Compute all playlist stations (matching PlaylistContent logic)
+    // Restrict to playlist stations only (featured and favorites)
     const allPlaylistStations = [
       ...favoriteStations,
       ...popularStations,
-      ...userStations.filter(station => !station.isFeatured),
       ...featuredStations
     ];
 
@@ -128,19 +117,16 @@ const PlaylistPage: React.FC = () => {
     let countRemoved = 0;
 
     uniquePlaylistStations.forEach(station => {
-      // Don't actually remove user stations, just un-favorite them (or skip)
       if (station.isFeatured) {
         removeStationByValue(station);
         countRemoved++;
       } else if (station.isFavorite) {
-        // For user stations, remove from playlist by un-favoriting only
         const index = tracks.findIndex(t => t.url === station.url);
         if (index !== -1) {
           toggleFavorite(index);
           countRemoved++;
         }
       }
-      // If it's just a user station, do not remove it from user library!
     });
 
     toast({
@@ -149,8 +135,7 @@ const PlaylistPage: React.FC = () => {
     });
     setShowClearDialog(false);
   };
-  
-  // Save edited station
+
   const handleSaveEdit = (data: { url: string; name: string }) => {
     if (editingStation) {
       editStationByValue(editingStation, data);
@@ -165,7 +150,6 @@ const PlaylistPage: React.FC = () => {
   return (
     <AppLayout>
       <div className={`container mx-auto max-w-5xl space-y-6 transition-opacity duration-300 ease-in-out pt-4 ${isPageReady ? 'opacity-100' : 'opacity-0'}`}>
-        {/* Playlist Content Component - Now unified layout */}
         <PlaylistContent
           userStations={userStations}
           featuredStations={featuredStations}
@@ -180,8 +164,6 @@ const PlaylistPage: React.FC = () => {
           onToggleFavorite={handleToggleFavorite}
           onClearAll={handleClearAll}
         />
-        
-        {/* Dialogs Component */}
         <PlaylistDialogs
           editingStation={editingStation}
           stationToDelete={stationToDelete}
@@ -190,8 +172,6 @@ const PlaylistPage: React.FC = () => {
           onCloseDeleteDialog={() => setStationToDelete(null)}
           onConfirmDelete={handleDeleteStation}
         />
-        
-        {/* Clear All Confirmation Dialog */}
         {showClearDialog && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
             <div className="bg-background p-6 rounded-lg shadow-lg max-w-md mx-4">
