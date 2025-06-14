@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Card } from "@/components/ui/card";
 import { Play, Pause, Edit, Trash2, Star, Plus } from "lucide-react";
@@ -37,10 +38,8 @@ export const StationCard: React.FC<StationCardProps> = ({
     if (actionIcon === "add") {
       return <Plus className="w-5 h-5" />;
     }
-    // Add pulse animation for more feedback
-    return isPlaying
-      ? <Pause className="w-5 h-5 animate-pulse" />
-      : <Play className="w-5 h-5 ml-0.5" />;
+    
+    return isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 ml-0.5" />;
   };
 
   // Ensure language is preserved from station data with proper fallback
@@ -66,7 +65,7 @@ export const StationCard: React.FC<StationCardProps> = ({
           className={cn(
             "w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 shadow-sm",
             isPlaying 
-              ? "bg-primary text-primary-foreground shadow-md scale-105 animate-pulse" 
+              ? "bg-primary text-primary-foreground shadow-md scale-105" 
               : "bg-secondary/80 text-secondary-foreground group-hover:bg-primary/30"
           )}
         >
