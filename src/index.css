@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -110,6 +109,72 @@
     
     --outline: 147 143 153;
     --outline-variant: 68 71 78;
+    
+    /* Legacy compatibility */
+    --card: var(--surface-container);
+    --card-foreground: var(--on-surface);
+    --popover: var(--surface-container);
+    --popover-foreground: var(--on-surface);
+    --muted: var(--surface-container-high);
+    --muted-foreground: var(--on-surface-variant);
+    --accent: var(--secondary-container);
+    --accent-foreground: var(--on-secondary-container);
+    --destructive: var(--error);
+    --destructive-foreground: var(--on-error);
+    --border: var(--outline-variant);
+    --input: var(--outline-variant);
+    --ring: var(--primary);
+
+    /* Sidebar colors */
+    --sidebar-background: var(--surface-container);
+    --sidebar-foreground: var(--on-surface);
+    --sidebar-primary: var(--primary);
+    --sidebar-primary-foreground: var(--on-primary);
+    --sidebar-accent: var(--secondary-container);
+    --sidebar-accent-foreground: var(--on-secondary-container);
+    --sidebar-border: var(--outline-variant);
+    --sidebar-ring: var(--primary);
+  }
+
+  .metallic {
+    /* Black Metallic Theme */
+    --background: 20 20 22; /* #141416 */
+    --foreground: 220 220 220; /* #dcdcdc */
+    
+    --surface: 28 28 30; /* #1c1c1e */
+    --surface-dim: 20 20 22;
+    --surface-bright: 52 52 56;
+    --surface-container-lowest: 16 16 18; /* #101012 */
+    --surface-container-low: 28 28 30;
+    --surface-container: 36 36 40; /* #242428 */
+    --surface-container-high: 44 44 48; /* #2c2c30 */
+    --surface-container-highest: 52 52 56; /* #343438 */
+    
+    --on-surface: 220 220 220;
+    --on-surface-variant: 180 180 180;
+    
+    --primary: 176 190 197; /* #b0bec5 - Blue Grey 100 */
+    --primary-container: 55 71 79; /* #37474f - Blue Grey 800 */
+    --on-primary: 10 10 10;
+    --on-primary-container: 207 216 220; /* #cfd8dc - Blue Grey 50 */
+    
+    --secondary: 158 158 158; /* #9e9e9e - Grey 500 */
+    --secondary-container: 69 90 100; /* #455a64 - Blue Grey 700 */
+    --on-secondary: 10 10 10;
+    --on-secondary-container: 207 216 220; /* #cfd8dc */
+    
+    --tertiary: 227 187 200;
+    --tertiary-container: 99 59 72;
+    --on-tertiary: 80 37 50;
+    --on-tertiary-container: 255 216 228;
+    
+    --error: 255 180 171;
+    --error-container: 147 0 10;
+    --on-error: 105 0 5;
+    --on-error-container: 255 218 214;
+    
+    --outline: 97 97 97; /* #616161 */
+    --outline-variant: 70 70 70; /* #464646 */
     
     /* Legacy compatibility */
     --card: var(--surface-container);
@@ -327,6 +392,25 @@
   
   .glass-primary {
     @apply backdrop-blur-xl bg-primary-container/80 border-primary/20;
+  }
+
+  .metallic body {
+    text-shadow: 0 1px 1px rgba(0,0,0,0.5);
+  }
+  .metallic .elevation-1 {
+    box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.5), 0px 1px 3px 1px rgba(0, 0, 0, 0.3);
+  }
+  .metallic .elevation-2 {
+    box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.5), 0px 2px 6px 2px rgba(0, 0, 0, 0.3);
+  }
+  .metallic .elevation-3 {
+    box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.5), 0px 4px 8px 3px rgba(0, 0, 0, 0.3);
+  }
+  .metallic .elevation-4 {
+    box-shadow: 0px 2px 3px 0px rgba(0, 0, 0, 0.5), 0px 6px 10px 4px rgba(0, 0, 0, 0.3);
+  }
+  .metallic .elevation-5 {
+    box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.5), 0px 8px 12px 6px rgba(0, 0, 0, 0.3);
   }
 }
 

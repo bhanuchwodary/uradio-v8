@@ -35,6 +35,14 @@ export function ThemeToggle({ children }: { children: React.ReactNode }) {
           Dark
         </DropdownMenuItem>
         <DropdownMenuItem
+          onClick={() => setTheme("metallic")}
+          className={`hover:bg-primary-container/60 focus:bg-primary-container/60 transition-all duration-200 ease-out rounded-lg mx-1 my-0.5 ${
+            theme === "metallic" ? "bg-primary-container/40 text-on-primary-container" : "text-on-surface"
+          }`}
+        >
+          Metallic
+        </DropdownMenuItem>
+        <DropdownMenuItem
           onClick={() => setTheme("system")}
           className={`hover:bg-primary-container/60 focus:bg-primary-container/60 transition-all duration-200 ease-out rounded-lg mx-1 my-0.5 ${
             theme === "system" ? "bg-primary-container/40 text-on-primary-container" : "text-on-surface"
