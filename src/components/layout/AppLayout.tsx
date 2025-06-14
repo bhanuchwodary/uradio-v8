@@ -9,6 +9,7 @@ interface AppLayoutProps {
 }
 
 export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
+  // Shared state for controlling volume and random between header/player
   const [randomMode, setRandomMode] = useState(false);
   const [volume, setVolume] = useState(0.7);
 
@@ -17,9 +18,8 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
       <AppHeader randomMode={randomMode} setRandomMode={setRandomMode} volume={volume} setVolume={setVolume} />
       <main
         className={cn(
-          // match main container layout to AppHeader's container
-          "flex-grow container mx-auto w-full px-3 pb-32 md:pb-28 overflow-x-hidden ios-smooth-scroll ios-safe-left ios-safe-right",
-          "pt-[100px] md:pt-24"
+          "flex-grow px-3 pb-32 md:pb-28 overflow-x-hidden container mx-auto w-full ios-smooth-scroll ios-safe-left ios-safe-right",
+          "pt-24"
         )}
       >
         {children}
@@ -28,4 +28,3 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
     </div>
   );
 };
-
