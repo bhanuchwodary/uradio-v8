@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { getStations } from "@/data/featuredStationsLoader";
 import { Track } from "@/types/track";
 import EditStationDialog from "@/components/EditStationDialog";
+import { ListMusic } from "lucide-react";
 
 const StationListPage: React.FC = () => {
   const { toast } = useToast();
@@ -107,7 +107,7 @@ const StationListPage: React.FC = () => {
         {/* REMOVED the Station List heading here */}
 
         {/* FIXED User Stations to match playlist design */}
-        <Card className="bg-gradient-to-br from-background/40 to-background/20 backdrop-blur-md border-border/30 shadow-xl">
+        <Card className="bg-gradient-to-br from-background/40 to-background/20 backdrop-blur-md border-border/30 elevation-2">
           <CardHeader className="pb-3 px-3 sm:px-6">
             <CardTitle className="text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">My Stations</CardTitle>
           </CardHeader>
@@ -124,9 +124,12 @@ const StationListPage: React.FC = () => {
                 actionIcon="add"
               />
             ) : (
-              <div className="text-center p-8 bg-gradient-to-br from-background/50 to-background/30 rounded-xl border border-border/50">
-                <p className="text-muted-foreground">No stations added yet</p>
-                <p className="text-sm text-muted-foreground/70 mt-1">Add stations to build your collection</p>
+              <div className="text-center p-8 bg-gradient-to-br from-background/50 to-background/30 rounded-xl border border-border/50 flex flex-col items-center justify-center gap-4">
+                <ListMusic className="h-12 w-12 text-muted-foreground/50" />
+                <div>
+                  <p className="text-muted-foreground font-semibold">No stations added yet</p>
+                  <p className="text-sm text-muted-foreground/70 mt-1">Add stations to build your collection</p>
+                </div>
               </div>
             )}
           </CardContent>
@@ -134,7 +137,7 @@ const StationListPage: React.FC = () => {
 
         {/* FIXED Featured Stations to match playlist design */}
         {Object.entries(stationsByLanguage).map(([language, stations]) => (
-          <Card key={language} className="bg-gradient-to-br from-background/40 to-background/20 backdrop-blur-md border-border/30 shadow-xl">
+          <Card key={language} className="bg-gradient-to-br from-background/40 to-background/20 backdrop-blur-md border-border/30 elevation-2">
             <CardHeader className="pb-3 px-3 sm:px-6">
               <CardTitle className="text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">Featured {language} Stations</CardTitle>
             </CardHeader>

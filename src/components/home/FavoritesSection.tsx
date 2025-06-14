@@ -3,6 +3,7 @@ import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StationGrid } from "@/components/ui/player/StationGrid";
 import { Track } from "@/types/track";
+import { Star } from "lucide-react";
 
 interface FavoritesSectionProps {
   favoriteStations: Track[];
@@ -28,11 +29,14 @@ const FavoritesSection: React.FC<FavoritesSectionProps> = ({
   }
 
   return (
-    <Card className="bg-surface-container border border-outline-variant/30 rounded-lg elevation-1">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-lg">Favorites</CardTitle>
+    <Card className="bg-gradient-to-br from-background/40 to-background/20 backdrop-blur-md border-border/30 elevation-2">
+      <CardHeader className="pb-3 px-3 sm:px-6">
+        <CardTitle className="text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent flex items-center gap-2">
+          <Star className="h-6 w-6 text-primary" />
+          Favorites
+        </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="px-3 sm:px-6">
         <StationGrid
           stations={favoriteStations}
           currentIndex={currentIndex}
