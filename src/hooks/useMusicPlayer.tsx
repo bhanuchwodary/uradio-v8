@@ -1,11 +1,8 @@
 
 import { useState, useRef } from "react";
 import { Track } from "@/types/track";
-import { globalAudioRef } from "@/components/music-player/audioInstance";
 import { useMediaSession } from "@/hooks/useMediaSession";
 import { useHlsHandler } from "./music-player/useHlsHandler";
-import { useAudioEvents } from "./music-player/useAudioEvents";
-import { useAudioInitialization } from "./music-player/useAudioInitialization";
 import { usePlayerControls } from "./music-player/usePlayerControls";
 
 interface UseMusicPlayerProps {
@@ -35,17 +32,8 @@ export const useMusicPlayer = (props?: UseMusicPlayerProps) => {
   const [volume, setVolume] = useState<number>(initialVolume);
   const [loading, setLoading] = useState<boolean>(false);
   
-  // Updated to use MutableRefObject since we need to assign to audioRef.current
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  // Updated to use lowercase symbol primitive type instead of Symbol object
   const playerInstanceRef = useRef<symbol>(Symbol("playerInstance"));
-
-  // Initialize audio
-  useAudioInitialization({
-    audioRef,
-    playerInstanceRef,
-    volume
-  });
 
   // Set up player controls
   const {
@@ -69,15 +57,6 @@ export const useMusicPlayer = (props?: UseMusicPlayerProps) => {
     url: urls[currentIndex],
     isPlaying,
     setIsPlaying,
-    setLoading
-  });
-
-  // Set up audio event listeners
-  useAudioEvents({
-    audioRef,
-    setCurrentTime,
-    setDuration,
-    onEnded: handleNext,
     setLoading
   });
 
