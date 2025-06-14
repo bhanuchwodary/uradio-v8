@@ -46,7 +46,7 @@ export const StationCard: React.FC<StationCardProps> = ({
   // Ensure language is preserved from station data with proper fallback
   const stationLanguage = station?.language && station.language !== "" ? station.language : "Unknown";
 
-  const hasActionButtons = onToggleFavorite || (onEdit && !station.isFeatured) || onDelete || onToggleInPlaylist;
+  const hasActionButtons = onToggleFavorite || onEdit || onDelete || onToggleInPlaylist;
 
   return (
     <Card 
@@ -102,7 +102,7 @@ export const StationCard: React.FC<StationCardProps> = ({
               </Button>
             )}
 
-            {/* ADD/REMOVE FROM PLAYLIST BUTTON */}
+            {/* PLAYLIST TOGGLE BUTTON */}
             {onToggleInPlaylist && (
               <Button
                 size="icon"
@@ -120,19 +120,8 @@ export const StationCard: React.FC<StationCardProps> = ({
                 {station.inPlaylist ? <ListX className="h-4 w-4" /> : <ListPlus className="h-4 w-4" />}
               </Button>
             )}
-            
-            {onEdit && !station.isFeatured && (
-              <Button 
-                size="icon" 
-                variant="ghost" 
-                className="h-7 w-7 text-blue-500 hover:text-blue-600 hover:bg-blue-500/10 rounded-full transition-all duration-200 active:scale-90"
-                onClick={(e) => handleButtonClick(e, onEdit)}
-                aria-label="Edit station"
-              >
-                <Edit className="h-4 w-4" />
-              </Button>
-            )}
-            
+
+            {/* DELETE BUTTON - Now placed next to playlist toggle */}
             {onDelete && (
               <Button 
                 size="icon" 
@@ -142,6 +131,19 @@ export const StationCard: React.FC<StationCardProps> = ({
                 aria-label="Delete station"
               >
                 <Trash2 className="h-4 w-4" />
+              </Button>
+            )}
+            
+            {/* EDIT BUTTON - Only show if onEdit is provided */}
+            {onEdit && !station.isFeatured && (
+              <Button 
+                size="icon" 
+                variant="ghost" 
+                className="h-7 w-7 text-blue-500 hover:text-blue-600 hover:bg-blue-500/10 rounded-full transition-all duration-200 active:scale-90"
+                onClick={(e) => handleButtonClick(e, onEdit)}
+                aria-label="Edit station"
+              >
+                <Edit className="h-4 w-4" />
               </Button>
             )}
           </div>

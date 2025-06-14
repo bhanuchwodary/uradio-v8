@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 import { StationGrid } from "@/components/ui/player/StationGrid";
 import { Track } from "@/types/track";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface PlaylistContentProps {
   stations: Track[];
@@ -31,6 +32,8 @@ const PlaylistContent: React.FC<PlaylistContentProps> = ({
   onToggleInPlaylist,
   onClearAll
 }) => {
+  const isMobile = useIsMobile();
+  
   // Unique by url only, though in practice there shouldn't be duplicates
   const uniquePlaylistStations = stations.filter(
     (station, index, self) =>
@@ -52,7 +55,7 @@ const PlaylistContent: React.FC<PlaylistContentProps> = ({
               className="flex items-center gap-2"
             >
               <Trash2 className="h-4 w-4" />
-              Clear All
+              {!isMobile && "Clear All"}
             </Button>
           )}
         </div>
@@ -67,7 +70,7 @@ const PlaylistContent: React.FC<PlaylistContentProps> = ({
             onSelectStation={index =>
               onSelectStation(index, uniquePlaylistStations)
             }
-            onEditStation={onEditStation}
+            onEditStation={undefined} // Hide edit button for playlist screen
             onDeleteStation={onConfirmDelete}
             onToggleFavorite={onToggleFavorite}
             onToggleInPlaylist={onToggleInPlaylist}
