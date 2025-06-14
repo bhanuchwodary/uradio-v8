@@ -20,52 +20,44 @@ export const usePlayerControls = ({
   setCurrentIndex,
   volume
 }: UsePlayerControlsProps) => {
-  // FIXED: Handle next track - ensure we stay within the provided urls array
+  // Handle next track - ONLY within provided URLs array
   const handleNext = () => {
     console.log("usePlayerControls - handleNext called");
     console.log("- Current index:", currentIndex);
-    console.log("- URLs length:", urls.length);
+    console.log("- URLs array length:", urls.length);
     console.log("- Current URL:", urls[currentIndex]);
-    console.log("- All URLs:", urls);
     
     if (urls.length === 0) {
-      console.log("- No URLs available, stopping");
+      console.log("- No URLs available");
       return;
     }
     
-    // Ensure currentIndex is valid before calculating next
-    const validCurrentIndex = Math.max(0, Math.min(currentIndex, urls.length - 1));
-    const nextIndex = (validCurrentIndex + 1) % urls.length;
-    
-    console.log("- Valid current index:", validCurrentIndex);
+    // Calculate next index within the bounds of the provided URLs
+    const nextIndex = (currentIndex + 1) % urls.length;
     console.log("- Next index:", nextIndex);
     console.log("- Next URL:", urls[nextIndex]);
-    console.log("- CRITICAL: Will navigate within playlist URLs only");
+    console.log("- CONFIRMED: Navigation within provided URLs array only");
     
     setCurrentIndex(nextIndex);
   };
 
-  // FIXED: Handle previous track - ensure we stay within the provided urls array
+  // Handle previous track - ONLY within provided URLs array
   const handlePrevious = () => {
     console.log("usePlayerControls - handlePrevious called");
     console.log("- Current index:", currentIndex);
-    console.log("- URLs length:", urls.length);
+    console.log("- URLs array length:", urls.length);
     console.log("- Current URL:", urls[currentIndex]);
-    console.log("- All URLs:", urls);
     
     if (urls.length === 0) {
-      console.log("- No URLs available, stopping");
+      console.log("- No URLs available");
       return;
     }
     
-    // Ensure currentIndex is valid before calculating previous
-    const validCurrentIndex = Math.max(0, Math.min(currentIndex, urls.length - 1));
-    const prevIndex = (validCurrentIndex - 1 + urls.length) % urls.length;
-    
-    console.log("- Valid current index:", validCurrentIndex);
+    // Calculate previous index within the bounds of the provided URLs
+    const prevIndex = (currentIndex - 1 + urls.length) % urls.length;
     console.log("- Previous index:", prevIndex);
     console.log("- Previous URL:", urls[prevIndex]);
-    console.log("- CRITICAL: Will navigate within playlist URLs only");
+    console.log("- CONFIRMED: Navigation within provided URLs array only");
     
     setCurrentIndex(prevIndex);
   };

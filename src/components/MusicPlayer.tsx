@@ -1,6 +1,5 @@
-
-// Streamlined MusicPlayer component that uses usePlayerCore for logic.
-import React, { memo, useMemo, useCallback } from "react";
+// Completely isolated MusicPlayer that only works with playlist stations
+import React, { memo, useMemo, useCallback, useState, useEffect } from "react";
 import PlayerLayout from "@/components/music-player/PlayerLayout";
 import PlayerTrackInfo from "@/components/music-player/PlayerTrackInfo";
 import PlayerSlider from "@/components/music-player/PlayerSlider";
@@ -19,7 +18,6 @@ interface MusicPlayerProps {
   tracks?: Track[];
 }
 
-// Using React.memo to prevent unnecessary re-renders
 const MusicPlayer: React.FC<MusicPlayerProps> = memo(({
   urls,
   currentIndex,
@@ -28,65 +26,62 @@ const MusicPlayer: React.FC<MusicPlayerProps> = memo(({
   setIsPlaying,
   tracks = [],
 }) => {
-  // COMPLETE ISOLATION: Create playlist-only data that doesn't sync back to main array
-  const playlistData = useMemo(() => {
-    const playlistTracks = tracks.filter(track => track.inPlaylist === true);
-    const playlistUrls = playlistTracks.map(track => track.url);
-    
-    // Find the current track in the original array
-    const currentTrack = tracks[currentIndex];
-    
-    // Find the index of current track in playlist array (only if it's in playlist)
-    let playlistIndex = -1;
-    if (currentTrack && currentTrack.inPlaylist) {
-      playlistIndex = playlistTracks.findIndex(track => track.url === currentTrack.url);
+  console.log("MusicPlayer - Props received:");
+  console.log("- Total tracks:", tracks.length);
+  console.log("- Current index:", currentIndex);
+  console.log("- Is playing:", isPlaying);
+
+  // STEP 1: Extract only playlist stations
+  const playlistStations = useMemo(() => {
+    const filtered = tracks.filter(track => track.inPlaylist === true);
+    console.log("MusicPlayer - Filtered playlist stations:", filtered.length);
+    console.log("- Playlist station names:", filtered.map(s => s.name));
+    return filtered;
+  }, [tracks]);
+
+  const playlistUrls = useMemo(() => {
+    return playlistStations.map(station => station.url);
+  }, [playlistStations]);
+
+  // STEP 2: Find current track in playlist (if it exists)
+  const currentTrack = tracks[currentIndex];
+  const playlistIndex = useMemo(() => {
+    if (!currentTrack || !currentTrack.inPlaylist) {
+      return -1; // Current track is not in playlist
     }
-    
-    console.log("MusicPlayer - Playlist isolation:");
-    console.log("- Total tracks:", tracks.length);
-    console.log("- Playlist tracks:", playlistTracks.length);
-    console.log("- Current index in full array:", currentIndex);
-    console.log("- Current index in playlist array:", playlistIndex);
-    console.log("- Current track is in playlist:", currentTrack?.inPlaylist);
-    
-    return {
-      tracks: playlistTracks,
-      urls: playlistUrls,
-      currentIndex: playlistIndex
-    };
-  }, [tracks, currentIndex]);
+    return playlistStations.findIndex(station => station.url === currentTrack.url);
+  }, [currentTrack, playlistStations]);
 
-  // COMPLETELY ISOLATED: State management for playlist-only player
-  const [internalPlaylistIndex, setInternalPlaylistIndex] = React.useState(playlistData.currentIndex);
-  const [internalIsPlaying, setInternalIsPlaying] = React.useState(isPlaying);
+  console.log("MusicPlayer - Current track analysis:");
+  console.log("- Current track:", currentTrack?.name);
+  console.log("- Is in playlist:", currentTrack?.inPlaylist);
+  console.log("- Playlist index:", playlistIndex);
 
-  // Update internal state when external playlist selection changes
-  React.useEffect(() => {
-    if (playlistData.currentIndex >= 0) {
-      setInternalPlaylistIndex(playlistData.currentIndex);
+  // STEP 3: Internal playlist-only state
+  const [internalIndex, setInternalIndex] = useState(playlistIndex >= 0 ? playlistIndex : 0);
+  const [internalIsPlaying, setInternalIsPlaying] = useState(false);
+
+  // STEP 4: Sync external changes to internal state (only when valid)
+  useEffect(() => {
+    if (playlistIndex >= 0) {
+      console.log("MusicPlayer - Syncing external change to internal state:", playlistIndex);
+      setInternalIndex(playlistIndex);
       setInternalIsPlaying(isPlaying);
     } else {
+      console.log("MusicPlayer - External track not in playlist, stopping playback");
       setInternalIsPlaying(false);
     }
-  }, [playlistData.currentIndex, isPlaying]);
+  }, [playlistIndex, isPlaying]);
 
-  // ISOLATED: Handle playlist index changes WITHOUT syncing back during navigation
-  const handlePlaylistIndexChange = useCallback((newPlaylistIndex: number) => {
-    console.log("MusicPlayer - Internal playlist navigation to index:", newPlaylistIndex);
-    console.log("- Playlist has", playlistData.tracks.length, "stations");
-    console.log("- New index is valid:", newPlaylistIndex >= 0 && newPlaylistIndex < playlistData.tracks.length);
-    
-    // Only update internal state - DO NOT sync back to main array during navigation
-    setInternalPlaylistIndex(newPlaylistIndex);
-    
-    // Log which track will play
-    if (newPlaylistIndex >= 0 && newPlaylistIndex < playlistData.tracks.length) {
-      const selectedTrack = playlistData.tracks[newPlaylistIndex];
-      console.log("- Will play playlist track:", selectedTrack.name);
-      console.log("- Track URL:", selectedTrack.url);
-    }
-  }, [playlistData.tracks]);
+  // STEP 5: Handle internal playlist navigation (NO external sync)
+  const handleInternalIndexChange = useCallback((newIndex: number) => {
+    console.log("MusicPlayer - Internal navigation to playlist index:", newIndex);
+    console.log("- Will play:", playlistStations[newIndex]?.name);
+    setInternalIndex(newIndex);
+    // CRITICAL: Do NOT call setCurrentIndex here - keep it internal only
+  }, [playlistStations]);
 
+  // STEP 6: Use player core with playlist-only data
   const {
     duration,
     currentTime,
@@ -98,19 +93,19 @@ const MusicPlayer: React.FC<MusicPlayerProps> = memo(({
     handlePrevious,
     handleSeek,
   } = usePlayerCore({
-    urls: playlistData.urls,
-    currentIndex: internalPlaylistIndex,
-    setCurrentIndex: handlePlaylistIndexChange,
+    urls: playlistUrls,
+    currentIndex: internalIndex,
+    setCurrentIndex: handleInternalIndexChange,
     isPlaying: internalIsPlaying,
     setIsPlaying: setInternalIsPlaying,
-    tracks: playlistData.tracks,
+    tracks: playlistStations,
   });
 
   // Add phone call handling
   usePhoneCallHandling(internalIsPlaying, setInternalIsPlaying);
 
-  // Show message if no playlist stations or invalid selection
-  if (playlistData.tracks.length === 0) {
+  // Show message if no playlist stations
+  if (playlistStations.length === 0) {
     return (
       <PlayerLayout>
         <div className="text-center text-muted-foreground p-4">
@@ -121,23 +116,25 @@ const MusicPlayer: React.FC<MusicPlayerProps> = memo(({
     );
   }
 
-  if (internalPlaylistIndex < 0 || internalPlaylistIndex >= playlistData.tracks.length) {
+  // Show message if current selection is not in playlist
+  if (playlistIndex < 0) {
     return (
       <PlayerLayout>
         <div className="text-center text-muted-foreground p-4">
           <p>Select a playlist station to start playing</p>
+          <p className="text-sm mt-1">Currently selected station is not in your playlist</p>
         </div>
       </PlayerLayout>
     );
   }
 
-  const currentPlaylistTrack = playlistData.tracks[internalPlaylistIndex];
+  const currentPlaylistStation = playlistStations[internalIndex];
 
   return (
     <PlayerLayout>
       <PlayerTrackInfo
-        title={currentPlaylistTrack?.name || `Track ${internalPlaylistIndex + 1}`}
-        url={playlistData.urls[internalPlaylistIndex]}
+        title={currentPlaylistStation?.name || `Station ${internalIndex + 1}`}
+        url={playlistUrls[internalIndex]}
         loading={loading}
       />
       <PlayerSlider
@@ -151,7 +148,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = memo(({
         onPlayPause={handlePlayPause}
         onNext={handleNext}
         onPrev={handlePrevious}
-        disabled={playlistData.urls.length === 0}
+        disabled={playlistUrls.length === 0}
       />
       <PlayerVolume
         volume={volume}
@@ -160,13 +157,11 @@ const MusicPlayer: React.FC<MusicPlayerProps> = memo(({
     </PlayerLayout>
   );
 }, (prevProps, nextProps) => {
-  // Custom comparison function for better performance
+  // Custom comparison for performance
   return (
     prevProps.currentIndex === nextProps.currentIndex &&
     prevProps.isPlaying === nextProps.isPlaying &&
-    prevProps.urls.length === nextProps.urls.length &&
-    (prevProps.tracks?.length || 0) === (nextProps.tracks?.length || 0) &&
-    prevProps.urls[prevProps.currentIndex] === nextProps.urls[nextProps.currentIndex]
+    prevProps.tracks?.length === nextProps.tracks?.length
   );
 });
 
