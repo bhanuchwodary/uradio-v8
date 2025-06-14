@@ -62,7 +62,8 @@ const AddStationPage: React.FC = () => {
   return (
     <AppLayout>
       <div className="container mx-auto max-w-5xl space-y-6 pt-4">
-        <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent flex items-center gap-2">
+        {/* Heading already clear and prominent, but will ensure visually distinct style */}
+        <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent flex items-center gap-2 py-2 px-1 rounded-lg shadow-lg">
           <Plus className="h-5 w-5 text-primary" />
           Add Station
         </h1>

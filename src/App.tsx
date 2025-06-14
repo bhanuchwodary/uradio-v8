@@ -7,7 +7,7 @@ import { TrackStateProvider } from "@/context/TrackStateContext";
 import PlaylistPage from "@/pages/PlaylistPage";
 import AddStationPage from "@/pages/AddStationPage";
 import NotFound from "@/pages/NotFound";
-import StationListPage from "@/pages/StationListPage";
+// Removed: import StationListPage from "@/pages/StationListPage";
 import RequestStationPage from "@/pages/RequestStationPage";
 
 const App = () => {
@@ -20,7 +20,7 @@ const App = () => {
             <Route path="/playlist" element={<PlaylistPage />} />
             <Route path="/add" element={<AddStationPage />} />
             <Route path="/add-station" element={<AddStationPage />} />
-            <Route path="/station-list" element={<StationListPage />} />
+            {/* Removed Station List route */}
             <Route path="/request-station" element={<RequestStationPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
