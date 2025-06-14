@@ -25,7 +25,8 @@ export const usePlayerControls = ({
     console.log("usePlayerControls - handleNext called");
     console.log("- Current index:", currentIndex);
     console.log("- URLs length:", urls.length);
-    console.log("- URLs:", urls);
+    console.log("- Current URL:", urls[currentIndex]);
+    console.log("- All URLs:", urls);
     
     if (urls.length === 0) {
       console.log("- No URLs available, stopping");
@@ -39,6 +40,7 @@ export const usePlayerControls = ({
     console.log("- Valid current index:", validCurrentIndex);
     console.log("- Next index:", nextIndex);
     console.log("- Next URL:", urls[nextIndex]);
+    console.log("- CRITICAL: Will navigate within playlist URLs only");
     
     setCurrentIndex(nextIndex);
   };
@@ -48,7 +50,8 @@ export const usePlayerControls = ({
     console.log("usePlayerControls - handlePrevious called");
     console.log("- Current index:", currentIndex);
     console.log("- URLs length:", urls.length);
-    console.log("- URLs:", urls);
+    console.log("- Current URL:", urls[currentIndex]);
+    console.log("- All URLs:", urls);
     
     if (urls.length === 0) {
       console.log("- No URLs available, stopping");
@@ -62,6 +65,7 @@ export const usePlayerControls = ({
     console.log("- Valid current index:", validCurrentIndex);
     console.log("- Previous index:", prevIndex);
     console.log("- Previous URL:", urls[prevIndex]);
+    console.log("- CRITICAL: Will navigate within playlist URLs only");
     
     setCurrentIndex(prevIndex);
   };

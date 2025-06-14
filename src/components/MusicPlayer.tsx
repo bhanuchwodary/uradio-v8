@@ -56,7 +56,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = memo(({
     };
   }, [tracks, currentIndex]);
 
-  // ISOLATED: State management for playlist-only player
+  // COMPLETELY ISOLATED: State management for playlist-only player
   const [internalPlaylistIndex, setInternalPlaylistIndex] = React.useState(playlistData.currentIndex);
   const [internalIsPlaying, setInternalIsPlaying] = React.useState(isPlaying);
 
@@ -70,26 +70,22 @@ const MusicPlayer: React.FC<MusicPlayerProps> = memo(({
     }
   }, [playlistData.currentIndex, isPlaying]);
 
-  // CRITICAL FIX: Handle playlist index changes and sync back to main array
+  // ISOLATED: Handle playlist index changes WITHOUT syncing back during navigation
   const handlePlaylistIndexChange = useCallback((newPlaylistIndex: number) => {
-    console.log("MusicPlayer - Internal playlist index change:", newPlaylistIndex);
+    console.log("MusicPlayer - Internal playlist navigation to index:", newPlaylistIndex);
+    console.log("- Playlist has", playlistData.tracks.length, "stations");
+    console.log("- New index is valid:", newPlaylistIndex >= 0 && newPlaylistIndex < playlistData.tracks.length);
+    
+    // Only update internal state - DO NOT sync back to main array during navigation
     setInternalPlaylistIndex(newPlaylistIndex);
     
-    // SYNC BACK: Find the corresponding index in the full tracks array
+    // Log which track will play
     if (newPlaylistIndex >= 0 && newPlaylistIndex < playlistData.tracks.length) {
-      const selectedPlaylistTrack = playlistData.tracks[newPlaylistIndex];
-      const fullArrayIndex = tracks.findIndex(track => track.url === selectedPlaylistTrack.url);
-      
-      console.log("MusicPlayer - Syncing back to main array:");
-      console.log("- New playlist index:", newPlaylistIndex);
-      console.log("- Selected playlist track:", selectedPlaylistTrack.name);
-      console.log("- Corresponding full array index:", fullArrayIndex);
-      
-      if (fullArrayIndex >= 0) {
-        setCurrentIndex(fullArrayIndex);
-      }
+      const selectedTrack = playlistData.tracks[newPlaylistIndex];
+      console.log("- Will play playlist track:", selectedTrack.name);
+      console.log("- Track URL:", selectedTrack.url);
     }
-  }, [playlistData.tracks, tracks, setCurrentIndex]);
+  }, [playlistData.tracks]);
 
   const {
     duration,
