@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Card } from "@/components/ui/card";
-import { Play, Pause, Edit, Trash2, Star, Plus } from "lucide-react";
+import { Play, Pause, Edit, Trash2, Star, Plus, ListPlus, ListX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Track } from "@/types/track";
 import { cn } from "@/lib/utils";
@@ -14,7 +14,7 @@ interface StationCardProps {
   onEdit?: () => void;
   onDelete?: () => void;
   onToggleFavorite?: () => void;
-  onToggleInPlaylist?: () => void; // <-- Add this line for typing support
+  onToggleInPlaylist?: () => void;
   actionIcon?: "play" | "add";
 }
 
@@ -26,6 +26,7 @@ export const StationCard: React.FC<StationCardProps> = ({
   onEdit,
   onDelete,
   onToggleFavorite,
+  onToggleInPlaylist,
   actionIcon = "play"
 }) => {
   // Prevent event bubbling for control buttons
@@ -39,16 +40,13 @@ export const StationCard: React.FC<StationCardProps> = ({
     if (actionIcon === "add") {
       return <Plus className="w-5 h-5" />;
     }
-    
     return isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 ml-0.5" />;
   };
 
   // Ensure language is preserved from station data with proper fallback
   const stationLanguage = station?.language && station.language !== "" ? station.language : "Unknown";
 
-  console.log("StationCard rendering:", { name: station.name, language: stationLanguage, isPlaying, isSelected });
-
-  const hasActionButtons = onToggleFavorite || (onEdit && !station.isFeatured) || onDelete;
+  const hasActionButtons = onToggleFavorite || (onEdit && !station.isFeatured) || onDelete || onToggleInPlaylist;
 
   return (
     <Card 
@@ -101,6 +99,25 @@ export const StationCard: React.FC<StationCardProps> = ({
                   "h-4 w-4",
                   station.isFavorite && "fill-yellow-500"
                 )} />
+              </Button>
+            )}
+
+            {/* ADD/REMOVE FROM PLAYLIST BUTTON */}
+            {onToggleInPlaylist && (
+              <Button
+                size="icon"
+                variant="ghost"
+                className={cn(
+                  "h-7 w-7 rounded-full transition-all duration-200 active:scale-90",
+                  station.inPlaylist
+                    ? "text-green-600 bg-green-400/10 hover:bg-green-400/20"
+                    : "text-muted-foreground hover:text-green-500 hover:bg-green-500/10"
+                )}
+                onClick={e => handleButtonClick(e, onToggleInPlaylist)}
+                aria-label={station.inPlaylist ? "Remove from playlist" : "Add to playlist"}
+                title={station.inPlaylist ? "Remove from playlist" : "Add to playlist"}
+              >
+                {station.inPlaylist ? <ListX className="h-4 w-4" /> : <ListPlus className="h-4 w-4" />}
               </Button>
             )}
             
