@@ -39,7 +39,7 @@ const MiniPlayerBar: React.FC = () => {
               <SkipBack className="h-4 w-4" />
             </Button>
             <Button
-              variant="primary"
+              variant="default"
               size="icon"
               onClick={handlePlayPause}
               disabled={loading}
@@ -72,3 +72,4 @@ const MiniPlayerBar: React.FC = () => {
 };
 
 export default MiniPlayerBar;
+
