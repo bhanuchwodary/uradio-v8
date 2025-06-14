@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useTrackStateContext } from "@/context/TrackStateContext";
@@ -77,11 +76,22 @@ const PlaylistPage: React.FC = () => {
   const handleDeleteStation = () => {
     if (stationToDelete) {
       const stationName = stationToDelete.name;
-      removeStationByValue(stationToDelete);
-      toast({
-        title: "Station removed",
-        description: `${stationName} has been removed from your playlist`
-      });
+      // Prevent removing user-added stations from main list (library)
+      if (!stationToDelete.isFeatured) {
+        // For user stations, it should NOT be deleted from the library
+        toast({
+          title: "Can't remove user station from playlist",
+          description: `${stationName} will stay available in your stations`,
+          variant: "destructive"
+        });
+      } else {
+        // Only allow removal for featured stations (from playlist view)
+        removeStationByValue(stationToDelete);
+        toast({
+          title: "Station removed",
+          description: `${stationName} has been removed from your playlist`
+        });
+      }
       setStationToDelete(null);
     }
   };
@@ -99,9 +109,9 @@ const PlaylistPage: React.FC = () => {
     setShowClearDialog(true);
   };
 
-  // FIX: Remove ALL stations that are visible in the 'playlist' (including user-added)
+  // Clear all function should NOT remove user-added stations from library
   const confirmClearAll = () => {
-    // Reproduce the merging and deduplication logic from PlaylistContent
+    // Compute all playlist stations (matching PlaylistContent logic)
     const allPlaylistStations = [
       ...favoriteStations,
       ...popularStations,
@@ -115,15 +125,27 @@ const PlaylistPage: React.FC = () => {
         index === self.findIndex(s => s.url === station.url)
     );
 
-    // Remove all of these stations from playlist
-    const countToRemove = uniquePlaylistStations.length;
+    let countRemoved = 0;
+
     uniquePlaylistStations.forEach(station => {
-      removeStationByValue(station);
+      // Don't actually remove user stations, just un-favorite them (or skip)
+      if (station.isFeatured) {
+        removeStationByValue(station);
+        countRemoved++;
+      } else if (station.isFavorite) {
+        // For user stations, remove from playlist by un-favoriting only
+        const index = tracks.findIndex(t => t.url === station.url);
+        if (index !== -1) {
+          toggleFavorite(index);
+          countRemoved++;
+        }
+      }
+      // If it's just a user station, do not remove it from user library!
     });
 
     toast({
       title: "Playlist cleared",
-      description: `${countToRemove} station${countToRemove === 1 ? "" : "s"} removed from your playlist`,
+      description: `${countRemoved} station${countRemoved === 1 ? "" : "s"} removed from your playlist`,
     });
     setShowClearDialog(false);
   };
@@ -194,4 +216,3 @@ const PlaylistPage: React.FC = () => {
 };
 
 export default PlaylistPage;
-
