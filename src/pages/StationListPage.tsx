@@ -103,7 +103,7 @@ const StationListPage: React.FC = () => {
 
   return (
     <AppLayout>
-      <div className="container mx-auto max-w-5xl space-y-6 pt-4">
+      <div className="space-y-6 pt-4">
         {/* REMOVED the Station List heading here */}
 
         {/* FIXED User Stations to match playlist design */}

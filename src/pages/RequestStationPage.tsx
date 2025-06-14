@@ -82,7 +82,7 @@ const RequestStationPage: React.FC = () => {
   return (
     <AppLayout>
       {/* FIXED Added proper gap between header and content */}
-      <div className="container mx-auto max-w-2xl space-y-6 pt-4">
+      <div className="mx-auto max-w-2xl space-y-6 pt-4">
         <Card className="bg-gradient-to-br from-background/40 to-background/20 backdrop-blur-md border-border/30 shadow-xl">
           <CardHeader className="pb-3">
             <CardTitle className="text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent flex items-center gap-2">

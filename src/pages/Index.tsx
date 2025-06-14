@@ -124,7 +124,7 @@ const Index: React.FC = () => {
 
   return (
     <AppLayout>
-      <div className="container mx-auto max-w-5xl space-y-6">
+      <div className="space-y-6">
         {/* Player Card */}
         <HomePagePlayer
           currentTrack={currentTrack}
