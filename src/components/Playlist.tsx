@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Trash2, Edit, Heart, HeartOff, Play, Pause, Sparkles, MoreVertical } from "lucide-react";
+import { Trash2, Edit, Heart, HeartOff, Play, Pause, Sparkles, MoreVertical, Music } from "lucide-react";
 import { Track } from "@/types/track";
 import { cn } from "@/lib/utils";
 import EditStationDialog from "@/components/EditStationDialog";
