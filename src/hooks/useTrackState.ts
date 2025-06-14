@@ -60,8 +60,6 @@ export const useTrackState = (): TrackStateResult => {
     // Include other operations from operations interface
     editStationByValue: operations.editStationByValue,
     removeStationByValue: operations.removeStationByValue,
-    // Explicitly expose toggleInPlaylist for context
-    toggleInPlaylist: operations.toggleInPlaylist,
     ...debug
   };
 };

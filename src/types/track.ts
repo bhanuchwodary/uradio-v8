@@ -6,5 +6,4 @@ export interface Track {
   playTime: number;
   isFeatured?: boolean;
   language?: string;
-  inPlaylist?: boolean; // <- NEW property for playlist logic
 }

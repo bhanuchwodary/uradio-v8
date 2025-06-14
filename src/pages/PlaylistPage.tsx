@@ -14,8 +14,8 @@ const PlaylistPage: React.FC = () => {
   const [stationToDelete, setStationToDelete] = useState<Track | null>(null);
   const [showClearDialog, setShowClearDialog] = useState(false);
   const [isPageReady, setIsPageReady] = useState(false);
-
-  const {
+  
+  const { 
     tracks,
     currentIndex,
     isPlaying,
@@ -23,25 +23,37 @@ const PlaylistPage: React.FC = () => {
     setIsPlaying,
     editStationByValue,
     removeStationByValue,
-    toggleFavorite,
-    toggleInPlaylist // <- Make sure this exists
+    toggleFavorite
   } = useTrackStateContext();
-
-  // Playlist stations are those with inPlaylist === true
-  const playlistStations = tracks.filter(track => track.inPlaylist);
-
+  
+  // Split stations into different categories - ensure proper filtering
+  const userStations = tracks.filter(track => !track.isFeatured);
+  const featuredStations = tracks.filter(track => track.isFeatured);
+  const favoriteStations = tracks.filter(track => track.isFavorite);
+  
+  // Calculate popular stations based on play time
+  const popularStations = [...tracks]
+    .sort((a, b) => (b.playTime || 0) - (a.playTime || 0))
+    .slice(0, 8);
+  
+  // Add effect for smooth transition on page load
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsPageReady(true);
     }, 50);
+    
     return () => clearTimeout(timer);
   }, []);
-
+  
+  // Calculate current track
   const currentTrack = tracks[currentIndex] || null;
-
+  
+  // Handle selecting a station from a grid with pause functionality
   const handleSelectStation = (stationIndex: number, stationList: typeof tracks) => {
+    // Find the corresponding index in the full tracks list
     const mainIndex = tracks.findIndex(t => t.url === stationList[stationIndex].url);
     if (mainIndex !== -1) {
+      // If clicking on the currently playing station, toggle pause/play
       if (mainIndex === currentIndex && isPlaying) {
         setIsPlaying(false);
       } else {
@@ -50,69 +62,62 @@ const PlaylistPage: React.FC = () => {
       }
     }
   };
-
+  
+  // Edit station handler
   const handleEditStation = (station: Track) => {
     setEditingStation(station);
   };
-
+  
+  // Open the delete confirmation dialog for a station
   const handleConfirmDelete = (station: Track) => {
     setStationToDelete(station);
   };
-
+  
+  // Handle actual deletion after confirmation
   const handleDeleteStation = () => {
     if (stationToDelete) {
-      const idx = tracks.findIndex(t => t.url === stationToDelete.url);
-      if (idx !== -1) {
-        toggleInPlaylist(idx); // Remove from playlist, not from library
-        toast({
-          title: "Station removed from playlist",
-          description: `${stationToDelete.name} was removed from your playlist.`
-        });
-      }
+      const stationName = stationToDelete.name;
+      removeStationByValue(stationToDelete);
+      toast({
+        title: "Station removed",
+        description: `${stationName} has been removed from your playlist`
+      });
       setStationToDelete(null);
     }
   };
-
+  
+  // Toggle favorite for a station
   const handleToggleFavorite = (station: Track) => {
-    const idx = tracks.findIndex(t => t.url === station.url);
-    if (idx !== -1) {
-      toggleFavorite(idx);
+    const index = tracks.findIndex(t => t.url === station.url);
+    if (index !== -1) {
+      toggleFavorite(index);
     }
   };
-
-  const handleToggleInPlaylist = (station: Track) => {
-    const idx = tracks.findIndex(t => t.url === station.url);
-    if (idx !== -1) {
-      toggleInPlaylist(idx);
-    }
-  };
-
+  
+  // Clear all stations from playlist
   const handleClearAll = () => {
     setShowClearDialog(true);
   };
-
+  
+  // FIXED: Clear all function now properly removes ALL stations from the playlist only
   const confirmClearAll = () => {
-    // Remove all stations from playlist view (set inPlaylist to false for all tracks)
-    let countCleared = 0;
-    tracks.forEach((station, idx) => {
-      if (station.inPlaylist) {
-        toggleInPlaylist(idx);
-        countCleared++;
-      }
+    // Get count before clearing
+    const stationCount = tracks.length;
+    
+    // Remove ALL stations from the tracks array (this is the playlist)
+    const allStationsToRemove = [...tracks];
+    allStationsToRemove.forEach(station => {
+      removeStationByValue(station);
     });
-
+    
     toast({
       title: "Playlist cleared",
-      description: `${
-        countCleared === 0
-          ? "No stations were"
-          : countCleared + " station" + (countCleared === 1 ? " was" : "s were")
-      } removed from your playlist.`,
+      description: `${stationCount} stations removed from your playlist`
     });
-
     setShowClearDialog(false);
   };
-
+  
+  // Save edited station
   const handleSaveEdit = (data: { url: string; name: string }) => {
     if (editingStation) {
       editStationByValue(editingStation, data);
@@ -126,9 +131,13 @@ const PlaylistPage: React.FC = () => {
 
   return (
     <AppLayout>
-      <div className={`w-full max-w-none space-y-6 transition-opacity duration-300 ease-in-out pt-4 ${isPageReady ? 'opacity-100' : 'opacity-0'}`}>
+      <div className={`container mx-auto max-w-5xl space-y-6 transition-opacity duration-300 ease-in-out pt-4 ${isPageReady ? 'opacity-100' : 'opacity-0'}`}>
+        {/* Playlist Content Component - Now unified layout */}
         <PlaylistContent
-          stations={playlistStations}
+          userStations={userStations}
+          featuredStations={featuredStations}
+          favoriteStations={favoriteStations}
+          popularStations={popularStations}
           currentIndex={currentIndex}
           currentTrack={currentTrack}
           isPlaying={isPlaying}
@@ -136,9 +145,10 @@ const PlaylistPage: React.FC = () => {
           onEditStation={handleEditStation}
           onConfirmDelete={handleConfirmDelete}
           onToggleFavorite={handleToggleFavorite}
-          onToggleInPlaylist={handleToggleInPlaylist}
           onClearAll={handleClearAll}
         />
+        
+        {/* Dialogs Component */}
         <PlaylistDialogs
           editingStation={editingStation}
           stationToDelete={stationToDelete}
@@ -147,6 +157,8 @@ const PlaylistPage: React.FC = () => {
           onCloseDeleteDialog={() => setStationToDelete(null)}
           onConfirmDelete={handleDeleteStation}
         />
+        
+        {/* Clear All Confirmation Dialog */}
         {showClearDialog && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
             <div className="bg-background p-6 rounded-lg shadow-lg max-w-md mx-4">

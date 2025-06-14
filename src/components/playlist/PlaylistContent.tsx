@@ -5,23 +5,27 @@ import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 import { StationGrid } from "@/components/ui/player/StationGrid";
 import { Track } from "@/types/track";
-import { useIsMobile } from "@/hooks/use-mobile";
 
 interface PlaylistContentProps {
-  stations: Track[];
+  userStations: Track[];
+  featuredStations: Track[];
+  favoriteStations: Track[];
+  popularStations: Track[];
   currentIndex: number;
   currentTrack: Track | null;
   isPlaying: boolean;
   onSelectStation: (index: number, stationList: Track[]) => void;
   onEditStation: (station: Track) => void;
   onConfirmDelete: (station: Track) => void;
-  onToggleFavorite?: (station: Track) => void;
-  onToggleInPlaylist?: (station: Track) => void;
+  onToggleFavorite: (station: Track) => void;
   onClearAll?: () => void;
 }
 
 const PlaylistContent: React.FC<PlaylistContentProps> = ({
-  stations,
+  userStations,
+  featuredStations,
+  favoriteStations,
+  popularStations,
   currentIndex,
   currentTrack,
   isPlaying,
@@ -29,15 +33,19 @@ const PlaylistContent: React.FC<PlaylistContentProps> = ({
   onEditStation,
   onConfirmDelete,
   onToggleFavorite,
-  onToggleInPlaylist,
   onClearAll
 }) => {
-  const isMobile = useIsMobile();
-  
-  // Unique by url only, though in practice there shouldn't be duplicates
-  const uniquePlaylistStations = stations.filter(
-    (station, index, self) =>
-      index === self.findIndex(s => s.url === station.url)
+  // FIXED: Combine all stations into one unified playlist (stations that are actually in the playlist)
+  const allPlaylistStations = [
+    ...favoriteStations,
+    ...popularStations,
+    ...userStations.filter(station => !station.isFeatured),
+    ...featuredStations
+  ];
+
+  // Remove duplicates based on URL
+  const uniquePlaylistStations = allPlaylistStations.filter((station, index, self) => 
+    index === self.findIndex(s => s.url === station.url)
   );
 
   return (
@@ -47,6 +55,7 @@ const PlaylistContent: React.FC<PlaylistContentProps> = ({
           <CardTitle className="text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
             My Playlist
           </CardTitle>
+          {/* FIXED: Only show clear all if there are stations in the playlist */}
           {uniquePlaylistStations.length > 0 && onClearAll && (
             <Button
               variant="destructive"
@@ -55,7 +64,7 @@ const PlaylistContent: React.FC<PlaylistContentProps> = ({
               className="flex items-center gap-2"
             >
               <Trash2 className="h-4 w-4" />
-              {!isMobile && "Clear All"}
+              Clear All
             </Button>
           )}
         </div>
@@ -67,21 +76,15 @@ const PlaylistContent: React.FC<PlaylistContentProps> = ({
             currentIndex={currentIndex}
             currentTrackUrl={currentTrack?.url}
             isPlaying={isPlaying}
-            onSelectStation={index =>
-              onSelectStation(index, uniquePlaylistStations)
-            }
-            onEditStation={undefined} // Hide edit button for playlist screen
-            onDeleteStation={undefined} // Hide delete button for playlist screen
+            onSelectStation={(index) => onSelectStation(index, uniquePlaylistStations)}
+            onEditStation={onEditStation}
+            onDeleteStation={onConfirmDelete}
             onToggleFavorite={onToggleFavorite}
-            onToggleInPlaylist={onToggleInPlaylist}
-            actionIcon="play"
           />
         ) : (
           <div className="text-center p-8 bg-gradient-to-br from-background/50 to-background/30 rounded-xl border border-border/50">
             <p className="text-muted-foreground">Your playlist is empty</p>
-            <p className="text-sm text-muted-foreground/70 mt-1">
-              Add stations to build your collection
-            </p>
+            <p className="text-sm text-muted-foreground/70 mt-1">Add stations to build your collection</p>
           </div>
         )}
       </CardContent>

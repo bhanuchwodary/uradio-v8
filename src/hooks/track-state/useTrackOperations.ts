@@ -1,4 +1,3 @@
-
 import { useCallback } from "react";
 import { Track } from "@/types/track";
 import { saveTracksToLocalStorage } from "./trackStorage";
@@ -9,8 +8,7 @@ import {
   editStationByValue as editByValue,
   removeStationByValue as removeByValue,
   removeTrackByIndex,
-  toggleTrackFavorite,
-  toggleTrackInPlaylist
+  toggleTrackFavorite
 } from "./index";
 
 export const useTrackOperations = (
@@ -32,17 +30,16 @@ export const useTrackOperations = (
     name: string = "", 
     isFeatured: boolean = false, 
     isFavorite: boolean = false,
-    language: string = "",
-    inPlaylist: boolean = false // FIXED: Added inPlaylist parameter
+    language: string = ""
   ) => {
-    console.log("addUrl called with:", url, name, isFeatured, isFavorite, language, inPlaylist);
+    console.log("addUrl called with:", url, name, isFeatured, isFavorite, language);
     console.log("Current tracks count:", tracks.length);
     
     // Use tracksRef for most up-to-date value when available
     const currentTracks = tracksRef?.current || tracks;
     
     const { tracks: updatedTracks, result } = addStationUrl(
-      url, name, isFeatured, isFavorite, currentTracks, language, inPlaylist
+      url, name, isFeatured, isFavorite, currentTracks, language
     );
     
     console.log("Result of addStationUrl:", result.success, result.message);
@@ -175,22 +172,10 @@ export const useTrackOperations = (
     });
   }, [setTracks, tracksRef]);
 
-  // New: Toggle inPlaylist status
-  const toggleInPlaylist = useCallback((index: number) => {
-    setTracks(currentTracks => {
-      const updatedTracks = toggleTrackInPlaylist(currentTracks, index);
-      // ... force save and ref update ...
-      saveTracksToLocalStorage(updatedTracks);
-      if (tracksRef) tracksRef.current = updatedTracks;
-      return updatedTracks;
-    });
-  }, [setTracks, tracksRef]);
-
   return {
     addUrl,
     removeUrl,
     toggleFavorite,
-    toggleInPlaylist, // <- NEW
     editTrack,
     updatePlayTime,
     checkIfStationExists,
