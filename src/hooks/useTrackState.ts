@@ -55,7 +55,7 @@ export const useTrackState = (): TrackStateResult => {
     // Map management functions to match TrackStateResult interface
     getUserStations: management.getMyStations,
     getTopStations: management.getPopularStations,
-    // Map stationExists to checkIfStationExists as required by TrackStateResult
+    // Use stationExists which returns the correct object format
     checkIfStationExists: management.stationExists,
     // Include other operations from operations interface
     editStationByValue: operations.editStationByValue,

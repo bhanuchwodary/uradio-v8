@@ -33,7 +33,7 @@ export interface TrackStateResult {
   removeStationByValue: (station: Track) => void;
   
   // Utility functions
-  checkIfStationExists: (url: string) => boolean;
+  checkIfStationExists: (url: string) => { exists: boolean; isUserStation: boolean };
   getUserStations: () => Track[];
   getTopStations: () => Track[];
   
