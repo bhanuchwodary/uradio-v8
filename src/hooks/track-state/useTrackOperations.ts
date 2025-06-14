@@ -1,3 +1,4 @@
+
 import { useCallback } from "react";
 import { Track } from "@/types/track";
 import { saveTracksToLocalStorage } from "./trackStorage";
@@ -32,55 +33,14 @@ export const useTrackOperations = (
     isFeatured: boolean = false, 
     isFavorite: boolean = false,
     language: string = "",
-    inPlaylist: boolean = false,
-    shouldAutoPlay: boolean = false
+    inPlaylist: boolean = false // FIXED: Added inPlaylist parameter
   ) => {
-    console.log("addUrl called with:", { url, name, isFeatured, isFavorite, language, inPlaylist, shouldAutoPlay });
+    console.log("addUrl called with:", url, name, isFeatured, isFavorite, language, inPlaylist);
+    console.log("Current tracks count:", tracks.length);
     
     // Use tracksRef for most up-to-date value when available
     const currentTracks = tracksRef?.current || tracks;
     
-    // FIXED: If adding to playlist, check if station already exists and just toggle inPlaylist
-    if (inPlaylist) {
-      const existingIndex = currentTracks.findIndex(
-        track => track.url.toLowerCase() === url.toLowerCase()
-      );
-      
-      if (existingIndex !== -1) {
-        console.log("Found existing station at index:", existingIndex, "toggling inPlaylist to true");
-        // Station exists, just toggle inPlaylist to true
-        setTracks(prevTracks => {
-          const updatedTracks = [...prevTracks];
-          updatedTracks[existingIndex] = {
-            ...updatedTracks[existingIndex],
-            inPlaylist: true
-          };
-          
-          // Save to localStorage
-          saveTracksToLocalStorage(updatedTracks);
-          if (tracksRef) {
-            tracksRef.current = updatedTracks;
-          }
-          
-          return updatedTracks;
-        });
-        
-        // FIXED: Only auto-select and play if explicitly requested
-        if (shouldAutoPlay) {
-          console.log("Auto-playing existing station at index:", existingIndex);
-          setCurrentIndex(existingIndex);
-          setIsPlaying(true);
-        }
-        
-        return { 
-          success: true, 
-          message: "Station added to playlist",
-          addedIndex: existingIndex
-        };
-      }
-    }
-    
-    // If not adding to playlist or station doesn't exist, use the original addStationUrl logic
     const { tracks: updatedTracks, result } = addStationUrl(
       url, name, isFeatured, isFavorite, currentTracks, language, inPlaylist
     );
@@ -96,15 +56,6 @@ export const useTrackOperations = (
     // Always update state with a completely fresh array
     setTracks([...updatedTracks]);
     
-    // FIXED: Only auto-select and play if explicitly requested
-    if (shouldAutoPlay && result.success && result.addedIndex !== undefined) {
-      console.log("Auto-playing newly added station at index:", result.addedIndex);
-      setCurrentIndex(result.addedIndex);
-      setIsPlaying(true);
-    } else {
-      console.log("Station added but not auto-playing (shouldAutoPlay:", shouldAutoPlay, ")");
-    }
-    
     // Force an immediate save to localStorage
     const saveSuccess = saveTracksToLocalStorage(updatedTracks);
     if (!saveSuccess) {
@@ -116,7 +67,7 @@ export const useTrackOperations = (
     }
     
     return result;
-  }, [tracks, setTracks, tracksRef, setCurrentIndex, setIsPlaying]);
+  }, [tracks, setTracks, tracksRef]);
 
   const updatePlayTime = useCallback((index: number, seconds: number) => {
     setTracks(currentTracks => {
@@ -224,48 +175,22 @@ export const useTrackOperations = (
     });
   }, [setTracks, tracksRef]);
 
+  // New: Toggle inPlaylist status
   const toggleInPlaylist = useCallback((index: number) => {
     setTracks(currentTracks => {
       const updatedTracks = toggleTrackInPlaylist(currentTracks, index);
+      // ... force save and ref update ...
       saveTracksToLocalStorage(updatedTracks);
       if (tracksRef) tracksRef.current = updatedTracks;
       return updatedTracks;
     });
   }, [setTracks, tracksRef]);
 
-  // ENHANCED: Bulk clear all from playlist with smart playback handling
-  const clearAllFromPlaylist = useCallback(() => {
-    console.log("Clearing all stations from playlist");
-    console.log("Current playing index:", currentIndex);
-    console.log("Current playing station:", tracks[currentIndex]?.name);
-    
-    setTracks(currentTracks => {
-      const updatedTracks = currentTracks.map(track => ({
-        ...track,
-        inPlaylist: false
-      }));
-      
-      // FIXED: If currently playing station was in playlist, handle playback
-      const currentTrack = currentTracks[currentIndex];
-      if (currentTrack?.inPlaylist) {
-        console.log("Currently playing station was in playlist - stopping playback");
-        // Stop playback and reset to no selection
-        setIsPlaying(false);
-        setCurrentIndex(-1);
-      }
-      
-      saveTracksToLocalStorage(updatedTracks);
-      if (tracksRef) tracksRef.current = updatedTracks;
-      return updatedTracks;
-    });
-  }, [setTracks, tracksRef, currentIndex, tracks, setIsPlaying, setCurrentIndex]);
-
   return {
     addUrl,
     removeUrl,
     toggleFavorite,
-    toggleInPlaylist,
-    clearAllFromPlaylist,
+    toggleInPlaylist, // <- NEW
     editTrack,
     updatePlayTime,
     checkIfStationExists,

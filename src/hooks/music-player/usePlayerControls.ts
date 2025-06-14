@@ -20,63 +20,23 @@ export const usePlayerControls = ({
   setCurrentIndex,
   volume
 }: UsePlayerControlsProps) => {
-  // Handle next track - STRICTLY within provided URLs array
+  // Handle next track
   const handleNext = () => {
-    console.log("usePlayerControls - handleNext called");
-    console.log("- Current index:", currentIndex);
-    console.log("- URLs array length:", urls.length);
-    console.log("- URLs array:", urls);
-    
-    if (urls.length === 0) {
-      console.log("- No URLs available - STOPPING");
-      return;
-    }
-    
-    // STRICT boundary check - only navigate within provided URLs
-    if (currentIndex < 0 || currentIndex >= urls.length) {
-      console.log("- Current index out of bounds, resetting to 0");
-      setCurrentIndex(0);
-      return;
-    }
-    
-    // Calculate next index within the bounds of the provided URLs ONLY
+    if (urls.length === 0) return;
     const nextIndex = (currentIndex + 1) % urls.length;
-    console.log("- Next index:", nextIndex);
-    console.log("- CONFIRMED: Navigation STRICTLY within provided URLs array");
-    
     setCurrentIndex(nextIndex);
   };
 
-  // Handle previous track - STRICTLY within provided URLs array  
+  // Handle previous track
   const handlePrevious = () => {
-    console.log("usePlayerControls - handlePrevious called");
-    console.log("- Current index:", currentIndex);
-    console.log("- URLs array length:", urls.length);
-    console.log("- URLs array:", urls);
-    
-    if (urls.length === 0) {
-      console.log("- No URLs available - STOPPING");
-      return;
-    }
-    
-    // STRICT boundary check - only navigate within provided URLs
-    if (currentIndex < 0 || currentIndex >= urls.length) {
-      console.log("- Current index out of bounds, resetting to 0");
-      setCurrentIndex(0);
-      return;
-    }
-    
-    // Calculate previous index within the bounds of the provided URLs ONLY
+    if (urls.length === 0) return;
     const prevIndex = (currentIndex - 1 + urls.length) % urls.length;
-    console.log("- Previous index:", prevIndex);
-    console.log("- CONFIRMED: Navigation STRICTLY within provided URLs array");
-    
     setCurrentIndex(prevIndex);
   };
 
   // Handle play/pause toggle
   const handlePlayPause = () => {
-    if (audioRef.current && urls.length > 0) {
+    if (audioRef.current) {
       if (isPlaying) {
         audioRef.current.pause();
       } else {
@@ -97,7 +57,7 @@ export const usePlayerControls = ({
 
   // Handle play/pause state changes
   useEffect(() => {
-    if (!audioRef.current || urls.length === 0) return;
+    if (!audioRef.current) return;
 
     if (isPlaying) {
       audioRef.current.play().catch(error => {
@@ -107,7 +67,7 @@ export const usePlayerControls = ({
     } else {
       audioRef.current.pause();
     }
-  }, [isPlaying, audioRef, setIsPlaying, urls.length]);
+  }, [isPlaying, audioRef, setIsPlaying]);
 
   // Handle volume changes
   useEffect(() => {

@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useTrackStateContext } from "@/context/TrackStateContext";
 import { Track } from "@/types/track";
@@ -7,7 +7,6 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import PlaylistContent from "@/components/playlist/PlaylistContent";
 import PlaylistDialogs from "@/components/playlist/PlaylistDialogs";
-import { PlaylistMusicPlayer } from "@/components/playlist/PlaylistMusicPlayer";
 
 const PlaylistPage: React.FC = () => {
   const { toast } = useToast();
@@ -16,7 +15,6 @@ const PlaylistPage: React.FC = () => {
   const [showClearDialog, setShowClearDialog] = useState(false);
   const [isPageReady, setIsPageReady] = useState(false);
 
-  // Core state from context - do not change!
   const {
     tracks,
     currentIndex,
@@ -26,74 +24,46 @@ const PlaylistPage: React.FC = () => {
     editStationByValue,
     removeStationByValue,
     toggleFavorite,
-    toggleInPlaylist,
-    clearAllFromPlaylist
+    toggleInPlaylist // <- Make sure this exists
   } = useTrackStateContext();
 
-  // -- PLAYLIST MANAGEMENT --
-  // Always derive playlist stations from core tracks
-  const playlistStations: Track[] = useMemo(
-    () => tracks.filter(t => t.inPlaylist),
-    [tracks]
-  );
+  // Playlist stations are those with inPlaylist === true
+  const playlistStations = tracks.filter(track => track.inPlaylist);
 
-  // Map global currentIndex (in tracks) to its index in playlistStations (if present)
-  function getPlaylistIndexForCurrent() {
-    if (currentIndex < 0) return 0;
-    // Use url match for mapping
-    const idx = playlistStations.findIndex(st => st.url === (tracks[currentIndex]?.url));
-    return idx >= 0 ? idx : 0;
-  }
-
-  // Local index for navigating inside the playlist ONLY
-  const [playlistIndex, setPlaylistIndex] = useState(getPlaylistIndexForCurrent());
-
-  // Whenever playlistStations or currentIndex changes, resync playlistIndex
   useEffect(() => {
-    setPlaylistIndex(getPlaylistIndexForCurrent());
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tracks, currentIndex, playlistStations.length]);
+    const timer = setTimeout(() => {
+      setIsPageReady(true);
+    }, 50);
+    return () => clearTimeout(timer);
+  }, []);
 
-  // When switching playlistIndex (player navigation) -> update core selection to correct track
-  const handleSelectPlaylistStation = (plIndex: number) => {
-    // Get the selected station's url
-    const station = playlistStations[plIndex];
-    if (station) {
-      // Find in the master tracks array for core selection/playback
-      const masterIdx = tracks.findIndex(st => st.url === station.url);
-      if (masterIdx !== -1) {
-        setCurrentIndex(masterIdx);
+  const currentTrack = tracks[currentIndex] || null;
+
+  const handleSelectStation = (stationIndex: number, stationList: typeof tracks) => {
+    const mainIndex = tracks.findIndex(t => t.url === stationList[stationIndex].url);
+    if (mainIndex !== -1) {
+      if (mainIndex === currentIndex && isPlaying) {
+        setIsPlaying(false);
+      } else {
+        setCurrentIndex(mainIndex);
         setIsPlaying(true);
       }
-      setPlaylistIndex(plIndex);
     }
   };
 
-  // All navigation (next/prev/play) inside player uses setPlaylistIndex (playlist bounds only)
-  // Only explicit selections update actual setCurrentIndex for app-wide state.
-  // Playlist player is totally isolated from tracks not in the playlist!
-
-  // Triggered by grid "Play" button
-  const handleSelectStation = (stationIndex: number, stationList: typeof tracks) => {
-    // Always play ONLY from playlistStations
-    const station = stationList[stationIndex];
-    if (station) {
-      const plIdx = playlistStations.findIndex(s => s.url === station.url);
-      if (plIdx !== -1) {
-        handleSelectPlaylistStation(plIdx);
-      }
-    }
+  const handleEditStation = (station: Track) => {
+    setEditingStation(station);
   };
 
-  const currentPlaylistTrack = playlistStations[playlistIndex] || null;
+  const handleConfirmDelete = (station: Track) => {
+    setStationToDelete(station);
+  };
 
-  const handleEditStation = (station: Track) => setEditingStation(station);
-  const handleConfirmDelete = (station: Track) => setStationToDelete(station);
   const handleDeleteStation = () => {
     if (stationToDelete) {
       const idx = tracks.findIndex(t => t.url === stationToDelete.url);
       if (idx !== -1) {
-        toggleInPlaylist(idx);
+        toggleInPlaylist(idx); // Remove from playlist, not from library
         toast({
           title: "Station removed from playlist",
           description: `${stationToDelete.name} was removed from your playlist.`
@@ -105,23 +75,41 @@ const PlaylistPage: React.FC = () => {
 
   const handleToggleFavorite = (station: Track) => {
     const idx = tracks.findIndex(t => t.url === station.url);
-    if (idx !== -1) toggleFavorite(idx);
-  };
-  const handleToggleInPlaylist = (station: Track) => {
-    const idx = tracks.findIndex(t => t.url === station.url);
-    if (idx !== -1) toggleInPlaylist(idx);
+    if (idx !== -1) {
+      toggleFavorite(idx);
+    }
   };
 
-  const handleClearAll = () => setShowClearDialog(true);
-  const confirmClearAll = () => {
-    if (clearAllFromPlaylist) {
-      const countCleared = playlistStations.length;
-      clearAllFromPlaylist();
-      toast({
-        title: "Playlist cleared",
-        description: `${countCleared === 0 ? "No stations were" : countCleared + " station" + (countCleared === 1 ? " was" : "s were")} removed from your playlist.`,
-      });
+  const handleToggleInPlaylist = (station: Track) => {
+    const idx = tracks.findIndex(t => t.url === station.url);
+    if (idx !== -1) {
+      toggleInPlaylist(idx);
     }
+  };
+
+  const handleClearAll = () => {
+    setShowClearDialog(true);
+  };
+
+  const confirmClearAll = () => {
+    // Remove all stations from playlist view (set inPlaylist to false for all tracks)
+    let countCleared = 0;
+    tracks.forEach((station, idx) => {
+      if (station.inPlaylist) {
+        toggleInPlaylist(idx);
+        countCleared++;
+      }
+    });
+
+    toast({
+      title: "Playlist cleared",
+      description: `${
+        countCleared === 0
+          ? "No stations were"
+          : countCleared + " station" + (countCleared === 1 ? " was" : "s were")
+      } removed from your playlist.`,
+    });
+
     setShowClearDialog(false);
   };
 
@@ -136,18 +124,13 @@ const PlaylistPage: React.FC = () => {
     }
   };
 
-  useEffect(() => {
-    const timer = setTimeout(() => setIsPageReady(true), 50);
-    return () => clearTimeout(timer);
-  }, []);
-
   return (
     <AppLayout>
       <div className={`w-full max-w-none space-y-6 transition-opacity duration-300 ease-in-out pt-4 ${isPageReady ? 'opacity-100' : 'opacity-0'}`}>
         <PlaylistContent
           stations={playlistStations}
-          currentIndex={playlistIndex}
-          currentTrack={currentPlaylistTrack}
+          currentIndex={currentIndex}
+          currentTrack={currentTrack}
           isPlaying={isPlaying}
           onSelectStation={handleSelectStation}
           onEditStation={handleEditStation}
@@ -155,14 +138,6 @@ const PlaylistPage: React.FC = () => {
           onToggleFavorite={handleToggleFavorite}
           onToggleInPlaylist={handleToggleInPlaylist}
           onClearAll={handleClearAll}
-        />
-        {/* NEW: Isolated Playlist Music Player, works ONLY with in-playlist stations */}
-        <PlaylistMusicPlayer
-          playlistStations={playlistStations}
-          currentPlaylistIndex={playlistIndex}
-          setCurrentPlaylistIndex={setPlaylistIndex}
-          isPlaying={isPlaying}
-          setIsPlaying={setIsPlaying}
         />
         <PlaylistDialogs
           editingStation={editingStation}
@@ -196,4 +171,3 @@ const PlaylistPage: React.FC = () => {
 };
 
 export default PlaylistPage;
-

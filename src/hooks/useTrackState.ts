@@ -55,15 +55,13 @@ export const useTrackState = (): TrackStateResult => {
     // Map management functions to match TrackStateResult interface
     getUserStations: management.getMyStations,
     getTopStations: management.getPopularStations,
-    // Use stationExists which returns the correct object format
+    // Map stationExists to checkIfStationExists as required by TrackStateResult
     checkIfStationExists: management.stationExists,
     // Include other operations from operations interface
     editStationByValue: operations.editStationByValue,
     removeStationByValue: operations.removeStationByValue,
     // Explicitly expose toggleInPlaylist for context
     toggleInPlaylist: operations.toggleInPlaylist,
-    // NEW: Expose clearAllFromPlaylist
-    clearAllFromPlaylist: operations.clearAllFromPlaylist,
     ...debug
   };
 };
