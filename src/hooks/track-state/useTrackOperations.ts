@@ -33,14 +33,54 @@ export const useTrackOperations = (
     isFavorite: boolean = false,
     language: string = "",
     inPlaylist: boolean = false,
-    shouldAutoPlay: boolean = false // FIXED: Add parameter to control auto-play behavior
+    shouldAutoPlay: boolean = false
   ) => {
-    console.log("addUrl called with:", url, name, isFeatured, isFavorite, language, inPlaylist, shouldAutoPlay);
-    console.log("Current tracks count:", tracks.length);
+    console.log("addUrl called with:", { url, name, isFeatured, isFavorite, language, inPlaylist, shouldAutoPlay });
     
     // Use tracksRef for most up-to-date value when available
     const currentTracks = tracksRef?.current || tracks;
     
+    // FIXED: If adding to playlist, check if station already exists and just toggle inPlaylist
+    if (inPlaylist) {
+      const existingIndex = currentTracks.findIndex(
+        track => track.url.toLowerCase() === url.toLowerCase()
+      );
+      
+      if (existingIndex !== -1) {
+        console.log("Found existing station at index:", existingIndex, "toggling inPlaylist to true");
+        // Station exists, just toggle inPlaylist to true
+        setTracks(prevTracks => {
+          const updatedTracks = [...prevTracks];
+          updatedTracks[existingIndex] = {
+            ...updatedTracks[existingIndex],
+            inPlaylist: true
+          };
+          
+          // Save to localStorage
+          saveTracksToLocalStorage(updatedTracks);
+          if (tracksRef) {
+            tracksRef.current = updatedTracks;
+          }
+          
+          return updatedTracks;
+        });
+        
+        // FIXED: Only auto-select and play if explicitly requested
+        if (shouldAutoPlay) {
+          console.log("Auto-playing existing station at index:", existingIndex);
+          setCurrentIndex(existingIndex);
+          setIsPlaying(true);
+        }
+        
+        return { 
+          success: true, 
+          message: "Station added to playlist",
+          addedIndex: existingIndex
+        };
+      }
+    }
+    
+    // If not adding to playlist or station doesn't exist, use the original addStationUrl logic
     const { tracks: updatedTracks, result } = addStationUrl(
       url, name, isFeatured, isFavorite, currentTracks, language, inPlaylist
     );
@@ -56,7 +96,7 @@ export const useTrackOperations = (
     // Always update state with a completely fresh array
     setTracks([...updatedTracks]);
     
-    // FIXED: Only auto-select and play if explicitly requested (not just when adding to playlist)
+    // FIXED: Only auto-select and play if explicitly requested
     if (shouldAutoPlay && result.success && result.addedIndex !== undefined) {
       console.log("Auto-playing newly added station at index:", result.addedIndex);
       setCurrentIndex(result.addedIndex);
@@ -184,11 +224,9 @@ export const useTrackOperations = (
     });
   }, [setTracks, tracksRef]);
 
-  // New: Toggle inPlaylist status
   const toggleInPlaylist = useCallback((index: number) => {
     setTracks(currentTracks => {
       const updatedTracks = toggleTrackInPlaylist(currentTracks, index);
-      // ... force save and ref update ...
       saveTracksToLocalStorage(updatedTracks);
       if (tracksRef) tracksRef.current = updatedTracks;
       return updatedTracks;
