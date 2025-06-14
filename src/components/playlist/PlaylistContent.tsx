@@ -11,6 +11,7 @@ interface PlaylistContentProps {
   featuredStations: Track[];
   favoriteStations: Track[];
   popularStations: Track[];
+  allTracks: Track[];
   currentIndex: number;
   currentTrack: Track | null;
   isPlaying: boolean;
@@ -22,10 +23,7 @@ interface PlaylistContentProps {
 }
 
 const PlaylistContent: React.FC<PlaylistContentProps> = ({
-  userStations,
-  featuredStations,
-  favoriteStations,
-  popularStations,
+  allTracks,
   currentIndex,
   currentTrack,
   isPlaying,
@@ -35,56 +33,44 @@ const PlaylistContent: React.FC<PlaylistContentProps> = ({
   onToggleFavorite,
   onClearAll
 }) => {
-  // FIXED: Combine all stations into one unified playlist (stations that are actually in the playlist)
-  const allPlaylistStations = [
-    ...favoriteStations,
-    ...popularStations,
-    ...userStations.filter(station => !station.isFeatured),
-    ...featuredStations
-  ];
-
-  // Remove duplicates based on URL
-  const uniquePlaylistStations = allPlaylistStations.filter((station, index, self) => 
-    index === self.findIndex(s => s.url === station.url)
-  );
-
   return (
-    <Card className="bg-gradient-to-br from-background/40 to-background/20 backdrop-blur-md border-border/30 shadow-xl">
-      <CardHeader className="pb-3 px-3 sm:px-6">
+    <Card className="bg-surface-container dark:bg-surface-container-high border-none shadow-lg">
+      <CardHeader className="pb-4 px-4 sm:px-6">
         <div className="flex justify-between items-center">
-          <CardTitle className="text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+          <CardTitle className="text-2xl font-bold text-on-surface">
             My Playlist
           </CardTitle>
-          {/* FIXED: Only show clear all if there are stations in the playlist */}
-          {uniquePlaylistStations.length > 0 && onClearAll && (
+          {allTracks.length > 0 && onClearAll && (
             <Button
               variant="destructive"
               size="sm"
               onClick={onClearAll}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 rounded-full"
             >
               <Trash2 className="h-4 w-4" />
-              Clear All
+              <span>Clear All</span>
             </Button>
           )}
         </div>
       </CardHeader>
-      <CardContent className="px-3 sm:px-6 space-y-6">
-        {uniquePlaylistStations.length > 0 ? (
+      <CardContent className="px-1 sm:px-2">
+        {allTracks.length > 0 ? (
           <StationGrid
-            stations={uniquePlaylistStations}
+            stations={allTracks}
             currentIndex={currentIndex}
             currentTrackUrl={currentTrack?.url}
             isPlaying={isPlaying}
-            onSelectStation={(index) => onSelectStation(index, uniquePlaylistStations)}
+            onSelectStation={(index) => onSelectStation(index, allTracks)}
             onEditStation={onEditStation}
             onDeleteStation={onConfirmDelete}
             onToggleFavorite={onToggleFavorite}
           />
         ) : (
-          <div className="text-center p-8 bg-gradient-to-br from-background/50 to-background/30 rounded-xl border border-border/50">
-            <p className="text-muted-foreground">Your playlist is empty</p>
-            <p className="text-sm text-muted-foreground/70 mt-1">Add stations to build your collection</p>
+          <div className="text-center py-16 px-6 bg-surface-container-low dark:bg-surface-container rounded-xl border border-dashed border-outline-variant">
+            <h3 className="text-lg font-semibold text-on-surface">Your Playlist is Empty</h3>
+            <p className="text-on-surface-variant mt-2">
+              Use the 'Add' page to add your favorite radio stations.
+            </p>
           </div>
         )}
       </CardContent>

@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -103,24 +104,29 @@ This request was submitted via uRadio app.
 
   return (
     <AppLayout>
-      {/* FIXED Added proper gap between header and content */}
-      <div className="container mx-auto max-w-2xl space-y-6 pt-4">
-        <Card className="bg-gradient-to-br from-background/40 to-background/20 backdrop-blur-md border-border/30 shadow-xl">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent flex items-center gap-2">
-              <Mail className="h-6 w-6 text-primary" />
-              Request Station
-            </CardTitle>
-            <p className="text-muted-foreground text-sm">
-              Request to add a new station or modify an existing one
-            </p>
+      <div className="container mx-auto max-w-2xl space-y-6">
+        <Card className="bg-surface-container dark:bg-surface-container-high border-none shadow-lg">
+          <CardHeader className="pb-4">
+            <div className="flex items-center gap-4">
+                <div className="bg-primary/20 p-3 rounded-full">
+                    <Mail className="h-6 w-6 text-primary" />
+                </div>
+                <div>
+                    <CardTitle className="text-xl font-bold text-on-surface">
+                    Request a Station
+                    </CardTitle>
+                    <p className="text-on-surface-variant text-sm mt-1">
+                    Help us grow our library by adding or updating a station.
+                    </p>
+                </div>
+            </div>
           </CardHeader>
           
           <CardContent className="space-y-6">
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-8">
               {/* Request Type */}
               <div className="space-y-3">
-                <Label className="text-base font-medium">Request Type</Label>
+                <Label className="font-medium">Request Type</Label>
                 <RadioGroup
                   value={formData.requestType}
                   onValueChange={(value) => handleInputChange("requestType", value)}
@@ -128,19 +134,19 @@ This request was submitted via uRadio app.
                 >
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="add" id="add" />
-                    <Label htmlFor="add" className="cursor-pointer">Add New Station</Label>
+                    <Label htmlFor="add" className="cursor-pointer font-normal">Add New Station</Label>
                   </div>
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="modify" id="modify" />
-                    <Label htmlFor="modify" className="cursor-pointer">Modify Existing Station</Label>
+                    <Label htmlFor="modify" className="cursor-pointer font-normal">Modify Existing Station</Label>
                   </div>
                 </RadioGroup>
               </div>
 
               {/* Station Name */}
               <div className="space-y-2">
-                <Label htmlFor="stationName" className="text-base font-medium">
-                  {formData.requestType === "modify" ? "Existing Station Name" : "Station Name"} <span className="text-red-500">*</span>
+                <Label htmlFor="stationName" className="font-medium">
+                  {formData.requestType === "modify" ? "Existing Station Name" : "Station Name"} <span className="text-destructive">*</span>
                 </Label>
                 <Input
                   id="stationName"
@@ -154,8 +160,8 @@ This request was submitted via uRadio app.
               {/* Station URL - for new stations */}
               {formData.requestType === "add" && (
                 <div className="space-y-2">
-                  <Label htmlFor="stationUrl" className="text-base font-medium">
-                    Station URL <span className="text-red-500">*</span>
+                  <Label htmlFor="stationUrl" className="font-medium">
+                    Station URL <span className="text-destructive">*</span>
                   </Label>
                   <Input
                     id="stationUrl"
@@ -168,11 +174,11 @@ This request was submitted via uRadio app.
                 </div>
               )}
 
-              {/* FIXED New Station URL - for modifications */}
+              {/* New Station URL - for modifications */}
               {formData.requestType === "modify" && (
                 <div className="space-y-2">
-                  <Label htmlFor="existingStationUrl" className="text-base font-medium">
-                    New Station URL <span className="text-red-500">*</span>
+                  <Label htmlFor="existingStationUrl" className="font-medium">
+                    New Station URL <span className="text-destructive">*</span>
                   </Label>
                   <Input
                     id="existingStationUrl"
@@ -187,7 +193,7 @@ This request was submitted via uRadio app.
 
               {/* Language */}
               <div className="space-y-2">
-                <Label htmlFor="language" className="text-base font-medium">Language</Label>
+                <Label htmlFor="language" className="font-medium">Language</Label>
                 <Input
                   id="language"
                   value={formData.language}
@@ -198,8 +204,8 @@ This request was submitted via uRadio app.
 
               {/* Contact Email */}
               <div className="space-y-2">
-                <Label htmlFor="contactEmail" className="text-base font-medium">
-                  Your Email <span className="text-red-500">*</span>
+                <Label htmlFor="contactEmail" className="font-medium">
+                  Your Email <span className="text-destructive">*</span>
                 </Label>
                 <Input
                   id="contactEmail"
@@ -213,7 +219,7 @@ This request was submitted via uRadio app.
 
               {/* Description */}
               <div className="space-y-2">
-                <Label htmlFor="description" className="text-base font-medium">
+                <Label htmlFor="description" className="font-medium">
                   Additional Details
                 </Label>
                 <Textarea
@@ -230,17 +236,15 @@ This request was submitted via uRadio app.
               </div>
 
               {/* Submit Button */}
-              <Button type="submit" className="w-full flex items-center gap-2">
+              <Button type="submit" size="lg" className="w-full flex items-center gap-2">
                 <Send className="h-4 w-4" />
                 Send Request
               </Button>
             </form>
 
-            {/* Info Box */}
-            <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-              <p className="text-sm text-blue-800 dark:text-blue-200">
-                <strong>Note:</strong> This will open your default email client with a pre-filled message. 
-                Please send the email to complete your request. We'll review your submission and get back to you.
+            <div className="bg-primary/10 border-l-4 border-primary text-primary-foreground p-4 rounded-r-lg">
+              <p className="text-sm text-on-surface">
+                <strong>Note:</strong> This will open your default email client. Please send the email to complete your request.
               </p>
             </div>
           </CardContent>

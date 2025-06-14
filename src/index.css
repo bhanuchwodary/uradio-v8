@@ -42,7 +42,7 @@
     --on-error-container: 65 0 2;
     
     --outline: 121 116 126;
-    --outline-variant: 196 199 197;
+    --outline-variant: 204 204 204;
     
     /* Legacy compatibility */
     --card: var(--surface-container);
@@ -58,7 +58,7 @@
     --border: var(--outline-variant);
     --input: var(--outline-variant);
     --ring: var(--primary);
-    --radius: 1rem;
+    --radius: 1.25rem;
 
     /* Sidebar colors */
     --sidebar-background: var(--surface-container);
@@ -153,13 +153,13 @@
   body {
     @apply bg-background text-foreground antialiased;
     text-rendering: optimizeLegibility;
-    font-size: max(16px, 1rem);
+    font-size: 16px;
     padding-top: env(safe-area-inset-top);
     padding-bottom: env(safe-area-inset-bottom);
   }
   
   input, select, textarea {
-    font-size: max(16px, 1rem) !important;
+    font-size: 16px !important;
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
@@ -180,99 +180,30 @@
 /* Enhanced Material Design 3 Utilities */
 @layer utilities {
   /* Material Design 3 Elevation System */
-  .elevation-0 {
-    box-shadow: none;
-  }
-  
-  .elevation-1 {
-    box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.3), 0px 1px 3px 1px rgba(0, 0, 0, 0.15);
-  }
-  
-  .elevation-2 {
-    box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.3), 0px 2px 6px 2px rgba(0, 0, 0, 0.15);
-  }
-  
-  .elevation-3 {
-    box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.3), 0px 4px 8px 3px rgba(0, 0, 0, 0.15);
-  }
-  
-  .elevation-4 {
-    box-shadow: 0px 2px 3px 0px rgba(0, 0, 0, 0.3), 0px 6px 10px 4px rgba(0, 0, 0, 0.15);
-  }
-  
-  .elevation-5 {
-    box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.3), 0px 8px 12px 6px rgba(0, 0, 0, 0.15);
-  }
-
-  /* Material Design 3 Surface Colors */
-  .surface-container-lowest {
-    @apply bg-[rgb(var(--surface-container-lowest))];
-  }
-  
-  .surface-container-low {
-    @apply bg-[rgb(var(--surface-container-low))];
-  }
-  
-  .surface-container {
-    @apply bg-[rgb(var(--surface-container))];
-  }
-  
-  .surface-container-high {
-    @apply bg-[rgb(var(--surface-container-high))];
-  }
-  
-  .surface-container-highest {
-    @apply bg-[rgb(var(--surface-container-highest))];
-  }
+  .elevation-0 { box-shadow: none; }
+  .elevation-1 { box-shadow: 0 1px 2px 0 rgba(0,0,0,.3), 0 1px 3px 1px rgba(0,0,0,.15); }
+  .elevation-2 { box-shadow: 0 1px 2px 0 rgba(0,0,0,.3), 0 2px 6px 2px rgba(0,0,0,.15); }
+  .elevation-3 { box-shadow: 0 1px 3px 0 rgba(0,0,0,.3), 0 4px 8px 3px rgba(0,0,0,.15); }
+  .elevation-4 { box-shadow: 0 2px 3px 0 rgba(0,0,0,.3), 0 6px 10px 4px rgba(0,0,0,.15); }
+  .elevation-5 { box-shadow: 0 4px 4px 0 rgba(0,0,0,.3), 0 8px 12px 6px rgba(0,0,0,.15); }
 
   /* Enhanced transitions */
-  .material-transition {
-    @apply transition-all duration-300 ease-out;
-  }
+  .material-transition { @apply transition-all duration-300 ease-out; }
+  .material-transition-fast { @apply transition-all duration-200 ease-out; }
+  .material-transition-slow { @apply transition-all duration-500 ease-out; }
 
-  .material-transition-fast {
-    @apply transition-all duration-200 ease-out;
-  }
-
-  .material-transition-slow {
-    @apply transition-all duration-500 ease-out;
-  }
-
-  /* Enhanced responsive utilities */
-  .responsive-container {
-    @apply w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
-  }
-  
-  .responsive-padding {
-    @apply px-4 sm:px-6 md:px-8;
-  }
-  
-  .responsive-grid {
-    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4;
-  }
-  
   /* Enhanced iOS Safe Area Support */
-  .ios-safe-top {
-    padding-top: max(env(safe-area-inset-top), 1rem);
-  }
-  
-  .ios-safe-bottom {
-    padding-bottom: max(env(safe-area-inset-bottom), 1rem);
-  }
-  
-  .ios-safe-left {
-    padding-left: max(env(safe-area-inset-left), 0px);
-  }
-  
-  .ios-safe-right {
-    padding-right: max(env(safe-area-inset-right), 0px);
-  }
+  .ios-safe-top { padding-top: env(safe-area-inset-top); }
+  .ios-safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+  .ios-safe-left { padding-left: env(safe-area-inset-left); }
+  .ios-safe-right { padding-right: env(safe-area-inset-right); }
   
   .ios-touch-target {
-    min-height: 44px;
-    min-width: 44px;
-    touch-action: manipulation;
-    -webkit-tap-highlight-color: transparent;
+    min-height: 48px;
+    min-width: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .ios-vh-fix {
@@ -281,80 +212,26 @@
   }
   
   .ios-no-bounce {
-    overscroll-behavior: none;
-    -webkit-overflow-scrolling: touch;
-  }
-  
-  .ios-smooth-scroll {
-    -webkit-overflow-scrolling: touch;
-    scroll-behavior: smooth;
-  }
-
-  /* Enhanced glassmorphism effects */
-  .glass-surface {
-    @apply backdrop-blur-xl bg-surface-container/90 border-outline-variant/20;
-  }
-  
-  .glass-primary {
-    @apply backdrop-blur-xl bg-primary-container/80 border-primary/20;
-  }
-}
-
-/* Enhanced iOS specific improvements */
-@supports (-webkit-touch-callout: none) {
-  .ios-vh-fix {
-    height: 100vh;
-    height: -webkit-fill-available;
-    min-height: 100vh;
-    min-height: -webkit-fill-available;
-  }
-  
-  .ios-no-bounce {
-    overscroll-behavior: none;
     overscroll-behavior-y: none;
   }
   
   .ios-smooth-scroll {
     -webkit-overflow-scrolling: touch;
-    scroll-behavior: smooth;
   }
+}
 
+/* iOS specific improvements */
+@supports (-webkit-touch-callout: none) {
+  .ios-vh-fix {
+    height: -webkit-fill-available;
+  }
   input, select, textarea {
-    font-size: max(16px, 1rem) !important;
-    transform: translateZ(0);
-    -webkit-transform: translateZ(0);
+    font-size: 16px !important;
   }
 }
 
 @media screen and (max-width: 640px) {
   .bottom-nav-ios {
-    padding-bottom: max(calc(env(safe-area-inset-bottom) + 0.5rem), 1rem);
-  }
-  
-  input, select, textarea, button {
-    @apply text-base ios-touch-target;
-    font-size: max(16px, 1rem) !important;
-  }
-  
-  .touch-target {
-    @apply ios-touch-target;
-  }
-}
-
-@media (min-width: 768px) and (max-width: 1024px) {
-  .responsive-grid {
-    @apply grid-cols-2 lg:grid-cols-3;
-  }
-  
-  body {
-    padding-left: env(safe-area-inset-left);
-    padding-right: env(safe-area-inset-right);
-  }
-}
-
-@media screen and (orientation: landscape) and (max-device-width: 896px) {
-  .ios-landscape-fix {
-    padding-left: max(env(safe-area-inset-left), 0px);
-    padding-right: max(env(safe-area-inset-right), 0px);
+    padding-bottom: max(env(safe-area-inset-bottom), 0.75rem);
   }
 }
