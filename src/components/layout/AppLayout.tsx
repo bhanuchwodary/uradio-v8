@@ -104,16 +104,68 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-surface-container-lowest via-surface to-surface-container dark:from-surface-dim dark:via-surface dark:to-surface-bright ios-vh-fix ios-no-bounce">
-      {/* Sleek Header - Reduced padding and better alignment */}
+      {/* Ultra Compact Header */}
       <header className="fixed top-0 left-0 right-0 bg-surface-container/95 backdrop-blur-lg border-b border-outline-variant/20 z-20 ios-safe-top ios-safe-left ios-safe-right elevation-1">
-        <div className="px-2 py-2">
-          {/* Compact Player Layout */}
-          <div className="bg-gradient-to-r from-surface-container-high/50 to-surface-container-high/30 backdrop-blur-sm rounded-xl border border-outline-variant/20 shadow-sm">
+        <div className="p-1.5">
+          <div className="bg-gradient-to-r from-surface-container-high/50 to-surface-container-high/30 backdrop-blur-sm rounded-lg border border-outline-variant/20 shadow-sm">
             {currentTrack ? (
-              <div className="flex flex-col md:flex-row md:items-center p-3 gap-2">
-                {/* Mobile Layout: Compact station name at top */}
-                <div className="flex items-center gap-3 md:hidden">
-                  {/* Smaller Logo */}
+              <>
+                {/* Mobile Layout: Single compact row */}
+                <div className="flex items-center p-2 gap-2 md:hidden">
+                  {/* Mini Logo */}
+                  <div className="flex-shrink-0">
+                    <img 
+                      src={getLogoSrc()}
+                      alt="uRadio" 
+                      className={`h-6 w-auto object-contain transition-opacity duration-100 ${logoLoaded ? 'opacity-100' : 'opacity-0'}`}
+                    />
+                  </div>
+                  
+                  {/* Station Info - Ultra Compact */}
+                  <div className="flex-1 min-w-0 mx-1">
+                    <h3 className="text-xs font-semibold text-on-surface truncate leading-none">
+                      {currentTrack.name}
+                    </h3>
+                    {loading && (
+                      <p className="text-xs text-primary animate-pulse leading-none mt-0.5">Loading...</p>
+                    )}
+                  </div>
+                  
+                  {/* Compact Controls */}
+                  <div className="flex items-center gap-1 flex-shrink-0">
+                    <MusicPlayer
+                      currentTrack={currentTrack}
+                      isPlaying={isPlaying}
+                      onPlayPause={handlePlayPause}
+                      onNext={handleNext}
+                      onPrevious={handlePrevious}
+                      volume={volume}
+                      onVolumeChange={setVolume}
+                      loading={loading}
+                      compact={true}
+                    />
+                    
+                    {/* Mini Random Toggle */}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setRandomMode(!randomMode)}
+                      className={cn(
+                        "h-6 w-6 rounded-md transition-all duration-200 border flex-shrink-0",
+                        randomMode 
+                          ? "bg-primary/20 text-primary border-primary/30 hover:bg-primary/30" 
+                          : "bg-surface-container-high/50 border-outline-variant/20 hover:bg-surface-container-high/70 text-on-surface-variant hover:text-on-surface"
+                      )}
+                      title={randomMode ? "Random mode on" : "Random mode off"}
+                    >
+                      <Shuffle className="h-3 w-3" />
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Desktop Layout: Horizontal compact layout */}
+                <div className="hidden md:flex md:items-center md:gap-3 md:p-2.5">
+                  {/* Logo - Desktop */}
                   <div className="flex-shrink-0">
                     <img 
                       src={getLogoSrc()}
@@ -122,7 +174,10 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
                     />
                   </div>
                   
-                  {/* Station Info - Mobile Compact */}
+                  {/* Subtle separator */}
+                  <div className="w-px h-5 bg-outline-variant/20"></div>
+                  
+                  {/* Station Info - Desktop */}
                   <div className="flex-1 min-w-0">
                     <h3 className="text-sm font-semibold text-on-surface truncate leading-tight">
                       {currentTrack.name}
@@ -138,77 +193,8 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
                       )}
                     </div>
                   </div>
-                </div>
-                
-                {/* Mobile Layout: Compact controls row */}
-                <div className="flex items-center justify-between gap-2 md:hidden">
-                  <div className="flex items-center flex-1">
-                    <MusicPlayer
-                      currentTrack={currentTrack}
-                      isPlaying={isPlaying}
-                      onPlayPause={handlePlayPause}
-                      onNext={handleNext}
-                      onPrevious={handlePrevious}
-                      volume={volume}
-                      onVolumeChange={setVolume}
-                      loading={loading}
-                      compact={true}
-                    />
-                  </div>
                   
-                  {/* Random Mode Toggle - Compact */}
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setRandomMode(!randomMode)}
-                    className={cn(
-                      "h-8 w-8 rounded-lg transition-all duration-200 border flex-shrink-0",
-                      randomMode 
-                        ? "bg-primary/20 text-primary border-primary/30 hover:bg-primary/30" 
-                        : "bg-surface-container-high/50 border-outline-variant/20 hover:bg-surface-container-high/70 text-on-surface-variant hover:text-on-surface"
-                    )}
-                    title={randomMode ? "Random mode on" : "Random mode off"}
-                  >
-                    <Shuffle className="h-3.5 w-3.5" />
-                  </Button>
-                </div>
-
-                {/* Desktop Layout: Horizontal compact layout */}
-                <div className="hidden md:flex md:items-center md:gap-3 md:w-full">
-                  {/* Logo - Desktop Smaller */}
-                  <div className="flex-shrink-0">
-                    <img 
-                      src={getLogoSrc()}
-                      alt="uRadio" 
-                      className={`h-9 w-auto object-contain transition-opacity duration-100 ${logoLoaded ? 'opacity-100' : 'opacity-0'}`}
-                    />
-                  </div>
-                  
-                  {/* Subtle separator */}
-                  <div className="w-px h-6 bg-outline-variant/20"></div>
-                  
-                  {/* Station Info - Desktop Compact */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <div className="flex-1 min-w-0">
-                        <h3 className="text-sm font-semibold text-on-surface truncate leading-tight">
-                          {currentTrack.name}
-                        </h3>
-                        <div className="flex items-center gap-2 mt-0.5">
-                          {loading && (
-                            <p className="text-xs text-primary animate-pulse leading-tight">Loading...</p>
-                          )}
-                          {currentTrack.language && (
-                            <span className="inline-block px-1.5 py-0.5 text-xs bg-primary/15 text-primary rounded-md font-medium">
-                              {currentTrack.language}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  {/* Player Controls - Desktop Compact */}
+                  {/* Player Controls - Desktop */}
                   <div className="flex items-center gap-2 flex-shrink-0">
                     <MusicPlayer
                       currentTrack={currentTrack}
@@ -222,7 +208,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
                       compact={true}
                     />
                     
-                    {/* Random Mode Toggle - Desktop Compact */}
+                    {/* Random Mode Toggle - Desktop */}
                     <Button
                       variant="ghost"
                       size="icon"
@@ -239,43 +225,40 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
                     </Button>
                   </div>
                 </div>
-              </div>
+              </>
             ) : (
-              <div className="flex items-center px-3 py-2.5 gap-3">
-                {/* Logo - Always visible but smaller */}
+              <div className="flex items-center px-2 py-2 gap-2">
+                {/* Mini Logo */}
                 <div className="flex-shrink-0">
                   <img 
                     src={getLogoSrc()}
                     alt="uRadio" 
-                    className={`h-8 w-auto object-contain transition-opacity duration-100 ${logoLoaded ? 'opacity-100' : 'opacity-0'}`}
+                    className={`h-6 w-auto object-contain transition-opacity duration-100 ${logoLoaded ? 'opacity-100' : 'opacity-0'}`}
                   />
                 </div>
                 
-                {/* Subtle separator */}
-                <div className="w-px h-6 bg-outline-variant/20"></div>
-                
-                {/* No station message - compact */}
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-on-surface-variant">
-                    Select a station to start playing
+                {/* No station message - ultra compact */}
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-medium text-on-surface-variant truncate">
+                    Select a station to start
                   </p>
                 </div>
                 
-                {/* Random Mode Toggle - Always visible but compact */}
+                {/* Random Mode Toggle - Mini */}
                 <div className="flex-shrink-0">
                   <Button
                     variant="ghost"
                     size="icon"
                     onClick={() => setRandomMode(!randomMode)}
                     className={cn(
-                      "h-8 w-8 rounded-lg transition-all duration-200 border",
+                      "h-6 w-6 rounded-md transition-all duration-200 border",
                       randomMode 
                         ? "bg-primary/20 text-primary border-primary/30 hover:bg-primary/30" 
                         : "bg-surface-container-high/50 border-outline-variant/20 hover:bg-surface-container-high/70 text-on-surface-variant hover:text-on-surface"
                     )}
                     title={randomMode ? "Random mode on" : "Random mode off"}
                   >
-                    <Shuffle className="h-3.5 w-3.5" />
+                    <Shuffle className="h-3 w-3" />
                   </Button>
                 </div>
               </div>
@@ -284,10 +267,10 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
         </div>
       </header>
       
-      {/* Main Content - Adjusted padding for compact header */}
+      {/* Main Content - Reduced top padding to prevent overlap */}
       <main className={cn(
         "flex-grow px-3 pb-32 md:pb-28 overflow-x-hidden container mx-auto w-full ios-smooth-scroll ios-safe-left ios-safe-right",
-        "pt-20"
+        "pt-14"
       )}>
         {children}
       </main>
