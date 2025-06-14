@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/hooks/use-toast";
 import { Mail, Send } from "lucide-react";
 
@@ -28,7 +28,7 @@ const RequestStationPage: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
+    
     // Validate required fields
     if (!formData.stationName || !formData.contactEmail) {
       toast({
@@ -38,7 +38,7 @@ const RequestStationPage: React.FC = () => {
       });
       return;
     }
-
+    
     if (formData.requestType === "add" && !formData.stationUrl) {
       toast({
         title: "Missing Station URL",
@@ -47,7 +47,7 @@ const RequestStationPage: React.FC = () => {
       });
       return;
     }
-
+    
     if (formData.requestType === "modify" && !formData.existingStationUrl) {
       toast({
         title: "Missing Station URL",
@@ -58,10 +58,10 @@ const RequestStationPage: React.FC = () => {
     }
 
     // Create email content
-    const subject = formData.requestType === "add"
+    const subject = formData.requestType === "add" 
       ? `New Station Request: ${formData.stationName}`
       : `Station Modification Request: ${formData.stationName}`;
-
+      
     const body = `
 Station Request Details:
 ------------------------
@@ -80,16 +80,16 @@ This request was submitted via uRadio app.
 
     // Create mailto link
     const mailtoLink = `mailto:bhanuprabhakar.b@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-
+    
     // Open email client
     window.location.href = mailtoLink;
-
+    
     // Show success message
     toast({
       title: "Email Opened",
       description: "Your email client has been opened with the request details. Please send the email to complete your request.",
     });
-
+    
     // Reset form
     setFormData({
       requestType: "add",
@@ -104,9 +104,9 @@ This request was submitted via uRadio app.
 
   return (
     <AppLayout>
-      {/* Wider container for full width on all screens */}
-      <div className="w-full max-w-full px-0 mx-0 space-y-6 pt-4">
-        <Card className="bg-gradient-to-br from-background/40 to-background/20 backdrop-blur-md border-border/30 shadow-xl w-full max-w-full">
+      {/* FIXED Added proper gap between header and content */}
+      <div className="container mx-auto max-w-2xl space-y-6 pt-4">
+        <Card className="bg-gradient-to-br from-background/40 to-background/20 backdrop-blur-md border-border/30 shadow-xl">
           <CardHeader className="pb-3">
             <CardTitle className="text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent flex items-center gap-2">
               <Mail className="h-6 w-6 text-primary" />
@@ -116,23 +116,26 @@ This request was submitted via uRadio app.
               Request to add a new station or modify an existing one
             </p>
           </CardHeader>
+          
           <CardContent className="space-y-6">
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Request Type as Dropdown */}
-              <div className="space-y-2">
-                <Label className="text-base font-medium" htmlFor="requestType-select">Request Type</Label>
-                <Select
+              {/* Request Type */}
+              <div className="space-y-3">
+                <Label className="text-base font-medium">Request Type</Label>
+                <RadioGroup
                   value={formData.requestType}
-                  onValueChange={value => handleInputChange("requestType", value)}
+                  onValueChange={(value) => handleInputChange("requestType", value)}
+                  className="flex gap-6"
                 >
-                  <SelectTrigger id="requestType-select" className="w-full">
-                    <SelectValue placeholder="Select request type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="add">Add New Station</SelectItem>
-                    <SelectItem value="modify">Modify Existing Station</SelectItem>
-                  </SelectContent>
-                </Select>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="add" id="add" />
+                    <Label htmlFor="add" className="cursor-pointer">Add New Station</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="modify" id="modify" />
+                    <Label htmlFor="modify" className="cursor-pointer">Modify Existing Station</Label>
+                  </div>
+                </RadioGroup>
               </div>
 
               {/* Station Name */}
@@ -166,7 +169,7 @@ This request was submitted via uRadio app.
                 </div>
               )}
 
-              {/* New Station URL - for modifications */}
+              {/* FIXED New Station URL - for modifications */}
               {formData.requestType === "modify" && (
                 <div className="space-y-2">
                   <Label htmlFor="existingStationUrl" className="text-base font-medium">
@@ -219,7 +222,7 @@ This request was submitted via uRadio app.
                   value={formData.description}
                   onChange={(e) => handleInputChange("description", e.target.value)}
                   placeholder={
-                    formData.requestType === "add"
+                    formData.requestType === "add" 
                       ? "Provide any additional information about the station, genre, or special requirements..."
                       : "Describe what changes you'd like to make to the existing station..."
                   }
@@ -237,7 +240,7 @@ This request was submitted via uRadio app.
             {/* Info Box */}
             <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
               <p className="text-sm text-blue-800 dark:text-blue-200">
-                <strong>Note:</strong> This will open your default email client with a pre-filled message.
+                <strong>Note:</strong> This will open your default email client with a pre-filled message. 
                 Please send the email to complete your request. We'll review your submission and get back to you.
               </p>
             </div>
@@ -249,5 +252,3 @@ This request was submitted via uRadio app.
 };
 
 export default RequestStationPage;
-
-// NOTE: This file is now quite long (~255 lines). Please consider asking me to refactor it into smaller components for better maintainability.
