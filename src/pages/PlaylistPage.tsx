@@ -30,11 +30,6 @@ const PlaylistPage: React.FC = () => {
   const featuredStations = tracks.filter(track => track.isFeatured);
   const favoriteStations = tracks.filter(track => track.isFavorite);
   
-  // Calculate popular stations based on play time
-  const popularStations = [...tracks]
-    .sort((a, b) => (b.playTime || 0) - (a.playTime || 0))
-    .slice(0, 8);
-  
   // Add effect for smooth transition on page load
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -136,7 +131,6 @@ const PlaylistPage: React.FC = () => {
           userStations={userStations}
           featuredStations={featuredStations}
           favoriteStations={favoriteStations}
-          popularStations={popularStations}
           currentIndex={currentIndex}
           currentTrack={currentTrack}
           isPlaying={isPlaying}
@@ -145,7 +139,6 @@ const PlaylistPage: React.FC = () => {
           onConfirmDelete={handleConfirmDelete}
           onToggleFavorite={handleToggleFavorite}
           onClearAll={handleClearAll}
-          allTracks={tracks}
         />
         
         {/* Dialogs Component */}
