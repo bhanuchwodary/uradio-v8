@@ -48,6 +48,17 @@ const MusicPlayer: React.FC<MusicPlayerProps> = memo(({
   // Add phone call handling
   usePhoneCallHandling(isPlaying, setIsPlaying);
 
+  // FIXED: Don't show player if no valid track is selected
+  if (currentIndex < 0 || currentIndex >= tracks.length) {
+    return (
+      <PlayerLayout>
+        <div className="text-center text-muted-foreground p-4">
+          <p>Select a station to start playing</p>
+        </div>
+      </PlayerLayout>
+    );
+  }
+
   return (
     <PlayerLayout>
       <PlayerTrackInfo

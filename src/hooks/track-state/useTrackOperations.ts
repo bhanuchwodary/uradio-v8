@@ -1,4 +1,3 @@
-
 import { useCallback } from "react";
 import { Track } from "@/types/track";
 import { saveTracksToLocalStorage } from "./trackStorage";
@@ -234,20 +233,32 @@ export const useTrackOperations = (
     });
   }, [setTracks, tracksRef]);
 
-  // NEW: Bulk clear all from playlist
+  // ENHANCED: Bulk clear all from playlist with smart playback handling
   const clearAllFromPlaylist = useCallback(() => {
     console.log("Clearing all stations from playlist");
+    console.log("Current playing index:", currentIndex);
+    console.log("Current playing station:", tracks[currentIndex]?.name);
+    
     setTracks(currentTracks => {
       const updatedTracks = currentTracks.map(track => ({
         ...track,
         inPlaylist: false
       }));
       
+      // FIXED: If currently playing station was in playlist, handle playback
+      const currentTrack = currentTracks[currentIndex];
+      if (currentTrack?.inPlaylist) {
+        console.log("Currently playing station was in playlist - stopping playback");
+        // Stop playback and reset to no selection
+        setIsPlaying(false);
+        setCurrentIndex(-1);
+      }
+      
       saveTracksToLocalStorage(updatedTracks);
       if (tracksRef) tracksRef.current = updatedTracks;
       return updatedTracks;
     });
-  }, [setTracks, tracksRef]);
+  }, [setTracks, tracksRef, currentIndex, tracks, setIsPlaying, setCurrentIndex]);
 
   return {
     addUrl,

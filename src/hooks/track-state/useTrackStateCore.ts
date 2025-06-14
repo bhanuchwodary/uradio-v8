@@ -6,7 +6,8 @@ import { loadTracksFromLocalStorage, saveTracksToLocalStorage, testLocalStorage,
 export const useTrackStateCore = () => {
   // Track state with a stable reference
   const [tracks, setTracks] = useState<Track[]>([]);
-  const [currentIndex, setCurrentIndex] = useState(0);
+  // FIXED: Don't auto-select first track - start with -1 (no selection)
+  const [currentIndex, setCurrentIndex] = useState(-1);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
   
@@ -50,6 +51,9 @@ export const useTrackStateCore = () => {
         tracksRef.current = freshTracks;
         setTracks(freshTracks);
         lastSavedTracksJSON.current = JSON.stringify(freshTracks);
+        
+        // FIXED: Don't auto-select any track - let user choose explicitly
+        console.log("Tracks loaded but no auto-selection - user must choose a station");
       }
     }
     
