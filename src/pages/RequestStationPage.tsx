@@ -2,17 +2,14 @@
 import React, { useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/hooks/use-toast";
-import { Mail, Send } from "lucide-react";
+import { Mail } from "lucide-react";
+import RequestStationForm, { RequestStationFormData } from "@/components/request-station/RequestStationForm";
+import { createRequestMailtoLink } from "@/utils/requestStationUtils";
 
 const RequestStationPage: React.FC = () => {
   const { toast } = useToast();
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<RequestStationFormData>({
     requestType: "add",
     stationName: "",
     stationUrl: "",
@@ -22,8 +19,8 @@ const RequestStationPage: React.FC = () => {
     existingStationUrl: ""
   });
 
-  const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+  const handleInputChange = (field: keyof RequestStationFormData, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value as any }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -57,29 +54,8 @@ const RequestStationPage: React.FC = () => {
       return;
     }
 
-    // Create email content
-    const subject = formData.requestType === "add" 
-      ? `New Station Request: ${formData.stationName}`
-      : `Station Modification Request: ${formData.stationName}`;
-      
-    const body = `
-Station Request Details:
-------------------------
-Request Type: ${formData.requestType === "add" ? "Add New Station" : "Modify Existing Station"}
-Station Name: ${formData.stationName}
-${formData.requestType === "add" ? `Station URL: ${formData.stationUrl}` : `Existing Station URL: ${formData.existingStationUrl}`}
-Language: ${formData.language || "Not specified"}
-Contact Email: ${formData.contactEmail}
-
-Description:
-${formData.description || "No additional description provided"}
-
----
-This request was submitted via uRadio app.
-    `.trim();
-
     // Create mailto link
-    const mailtoLink = `mailto:request.uradio@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    const mailtoLink = createRequestMailtoLink(formData);
     
     // Open email client
     window.location.href = mailtoLink;
@@ -118,124 +94,11 @@ This request was submitted via uRadio app.
           </CardHeader>
           
           <CardContent className="space-y-6">
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Request Type */}
-              <div className="space-y-3">
-                <Label className="text-base font-medium">Request Type</Label>
-                <RadioGroup
-                  value={formData.requestType}
-                  onValueChange={(value) => handleInputChange("requestType", value)}
-                  className="flex flex-col gap-4 sm:flex-row sm:gap-6"
-                >
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="add" id="add" />
-                    <Label htmlFor="add" className="cursor-pointer">Add New Station</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="modify" id="modify" />
-                    <Label htmlFor="modify" className="cursor-pointer">Modify Existing Station</Label>
-                  </div>
-                </RadioGroup>
-              </div>
-
-              {/* Station Name */}
-              <div className="space-y-2">
-                <Label htmlFor="stationName" className="text-base font-medium">
-                  {formData.requestType === "modify" ? "Existing Station Name" : "Station Name"} <span className="text-red-500">*</span>
-                </Label>
-                <Input
-                  id="stationName"
-                  value={formData.stationName}
-                  onChange={(e) => handleInputChange("stationName", e.target.value)}
-                  placeholder={formData.requestType === "modify" ? "Enter existing station name to be modified" : "Enter station name"}
-                  required
-                />
-              </div>
-
-              {/* Station URL - for new stations */}
-              {formData.requestType === "add" && (
-                <div className="space-y-2">
-                  <Label htmlFor="stationUrl" className="text-base font-medium">
-                    Station URL <span className="text-red-500">*</span>
-                  </Label>
-                  <Input
-                    id="stationUrl"
-                    type="url"
-                    value={formData.stationUrl}
-                    onChange={(e) => handleInputChange("stationUrl", e.target.value)}
-                    placeholder="https://example.com/stream"
-                    required
-                  />
-                </div>
-              )}
-
-              {/* FIXED New Station URL - for modifications */}
-              {formData.requestType === "modify" && (
-                <div className="space-y-2">
-                  <Label htmlFor="existingStationUrl" className="text-base font-medium">
-                    New Station URL <span className="text-red-500">*</span>
-                  </Label>
-                  <Input
-                    id="existingStationUrl"
-                    type="url"
-                    value={formData.existingStationUrl}
-                    onChange={(e) => handleInputChange("existingStationUrl", e.target.value)}
-                    placeholder="Enter new station URL to replace the existing one"
-                    required
-                  />
-                </div>
-              )}
-
-              {/* Language */}
-              <div className="space-y-2">
-                <Label htmlFor="language" className="text-base font-medium">Language</Label>
-                <Input
-                  id="language"
-                  value={formData.language}
-                  onChange={(e) => handleInputChange("language", e.target.value)}
-                  placeholder="e.g., English, Spanish, French"
-                />
-              </div>
-
-              {/* Contact Email */}
-              <div className="space-y-2">
-                <Label htmlFor="contactEmail" className="text-base font-medium">
-                  Your Email <span className="text-red-500">*</span>
-                </Label>
-                <Input
-                  id="contactEmail"
-                  type="email"
-                  value={formData.contactEmail}
-                  onChange={(e) => handleInputChange("contactEmail", e.target.value)}
-                  placeholder="your.email@example.com"
-                  required
-                />
-              </div>
-
-              {/* Description */}
-              <div className="space-y-2">
-                <Label htmlFor="description" className="text-base font-medium">
-                  Additional Details
-                </Label>
-                <Textarea
-                  id="description"
-                  value={formData.description}
-                  onChange={(e) => handleInputChange("description", e.target.value)}
-                  placeholder={
-                    formData.requestType === "add" 
-                      ? "Provide any additional information about the station, genre, or special requirements..."
-                      : "Describe what changes you'd like to make to the existing station..."
-                  }
-                  rows={4}
-                />
-              </div>
-
-              {/* Submit Button */}
-              <Button type="submit" className="w-full flex items-center gap-2">
-                <Send className="h-4 w-4" />
-                Send Request
-              </Button>
-            </form>
+            <RequestStationForm
+              formData={formData}
+              onInputChange={handleInputChange}
+              onSubmit={handleSubmit}
+            />
 
             {/* Info Box */}
             <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
