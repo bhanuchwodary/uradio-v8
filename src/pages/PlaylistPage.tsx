@@ -24,7 +24,7 @@ const PlaylistPage: React.FC = () => {
     editStationByValue,
     removeStationByValue,
     toggleFavorite,
-    toggleInPlaylist // <- Make sure this exists
+    toggleInPlaylist
   } = useTrackStateContext();
 
   // Playlist stations are those with inPlaylist === true
@@ -63,7 +63,7 @@ const PlaylistPage: React.FC = () => {
     if (stationToDelete) {
       const idx = tracks.findIndex(t => t.url === stationToDelete.url);
       if (idx !== -1) {
-        toggleInPlaylist(idx); // Remove from playlist, not from library
+        toggleInPlaylist(idx);
         toast({
           title: "Station removed from playlist",
           description: `${stationToDelete.name} was removed from your playlist.`
@@ -92,6 +92,9 @@ const PlaylistPage: React.FC = () => {
   };
 
   const confirmClearAll = () => {
+    // Check if currently playing station is in playlist before clearing
+    const currentlyPlayingInPlaylist = currentTrack && currentTrack.inPlaylist;
+    
     // Remove all stations from playlist view (set inPlaylist to false for all tracks)
     let countCleared = 0;
     tracks.forEach((station, idx) => {
@@ -100,6 +103,12 @@ const PlaylistPage: React.FC = () => {
         countCleared++;
       }
     });
+
+    // FIXED: Stop playback if the currently playing station was in the playlist
+    if (currentlyPlayingInPlaylist && isPlaying) {
+      console.log("Stopping playback because currently playing station was cleared from playlist");
+      setIsPlaying(false);
+    }
 
     toast({
       title: "Playlist cleared",

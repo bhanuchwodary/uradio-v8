@@ -1,92 +1,78 @@
+
 import { Track } from "@/types/track";
 
+export interface AddStationResult {
+  success: boolean;
+  message: string;
+  addedIndex?: number; // FIXED: Add index of newly added station
+}
+
 export const addStationUrl = (
-  url: string, 
-  name: string = "", 
-  isFeatured: boolean = false, 
-  isFavorite: boolean = false, 
-  tracks: Track[],
+  url: string,
+  name: string = "",
+  isFeatured: boolean = false,
+  isFavorite: boolean = false,
+  existingTracks: Track[] = [],
   language: string = "",
-  inPlaylist: boolean = false // ADDED for inPlaylist control
-): { tracks: Track[], result: { success: boolean, message: string } } => {
-  if (!url) {
-    console.error("Cannot add empty URL");
-    return { tracks, result: { success: false, message: "URL cannot be empty" } };
+  inPlaylist: boolean = false
+): { tracks: Track[], result: AddStationResult } => {
+  console.log("addStationUrl called with:", { url, name, isFeatured, isFavorite, language, inPlaylist });
+  
+  if (!url || typeof url !== 'string') {
+    return {
+      tracks: existingTracks,
+      result: { success: false, message: "Invalid URL provided" }
+    };
   }
-  
-  console.log(`Adding URL: ${url}, Name: ${name}, IsFeatured: ${isFeatured}, IsFavorite: ${isFavorite}, Language: ${language}`);
-  console.log("Current tracks count before add:", tracks.length);
-  
-  // Create a deep clone of the tracks array to ensure we don't modify the original
-  const tracksClone = JSON.parse(JSON.stringify(tracks));
-  
-  // First, check for duplicates by URL in current playlist (case insensitive comparison)
-  const existingIndex = tracksClone.findIndex(
-    (track: Track) => track.url.toLowerCase() === url.toLowerCase()
+
+  const cleanedUrl = url.trim();
+  if (!cleanedUrl) {
+    return {
+      tracks: existingTracks,
+      result: { success: false, message: "URL cannot be empty" }
+    };
+  }
+
+  // Check if URL already exists (case-insensitive)
+  const existingIndex = existingTracks.findIndex(
+    track => track.url.toLowerCase() === cleanedUrl.toLowerCase()
   );
-  
-  console.log("Existing track index:", existingIndex);
-  
-  let updatedTracks;
-  let resultMessage;
-  
+
   if (existingIndex !== -1) {
-    // If found, create a new array and update the existing station
-    console.log("Station already exists in playlist, updating at index:", existingIndex);
-    
-    // Create a completely new array to ensure React detects the state change
-    updatedTracks = [...tracksClone];
-    
-    // Update all properties explicitly, ensuring language is preserved
-    updatedTracks[existingIndex] = {
-      ...updatedTracks[existingIndex],  // Keep existing properties first
-      url: url,  // Then update what we need to update
-      name: name || updatedTracks[existingIndex].name,
-      isFeatured: isFeatured !== undefined ? isFeatured : updatedTracks[existingIndex].isFeatured,
-      isFavorite: isFavorite !== undefined ? isFavorite : updatedTracks[existingIndex].isFavorite,
-      // CRITICAL FIX: Ensure language is always preserved and not overwritten with empty string
-      language: language || updatedTracks[existingIndex].language || "",
-      playTime: updatedTracks[existingIndex].playTime || 0,
-      inPlaylist: inPlaylist !== undefined ? inPlaylist : updatedTracks[existingIndex].inPlaylist || false
-    };
-    
-    console.log("Updated station data with language:", updatedTracks[existingIndex].language);
-    resultMessage = "Station updated in playlist";
-  } else {
-    // If not found, add as a new station
-    console.log("Station doesn't exist in playlist, adding as new");
-    const newTrack: Track = { 
-      url, 
-      name: name || `Station ${tracksClone.length + 1}`,
-      isFavorite: !!isFavorite,
-      playTime: 0,
-      isFeatured: !!isFeatured,
-      // CRITICAL FIX: Ensure language is always set and not lost
-      language: language || "",
-      inPlaylist: !!inPlaylist // ADDED
-    };
-    
-    console.log("New track being added with language:", newTrack.language);
-    
-    // Critical fix: create a fresh array to ensure state change detection
-    updatedTracks = [...tracksClone, newTrack];
-    resultMessage = "Station added to playlist";
-  }
-  
-  console.log("Updated tracks array now has", updatedTracks.length, "tracks");
-  
-  // Sanity check our data before returning
-  const hasInvalidTracks = updatedTracks.some((track: Track) => !track.url || !track.name);
-  if (hasInvalidTracks) {
-    console.error("Invalid tracks detected after adding/updating station");
-    return { 
-      tracks: tracksClone, // Return original if something went wrong
-      result: { success: false, message: "Error processing station data" } 
+    return {
+      tracks: existingTracks,
+      result: { 
+        success: false, 
+        message: "Station already exists in your list",
+        addedIndex: existingIndex
+      }
     };
   }
+
+  // Create new track
+  const newTrack: Track = {
+    url: cleanedUrl,
+    name: name || `Station ${existingTracks.length + 1}`,
+    isFavorite: isFavorite || false,
+    playTime: 0,
+    isFeatured: isFeatured || false,
+    language: language || "Unknown",
+    inPlaylist: inPlaylist || false
+  };
+
+  console.log("Creating new track:", JSON.stringify(newTrack));
   
-  return { 
-    tracks: updatedTracks, 
-    result: { success: true, message: resultMessage } 
+  const updatedTracks = [...existingTracks, newTrack];
+  const addedIndex = updatedTracks.length - 1;
+  
+  console.log("Track added successfully at index:", addedIndex);
+  
+  return {
+    tracks: updatedTracks,
+    result: { 
+      success: true, 
+      message: "Station added successfully",
+      addedIndex
+    }
   };
 };

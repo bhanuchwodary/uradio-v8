@@ -1,4 +1,3 @@
-
 import { useCallback } from "react";
 import { Track } from "@/types/track";
 import { saveTracksToLocalStorage } from "./trackStorage";
@@ -33,9 +32,10 @@ export const useTrackOperations = (
     isFeatured: boolean = false, 
     isFavorite: boolean = false,
     language: string = "",
-    inPlaylist: boolean = false // FIXED: Added inPlaylist parameter
+    inPlaylist: boolean = false,
+    shouldAutoPlay: boolean = false // FIXED: Add parameter to control auto-play behavior
   ) => {
-    console.log("addUrl called with:", url, name, isFeatured, isFavorite, language, inPlaylist);
+    console.log("addUrl called with:", url, name, isFeatured, isFavorite, language, inPlaylist, shouldAutoPlay);
     console.log("Current tracks count:", tracks.length);
     
     // Use tracksRef for most up-to-date value when available
@@ -56,6 +56,15 @@ export const useTrackOperations = (
     // Always update state with a completely fresh array
     setTracks([...updatedTracks]);
     
+    // FIXED: Only auto-select and play if explicitly requested (not just when adding to playlist)
+    if (shouldAutoPlay && result.success && result.addedIndex !== undefined) {
+      console.log("Auto-playing newly added station at index:", result.addedIndex);
+      setCurrentIndex(result.addedIndex);
+      setIsPlaying(true);
+    } else {
+      console.log("Station added but not auto-playing (shouldAutoPlay:", shouldAutoPlay, ")");
+    }
+    
     // Force an immediate save to localStorage
     const saveSuccess = saveTracksToLocalStorage(updatedTracks);
     if (!saveSuccess) {
@@ -67,7 +76,7 @@ export const useTrackOperations = (
     }
     
     return result;
-  }, [tracks, setTracks, tracksRef]);
+  }, [tracks, setTracks, tracksRef, setCurrentIndex, setIsPlaying]);
 
   const updatePlayTime = useCallback((index: number, seconds: number) => {
     setTracks(currentTracks => {
@@ -190,7 +199,7 @@ export const useTrackOperations = (
     addUrl,
     removeUrl,
     toggleFavorite,
-    toggleInPlaylist, // <- NEW
+    toggleInPlaylist,
     editTrack,
     updatePlayTime,
     checkIfStationExists,
