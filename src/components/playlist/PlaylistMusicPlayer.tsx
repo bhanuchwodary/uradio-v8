@@ -5,8 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Play, Pause, SkipBack, SkipForward, Volume2 } from "lucide-react";
 import { Track } from "@/types/track";
-import { cn } from "@/lib/utils";
 import { saveVolumePreference, getVolumePreference } from "@/utils/volumeStorage";
+import { usePlayerControls } from "@/hooks/music-player/usePlayerControls";
 import Hls from "hls.js";
 
 interface PlaylistMusicPlayerProps {
@@ -32,9 +32,24 @@ export const PlaylistMusicPlayer: React.FC<PlaylistMusicPlayerProps> = ({
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const hlsRef = useRef<Hls | null>(null);
 
-  // Initialize audio element
+  // Get playlist URLs for strict navigation
+  const playlistUrls = playlistStations.map(station => station.url);
+
+  // Use the player controls hook with strict playlist boundaries
+  const { handleNext, handlePrevious, handlePlayPause, handleSeek } = usePlayerControls({
+    audioRef,
+    isPlaying,
+    setIsPlaying,
+    urls: playlistUrls,
+    currentIndex: currentPlaylistIndex,
+    setCurrentIndex: setCurrentPlaylistIndex,
+    volume
+  });
+
+  // Initialize audio element ONCE
   useEffect(() => {
     if (!audioRef.current) {
+      console.log("PlaylistMusicPlayer - Creating single audio element");
       audioRef.current = new Audio();
       audioRef.current.crossOrigin = "anonymous";
       audioRef.current.preload = "auto";
@@ -61,7 +76,7 @@ export const PlaylistMusicPlayer: React.FC<PlaylistMusicPlayerProps> = ({
       audio.removeEventListener("waiting", handleWaiting);
       audio.removeEventListener("ended", handleEnded);
     };
-  }, []);
+  }, [handleNext]);
 
   // Handle volume changes
   useEffect(() => {
@@ -71,9 +86,10 @@ export const PlaylistMusicPlayer: React.FC<PlaylistMusicPlayerProps> = ({
     }
   }, [volume]);
 
-  // Handle station changes
+  // Handle station changes - ONLY playlist stations
   useEffect(() => {
-    if (playlistStations.length === 0 || currentPlaylistIndex < 0) {
+    if (playlistStations.length === 0 || currentPlaylistIndex < 0 || currentPlaylistIndex >= playlistStations.length) {
+      console.log("PlaylistMusicPlayer - No valid playlist station to load");
       return;
     }
 
@@ -82,7 +98,8 @@ export const PlaylistMusicPlayer: React.FC<PlaylistMusicPlayerProps> = ({
       return;
     }
 
-    console.log("Loading playlist station:", currentStation.name, "at index:", currentPlaylistIndex);
+    console.log("PlaylistMusicPlayer - Loading PLAYLIST station:", currentStation.name, "at playlist index:", currentPlaylistIndex);
+    console.log("PlaylistMusicPlayer - CONFIRMED: Only playing from playlist with", playlistStations.length, "stations");
 
     const audio = audioRef.current;
     setLoading(true);
@@ -105,7 +122,7 @@ export const PlaylistMusicPlayer: React.FC<PlaylistMusicPlayerProps> = ({
       hlsRef.current = hls;
       
       hls.on(Hls.Events.MANIFEST_PARSED, () => {
-        console.log("HLS manifest parsed for:", currentStation.name);
+        console.log("HLS manifest parsed for playlist station:", currentStation.name);
         setLoading(false);
       });
 
@@ -119,49 +136,6 @@ export const PlaylistMusicPlayer: React.FC<PlaylistMusicPlayerProps> = ({
       audio.load();
     }
   }, [playlistStations, currentPlaylistIndex]);
-
-  // Handle play/pause state
-  useEffect(() => {
-    if (!audioRef.current || playlistStations.length === 0) {
-      return;
-    }
-
-    const audio = audioRef.current;
-
-    if (isPlaying) {
-      audio.play().catch(error => {
-        console.error("Error playing audio:", error);
-        setIsPlaying(false);
-      });
-    } else {
-      audio.pause();
-    }
-  }, [isPlaying, setIsPlaying, playlistStations.length]);
-
-  const handlePlayPause = () => {
-    if (playlistStations.length === 0) return;
-    setIsPlaying(!isPlaying);
-  };
-
-  const handleNext = () => {
-    if (playlistStations.length <= 1) return;
-    const nextIndex = (currentPlaylistIndex + 1) % playlistStations.length;
-    console.log("Next: Moving from playlist index", currentPlaylistIndex, "to", nextIndex);
-    setCurrentPlaylistIndex(nextIndex);
-  };
-
-  const handlePrevious = () => {
-    if (playlistStations.length <= 1) return;
-    const prevIndex = (currentPlaylistIndex - 1 + playlistStations.length) % playlistStations.length;
-    console.log("Previous: Moving from playlist index", currentPlaylistIndex, "to", prevIndex);
-    setCurrentPlaylistIndex(prevIndex);
-  };
-
-  const handleSeek = (value: number[]) => {
-    if (audioRef.current && !isNaN(value[0])) {
-      audioRef.current.currentTime = value[0];
-    }
-  };
 
   const handleVolumeChange = (value: number[]) => {
     setVolume(value[0] / 100);
@@ -187,7 +161,7 @@ export const PlaylistMusicPlayer: React.FC<PlaylistMusicPlayerProps> = ({
     );
   }
 
-  const currentStation = playlistStations[currentPlaylistIndex];
+  const currentStation = playlistStations[currentPlaylistIndex] || playlistStations[0];
 
   return (
     <Card className="p-4 bg-surface-container-low border border-outline-variant/30 shadow-xl shadow-black/5 rounded-3xl">
@@ -210,6 +184,9 @@ export const PlaylistMusicPlayer: React.FC<PlaylistMusicPlayerProps> = ({
           {loading && (
             <p className="text-sm text-primary animate-pulse mt-2">Loading...</p>
           )}
+          <p className="text-xs text-muted-foreground mt-1">
+            Playing from playlist ({currentPlaylistIndex + 1} of {playlistStations.length})
+          </p>
         </div>
 
         {/* Progress slider */}
