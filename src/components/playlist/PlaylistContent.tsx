@@ -2,9 +2,10 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Trash2 } from "lucide-react";
+import { Trash2, Music, Heart } from "lucide-react";
 import { StationGrid } from "@/components/ui/player/StationGrid";
 import { Track } from "@/types/track";
+import { cn } from "@/lib/utils";
 
 interface PlaylistContentProps {
   userStations: Track[];
@@ -35,7 +36,7 @@ const PlaylistContent: React.FC<PlaylistContentProps> = ({
   onToggleFavorite,
   onClearAll
 }) => {
-  // FIXED: Combine all stations into one unified playlist (stations that are actually in the playlist)
+  // Combine all stations into one unified playlist
   const allPlaylistStations = [
     ...favoriteStations,
     ...popularStations,
@@ -49,27 +50,38 @@ const PlaylistContent: React.FC<PlaylistContentProps> = ({
   );
 
   return (
-    <Card className="bg-gradient-to-br from-background/40 to-background/20 backdrop-blur-md border-border/30 shadow-xl">
-      <CardHeader className="pb-3 px-3 sm:px-6">
+    <Card className="glass-surface border-outline-variant/30 overflow-hidden">
+      <CardHeader className="pb-4">
         <div className="flex justify-between items-center">
-          <CardTitle className="text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-            My Playlist
-          </CardTitle>
-          {/* FIXED: Only show clear all if there are stations in the playlist */}
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-primary/10 rounded-xl">
+              <Music className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <CardTitle className="text-lg font-semibold text-on-surface">
+                My Playlist
+              </CardTitle>
+              <p className="text-sm text-on-surface-variant mt-0.5">
+                {uniquePlaylistStations.length} stations
+              </p>
+            </div>
+          </div>
+          
           {uniquePlaylistStations.length > 0 && onClearAll && (
             <Button
-              variant="destructive"
+              variant="outline"
               size="sm"
               onClick={onClearAll}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 text-error border-error/30 hover:bg-error/10"
             >
-              <Trash2 className="h-4 w-4" />
+              <Trash2 className="h-3.5 w-3.5" />
               Clear All
             </Button>
           )}
         </div>
       </CardHeader>
-      <CardContent className="px-3 sm:px-6 space-y-6">
+      
+      <CardContent className="pt-0">
         {uniquePlaylistStations.length > 0 ? (
           <StationGrid
             stations={uniquePlaylistStations}
@@ -82,9 +94,12 @@ const PlaylistContent: React.FC<PlaylistContentProps> = ({
             onToggleFavorite={onToggleFavorite}
           />
         ) : (
-          <div className="text-center p-8 bg-gradient-to-br from-background/50 to-background/30 rounded-xl border border-border/50">
-            <p className="text-muted-foreground">Your playlist is empty</p>
-            <p className="text-sm text-muted-foreground/70 mt-1">Add stations to build your collection</p>
+          <div className="text-center py-12">
+            <div className="p-4 bg-surface-container/30 rounded-2xl inline-block mb-4">
+              <Music className="h-8 w-8 text-on-surface-variant" />
+            </div>
+            <h3 className="text-base font-medium text-on-surface mb-1">Your playlist is empty</h3>
+            <p className="text-sm text-on-surface-variant">Add stations to build your collection</p>
           </div>
         )}
       </CardContent>
