@@ -7,10 +7,10 @@ export interface TrackStateResult {
   isPlaying: boolean;
   setCurrentIndex: (index: number) => void;
   setIsPlaying: (playing: boolean) => void;
-  addUrl: (url: string, name?: string, isPrebuilt?: boolean, isFavorite?: boolean, language?: string, inPlaylist?: boolean) => { success: boolean, message: string };
+  addUrl: (url: string, name?: string, isPrebuilt?: boolean, isFavorite?: boolean, language?: string) => { success: boolean, message: string };
   removeUrl: (index: number) => void;
   toggleFavorite: (index: number) => void;
-  toggleInPlaylist: (index: number) => void;
+  toggleInPlaylist: (index: number) => void; // <-- Add this line
   editTrack: (index: number, data: { url: string; name: string; language?: string }) => void;
   updatePlayTime: (index: number, seconds: number) => void;
   getTopStations: () => Track[];

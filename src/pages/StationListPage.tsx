@@ -52,52 +52,25 @@ const StationListPage: React.FC = () => {
   
   // Add station to playlist handler
   const handleAddStation = (station: Track) => {
-    // Check if station already exists in tracks
-    const existingStation = tracks.find(track => track.url === station.url);
+    const result = addUrl(
+      station.url, 
+      station.name, 
+      station.isFeatured || false,
+      station.isFavorite || false,
+      station.language || ""
+    );
     
-    if (existingStation) {
-      // If station exists but not in playlist, add it to playlist
-      if (!existingStation.inPlaylist) {
-        const stationIndex = tracks.findIndex(track => track.url === station.url);
-        if (stationIndex !== -1) {
-          // Use the existing toggleInPlaylist function to add to playlist
-          const { toggleInPlaylist } = useTrackStateContext();
-          toggleInPlaylist(stationIndex);
-          
-          toast({
-            title: "Station Added to Playlist",
-            description: `${station.name} has been added to your playlist`,
-          });
-        }
-      } else {
-        toast({
-          title: "Station Already in Playlist",
-          description: `${station.name} is already in your playlist`,
-        });
-      }
+    if (result.success) {
+      toast({
+        title: "Station Added",
+        description: `${station.name} has been added to your playlist`,
+      });
     } else {
-      // If station doesn't exist, add it with inPlaylist: true
-      const result = addUrl(
-        station.url, 
-        station.name, 
-        station.isFeatured || false,
-        station.isFavorite || false,
-        station.language || "",
-        true // Set inPlaylist to true when adding from stations screen
-      );
-      
-      if (result.success) {
-        toast({
-          title: "Station Added to Playlist",
-          description: `${station.name} has been added to your playlist`,
-        });
-      } else {
-        toast({
-          title: "Failed to Add Station",
-          description: result.message || "Error adding station",
-          variant: "destructive"
-        });
-      }
+      toast({
+        title: "Failed to Add Station",
+        description: result.message || "Error adding station",
+        variant: "destructive"
+      });
     }
   };
   

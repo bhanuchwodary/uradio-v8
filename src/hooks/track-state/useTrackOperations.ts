@@ -31,17 +31,16 @@ export const useTrackOperations = (
     name: string = "", 
     isFeatured: boolean = false, 
     isFavorite: boolean = false,
-    language: string = "",
-    inPlaylist: boolean = false // Add inPlaylist parameter
+    language: string = ""
   ) => {
-    console.log("addUrl called with:", url, name, isFeatured, isFavorite, language, inPlaylist);
+    console.log("addUrl called with:", url, name, isFeatured, isFavorite, language);
     console.log("Current tracks count:", tracks.length);
     
     // Use tracksRef for most up-to-date value when available
     const currentTracks = tracksRef?.current || tracks;
     
     const { tracks: updatedTracks, result } = addStationUrl(
-      url, name, isFeatured, isFavorite, currentTracks, language, inPlaylist
+      url, name, isFeatured, isFavorite, currentTracks, language
     );
     
     console.log("Result of addStationUrl:", result.success, result.message);
