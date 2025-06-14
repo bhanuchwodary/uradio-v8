@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -124,7 +125,7 @@ This request was submitted via uRadio app.
                 <RadioGroup
                   value={formData.requestType}
                   onValueChange={(value) => handleInputChange("requestType", value)}
-                  className="flex gap-6"
+                  className="flex flex-col gap-4 sm:flex-row sm:gap-6"
                 >
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="add" id="add" />
