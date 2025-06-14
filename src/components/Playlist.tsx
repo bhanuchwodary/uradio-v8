@@ -55,48 +55,26 @@ const Playlist: React.FC<PlaylistProps> = ({
   return (
     <>
       <div className="space-y-3">
-        {/* Header with responsive Clear All button */}
+        {/* Header with redesigned Clear All button */}
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-on-surface">Your Playlist ({tracks.length})</h2>
           {tracks.length > 0 && (
-            <>
-              {/* Mobile version - Icon only */}
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={onClearAll}
-                className="md:hidden group relative overflow-hidden bg-gradient-to-br from-red-50/80 to-red-100/60 dark:from-red-950/40 dark:to-red-900/20 hover:from-red-100/90 hover:to-red-200/70 dark:hover:from-red-900/60 dark:hover:to-red-800/40 border border-red-200/60 dark:border-red-800/40 hover:border-red-300/80 dark:hover:border-red-700/60 text-red-700 dark:text-red-300 hover:text-red-800 dark:hover:text-red-200 transition-all duration-300 rounded-xl h-10 w-10 shadow-sm hover:shadow-lg backdrop-blur-sm"
-                title="Clear Playlist"
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-red-500/5 to-red-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <div className="absolute inset-0 bg-red-500/10 opacity-0 group-hover:opacity-20 transition-opacity duration-500 rounded-xl" />
+            <Button
+              variant="ghost"
+              onClick={onClearAll}
+              className="group relative overflow-hidden bg-gradient-to-br from-red-50/80 to-red-100/60 dark:from-red-950/40 dark:to-red-900/20 hover:from-red-100/90 hover:to-red-200/70 dark:hover:from-red-900/60 dark:hover:to-red-800/40 border border-red-200/60 dark:border-red-800/40 hover:border-red-300/80 dark:hover:border-red-700/60 text-red-700 dark:text-red-300 hover:text-red-800 dark:hover:text-red-200 transition-all duration-300 rounded-2xl px-6 py-2.5 shadow-sm hover:shadow-lg backdrop-blur-sm"
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-red-500/5 to-red-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <div className="absolute inset-0 bg-red-500/10 opacity-0 group-hover:opacity-20 transition-opacity duration-500 rounded-2xl" />
+              <div className="relative flex items-center gap-2.5">
                 <div className="relative">
-                  <div className="relative">
-                    <Sparkles className="h-4 w-4 transition-all group-hover:scale-110 duration-300 absolute opacity-0 group-hover:opacity-100 animate-pulse" />
-                    <Trash2 className="h-4 w-4 transition-all group-hover:scale-95 group-hover:opacity-0 duration-300" />
-                  </div>
+                  <Sparkles className="h-4 w-4 transition-all group-hover:scale-110 duration-300 absolute opacity-0 group-hover:opacity-100 animate-pulse" />
+                  <Trash2 className="h-4 w-4 transition-all group-hover:scale-95 group-hover:opacity-0 duration-300" />
                 </div>
-                <div className="absolute -top-1 -right-1 w-2 h-2 bg-red-400/20 rounded-full group-hover:scale-150 transition-transform duration-300" />
-              </Button>
-
-              {/* Desktop version - Full button with text */}
-              <Button
-                variant="ghost"
-                onClick={onClearAll}
-                className="hidden md:flex group relative overflow-hidden bg-gradient-to-br from-red-50/80 to-red-100/60 dark:from-red-950/40 dark:to-red-900/20 hover:from-red-100/90 hover:to-red-200/70 dark:hover:from-red-900/60 dark:hover:to-red-800/40 border border-red-200/60 dark:border-red-800/40 hover:border-red-300/80 dark:hover:border-red-700/60 text-red-700 dark:text-red-300 hover:text-red-800 dark:hover:text-red-200 transition-all duration-300 rounded-2xl px-6 py-2.5 shadow-sm hover:shadow-lg backdrop-blur-sm"
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-red-500/5 to-red-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <div className="absolute inset-0 bg-red-500/10 opacity-0 group-hover:opacity-20 transition-opacity duration-500 rounded-2xl" />
-                <div className="relative flex items-center gap-2.5">
-                  <div className="relative">
-                    <Sparkles className="h-4 w-4 transition-all group-hover:scale-110 duration-300 absolute opacity-0 group-hover:opacity-100 animate-pulse" />
-                    <Trash2 className="h-4 w-4 transition-all group-hover:scale-95 group-hover:opacity-0 duration-300" />
-                  </div>
-                  <span className="font-semibold text-sm tracking-wide">Clear Playlist</span>
-                </div>
-                <div className="absolute -top-1 -right-1 w-2 h-2 bg-red-400/20 rounded-full group-hover:scale-150 transition-transform duration-300" />
-              </Button>
-            </>
+                <span className="font-semibold text-sm tracking-wide">Clear Playlist</span>
+              </div>
+              <div className="absolute -top-1 -right-1 w-2 h-2 bg-red-400/20 rounded-full group-hover:scale-150 transition-transform duration-300" />
+            </Button>
           )}
         </div>
 
