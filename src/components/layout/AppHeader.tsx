@@ -55,7 +55,7 @@ const AppHeader: React.FC = () => {
                         <img 
                             src={getLogoSrc()}
                             alt="uRadio" 
-                            className={`h-9 w-auto object-contain transition-opacity duration-300 ${logoLoaded ? 'opacity-100' : 'opacity-0'}`}
+                            className={`h-20 w-auto object-contain transition-opacity duration-300 ${logoLoaded ? 'opacity-100' : 'opacity-0'}`}
                         />
                     </div>
                 
