@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Music, List, Plus, Mail, Shuffle, Menu, X } from "lucide-react";
+import { Music, List, Plus, Mail, Shuffle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useTheme } from "@/components/ThemeProvider";
@@ -20,7 +20,6 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const { theme } = useTheme();
   const [logoLoaded, setLogoLoaded] = useState(false);
   const [randomMode, setRandomMode] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   
   // Get track state for integrated player
   const { 
@@ -76,7 +75,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   // Calculate current track
   const currentTrack = tracks[currentIndex] || null;
   
-  // Determine which logo to use based on theme
+  // Determine which logo to use based on theme with preload
   const getLogoSrc = () => {
     const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
     const currentTheme = theme === "system" ? systemTheme : theme;
@@ -86,7 +85,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
       : "/lovable-uploads/f6bddacc-e4ab-42a4-bdd9-3ea0d18320c0.png";
   };
 
-  // Preload logos
+  // Preload both theme logos for instant switching
   useEffect(() => {
     const lightLogo = new Image();
     lightLogo.src = "/lovable-uploads/92c8140b-84fe-439c-a2f8-4d1758ab0998.png";
@@ -105,218 +104,165 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   ];
 
   return (
-    <div className="min-h-screen flex flex-col gradient-surface ios-vh-fix ios-smooth-scroll">
-      {/* Modern Header */}
-      <header className="fixed top-0 left-0 right-0 z-20 ios-safe-top ios-safe-left ios-safe-right">
-        <div className="glass-light dark:glass-dark">
-          <div className="px-4 py-3">
-            {/* Mobile Header */}
-            <div className="flex md:hidden items-center justify-between">
-              <div className="flex items-center gap-3">
-                <img 
-                  src={getLogoSrc()}
-                  alt="uRadio" 
-                  className={cn(
-                    "h-8 w-auto object-contain transition-opacity duration-200",
-                    logoLoaded ? 'opacity-100' : 'opacity-0'
-                  )}
-                />
-                <div className="h-6 w-px bg-outline-variant/30"></div>
-                <h1 className="text-lg font-bold gradient-primary bg-clip-text text-transparent">
-                  uRadio
-                </h1>
-              </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="h-10 w-10 rounded-xl"
-              >
-                {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-              </Button>
-            </div>
-
-            {/* Desktop Header */}
-            <div className="hidden md:flex items-center gap-6">
-              <div className="flex items-center gap-4">
-                <img 
-                  src={getLogoSrc()}
-                  alt="uRadio" 
-                  className={cn(
-                    "h-10 w-auto object-contain transition-opacity duration-200",
-                    logoLoaded ? 'opacity-100' : 'opacity-0'
-                  )}
-                />
-                <div className="h-8 w-px bg-outline-variant/30"></div>
-                <h1 className="text-xl font-bold gradient-primary bg-clip-text text-transparent">
-                  uRadio
-                </h1>
-              </div>
-
-              {/* Desktop Navigation */}
-              <nav className="flex-1">
-                <div className="flex items-center gap-2">
-                  {navItems.map((item) => (
-                    <Link key={item.path} to={item.path}>
-                      <Button
-                        variant="ghost"
-                        className={cn(
-                          "flex items-center gap-2 px-4 py-2 rounded-xl transition-smooth",
-                          path === item.path 
-                            ? "bg-primary/10 text-primary shadow-sm" 
-                            : "text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high/60"
-                        )}
-                      >
-                        <item.icon className="h-4 w-4" />
-                        <span className="font-medium">{item.label}</span>
-                      </Button>
-                    </Link>
-                  ))}
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-surface-container-lowest via-surface to-surface-container dark:from-surface-dim dark:via-surface dark:to-surface-bright ios-vh-fix ios-no-bounce">
+      {/* Redesigned Header - Now with integrated logo and player */}
+      <header className="fixed top-0 left-0 right-0 bg-surface-container/98 backdrop-blur-xl border-b border-outline-variant/20 z-20 ios-safe-top ios-safe-left ios-safe-right elevation-2">
+        <div className="px-3 py-3">
+          {/* Integrated Player with Logo - Redesigned layout */}
+          <div className="bg-gradient-to-r from-surface-container-high/60 to-surface-container-high/40 backdrop-blur-sm rounded-2xl border border-outline-variant/30 shadow-lg">
+            {currentTrack ? (
+              <div className="flex items-center px-4 py-3 gap-4">
+                {/* Logo - Now larger and integrated into player */}
+                <div className="flex-shrink-0">
+                  <img 
+                    src={getLogoSrc()}
+                    alt="uRadio" 
+                    className={`h-10 w-auto object-contain transition-opacity duration-100 ${logoLoaded ? 'opacity-100' : 'opacity-0'}`}
+                  />
                 </div>
-              </nav>
-
-              {/* Controls */}
-              <div className="flex items-center gap-3">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setRandomMode(!randomMode)}
-                  className={cn(
-                    "h-10 w-10 rounded-xl transition-smooth",
-                    randomMode 
-                      ? "bg-primary/20 text-primary shadow-sm" 
-                      : "text-on-surface-variant hover:text-on-surface"
-                  )}
-                  title={randomMode ? "Random mode on" : "Random mode off"}
-                >
-                  <Shuffle className="h-4 w-4" />
-                </Button>
-                <ThemeToggle />
-              </div>
-            </div>
-
-            {/* Current Track Info - Modern Design */}
-            {currentTrack && (
-              <div className="mt-4 p-4 rounded-2xl bg-gradient-to-r from-primary/5 to-tertiary/5 border border-outline-variant/10">
-                <div className="flex items-center gap-4">
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-bold text-on-surface truncate">
-                      {currentTrack.name}
-                    </h3>
-                    <div className="flex items-center gap-2 mt-1">
-                      {loading && (
-                        <span className="text-xs text-primary animate-pulse">Loading...</span>
-                      )}
-                      {currentTrack.language && (
-                        <span className="inline-block px-2 py-1 text-xs bg-primary/20 text-primary rounded-full font-medium">
-                          {currentTrack.language}
-                        </span>
-                      )}
+                
+                {/* Vertical separator */}
+                <div className="w-px h-8 bg-outline-variant/30"></div>
+                
+                {/* Station Info - Better layout */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-3">
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-base font-bold text-on-surface truncate leading-tight">
+                        {currentTrack.name}
+                      </h3>
+                      <div className="flex items-center gap-2 mt-1">
+                        {loading && (
+                          <p className="text-xs text-primary animate-pulse leading-tight">Loading...</p>
+                        )}
+                        {currentTrack.language && (
+                          <span className="inline-block px-2 py-1 text-xs bg-primary/20 text-primary rounded-full font-medium">
+                            {currentTrack.language}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
+                </div>
+                
+                {/* Player Controls - Compact */}
+                <div className="flex items-center gap-3 flex-shrink-0">
+                  <MusicPlayer
+                    currentTrack={currentTrack}
+                    isPlaying={isPlaying}
+                    onPlayPause={handlePlayPause}
+                    onNext={handleNext}
+                    onPrevious={handlePrevious}
+                    volume={volume}
+                    onVolumeChange={setVolume}
+                    loading={loading}
+                    compact={true}
+                  />
                   
-                  <div className="flex-shrink-0">
-                    <MusicPlayer
-                      currentTrack={currentTrack}
-                      isPlaying={isPlaying}
-                      onPlayPause={handlePlayPause}
-                      onNext={handleNext}
-                      onPrevious={handlePrevious}
-                      volume={volume}
-                      onVolumeChange={setVolume}
-                      loading={loading}
-                      compact={true}
-                    />
-                  </div>
+                  {/* Random Mode Toggle */}
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setRandomMode(!randomMode)}
+                    className={cn(
+                      "h-9 w-9 rounded-xl transition-all duration-200 border",
+                      randomMode 
+                        ? "bg-primary/20 text-primary border-primary/30 hover:bg-primary/30 shadow-sm" 
+                        : "bg-surface-container-high/60 border-outline-variant/30 hover:bg-surface-container-high/80 text-on-surface-variant hover:text-on-surface"
+                    )}
+                    title={randomMode ? "Random mode on" : "Random mode off"}
+                  >
+                    <Shuffle className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center px-4 py-3 gap-4">
+                {/* Logo - Always visible */}
+                <div className="flex-shrink-0">
+                  <img 
+                    src={getLogoSrc()}
+                    alt="uRadio" 
+                    className={`h-10 w-auto object-contain transition-opacity duration-100 ${logoLoaded ? 'opacity-100' : 'opacity-0'}`}
+                  />
+                </div>
+                
+                {/* Vertical separator */}
+                <div className="w-px h-8 bg-outline-variant/30"></div>
+                
+                {/* No station message */}
+                <div className="flex-1">
+                  <p className="text-base font-medium text-on-surface-variant">
+                    Select a station to start playing
+                  </p>
+                </div>
+                
+                {/* Random Mode Toggle - Always visible */}
+                <div className="flex-shrink-0">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setRandomMode(!randomMode)}
+                    className={cn(
+                      "h-9 w-9 rounded-xl transition-all duration-200 border",
+                      randomMode 
+                        ? "bg-primary/20 text-primary border-primary/30 hover:bg-primary/30 shadow-sm" 
+                        : "bg-surface-container-high/60 border-outline-variant/30 hover:bg-surface-container-high/80 text-on-surface-variant hover:text-on-surface"
+                    )}
+                    title={randomMode ? "Random mode on" : "Random mode off"}
+                  >
+                    <Shuffle className="h-4 w-4" />
+                  </Button>
                 </div>
               </div>
             )}
           </div>
         </div>
       </header>
-
-      {/* Mobile Sidebar Overlay */}
-      {sidebarOpen && (
-        <div 
-          className="fixed inset-0 bg-black/50 z-30 md:hidden"
-          onClick={() => setSidebarOpen(false)}
-        >
-          <div 
-            className="fixed top-0 right-0 h-full w-80 glass-light dark:glass-dark p-6"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex justify-between items-center mb-8">
-              <h2 className="text-lg font-bold">Navigation</h2>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setSidebarOpen(false)}
-                className="h-10 w-10 rounded-xl"
-              >
-                <X className="h-5 w-5" />
-              </Button>
-            </div>
-            
-            <nav className="space-y-2">
-              {navItems.map((item) => (
-                <Link 
-                  key={item.path} 
-                  to={item.path}
-                  onClick={() => setSidebarOpen(false)}
-                >
-                  <Button
-                    variant="ghost"
-                    className={cn(
-                      "w-full justify-start gap-3 p-4 rounded-xl transition-smooth",
-                      path === item.path 
-                        ? "bg-primary/10 text-primary shadow-sm" 
-                        : "text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high/60"
-                    )}
-                  >
-                    <item.icon className="h-5 w-5" />
-                    <span className="font-medium">{item.label}</span>
-                  </Button>
-                </Link>
-              ))}
-            </nav>
-
-            <div className="mt-8 pt-6 border-t border-outline-variant/20">
-              <div className="flex items-center gap-3">
+      
+      {/* Main Content - Adjusted padding for new header height */}
+      <main className={cn(
+        "flex-grow px-3 pb-32 md:pb-28 overflow-x-hidden container mx-auto w-full ios-smooth-scroll ios-safe-left ios-safe-right",
+        "pt-24"
+      )}>
+        {children}
+      </main>
+      
+      {/* Enhanced Bottom Navigation with matching theme toggle */}
+      <nav className="fixed bottom-0 left-0 right-0 p-2 sm:p-3 bg-surface-container/98 backdrop-blur-xl border-t border-outline-variant/20 elevation-3 z-10 bottom-nav-ios ios-safe-left ios-safe-right">
+        <div className="container mx-auto px-0">
+          <div className="flex justify-between items-center gap-2">
+            {navItems.map((item) => (
+              <Link key={item.path} to={item.path} className="flex-1">
                 <Button
                   variant="ghost"
-                  size="icon"
-                  onClick={() => setRandomMode(!randomMode)}
                   className={cn(
-                    "h-10 w-10 rounded-xl transition-smooth",
-                    randomMode 
-                      ? "bg-primary/20 text-primary shadow-sm" 
-                      : "text-on-surface-variant hover:text-on-surface"
+                    "flex flex-col items-center gap-1.5 h-auto py-3 px-2 w-full transition-all duration-200 ease-out bg-transparent ios-touch-target rounded-xl",
+                    path === item.path 
+                      ? "text-primary bg-primary-container/40 after:absolute after:bottom-1 after:left-1/4 after:w-1/2 after:h-1 after:bg-primary after:rounded-full after:shadow-sm" 
+                      : "text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high/60 active:bg-primary-container/20"
                   )}
                 >
-                  <Shuffle className="h-4 w-4" />
+                  <item.icon className={cn(
+                    "transition-all duration-200 ease-out", 
+                    path === item.path ? "h-6 w-6 scale-110" : "h-5 w-5 hover:scale-105"
+                  )} />
+                  <span className={cn(
+                    "text-xs transition-all duration-200 ease-out font-medium",
+                    path === item.path ? "opacity-100 font-semibold" : "opacity-90"
+                  )}>
+                    {item.label}
+                  </span>
                 </Button>
-                <span className="text-sm text-on-surface-variant">
-                  Random mode {randomMode ? 'on' : 'off'}
-                </span>
-              </div>
-              <div className="mt-4">
-                <ThemeToggle />
-              </div>
+              </Link>
+            ))}
+            
+            <div className="flex-1">
+              <ThemeToggle />
             </div>
           </div>
         </div>
-      )}
-      
-      {/* Main Content */}
-      <main className={cn(
-        "flex-grow overflow-x-hidden ios-smooth-scroll ios-safe-left ios-safe-right",
-        currentTrack ? "pt-40 md:pt-36" : "pt-28 md:pt-24",
-        "pb-4 px-4"
-      )}>
-        <div className="responsive-container">
-          {children}
-        </div>
-      </main>
+      </nav>
     </div>
   );
 }

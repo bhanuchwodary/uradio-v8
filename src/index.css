@@ -5,62 +5,51 @@
 
 @layer base {
   :root {
-    /* Modern Material Design 3 Light Theme - Enhanced */
-    --background: 250 250 252;
-    --foreground: 15 23 42;
+    /* Material Design 3 Light Theme Colors */
+    --background: 254 254 254;
+    --foreground: 16 16 16;
     
-    --surface: 255 255 255;
-    --surface-dim: 244 244 248;
-    --surface-bright: 255 255 255;
+    --surface: 254 254 254;
+    --surface-dim: 231 231 231;
+    --surface-bright: 254 254 254;
     --surface-container-lowest: 255 255 255;
-    --surface-container-low: 249 250 251;
-    --surface-container: 243 244 246;
-    --surface-container-high: 229 231 235;
-    --surface-container-highest: 209 213 219;
+    --surface-container-low: 247 247 247;
+    --surface-container: 241 241 241;
+    --surface-container-high: 236 236 236;
+    --surface-container-highest: 230 230 230;
     
-    --on-surface: 15 23 42;
-    --on-surface-variant: 71 85 105;
+    --on-surface: 16 16 16;
+    --on-surface-variant: 68 68 68;
     
-    --primary: 79 70 229;
-    --primary-container: 238 242 255;
+    --primary: 103 80 164;
+    --primary-container: 234 221 255;
     --on-primary: 255 255 255;
-    --on-primary-container: 30 27 75;
+    --on-primary-container: 33 0 93;
     
-    --secondary: 100 116 139;
-    --secondary-container: 241 245 249;
+    --secondary: 98 91 113;
+    --secondary-container: 231 222 248;
     --on-secondary: 255 255 255;
-    --on-secondary-container: 30 41 59;
+    --on-secondary-container: 30 25 43;
     
-    --tertiary: 147 51 234;
-    --tertiary-container: 243 232 255;
+    --tertiary: 125 82 96;
+    --tertiary-container: 255 216 228;
     --on-tertiary: 255 255 255;
-    --on-tertiary-container: 59 7 100;
+    --on-tertiary-container: 55 11 30;
     
-    --error: 239 68 68;
-    --error-container: 254 242 242;
+    --error: 186 26 26;
+    --error-container: 255 218 214;
     --on-error: 255 255 255;
-    --on-error-container: 127 29 29;
+    --on-error-container: 65 0 2;
     
-    --outline: 148 163 184;
-    --outline-variant: 203 213 225;
-    
-    /* Enhanced gradient variables */
-    --gradient-primary: linear-gradient(135deg, rgb(79 70 229) 0%, rgb(147 51 234) 100%);
-    --gradient-surface: linear-gradient(135deg, rgb(255 255 255) 0%, rgb(249 250 251) 100%);
-    --gradient-accent: linear-gradient(135deg, rgb(238 242 255) 0%, rgb(243 232 255) 100%);
-    
-    /* Shadow system */
-    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+    --outline: 121 116 126;
+    --outline-variant: 196 199 197;
     
     /* Legacy compatibility */
-    --card: var(--surface);
+    --card: var(--surface-container);
     --card-foreground: var(--on-surface);
     --popover: var(--surface-container);
     --popover-foreground: var(--on-surface);
-    --muted: var(--surface-container);
+    --muted: var(--surface-container-high);
     --muted-foreground: var(--on-surface-variant);
     --accent: var(--secondary-container);
     --accent-foreground: var(--on-secondary-container);
@@ -69,7 +58,7 @@
     --border: var(--outline-variant);
     --input: var(--outline-variant);
     --ring: var(--primary);
-    --radius: 0.75rem;
+    --radius: 1rem;
 
     /* Sidebar colors */
     --sidebar-background: var(--surface-container);
@@ -83,56 +72,45 @@
   }
 
   .dark {
-    /* Modern Material Design 3 Dark Theme - Enhanced */
-    --background: 2 6 23;
-    --foreground: 248 250 252;
+    /* Material Design 3 Dark Theme Colors */
+    --background: 16 16 20;
+    --foreground: 230 225 229;
     
-    --surface: 15 23 42;
-    --surface-dim: 2 6 23;
-    --surface-bright: 51 65 85;
-    --surface-container-lowest: 2 6 23;
-    --surface-container-low: 15 23 42;
-    --surface-container: 30 41 59;
-    --surface-container-high: 51 65 85;
-    --surface-container-highest: 71 85 105;
+    --surface: 16 16 20;
+    --surface-dim: 16 16 20;
+    --surface-bright: 59 56 62;
+    --surface-container-lowest: 10 10 13;
+    --surface-container-low: 22 22 26;
+    --surface-container: 30 29 32;
+    --surface-container-high: 40 39 43;
+    --surface-container-highest: 49 48 51;
     
-    --on-surface: 248 250 252;
-    --on-surface-variant: 148 163 184;
+    --on-surface: 230 225 229;
+    --on-surface-variant: 196 199 197;
     
-    --primary: 129 140 248;
-    --primary-container: 67 56 202;
-    --on-primary: 30 27 75;
-    --on-primary-container: 238 242 255;
+    --primary: 208 188 255;
+    --primary-container: 79 55 139;
+    --on-primary: 56 30 114;
+    --on-primary-container: 234 221 255;
     
-    --secondary: 148 163 184;
-    --secondary-container: 71 85 105;
-    --on-secondary: 30 41 59;
-    --on-secondary-container: 241 245 249;
+    --secondary: 203 194 220;
+    --secondary-container: 74 68 88;
+    --on-secondary: 51 45 65;
+    --on-secondary-container: 231 222 248;
     
-    --tertiary: 196 181 253;
-    --tertiary-container: 124 58 237;
-    --on-tertiary: 59 7 100;
-    --on-tertiary-container: 243 232 255;
+    --tertiary: 227 187 200;
+    --tertiary-container: 99 59 72;
+    --on-tertiary: 80 37 50;
+    --on-tertiary-container: 255 216 228;
     
-    --error: 248 113 113;
-    --error-container: 153 27 27;
-    --on-error: 127 29 29;
-    --on-error-container: 254 242 242;
+    --error: 255 180 171;
+    --error-container: 147 0 10;
+    --on-error: 105 0 5;
+    --on-error-container: 255 218 214;
     
-    --outline: 100 116 139;
-    --outline-variant: 51 65 85;
+    --outline: 147 143 153;
+    --outline-variant: 68 71 78;
     
-    /* Enhanced gradient variables for dark mode */
-    --gradient-primary: linear-gradient(135deg, rgb(129 140 248) 0%, rgb(196 181 253) 100%);
-    --gradient-surface: linear-gradient(135deg, rgb(15 23 42) 0%, rgb(30 41 59) 100%);
-    --gradient-accent: linear-gradient(135deg, rgb(67 56 202) 0%, rgb(124 58 237) 100%);
-    
-    /* Enhanced shadows for dark mode */
-    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
-    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.3);
-    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.4), 0 4px 6px -4px rgb(0 0 0 / 0.3);
-    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.4), 0 8px 10px -6px rgb(0 0 0 / 0.3);
-
     /* Legacy compatibility */
     --card: var(--surface-container);
     --card-foreground: var(--on-surface);
@@ -170,105 +148,125 @@
     -webkit-overflow-scrolling: touch;
     -webkit-text-size-adjust: 100%;
     -webkit-tap-highlight-color: transparent;
-    scroll-behavior: smooth;
   }
 
   body {
-    @apply antialiased;
-    background: var(--gradient-surface);
-    color: rgb(var(--foreground));
-    font-synthesis: none;
+    @apply bg-background text-foreground antialiased;
     text-rendering: optimizeLegibility;
     font-size: max(16px, 1rem);
-    line-height: 1.5;
-    font-weight: 400;
-    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     padding-top: env(safe-area-inset-top);
     padding-bottom: env(safe-area-inset-bottom);
   }
   
-  /* Enhanced form elements */
   input, select, textarea {
     font-size: max(16px, 1rem) !important;
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
-    border-radius: 0.5rem;
+    border-radius: 0;
     background-clip: padding-box;
-    transition: all 0.2s ease-in-out;
   }
   
   button {
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
-    border-radius: 0.75rem;
+    border-radius: 0;
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
-    transition: all 0.2s ease-in-out;
-    cursor: pointer;
-  }
-
-  /* Improved focus styles */
-  button:focus-visible,
-  input:focus-visible,
-  select:focus-visible,
-  textarea:focus-visible {
-    outline: 2px solid rgb(var(--primary));
-    outline-offset: 2px;
   }
 }
 
-/* Modern Material Design 3 Utilities */
+/* Enhanced Material Design 3 Utilities */
 @layer utilities {
-  /* Enhanced elevation system */
-  .elevation-0 { box-shadow: none; }
-  .elevation-1 { box-shadow: var(--shadow-sm); }
-  .elevation-2 { box-shadow: var(--shadow-md); }
-  .elevation-3 { box-shadow: var(--shadow-lg); }
-  .elevation-4 { box-shadow: var(--shadow-xl); }
-
-  /* Modern gradient utilities */
-  .gradient-primary { background: var(--gradient-primary); }
-  .gradient-surface { background: var(--gradient-surface); }
-  .gradient-accent { background: var(--gradient-accent); }
-
-  /* Enhanced transitions */
-  .transition-smooth { 
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  .transition-bounce { 
-    transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-  }
-
-  /* Modern glass effects */
-  .glass-light {
-    backdrop-filter: blur(20px) saturate(180%);
-    background: rgba(255, 255, 255, 0.7);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+  /* Material Design 3 Elevation System */
+  .elevation-0 {
+    box-shadow: none;
   }
   
-  .glass-dark {
-    backdrop-filter: blur(20px) saturate(180%);
-    background: rgba(15, 23, 42, 0.7);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+  .elevation-1 {
+    box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.3), 0px 1px 3px 1px rgba(0, 0, 0, 0.15);
+  }
+  
+  .elevation-2 {
+    box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.3), 0px 2px 6px 2px rgba(0, 0, 0, 0.15);
+  }
+  
+  .elevation-3 {
+    box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.3), 0px 4px 8px 3px rgba(0, 0, 0, 0.15);
+  }
+  
+  .elevation-4 {
+    box-shadow: 0px 2px 3px 0px rgba(0, 0, 0, 0.3), 0px 6px 10px 4px rgba(0, 0, 0, 0.15);
+  }
+  
+  .elevation-5 {
+    box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.3), 0px 8px 12px 6px rgba(0, 0, 0, 0.15);
   }
 
-  /* Responsive utilities */
+  /* Material Design 3 Surface Colors */
+  .surface-container-lowest {
+    @apply bg-[rgb(var(--surface-container-lowest))];
+  }
+  
+  .surface-container-low {
+    @apply bg-[rgb(var(--surface-container-low))];
+  }
+  
+  .surface-container {
+    @apply bg-[rgb(var(--surface-container))];
+  }
+  
+  .surface-container-high {
+    @apply bg-[rgb(var(--surface-container-high))];
+  }
+  
+  .surface-container-highest {
+    @apply bg-[rgb(var(--surface-container-highest))];
+  }
+
+  /* Enhanced transitions */
+  .material-transition {
+    @apply transition-all duration-300 ease-out;
+  }
+
+  .material-transition-fast {
+    @apply transition-all duration-200 ease-out;
+  }
+
+  .material-transition-slow {
+    @apply transition-all duration-500 ease-out;
+  }
+
+  /* Enhanced responsive utilities */
   .responsive-container {
     @apply w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
   }
   
-  .responsive-grid {
-    @apply grid gap-4;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  .responsive-padding {
+    @apply px-4 sm:px-6 md:px-8;
   }
   
-  /* iOS optimizations */
-  .ios-safe-top { padding-top: max(env(safe-area-inset-top), 1rem); }
-  .ios-safe-bottom { padding-bottom: max(env(safe-area-inset-bottom), 1rem); }
-  .ios-safe-left { padding-left: max(env(safe-area-inset-left), 0px); }
-  .ios-safe-right { padding-right: max(env(safe-area-inset-right), 0px); }
+  .responsive-grid {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4;
+  }
+  
+  /* Enhanced iOS Safe Area Support */
+  .ios-safe-top {
+    padding-top: max(env(safe-area-inset-top), 1rem);
+  }
+  
+  .ios-safe-bottom {
+    padding-bottom: max(env(safe-area-inset-bottom), 1rem);
+  }
+  
+  .ios-safe-left {
+    padding-left: max(env(safe-area-inset-left), 0px);
+  }
+  
+  .ios-safe-right {
+    padding-right: max(env(safe-area-inset-right), 0px);
+  }
   
   .ios-touch-target {
     min-height: 44px;
@@ -282,24 +280,27 @@
     min-height: -webkit-fill-available;
   }
   
+  .ios-no-bounce {
+    overscroll-behavior: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  
   .ios-smooth-scroll {
     -webkit-overflow-scrolling: touch;
     scroll-behavior: smooth;
-    overscroll-behavior: none;
   }
 
-  /* Performance optimizations */
-  .gpu-accelerated {
-    transform: translateZ(0);
-    backface-visibility: hidden;
-    perspective: 1000px;
+  /* Enhanced glassmorphism effects */
+  .glass-surface {
+    @apply backdrop-blur-xl bg-surface-container/90 border-outline-variant/20;
   }
-
-  .will-change-transform { will-change: transform; }
-  .will-change-opacity { will-change: opacity; }
+  
+  .glass-primary {
+    @apply backdrop-blur-xl bg-primary-container/80 border-primary/20;
+  }
 }
 
-/* Enhanced iOS and mobile optimizations */
+/* Enhanced iOS specific improvements */
 @supports (-webkit-touch-callout: none) {
   .ios-vh-fix {
     height: 100vh;
@@ -308,6 +309,16 @@
     min-height: -webkit-fill-available;
   }
   
+  .ios-no-bounce {
+    overscroll-behavior: none;
+    overscroll-behavior-y: none;
+  }
+  
+  .ios-smooth-scroll {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+
   input, select, textarea {
     font-size: max(16px, 1rem) !important;
     transform: translateZ(0);
@@ -324,27 +335,26 @@
     @apply text-base ios-touch-target;
     font-size: max(16px, 1rem) !important;
   }
-}
-
-/* Reduce motion for accessibility */
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
+  
+  .touch-target {
+    @apply ios-touch-target;
   }
 }
 
-/* High contrast mode support */
-@media (prefers-contrast: high) {
-  :root {
-    --outline: 0 0 0;
-    --outline-variant: 100 100 100;
+@media (min-width: 768px) and (max-width: 1024px) {
+  .responsive-grid {
+    @apply grid-cols-2 lg:grid-cols-3;
   }
   
-  .dark {
-    --outline: 255 255 255;
-    --outline-variant: 200 200 200;
+  body {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+}
+
+@media screen and (orientation: landscape) and (max-device-width: 896px) {
+  .ios-landscape-fix {
+    padding-left: max(env(safe-area-inset-left), 0px);
+    padding-right: max(env(safe-area-inset-right), 0px);
   }
 }

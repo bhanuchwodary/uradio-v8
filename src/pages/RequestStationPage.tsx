@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/hooks/use-toast";
-import { Mail, Send, Radio, Info } from "lucide-react";
+import { Mail, Send } from "lucide-react";
 
 const RequestStationPage: React.FC = () => {
   const { toast } = useToast();
@@ -67,7 +66,7 @@ Station Request Details:
 ------------------------
 Request Type: ${formData.requestType === "add" ? "Add New Station" : "Modify Existing Station"}
 Station Name: ${formData.stationName}
-${formData.requestType === "add" ? `Station URL: ${formData.stationUrl}` : `New Station URL: ${formData.existingStationUrl}`}
+${formData.requestType === "add" ? `Station URL: ${formData.stationUrl}` : `Existing Station URL: ${formData.existingStationUrl}`}
 Language: ${formData.language || "Not specified"}
 Contact Email: ${formData.contactEmail}
 
@@ -104,89 +103,59 @@ This request was submitted via uRadio app.
 
   return (
     <AppLayout>
-      <div className="max-w-2xl mx-auto space-y-8">
-        {/* Header Section */}
-        <div className="text-center space-y-4">
-          <div className="w-16 h-16 mx-auto rounded-full gradient-accent flex items-center justify-center mb-4">
-            <Radio className="h-8 w-8 text-primary" />
-          </div>
-          <h1 className="text-3xl font-bold gradient-primary bg-clip-text text-transparent">
-            Request Station
-          </h1>
-          <p className="text-on-surface-variant text-lg">
-            Help us expand our radio collection by requesting new stations or updates
-          </p>
-        </div>
-
-        {/* Request Form */}
-        <Card className="border-0 elevation-2 bg-gradient-to-br from-surface/90 to-surface-container/60 backdrop-blur-sm">
-          <CardHeader className="pb-6">
-            <CardTitle className="text-xl font-bold text-on-surface flex items-center gap-3">
+      {/* FIXED Added proper gap between header and content */}
+      <div className="container mx-auto max-w-2xl space-y-6 pt-4">
+        <Card className="bg-gradient-to-br from-background/40 to-background/20 backdrop-blur-md border-border/30 shadow-xl">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent flex items-center gap-2">
               <Mail className="h-6 w-6 text-primary" />
-              Station Request Form
+              Request Station
             </CardTitle>
+            <p className="text-muted-foreground text-sm">
+              Request to add a new station or modify an existing one
+            </p>
           </CardHeader>
           
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-8">
+          <CardContent className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-6">
               {/* Request Type */}
-              <div className="space-y-4">
-                <Label className="text-base font-semibold text-on-surface">Request Type</Label>
+              <div className="space-y-3">
+                <Label className="text-base font-medium">Request Type</Label>
                 <RadioGroup
                   value={formData.requestType}
                   onValueChange={(value) => handleInputChange("requestType", value)}
-                  className="grid grid-cols-1 md:grid-cols-2 gap-4"
+                  className="flex gap-6"
                 >
-                  <div className="relative">
-                    <RadioGroupItem value="add" id="add" className="peer sr-only" />
-                    <Label 
-                      htmlFor="add" 
-                      className="flex flex-col items-center justify-center p-6 bg-surface-container/60 border-2 border-outline-variant/30 rounded-2xl cursor-pointer transition-smooth hover:bg-surface-container-high/60 peer-checked:border-primary peer-checked:bg-primary/5"
-                    >
-                      <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-3">
-                        <Radio className="h-6 w-6 text-primary" />
-                      </div>
-                      <span className="font-semibold text-on-surface">Add New Station</span>
-                      <span className="text-sm text-on-surface-variant mt-1">Request a brand new radio station</span>
-                    </Label>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="add" id="add" />
+                    <Label htmlFor="add" className="cursor-pointer">Add New Station</Label>
                   </div>
-                  <div className="relative">
-                    <RadioGroupItem value="modify" id="modify" className="peer sr-only" />
-                    <Label 
-                      htmlFor="modify" 
-                      className="flex flex-col items-center justify-center p-6 bg-surface-container/60 border-2 border-outline-variant/30 rounded-2xl cursor-pointer transition-smooth hover:bg-surface-container-high/60 peer-checked:border-primary peer-checked:bg-primary/5"
-                    >
-                      <div className="w-12 h-12 rounded-full bg-secondary/10 flex items-center justify-center mb-3">
-                        <Mail className="h-6 w-6 text-secondary" />
-                      </div>
-                      <span className="font-semibold text-on-surface">Modify Existing</span>
-                      <span className="text-sm text-on-surface-variant mt-1">Update an existing station</span>
-                    </Label>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="modify" id="modify" />
+                    <Label htmlFor="modify" className="cursor-pointer">Modify Existing Station</Label>
                   </div>
                 </RadioGroup>
               </div>
 
               {/* Station Name */}
-              <div className="space-y-3">
-                <Label htmlFor="stationName" className="text-base font-semibold text-on-surface">
-                  {formData.requestType === "modify" ? "Existing Station Name" : "Station Name"} 
-                  <span className="text-red-500 ml-1">*</span>
+              <div className="space-y-2">
+                <Label htmlFor="stationName" className="text-base font-medium">
+                  {formData.requestType === "modify" ? "Existing Station Name" : "Station Name"} <span className="text-red-500">*</span>
                 </Label>
                 <Input
                   id="stationName"
                   value={formData.stationName}
                   onChange={(e) => handleInputChange("stationName", e.target.value)}
                   placeholder={formData.requestType === "modify" ? "Enter existing station name to be modified" : "Enter station name"}
-                  className="h-12 text-base rounded-xl border-outline-variant/30 bg-surface-container/40 focus:bg-surface-container/60 transition-smooth"
                   required
                 />
               </div>
 
               {/* Station URL - for new stations */}
               {formData.requestType === "add" && (
-                <div className="space-y-3">
-                  <Label htmlFor="stationUrl" className="text-base font-semibold text-on-surface">
-                    Station URL <span className="text-red-500 ml-1">*</span>
+                <div className="space-y-2">
+                  <Label htmlFor="stationUrl" className="text-base font-medium">
+                    Station URL <span className="text-red-500">*</span>
                   </Label>
                   <Input
                     id="stationUrl"
@@ -194,17 +163,16 @@ This request was submitted via uRadio app.
                     value={formData.stationUrl}
                     onChange={(e) => handleInputChange("stationUrl", e.target.value)}
                     placeholder="https://example.com/stream"
-                    className="h-12 text-base rounded-xl border-outline-variant/30 bg-surface-container/40 focus:bg-surface-container/60 transition-smooth"
                     required
                   />
                 </div>
               )}
 
-              {/* New Station URL - for modifications */}
+              {/* FIXED New Station URL - for modifications */}
               {formData.requestType === "modify" && (
-                <div className="space-y-3">
-                  <Label htmlFor="existingStationUrl" className="text-base font-semibold text-on-surface">
-                    New Station URL <span className="text-red-500 ml-1">*</span>
+                <div className="space-y-2">
+                  <Label htmlFor="existingStationUrl" className="text-base font-medium">
+                    New Station URL <span className="text-red-500">*</span>
                   </Label>
                   <Input
                     id="existingStationUrl"
@@ -212,28 +180,26 @@ This request was submitted via uRadio app.
                     value={formData.existingStationUrl}
                     onChange={(e) => handleInputChange("existingStationUrl", e.target.value)}
                     placeholder="Enter new station URL to replace the existing one"
-                    className="h-12 text-base rounded-xl border-outline-variant/30 bg-surface-container/40 focus:bg-surface-container/60 transition-smooth"
                     required
                   />
                 </div>
               )}
 
               {/* Language */}
-              <div className="space-y-3">
-                <Label htmlFor="language" className="text-base font-semibold text-on-surface">Language</Label>
+              <div className="space-y-2">
+                <Label htmlFor="language" className="text-base font-medium">Language</Label>
                 <Input
                   id="language"
                   value={formData.language}
                   onChange={(e) => handleInputChange("language", e.target.value)}
                   placeholder="e.g., English, Spanish, French"
-                  className="h-12 text-base rounded-xl border-outline-variant/30 bg-surface-container/40 focus:bg-surface-container/60 transition-smooth"
                 />
               </div>
 
               {/* Contact Email */}
-              <div className="space-y-3">
-                <Label htmlFor="contactEmail" className="text-base font-semibold text-on-surface">
-                  Your Email <span className="text-red-500 ml-1">*</span>
+              <div className="space-y-2">
+                <Label htmlFor="contactEmail" className="text-base font-medium">
+                  Your Email <span className="text-red-500">*</span>
                 </Label>
                 <Input
                   id="contactEmail"
@@ -241,14 +207,13 @@ This request was submitted via uRadio app.
                   value={formData.contactEmail}
                   onChange={(e) => handleInputChange("contactEmail", e.target.value)}
                   placeholder="your.email@example.com"
-                  className="h-12 text-base rounded-xl border-outline-variant/30 bg-surface-container/40 focus:bg-surface-container/60 transition-smooth"
                   required
                 />
               </div>
 
               {/* Description */}
-              <div className="space-y-3">
-                <Label htmlFor="description" className="text-base font-semibold text-on-surface">
+              <div className="space-y-2">
+                <Label htmlFor="description" className="text-base font-medium">
                   Additional Details
                 </Label>
                 <Textarea
@@ -261,34 +226,22 @@ This request was submitted via uRadio app.
                       : "Describe what changes you'd like to make to the existing station..."
                   }
                   rows={4}
-                  className="text-base rounded-xl border-outline-variant/30 bg-surface-container/40 focus:bg-surface-container/60 transition-smooth resize-none"
                 />
               </div>
 
               {/* Submit Button */}
-              <Button 
-                type="submit" 
-                className="w-full h-14 text-base font-semibold rounded-2xl gradient-primary text-white shadow-lg hover:shadow-xl transition-smooth"
-              >
-                <Send className="h-5 w-5 mr-3" />
+              <Button type="submit" className="w-full flex items-center gap-2">
+                <Send className="h-4 w-4" />
                 Send Request
               </Button>
             </form>
 
             {/* Info Box */}
-            <div className="mt-8 p-6 bg-blue-50/80 dark:bg-blue-950/20 border border-blue-200/60 dark:border-blue-800/40 rounded-2xl">
-              <div className="flex gap-4">
-                <div className="flex-shrink-0">
-                  <Info className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-blue-800 dark:text-blue-200 mb-2">How it works</h3>
-                  <p className="text-sm text-blue-700 dark:text-blue-300 leading-relaxed">
-                    This will open your default email client with a pre-filled message containing all your request details. 
-                    Simply send the email and we'll review your submission and get back to you as soon as possible.
-                  </p>
-                </div>
-              </div>
+            <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+              <p className="text-sm text-blue-800 dark:text-blue-200">
+                <strong>Note:</strong> This will open your default email client with a pre-filled message. 
+                Please send the email to complete your request. We'll review your submission and get back to you.
+              </p>
             </div>
           </CardContent>
         </Card>
