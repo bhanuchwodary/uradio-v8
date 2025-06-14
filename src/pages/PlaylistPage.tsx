@@ -112,30 +112,22 @@ const PlaylistPage: React.FC = () => {
   };
 
   const confirmClearAll = () => {
-    // Remove every station in the current playlist (as shown in the UI grid)
-    let countRemoved = 0;
+    // Unfavorite all stations that are favorites (playlist = all favorited stations + featured)
+    let countUnfavorited = 0;
 
-    uniquePlaylistStations.forEach(station => {
-      if (station.isFeatured) {
-        removeStationByValue(station);
-        countRemoved++;
-      } else if (station.isFavorite) {
-        const index = tracks.findIndex(t => t.url === station.url);
-        if (index !== -1) {
-          toggleFavorite(index); // This unfavorites
-          countRemoved++;
-        }
-      } else {
-        // User station that is not favorite or featured
-        removeStationByValue(station);
-        countRemoved++;
+    // Get indexes of all favorite stations
+    tracks.forEach((station, idx) => {
+      if (station.isFavorite) {
+        toggleFavorite(idx);
+        countUnfavorited++;
       }
     });
 
     toast({
       title: "Playlist cleared",
-      description: `${countRemoved} station${countRemoved === 1 ? "" : "s"} removed from your playlist`,
+      description: `${countUnfavorited === 0 ? "No stations were" : countUnfavorited + " station" + (countUnfavorited === 1 ? " was" : "s were")} removed from your playlist.`,
     });
+
     setShowClearDialog(false);
   };
 
