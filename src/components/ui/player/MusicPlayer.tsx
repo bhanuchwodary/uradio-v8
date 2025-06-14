@@ -88,7 +88,7 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
 
   // Redesigned full player layout for non-compact mode
   return (
-    <Card className="p-4 bg-surface-container-low border border-outline-variant/30 shadow-xl shadow-black/5 rounded-3xl">
+    <Card className="p-4 bg-surface-container-low border border-outline-variant/30 shadow-xl shadow-black/5 rounded-3xl animate-scale-in">
       <div className="flex flex-col space-y-4">
         {/* Station info */}
         <div className="text-center px-2">
@@ -125,7 +125,7 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
             size="icon"
             onClick={onPlayPause}
             disabled={!currentTrack}
-            className="h-20 w-20 rounded-full shadow-lg"
+            className={`h-20 w-20 rounded-full shadow-lg active:scale-95 transition-transform duration-200 ${isPlaying ? "animate-pulse" : ""}`}
           >
             {isPlaying ? (
               <Pause className="h-9 w-9" />
