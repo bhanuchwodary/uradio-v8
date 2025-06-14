@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -107,6 +108,25 @@ const StationListPage: React.FC = () => {
           <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">Station List</h1>
         </div>
         
+        {/* FIXED Featured Stations to match playlist design */}
+        {Object.entries(stationsByLanguage).map(([language, stations]) => (
+          <Card key={language} className="bg-gradient-to-br from-background/40 to-background/20 backdrop-blur-md border-border/30 shadow-xl">
+            <CardHeader className="pb-3 px-3 sm:px-6">
+              <CardTitle className="text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">Featured {language} Stations</CardTitle>
+            </CardHeader>
+            <CardContent className="px-3 sm:px-6">
+              <StationGrid
+                stations={stations}
+                currentIndex={currentIndex}
+                currentTrackUrl={currentTrack?.url}
+                isPlaying={isPlaying}
+                onSelectStation={(index) => handleAddStation(stations[index])}
+                actionIcon="add"
+              />
+            </CardContent>
+          </Card>
+        ))}
+
         {/* FIXED User Stations to match playlist design */}
         <Card className="bg-gradient-to-br from-background/40 to-background/20 backdrop-blur-md border-border/30 shadow-xl">
           <CardHeader className="pb-3 px-3 sm:px-6">
@@ -132,25 +152,6 @@ const StationListPage: React.FC = () => {
             )}
           </CardContent>
         </Card>
-        
-        {/* FIXED Featured Stations to match playlist design */}
-        {Object.entries(stationsByLanguage).map(([language, stations]) => (
-          <Card key={language} className="bg-gradient-to-br from-background/40 to-background/20 backdrop-blur-md border-border/30 shadow-xl">
-            <CardHeader className="pb-3 px-3 sm:px-6">
-              <CardTitle className="text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">Featured {language} Stations</CardTitle>
-            </CardHeader>
-            <CardContent className="px-3 sm:px-6">
-              <StationGrid
-                stations={stations}
-                currentIndex={currentIndex}
-                currentTrackUrl={currentTrack?.url}
-                isPlaying={isPlaying}
-                onSelectStation={(index) => handleAddStation(stations[index])}
-                actionIcon="add"
-              />
-            </CardContent>
-          </Card>
-        ))}
         
         {/* Edit station dialog */}
         {editingStation && (

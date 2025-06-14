@@ -17,7 +17,8 @@ const App = () => {
       <TrackStateProvider>
         <Router>
           <Routes>
-            <Route path="/" element={<Index />} />
+            <Route path="/" element={<PlaylistPage />} />
+            <Route path="/home" element={<Index />} />
             <Route path="/playlist" element={<PlaylistPage />} />
             <Route path="/add" element={<AddStationPage />} />
             <Route path="/add-station" element={<AddStationPage />} />
