@@ -5,49 +5,49 @@
 
 @layer base {
   :root {
-    /* Modern Design System - Light Theme */
-    --background: 250 250 250;
-    --foreground: 9 9 11;
+    /* Material Design 3 Light Theme Colors */
+    --background: 254 254 254;
+    --foreground: 16 16 16;
     
-    --surface: 255 255 255;
-    --surface-dim: 244 244 245;
-    --surface-bright: 255 255 255;
+    --surface: 254 254 254;
+    --surface-dim: 231 231 231;
+    --surface-bright: 254 254 254;
     --surface-container-lowest: 255 255 255;
-    --surface-container-low: 248 250 252;
-    --surface-container: 241 245 249;
-    --surface-container-high: 226 232 240;
-    --surface-container-highest: 203 213 225;
+    --surface-container-low: 247 247 247;
+    --surface-container: 241 241 241;
+    --surface-container-high: 236 236 236;
+    --surface-container-highest: 230 230 230;
     
-    --on-surface: 15 23 42;
-    --on-surface-variant: 71 85 105;
+    --on-surface: 16 16 16;
+    --on-surface-variant: 68 68 68;
     
-    --primary: 59 130 246;
-    --primary-container: 219 234 254;
+    --primary: 103 80 164;
+    --primary-container: 234 221 255;
     --on-primary: 255 255 255;
-    --on-primary-container: 30 58 138;
+    --on-primary-container: 33 0 93;
     
-    --secondary: 100 116 139;
-    --secondary-container: 226 232 240;
+    --secondary: 98 91 113;
+    --secondary-container: 231 222 248;
     --on-secondary: 255 255 255;
-    --on-secondary-container: 51 65 85;
+    --on-secondary-container: 30 25 43;
     
-    --tertiary: 168 85 247;
-    --tertiary-container: 245 208 254;
+    --tertiary: 125 82 96;
+    --tertiary-container: 255 216 228;
     --on-tertiary: 255 255 255;
-    --on-tertiary-container: 88 28 135;
+    --on-tertiary-container: 55 11 30;
     
-    --error: 239 68 68;
-    --error-container: 254 226 226;
+    --error: 186 26 26;
+    --error-container: 255 218 214;
     --on-error: 255 255 255;
-    --on-error-container: 127 29 29;
+    --on-error-container: 65 0 2;
     
-    --outline: 148 163 184;
-    --outline-variant: 203 213 225;
+    --outline: 121 116 126;
+    --outline-variant: 196 199 197;
     
     /* Legacy compatibility */
-    --card: var(--surface);
+    --card: var(--surface-container);
     --card-foreground: var(--on-surface);
-    --popover: var(--surface);
+    --popover: var(--surface-container);
     --popover-foreground: var(--on-surface);
     --muted: var(--surface-container-high);
     --muted-foreground: var(--on-surface-variant);
@@ -58,7 +58,7 @@
     --border: var(--outline-variant);
     --input: var(--outline-variant);
     --ring: var(--primary);
-    --radius: 0.75rem;
+    --radius: 1rem;
 
     /* Sidebar colors */
     --sidebar-background: var(--surface-container);
@@ -72,44 +72,44 @@
   }
 
   .dark {
-    /* Modern Design System - Dark Theme */
-    --background: 2 6 23;
-    --foreground: 248 250 252;
+    /* Material Design 3 Dark Theme Colors */
+    --background: 16 16 20;
+    --foreground: 230 225 229;
     
-    --surface: 15 23 42;
-    --surface-dim: 2 6 23;
-    --surface-bright: 51 65 85;
-    --surface-container-lowest: 2 6 23;
-    --surface-container-low: 15 23 42;
-    --surface-container: 30 41 59;
-    --surface-container-high: 51 65 85;
-    --surface-container-highest: 71 85 105;
+    --surface: 16 16 20;
+    --surface-dim: 16 16 20;
+    --surface-bright: 59 56 62;
+    --surface-container-lowest: 10 10 13;
+    --surface-container-low: 22 22 26;
+    --surface-container: 30 29 32;
+    --surface-container-high: 40 39 43;
+    --surface-container-highest: 49 48 51;
     
-    --on-surface: 248 250 252;
-    --on-surface-variant: 148 163 184;
+    --on-surface: 230 225 229;
+    --on-surface-variant: 196 199 197;
     
-    --primary: 96 165 250;
-    --primary-container: 30 58 138;
-    --on-primary: 30 58 138;
-    --on-primary-container: 219 234 254;
+    --primary: 208 188 255;
+    --primary-container: 79 55 139;
+    --on-primary: 56 30 114;
+    --on-primary-container: 234 221 255;
     
-    --secondary: 148 163 184;
-    --secondary-container: 51 65 85;
-    --on-secondary: 51 65 85;
-    --on-secondary-container: 226 232 240;
+    --secondary: 203 194 220;
+    --secondary-container: 74 68 88;
+    --on-secondary: 51 45 65;
+    --on-secondary-container: 231 222 248;
     
-    --tertiary: 196 181 253;
-    --tertiary-container: 88 28 135;
-    --on-tertiary: 88 28 135;
-    --on-tertiary-container: 245 208 254;
+    --tertiary: 227 187 200;
+    --tertiary-container: 99 59 72;
+    --on-tertiary: 80 37 50;
+    --on-tertiary-container: 255 216 228;
     
-    --error: 248 113 113;
-    --error-container: 127 29 29;
-    --on-error: 127 29 29;
-    --on-error-container: 254 226 226;
+    --error: 255 180 171;
+    --error-container: 147 0 10;
+    --on-error: 105 0 5;
+    --on-error-container: 255 218 214;
     
-    --outline: 100 116 139;
-    --outline-variant: 51 65 85;
+    --outline: 147 143 153;
+    --outline-variant: 68 71 78;
     
     /* Legacy compatibility */
     --card: var(--surface-container);
@@ -177,91 +177,184 @@
   }
 }
 
-/* Modern elevation system */
+/* Enhanced Material Design 3 Utilities */
 @layer utilities {
+  /* Material Design 3 Elevation System */
   .elevation-0 {
     box-shadow: none;
   }
   
   .elevation-1 {
-    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+    box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.3), 0px 1px 3px 1px rgba(0, 0, 0, 0.15);
   }
   
   .elevation-2 {
-    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.3), 0px 2px 6px 2px rgba(0, 0, 0, 0.15);
   }
   
   .elevation-3 {
-    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.3), 0px 4px 8px 3px rgba(0, 0, 0, 0.15);
   }
   
   .elevation-4 {
-    box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+    box-shadow: 0px 2px 3px 0px rgba(0, 0, 0, 0.3), 0px 6px 10px 4px rgba(0, 0, 0, 0.15);
+  }
+  
+  .elevation-5 {
+    box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.3), 0px 8px 12px 6px rgba(0, 0, 0, 0.15);
   }
 
-  /* Modern glass effects */
-  .glass-surface {
-    @apply backdrop-blur-xl bg-surface/80 border-outline-variant/20;
+  /* Material Design 3 Surface Colors */
+  .surface-container-lowest {
+    @apply bg-[rgb(var(--surface-container-lowest))];
   }
   
-  .glass-elevated {
-    @apply backdrop-blur-2xl bg-surface/90 border-outline-variant/30 elevation-2;
+  .surface-container-low {
+    @apply bg-[rgb(var(--surface-container-low))];
+  }
+  
+  .surface-container {
+    @apply bg-[rgb(var(--surface-container))];
+  }
+  
+  .surface-container-high {
+    @apply bg-[rgb(var(--surface-container-high))];
+  }
+  
+  .surface-container-highest {
+    @apply bg-[rgb(var(--surface-container-highest))];
   }
 
-  /* Enhanced responsive utilities */
-  .container-modern {
-    @apply w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  /* Enhanced transitions */
+  .material-transition {
+    @apply transition-all duration-300 ease-out;
   }
-  
-  .responsive-grid-stations {
-    @apply grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4;
-  }
-  
-  /* Modern transitions */
-  .transition-modern {
+
+  .material-transition-fast {
     @apply transition-all duration-200 ease-out;
   }
 
-  .transition-smooth {
-    @apply transition-all duration-300 ease-in-out;
+  .material-transition-slow {
+    @apply transition-all duration-500 ease-out;
+  }
+
+  /* Enhanced responsive utilities */
+  .responsive-container {
+    @apply w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
   }
   
-  /* iOS optimizations */
-  .ios-safe-area {
+  .responsive-padding {
+    @apply px-4 sm:px-6 md:px-8;
+  }
+  
+  .responsive-grid {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4;
+  }
+  
+  /* Enhanced iOS Safe Area Support */
+  .ios-safe-top {
     padding-top: max(env(safe-area-inset-top), 1rem);
+  }
+  
+  .ios-safe-bottom {
     padding-bottom: max(env(safe-area-inset-bottom), 1rem);
+  }
+  
+  .ios-safe-left {
     padding-left: max(env(safe-area-inset-left), 0px);
+  }
+  
+  .ios-safe-right {
     padding-right: max(env(safe-area-inset-right), 0px);
   }
   
-  .ios-touch-optimized {
+  .ios-touch-target {
     min-height: 44px;
     min-width: 44px;
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
   }
 
-  .ios-scrolling {
-    -webkit-overflow-scrolling: touch;
+  .ios-vh-fix {
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+  }
+  
+  .ios-no-bounce {
     overscroll-behavior: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .ios-smooth-scroll {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+
+  /* Enhanced glassmorphism effects */
+  .glass-surface {
+    @apply backdrop-blur-xl bg-surface-container/90 border-outline-variant/20;
+  }
+  
+  .glass-primary {
+    @apply backdrop-blur-xl bg-primary-container/80 border-primary/20;
   }
 }
 
-/* Enhanced mobile optimizations */
+/* Enhanced iOS specific improvements */
 @supports (-webkit-touch-callout: none) {
+  .ios-vh-fix {
+    height: 100vh;
+    height: -webkit-fill-available;
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+  }
+  
+  .ios-no-bounce {
+    overscroll-behavior: none;
+    overscroll-behavior-y: none;
+  }
+  
+  .ios-smooth-scroll {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+
   input, select, textarea {
     font-size: max(16px, 1rem) !important;
     transform: translateZ(0);
+    -webkit-transform: translateZ(0);
   }
 }
 
 @media screen and (max-width: 640px) {
-  .mobile-optimized {
+  .bottom-nav-ios {
     padding-bottom: max(calc(env(safe-area-inset-bottom) + 0.5rem), 1rem);
   }
   
   input, select, textarea, button {
-    @apply text-base ios-touch-optimized;
+    @apply text-base ios-touch-target;
     font-size: max(16px, 1rem) !important;
+  }
+  
+  .touch-target {
+    @apply ios-touch-target;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1024px) {
+  .responsive-grid {
+    @apply grid-cols-2 lg:grid-cols-3;
+  }
+  
+  body {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+}
+
+@media screen and (orientation: landscape) and (max-device-width: 896px) {
+  .ios-landscape-fix {
+    padding-left: max(env(safe-area-inset-left), 0px);
+    padding-right: max(env(safe-area-inset-right), 0px);
   }
 }
