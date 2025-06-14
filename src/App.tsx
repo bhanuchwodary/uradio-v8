@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-d
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Toaster } from "@/components/ui/toaster";
 import { TrackStateProvider } from "@/context/TrackStateContext";
+import Index from "@/pages/Index";
 import PlaylistPage from "@/pages/PlaylistPage";
 import AddStationPage from "@/pages/AddStationPage";
 import NotFound from "@/pages/NotFound";
@@ -16,7 +17,7 @@ const App = () => {
       <TrackStateProvider>
         <Router>
           <Routes>
-            <Route path="/" element={<PlaylistPage />} />
+            <Route path="/" element={<Index />} />
             <Route path="/playlist" element={<PlaylistPage />} />
             <Route path="/add" element={<AddStationPage />} />
             <Route path="/add-station" element={<AddStationPage />} />
