@@ -62,6 +62,8 @@ export const useTrackState = (): TrackStateResult => {
     removeStationByValue: operations.removeStationByValue,
     // Explicitly expose toggleInPlaylist for context
     toggleInPlaylist: operations.toggleInPlaylist,
+    // NEW: Expose clearAllFromPlaylist
+    clearAllFromPlaylist: operations.clearAllFromPlaylist,
     ...debug
   };
 };

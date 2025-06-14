@@ -1,3 +1,4 @@
+
 import { useCallback } from "react";
 import { Track } from "@/types/track";
 import { saveTracksToLocalStorage } from "./trackStorage";
@@ -233,11 +234,27 @@ export const useTrackOperations = (
     });
   }, [setTracks, tracksRef]);
 
+  // NEW: Bulk clear all from playlist
+  const clearAllFromPlaylist = useCallback(() => {
+    console.log("Clearing all stations from playlist");
+    setTracks(currentTracks => {
+      const updatedTracks = currentTracks.map(track => ({
+        ...track,
+        inPlaylist: false
+      }));
+      
+      saveTracksToLocalStorage(updatedTracks);
+      if (tracksRef) tracksRef.current = updatedTracks;
+      return updatedTracks;
+    });
+  }, [setTracks, tracksRef]);
+
   return {
     addUrl,
     removeUrl,
     toggleFavorite,
     toggleInPlaylist,
+    clearAllFromPlaylist,
     editTrack,
     updatePlayTime,
     checkIfStationExists,

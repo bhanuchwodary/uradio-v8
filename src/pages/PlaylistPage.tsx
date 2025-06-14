@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useTrackStateContext } from "@/context/TrackStateContext";
@@ -23,7 +24,8 @@ const PlaylistPage: React.FC = () => {
     editStationByValue,
     removeStationByValue,
     toggleFavorite,
-    toggleInPlaylist
+    toggleInPlaylist,
+    clearAllFromPlaylist // Add this new function
   } = useTrackStateContext();
 
   // Playlist stations are those with inPlaylist === true
@@ -97,30 +99,54 @@ const PlaylistPage: React.FC = () => {
     console.log("Total tracks before clear:", tracks.length);
     console.log("Playlist stations before clear:", playlistStations.length);
     
-    // FIXED: Clear all stations from playlist, including the currently playing one
-    let countCleared = 0;
-    tracks.forEach((station, idx) => {
-      if (station.inPlaylist) {
-        console.log(`Clearing station ${idx}: ${station.name} (inPlaylist: ${station.inPlaylist})`);
-        toggleInPlaylist(idx);
-        countCleared++;
-      }
-    });
+    // FIXED: Use bulk clear operation instead of individual toggles
+    if (clearAllFromPlaylist) {
+      const countCleared = playlistStations.length;
+      clearAllFromPlaylist();
+      
+      console.log("Stations cleared:", countCleared);
+      console.log("=== CLEAR ALL DEBUG END ===");
 
-    console.log("Stations cleared:", countCleared);
-    console.log("=== CLEAR ALL DEBUG END ===");
+      toast({
+        title: "Playlist cleared",
+        description: `${
+          countCleared === 0
+            ? "No stations were"
+            : countCleared + " station" + (countCleared === 1 ? " was" : "s were")
+        } removed from your playlist.`,
+      });
+    } else {
+      // Fallback to individual toggles if bulk operation not available
+      let countCleared = 0;
+      const stationsToToggle: number[] = [];
+      
+      tracks.forEach((station, idx) => {
+        if (station.inPlaylist) {
+          console.log(`Will clear station ${idx}: ${station.name} (inPlaylist: ${station.inPlaylist})`);
+          stationsToToggle.push(idx);
+          countCleared++;
+        }
+      });
 
-    // The currently playing station will continue playing, it's just no longer in the playlist view
-    console.log("Cleared", countCleared, "stations from playlist. Player continues with current station.");
+      // Toggle all at once using setTimeout to ensure proper state batching
+      stationsToToggle.forEach((idx, i) => {
+        setTimeout(() => {
+          toggleInPlaylist(idx);
+        }, i * 10); // Small delay between each toggle
+      });
 
-    toast({
-      title: "Playlist cleared",
-      description: `${
-        countCleared === 0
-          ? "No stations were"
-          : countCleared + " station" + (countCleared === 1 ? " was" : "s were")
-      } removed from your playlist.`,
-    });
+      console.log("Stations cleared:", countCleared);
+      console.log("=== CLEAR ALL DEBUG END ===");
+
+      toast({
+        title: "Playlist cleared",
+        description: `${
+          countCleared === 0
+            ? "No stations were"
+            : countCleared + " station" + (countCleared === 1 ? " was" : "s were")
+        } removed from your playlist.`,
+      });
+    }
 
     setShowClearDialog(false);
   };
