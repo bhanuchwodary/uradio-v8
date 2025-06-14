@@ -12,6 +12,7 @@ interface StationGridProps {
   onEditStation?: (station: Track) => void;
   onDeleteStation?: (station: Track) => void;
   onToggleFavorite?: (station: Track) => void;
+  onToggleInPlaylist?: (station: Track) => void; // <-- ADDED
   actionIcon?: "play" | "add";
 }
 
@@ -24,6 +25,7 @@ export const StationGrid: React.FC<StationGridProps> = ({
   onEditStation,
   onDeleteStation,
   onToggleFavorite,
+  onToggleInPlaylist,
   actionIcon = "play"
 }) => {
   if (!stations || stations.length === 0) {
@@ -39,10 +41,7 @@ export const StationGrid: React.FC<StationGridProps> = ({
       {stations.map((station, index) => {
         const isCurrentlyPlaying = station.url === currentTrackUrl && isPlaying;
         const isSelected = station.url === currentTrackUrl;
-        
-        // Create a stable key based on station properties that matter for rendering
         const stationKey = `${station.url}-${station.name}-${station.language || 'unknown'}`;
-        
         console.log("Rendering station in grid:", { 
           name: station.name, 
           language: station.language,
@@ -50,7 +49,6 @@ export const StationGrid: React.FC<StationGridProps> = ({
           isSelected,
           isPlaying: isCurrentlyPlaying
         });
-        
         return (
           <StationCard
             key={stationKey}
@@ -61,6 +59,7 @@ export const StationGrid: React.FC<StationGridProps> = ({
             onEdit={onEditStation ? () => onEditStation(station) : undefined}
             onDelete={onDeleteStation ? () => onDeleteStation(station) : undefined}
             onToggleFavorite={onToggleFavorite ? () => onToggleFavorite(station) : undefined}
+            onToggleInPlaylist={onToggleInPlaylist ? () => onToggleInPlaylist(station) : undefined} {/* <-- PASSED */}
             actionIcon={actionIcon}
           />
         );
