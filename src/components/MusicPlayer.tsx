@@ -28,7 +28,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = memo(({
   setIsPlaying,
   tracks = [],
 }) => {
-  // CRITICAL FIX: Filter to only playlist stations
+  // CRITICAL FIX: Filter to only playlist stations and create a completely isolated player state
   const playlistData = useMemo(() => {
     const playlistTracks = tracks.filter(track => track.inPlaylist === true);
     const playlistUrls = playlistTracks.map(track => track.url);
@@ -56,14 +56,22 @@ const MusicPlayer: React.FC<MusicPlayerProps> = memo(({
     };
   }, [tracks, currentIndex]);
 
-  // Custom setCurrentIndex that maps playlist index back to full array index
+  // FIXED: Custom setCurrentIndex that works entirely within playlist bounds
   const handleSetCurrentIndex = (playlistIndex: number) => {
+    console.log("MusicPlayer - Setting playlist index:", playlistIndex);
+    
     if (playlistIndex >= 0 && playlistIndex < playlistData.tracks.length) {
       const selectedPlaylistTrack = playlistData.tracks[playlistIndex];
       // Find this track in the original full array
       const fullArrayIndex = tracks.findIndex(track => track.url === selectedPlaylistTrack.url);
-      console.log("MusicPlayer - Index mapping:", playlistIndex, "->", fullArrayIndex);
-      setCurrentIndex(fullArrayIndex);
+      console.log("MusicPlayer - Mapping playlist index", playlistIndex, "to full array index", fullArrayIndex);
+      
+      if (fullArrayIndex !== -1) {
+        setCurrentIndex(fullArrayIndex);
+      } else {
+        console.error("MusicPlayer - Could not find playlist track in full array");
+        setCurrentIndex(-1);
+      }
     } else {
       console.log("MusicPlayer - Invalid playlist index:", playlistIndex);
       setCurrentIndex(-1);
