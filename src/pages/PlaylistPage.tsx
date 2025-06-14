@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useTrackStateContext } from "@/context/TrackStateContext";
@@ -97,17 +98,26 @@ const PlaylistPage: React.FC = () => {
   const handleClearAll = () => {
     setShowClearDialog(true);
   };
-  
-  // Clear all playlist (featured + favorites only), keep user-added stations
-  const confirmClearAll = () => {
-    // Only remove stations that are marked as featured or favorite (not user stations)
-    const stationsToRemove = tracks.filter(
-      (station) =>
-        station.isFeatured === true || station.isFavorite === true
-    );
-    const countToRemove = stationsToRemove.length;
 
-    stationsToRemove.forEach((station) => {
+  // FIX: Remove ALL stations that are visible in the 'playlist' (including user-added)
+  const confirmClearAll = () => {
+    // Reproduce the merging and deduplication logic from PlaylistContent
+    const allPlaylistStations = [
+      ...favoriteStations,
+      ...popularStations,
+      ...userStations.filter(station => !station.isFeatured),
+      ...featuredStations
+    ];
+
+    // Remove duplicates based on URL
+    const uniquePlaylistStations = allPlaylistStations.filter(
+      (station, index, self) =>
+        index === self.findIndex(s => s.url === station.url)
+    );
+
+    // Remove all of these stations from playlist
+    const countToRemove = uniquePlaylistStations.length;
+    uniquePlaylistStations.forEach(station => {
       removeStationByValue(station);
     });
 
@@ -184,3 +194,4 @@ const PlaylistPage: React.FC = () => {
 };
 
 export default PlaylistPage;
+
