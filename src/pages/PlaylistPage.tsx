@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useTrackStateContext } from "@/context/TrackStateContext";
@@ -25,23 +26,24 @@ const PlaylistPage: React.FC = () => {
     toggleFavorite
   } = useTrackStateContext();
   
-  // Only show featured and favorites in "playlist" view
-  const featuredStations = tracks.filter(track => track.isFeatured);
+  // Make sure playlist only shows FAVORITES and FEATURED (no user station unless favorite or featured)
   const favoriteStations = tracks.filter(track => track.isFavorite);
-  // Show ALL user-added stations in playlist, regardless of favorite status
-  const userStations = tracks.filter(track => !track.isFeatured);
+  const featuredStations = tracks.filter(track => track.isFeatured);
 
-  // Calculate popular stations based on play time, but restrict to featured/favorites only
+  // userStations for playlist, only include favorites (not ALL user stations)
+  const userStations = tracks.filter(track => !track.isFeatured && track.isFavorite);
+
+  // Calculate popular (favorites or featured, in case you use this elsewhere)
   const popularStations = [...tracks]
     .filter(track => track.isFavorite || track.isFeatured)
     .sort((a, b) => (b.playTime || 0) - (a.playTime || 0))
     .slice(0, 8);
 
   // Gather ALL stations shown in the playlist (just like in PlaylistContent)
+  // But strictly: unique combination of only favorite and featured
   const allPlaylistStations = [
     ...favoriteStations,
     ...popularStations,
-    ...userStations.filter(station => !station.isFeatured),
     ...featuredStations
   ];
 
@@ -112,10 +114,9 @@ const PlaylistPage: React.FC = () => {
   };
 
   const confirmClearAll = () => {
-    // Unfavorite all stations that are favorites (playlist = all favorited stations + featured)
+    // Unfavorite all stations that are favorites (this will clear playlist view)
     let countUnfavorited = 0;
 
-    // Get indexes of all favorite stations
     tracks.forEach((station, idx) => {
       if (station.isFavorite) {
         toggleFavorite(idx);
@@ -125,7 +126,11 @@ const PlaylistPage: React.FC = () => {
 
     toast({
       title: "Playlist cleared",
-      description: `${countUnfavorited === 0 ? "No stations were" : countUnfavorited + " station" + (countUnfavorited === 1 ? " was" : "s were")} removed from your playlist.`,
+      description: `${
+        countUnfavorited === 0
+          ? "No stations were"
+          : countUnfavorited + " station" + (countUnfavorited === 1 ? " was" : "s were")
+      } removed from your playlist.`,
     });
 
     setShowClearDialog(false);
