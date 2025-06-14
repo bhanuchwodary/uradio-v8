@@ -62,9 +62,17 @@ const PlaylistContent: React.FC<PlaylistContentProps> = ({
               size="sm"
               onClick={onClearAll}
               className="flex items-center gap-2"
+              aria-label="Clear all stations"
             >
-              <Trash2 className="h-4 w-4" />
-              Clear All
+              {/* Icon only on mobile */}
+              <span className="inline-flex sm:hidden">
+                <Trash2 className="h-5 w-5" />
+              </span>
+              {/* Icon + label on desktop */}
+              <span className="hidden sm:inline-flex items-center gap-2">
+                <Trash2 className="h-4 w-4" />
+                Clear All
+              </span>
             </Button>
           )}
         </div>
@@ -93,3 +101,4 @@ const PlaylistContent: React.FC<PlaylistContentProps> = ({
 };
 
 export default PlaylistContent;
+
