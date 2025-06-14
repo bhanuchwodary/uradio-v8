@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Shuffle } from "lucide-react";
@@ -103,7 +104,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
           <img
             src={getLogoSrc()}
             alt="uRadio"
-            className={`h-9 w-auto object-contain transition-opacity duration-100 ${logoLoaded ? 'opacity-100' : 'opacity-0'}`}
+            className={`h-12 w-auto object-contain transition-opacity duration-100 ${logoLoaded ? 'opacity-100' : 'opacity-0'}`}
           />
         </div>
         
