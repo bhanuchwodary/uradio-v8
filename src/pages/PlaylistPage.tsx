@@ -131,7 +131,7 @@ const PlaylistPage: React.FC = () => {
 
   return (
     <AppLayout>
-      <div className={`space-y-6 transition-opacity duration-300 ease-in-out pt-4 ${isPageReady ? 'opacity-100' : 'opacity-0'}`}>
+      <div className={`container mx-auto max-w-5xl space-y-6 transition-opacity duration-300 ease-in-out pt-4 ${isPageReady ? 'opacity-100' : 'opacity-0'}`}>
         {/* Playlist Content Component - Now unified layout */}
         <PlaylistContent
           userStations={userStations}
