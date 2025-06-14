@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useTrackStateContext } from "@/context/TrackStateContext";
@@ -99,20 +98,30 @@ const PlaylistPage: React.FC = () => {
     setShowClearDialog(true);
   };
   
-  // FIXED: Clear all function now properly removes ALL stations from the playlist only
+  // FIX: Only remove stations that are in the playlist (don't delete user-added stations)
   const confirmClearAll = () => {
-    // Get count before clearing
-    const stationCount = tracks.length;
-    
-    // Remove ALL stations from the tracks array (this is the playlist)
-    const allStationsToRemove = [...tracks];
-    allStationsToRemove.forEach(station => {
+    // Calculate playlist stations exactly as in PlaylistContent
+    const allPlaylistStations = [
+      ...favoriteStations,
+      ...popularStations,
+      ...userStations.filter(station => !station.isFeatured),
+      ...featuredStations
+    ];
+    // Remove duplicates based on URL
+    const uniquePlaylistStations = allPlaylistStations.filter(
+      (station, index, self) =>
+        index === self.findIndex(s => s.url === station.url)
+    );
+
+    // Remove only these stations from the tracks array
+    const countToRemove = uniquePlaylistStations.length;
+    uniquePlaylistStations.forEach(station => {
       removeStationByValue(station);
     });
-    
+
     toast({
       title: "Playlist cleared",
-      description: `${stationCount} stations removed from your playlist`
+      description: `${countToRemove} stations removed from your playlist`
     });
     setShowClearDialog(false);
   };
