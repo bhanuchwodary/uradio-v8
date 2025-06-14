@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,8 +12,8 @@ import EditStationDialog from "@/components/EditStationDialog";
 const StationListPage: React.FC = () => {
   const { toast } = useToast();
   const [editingStation, setEditingStation] = useState<Track | null>(null);
-  
-  const { 
+
+  const {
     tracks,
     currentIndex,
     isPlaying,
@@ -21,13 +22,13 @@ const StationListPage: React.FC = () => {
     removeStationByValue,
     getUserStations
   } = useTrackStateContext();
-  
+
   // Get user stations
   const userStations = getUserStations();
-  
+
   // Get featured stations from loader
   const featuredStationsList = getStations();
-  
+
   // Create proper track objects from featured stations data
   const featuredStationTracks: Track[] = featuredStationsList.map(station => ({
     ...station,
@@ -35,13 +36,13 @@ const StationListPage: React.FC = () => {
     isFeatured: true,
     playTime: 0
   }));
-  
+
   // Get current track
   const currentTrack = tracks[currentIndex];
-  
+
   // Group featured stations by language
   const stationsByLanguage: Record<string, Track[]> = {};
-  
+
   featuredStationTracks.forEach(station => {
     const language = station.language || "Unknown";
     if (!stationsByLanguage[language]) {
@@ -49,17 +50,17 @@ const StationListPage: React.FC = () => {
     }
     stationsByLanguage[language].push(station);
   });
-  
+
   // Add station to playlist handler
   const handleAddStation = (station: Track) => {
     const result = addUrl(
-      station.url, 
-      station.name, 
+      station.url,
+      station.name,
       station.isFeatured || false,
       station.isFavorite || false,
       station.language || ""
     );
-    
+
     if (result.success) {
       toast({
         title: "Station Added",
@@ -73,12 +74,12 @@ const StationListPage: React.FC = () => {
       });
     }
   };
-  
+
   // Handle edit station
   const handleEditStation = (station: Track) => {
     setEditingStation(station);
   };
-  
+
   // Handle delete station
   const handleDeleteStation = (station: Track) => {
     removeStationByValue(station);
@@ -87,7 +88,7 @@ const StationListPage: React.FC = () => {
       description: `${station.name} has been removed from your stations`
     });
   };
-  
+
   // Save edited station
   const handleSaveEdit = (data: { url: string; name: string; language?: string }) => {
     if (editingStation) {
@@ -99,14 +100,12 @@ const StationListPage: React.FC = () => {
       setEditingStation(null);
     }
   };
-  
+
   return (
     <AppLayout>
       <div className="container mx-auto max-w-5xl space-y-6 pt-4">
-        <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">Station List</h1>
-        </div>
-        
+        {/* REMOVED the Station List heading here */}
+
         {/* FIXED User Stations to match playlist design */}
         <Card className="bg-gradient-to-br from-background/40 to-background/20 backdrop-blur-md border-border/30 shadow-xl">
           <CardHeader className="pb-3 px-3 sm:px-6">
@@ -132,7 +131,7 @@ const StationListPage: React.FC = () => {
             )}
           </CardContent>
         </Card>
-        
+
         {/* FIXED Featured Stations to match playlist design */}
         {Object.entries(stationsByLanguage).map(([language, stations]) => (
           <Card key={language} className="bg-gradient-to-br from-background/40 to-background/20 backdrop-blur-md border-border/30 shadow-xl">
@@ -151,7 +150,7 @@ const StationListPage: React.FC = () => {
             </CardContent>
           </Card>
         ))}
-        
+
         {/* Edit station dialog */}
         {editingStation && (
           <EditStationDialog
