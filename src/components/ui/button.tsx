@@ -43,11 +43,46 @@ export interface ButtonProps
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, ...props }, ref) => {
     const Comp = asChild ? Slot : "button"
+
+    const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+      const button = event.currentTarget;
+      
+      // Create span element
+      const circle = document.createElement("span");
+      const diameter = Math.max(button.clientWidth, button.clientHeight);
+      const radius = diameter / 2;
+      
+      // Position the ripple
+      const rect = button.getBoundingClientRect();
+      circle.style.width = circle.style.height = `${diameter}px`;
+      circle.style.left = `${event.clientX - rect.left - radius}px`;
+      circle.style.top = `${event.clientY - rect.top - radius}px`;
+      circle.classList.add("ripple-effect");
+      
+      // Remove any existing ripple
+      const existingRipple = button.querySelector(".ripple-effect");
+      if (existingRipple) {
+        existingRipple.remove();
+      }
+      
+      // Append and automatically remove
+      button.appendChild(circle);
+      setTimeout(() => {
+        circle.remove();
+      }, 600); // Should match animation duration
+
+      // Forward the click event
+      if (props.onClick) {
+        props.onClick(event);
+      }
+    };
+
     return (
       <Comp
         className={cn(buttonVariants({ variant, size, className }), "ink-ripple")}
         ref={ref}
         {...props}
+        onClick={handleClick}
       />
     )
   }
