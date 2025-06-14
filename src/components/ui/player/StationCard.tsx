@@ -14,6 +14,7 @@ interface StationCardProps {
   onEdit?: () => void;
   onDelete?: () => void;
   onToggleFavorite?: () => void;
+  onToggleInPlaylist?: () => void; // <-- Add this line for typing support
   actionIcon?: "play" | "add";
 }
 
