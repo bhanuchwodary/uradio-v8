@@ -104,7 +104,7 @@ const StationListPage: React.FC = () => {
   
   return (
     <AppLayout>
-      <div className="container mx-auto max-w-5xl space-y-6 pt-4">
+      <div className="w-full max-w-none space-y-6 pt-4">
         {/* FIXED User Stations to match playlist design */}
         <Card className="bg-gradient-to-br from-background/40 to-background/20 backdrop-blur-md border-border/30 shadow-xl">
           <CardHeader className="pb-3 px-3 sm:px-6">

@@ -13,9 +13,9 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
     <div className="min-h-screen flex flex-col bg-background text-on-surface ios-vh-fix ios-no-bounce">
       <AppHeader />
       
-      {/* Main Content - Adjusted padding for new header height */}
+      {/* Main Content - Updated to use full width with minimal padding */}
       <main className={cn(
-        "flex-grow px-3 pb-28 pt-20 container mx-auto w-full ios-smooth-scroll",
+        "flex-grow px-2 pb-28 pt-20 w-full max-w-none ios-smooth-scroll",
         "ios-safe-left ios-safe-right"
       )}>
         {children}

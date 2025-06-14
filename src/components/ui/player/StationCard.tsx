@@ -102,7 +102,7 @@ export const StationCard: React.FC<StationCardProps> = ({
               </Button>
             )}
 
-            {/* PLAYLIST TOGGLE BUTTON */}
+            {/* PLAYLIST TOGGLE BUTTON - Updated to match favorite button behavior with red color */}
             {onToggleInPlaylist && (
               <Button
                 size="icon"
@@ -110,14 +110,14 @@ export const StationCard: React.FC<StationCardProps> = ({
                 className={cn(
                   "h-7 w-7 rounded-full transition-all duration-200 active:scale-90",
                   station.inPlaylist
-                    ? "text-green-600 bg-green-400/10 hover:bg-green-400/20"
-                    : "text-muted-foreground hover:text-green-500 hover:bg-green-500/10"
+                    ? "text-red-500 hover:text-red-600 bg-red-500/10 hover:bg-red-500/20"
+                    : "text-muted-foreground hover:text-red-500 hover:bg-red-500/10"
                 )}
                 onClick={e => handleButtonClick(e, onToggleInPlaylist)}
                 aria-label={station.inPlaylist ? "Remove from playlist" : "Add to playlist"}
                 title={station.inPlaylist ? "Remove from playlist" : "Add to playlist"}
               >
-                {station.inPlaylist ? <ListX className="h-4 w-4" /> : <ListPlus className="h-4 w-4" />}
+                {station.inPlaylist ? <ListX className="h-4 w-4 fill-red-500" /> : <ListPlus className="h-4 w-4" />}
               </Button>
             )}
 
