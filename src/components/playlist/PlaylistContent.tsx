@@ -71,7 +71,7 @@ const PlaylistContent: React.FC<PlaylistContentProps> = ({
               onSelectStation(index, uniquePlaylistStations)
             }
             onEditStation={undefined} // Hide edit button for playlist screen
-            onDeleteStation={onConfirmDelete}
+            onDeleteStation={undefined} // Hide delete button for playlist screen
             onToggleFavorite={onToggleFavorite}
             onToggleInPlaylist={onToggleInPlaylist}
             actionIcon="play"
