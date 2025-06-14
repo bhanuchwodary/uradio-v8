@@ -15,23 +15,19 @@ const Index: React.FC = () => {
   const [editingStation, setEditingStation] = useState<Track | null>(null);
   const [stationToDelete, setStationToDelete] = useState<Track | null>(null);
   
-  // Playlist-only state (separate from main track state)
+  // Playlist-only state (completely separate from main track state)
   const [playlistIndex, setPlaylistIndex] = useState(0);
   const [playlistIsPlaying, setPlaylistIsPlaying] = useState(false);
   
   const { 
     tracks, 
-    currentIndex,
-    isPlaying,
-    setCurrentIndex,
-    setIsPlaying,
     editStationByValue,
     removeStationByValue,
     toggleFavorite,
     getUserStations
   } = useTrackStateContext();
   
-  // Extract ONLY playlist stations
+  // Extract ONLY playlist stations for the playlist player
   const playlistStations = useMemo(() => {
     const filtered = tracks.filter(track => track.inPlaylist === true);
     console.log("Index - Playlist stations:", filtered.length, filtered.map(s => s.name));
@@ -48,7 +44,7 @@ const Index: React.FC = () => {
     }
   }, [playlistStations.length, playlistIndex]);
   
-  // Get favorite and popular stations for the sections below
+  // Get stations for display sections (no playback functionality)
   const favoriteStations = tracks.filter(track => track.isFavorite);
   const popularStations = [...tracks]
     .sort((a, b) => (b.playTime || 0) - (a.playTime || 0))
@@ -62,25 +58,8 @@ const Index: React.FC = () => {
     playTime: 0
   }));
 
-  // Handle selecting a station from any list (this updates the main app state)
-  const handleSelectStation = (stationIndex: number, stationList: typeof tracks) => {
-    const mainIndex = tracks.findIndex(t => t.url === stationList[stationIndex].url);
-    if (mainIndex !== -1) {
-      setCurrentIndex(mainIndex);
-      setIsPlaying(true);
-      
-      // If this station is in playlist, also update playlist player
-      const station = tracks[mainIndex];
-      if (station.inPlaylist) {
-        const playlistIdx = playlistStations.findIndex(s => s.url === station.url);
-        if (playlistIdx !== -1) {
-          console.log("Station is in playlist, updating playlist index to:", playlistIdx);
-          setPlaylistIndex(playlistIdx);
-          setPlaylistIsPlaying(true);
-        }
-      }
-    }
-  };
+  // REMOVED: handleSelectStation - stations in sections are for display only
+  // Only the playlist player handles actual playback
   
   const handleToggleFavorite = (station: typeof tracks[0]) => {
     const index = tracks.findIndex(t => t.url === station.url);
@@ -120,10 +99,19 @@ const Index: React.FC = () => {
     }
   };
 
+  // Dummy handler for display sections - they don't trigger playback
+  const handleDisplayStationClick = (index: number, stationList: Track[]) => {
+    console.log("Display section clicked - no playback triggered");
+    toast({
+      title: "Station Display",
+      description: "Use the Station List page to add stations to your playlist",
+    });
+  };
+
   return (
     <AppLayout>
       <div className="container mx-auto max-w-5xl space-y-6">
-        {/* Playlist-Only Music Player */}
+        {/* Playlist-Only Music Player - ONLY source of music playback */}
         <div className="mb-6">
           <PlaylistMusicPlayer
             playlistStations={playlistStations}
@@ -134,26 +122,26 @@ const Index: React.FC = () => {
           />
         </div>
 
-        {/* Favorites Section */}
+        {/* Favorites Section - DISPLAY ONLY */}
         <FavoritesSection 
           favoriteStations={favoriteStations}
-          currentIndex={currentIndex}
-          currentTrackUrl={tracks[currentIndex]?.url}
-          isPlaying={isPlaying}
-          onSelectStation={handleSelectStation}
+          currentIndex={-1} // No current index for display
+          currentTrackUrl="" // No current track for display
+          isPlaying={false} // Never playing from display
+          onSelectStation={handleDisplayStationClick}
           onToggleFavorite={handleToggleFavorite}
           onDeleteStation={handleConfirmDelete}
         />
         
-        {/* All Stations Section with Tabs */}
+        {/* All Stations Section with Tabs - DISPLAY ONLY */}
         <StationsTabsSection
           popularStations={popularStations}
           userStations={userStations}
           featuredStations={featuredStations}
-          currentIndex={currentIndex}
-          currentTrackUrl={tracks[currentIndex]?.url}
-          isPlaying={isPlaying}
-          onSelectStation={handleSelectStation}
+          currentIndex={-1} // No current index for display
+          currentTrackUrl="" // No current track for display
+          isPlaying={false} // Never playing from display
+          onSelectStation={handleDisplayStationClick}
           onEditStation={handleEditStation}
           onDeleteStation={handleConfirmDelete}
           onToggleFavorite={handleToggleFavorite}

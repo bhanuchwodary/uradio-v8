@@ -15,8 +15,6 @@ const StationListPage: React.FC = () => {
   
   const { 
     tracks,
-    currentIndex,
-    isPlaying,
     addUrl,
     editStationByValue,
     removeStationByValue,
@@ -37,9 +35,6 @@ const StationListPage: React.FC = () => {
     playTime: 0
   }));
   
-  // Get current track
-  const currentTrack = tracks[currentIndex];
-  
   // Group featured stations by language
   const stationsByLanguage: Record<string, Track[]> = {};
   
@@ -51,20 +46,22 @@ const StationListPage: React.FC = () => {
     stationsByLanguage[language].push(station);
   });
   
-  // Add station to playlist handler - FIXED to set inPlaylist: true
-  const handleAddStation = (station: Track) => {
+  // FIXED: Add station to playlist handler - ONLY adds to playlist, doesn't trigger playback
+  const handleAddStationToPlaylist = (station: Track) => {
+    console.log("Adding station to playlist:", station.name);
     const result = addUrl(
       station.url, 
       station.name, 
       station.isFeatured || false,
       station.isFavorite || false,
       station.language || "",
-      true // Set inPlaylist to true when adding from stations screen
+      true, // Set inPlaylist to true when adding from stations screen
+      false // CRITICAL: Don't auto-play when adding to playlist
     );
     
     if (result.success) {
       toast({
-        title: "Station Added",
+        title: "Station Added to Playlist",
         description: `${station.name} has been added to your playlist`,
       });
     } else {
@@ -76,12 +73,12 @@ const StationListPage: React.FC = () => {
     }
   };
   
-  // Handle edit station
+  // Handle edit station for user stations only
   const handleEditStation = (station: Track) => {
     setEditingStation(station);
   };
   
-  // Handle delete station
+  // Handle delete station for user stations only
   const handleDeleteStation = (station: Track) => {
     removeStationByValue(station);
     toast({
@@ -105,7 +102,7 @@ const StationListPage: React.FC = () => {
   return (
     <AppLayout>
       <div className="w-full max-w-none space-y-6 pt-4">
-        {/* FIXED User Stations to match playlist design */}
+        {/* User Stations - can be edited/deleted but NOT played from here */}
         <Card className="bg-gradient-to-br from-background/40 to-background/20 backdrop-blur-md border-border/30 shadow-xl">
           <CardHeader className="pb-3 px-3 sm:px-6">
             <CardTitle className="text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">My Stations</CardTitle>
@@ -114,10 +111,10 @@ const StationListPage: React.FC = () => {
             {userStations.length > 0 ? (
               <StationGrid
                 stations={userStations}
-                currentIndex={currentIndex}
-                currentTrackUrl={currentTrack?.url}
-                isPlaying={isPlaying}
-                onSelectStation={(index) => handleAddStation(userStations[index])}
+                currentIndex={-1} // No current playing state from this page
+                currentTrackUrl="" // No current track URL
+                isPlaying={false} // Never show as playing from this page
+                onSelectStation={(index) => handleAddStationToPlaylist(userStations[index])}
                 onEditStation={handleEditStation}
                 onDeleteStation={handleDeleteStation}
                 actionIcon="add"
@@ -131,7 +128,7 @@ const StationListPage: React.FC = () => {
           </CardContent>
         </Card>
         
-        {/* FIXED Featured Stations to match playlist design */}
+        {/* Featured Stations - can ONLY be added to playlist */}
         {Object.entries(stationsByLanguage).map(([language, stations]) => (
           <Card key={language} className="bg-gradient-to-br from-background/40 to-background/20 backdrop-blur-md border-border/30 shadow-xl">
             <CardHeader className="pb-3 px-3 sm:px-6">
@@ -140,10 +137,10 @@ const StationListPage: React.FC = () => {
             <CardContent className="px-3 sm:px-6">
               <StationGrid
                 stations={stations}
-                currentIndex={currentIndex}
-                currentTrackUrl={currentTrack?.url}
-                isPlaying={isPlaying}
-                onSelectStation={(index) => handleAddStation(stations[index])}
+                currentIndex={-1} // No current playing state from this page
+                currentTrackUrl="" // No current track URL
+                isPlaying={false} // Never show as playing from this page
+                onSelectStation={(index) => handleAddStationToPlaylist(stations[index])}
                 actionIcon="add"
               />
             </CardContent>
