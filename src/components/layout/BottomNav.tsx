@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -28,17 +27,17 @@ export const BottomNav: React.FC = () => {
                 className={cn(
                   "flex flex-col items-center gap-1.5 h-auto py-3 px-2 w-full transition-all duration-200 ease-out bg-transparent ios-touch-target rounded-xl",
                   path === item.path
-                    ? "text-primary bg-primary-container/40 after:absolute after:bottom-1 after:left-1/4 after:w-1/2 after:h-1 after:bg-primary after:rounded-full after:shadow-sm"
-                    : "text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high/60 active:bg-primary-container/20"
+                    ? "text-on-secondary-container bg-secondary-container"
+                    : "text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high/60 active:bg-secondary-container/20"
                 )}
               >
                 <item.icon className={cn(
                   "transition-all duration-200 ease-out",
-                  path === item.path ? "h-6 w-6 scale-110" : "h-5 w-5 hover:scale-105"
+                  path === item.path ? "h-6 w-6" : "h-5 w-5"
                 )} />
                 <span className={cn(
                   "text-xs transition-all duration-200 ease-out font-medium",
-                  path === item.path ? "opacity-100 font-semibold" : "opacity-90"
+                  path === item.path ? "font-semibold" : "opacity-90"
                 )}>
                   {item.label}
                 </span>
