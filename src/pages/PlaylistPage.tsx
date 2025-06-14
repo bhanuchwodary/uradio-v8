@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useTrackStateContext } from "@/context/TrackStateContext";
@@ -92,14 +91,24 @@ const PlaylistPage: React.FC = () => {
   };
 
   const confirmClearAll = () => {
-    // FIXED: Don't stop playback when clearing playlist - just remove from playlist view
+    console.log("=== CLEAR ALL DEBUG START ===");
+    console.log("Current track:", currentTrack);
+    console.log("Current track inPlaylist status:", currentTrack?.inPlaylist);
+    console.log("Total tracks before clear:", tracks.length);
+    console.log("Playlist stations before clear:", playlistStations.length);
+    
+    // FIXED: Clear all stations from playlist, including the currently playing one
     let countCleared = 0;
     tracks.forEach((station, idx) => {
       if (station.inPlaylist) {
+        console.log(`Clearing station ${idx}: ${station.name} (inPlaylist: ${station.inPlaylist})`);
         toggleInPlaylist(idx);
         countCleared++;
       }
     });
+
+    console.log("Stations cleared:", countCleared);
+    console.log("=== CLEAR ALL DEBUG END ===");
 
     // The currently playing station will continue playing, it's just no longer in the playlist view
     console.log("Cleared", countCleared, "stations from playlist. Player continues with current station.");
