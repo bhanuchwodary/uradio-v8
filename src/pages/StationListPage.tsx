@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -50,14 +51,15 @@ const StationListPage: React.FC = () => {
     stationsByLanguage[language].push(station);
   });
   
-  // Add station to playlist handler
+  // Add station to playlist handler - FIXED to set inPlaylist: true
   const handleAddStation = (station: Track) => {
     const result = addUrl(
       station.url, 
       station.name, 
       station.isFeatured || false,
       station.isFavorite || false,
-      station.language || ""
+      station.language || "",
+      true // Set inPlaylist to true when adding from stations screen
     );
     
     if (result.success) {
