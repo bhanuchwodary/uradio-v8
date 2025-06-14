@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useTrackStateContext } from "@/context/TrackStateContext";
@@ -29,10 +28,8 @@ const PlaylistPage: React.FC = () => {
   // Only show featured and favorites in "playlist" view
   const featuredStations = tracks.filter(track => track.isFeatured);
   const favoriteStations = tracks.filter(track => track.isFavorite);
-  // User-added (library) stations should NOT show in playlist unless favorited
-  const userStations = tracks.filter(track =>
-    !track.isFeatured && track.isFavorite
-  );
+  // CHANGE: Show ALL user-added stations in playlist, regardless of favorite status
+  const userStations = tracks.filter(track => !track.isFeatured);
   
   // Calculate popular stations based on play time, but restrict to featured/favorites only
   const popularStations = [...tracks]
