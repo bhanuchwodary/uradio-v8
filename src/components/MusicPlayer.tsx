@@ -8,6 +8,7 @@ import PlayerControlsRow from "@/components/music-player/PlayerControlsRow";
 import PlayerVolume from "@/components/music-player/PlayerVolume";
 import { usePlayerCore } from "@/hooks/usePlayerCore";
 import { usePhoneCallHandling } from "@/hooks/usePhoneCallHandling";
+import { Track } from "@/types/track";
 
 interface MusicPlayerProps {
   urls: string[];
@@ -15,7 +16,7 @@ interface MusicPlayerProps {
   setCurrentIndex: (index: number) => void;
   isPlaying: boolean;
   setIsPlaying: (isPlaying: boolean) => void;
-  tracks?: { name: string; url: string; inPlaylist?: boolean }[];
+  tracks?: Track[];
 }
 
 // Using React.memo to prevent unnecessary re-renders
