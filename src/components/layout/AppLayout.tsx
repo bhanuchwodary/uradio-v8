@@ -20,16 +20,16 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const { theme } = useTheme();
   const [logoLoaded, setLogoLoaded] = useState(false);
   const [randomMode, setRandomMode] = useState(false);
-  
+
   // Get track state for integrated player
-  const { 
+  const {
     tracks,
     currentIndex,
     isPlaying,
     setCurrentIndex,
     setIsPlaying
   } = useTrackStateContext();
-  
+
   // Use player core for player functionality
   const {
     volume,
@@ -71,17 +71,17 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
       originalHandlePrevious();
     }
   };
-  
+
   // Calculate current track
   const currentTrack = tracks[currentIndex] || null;
-  
+
   // Determine which logo to use based on theme with preload
   const getLogoSrc = () => {
     const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
     const currentTheme = theme === "system" ? systemTheme : theme;
-    
-    return currentTheme === "light" 
-      ? "/lovable-uploads/92c8140b-84fe-439c-a2f8-4d1758ab0998.png" 
+
+    return currentTheme === "light"
+      ? "/lovable-uploads/92c8140b-84fe-439c-a2f8-4d1758ab0998.png"
       : "/lovable-uploads/f6bddacc-e4ab-42a4-bdd9-3ea0d18320c0.png";
   };
 
@@ -90,12 +90,12 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
     const lightLogo = new Image();
     lightLogo.src = "/lovable-uploads/92c8140b-84fe-439c-a2f8-4d1758ab0998.png";
     lightLogo.onload = () => setLogoLoaded(true);
-    
+
     const darkLogo = new Image();
     darkLogo.src = "/lovable-uploads/f6bddacc-e4ab-42a4-bdd9-3ea0d18320c0.png";
     darkLogo.onload = () => setLogoLoaded(true);
   }, []);
-  
+
   const navItems = [
     { icon: Music, label: "Playlist", path: "/" },
     { icon: List, label: "Stations", path: "/station-list" },
@@ -105,31 +105,44 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-surface-container-lowest via-surface to-surface-container dark:from-surface-dim dark:via-surface dark:to-surface-bright ios-vh-fix ios-no-bounce">
-      {/* Redesigned Header - Now with integrated logo and player */}
+      {/* Redesigned Header for prominent station name on mobile */}
       <header className="fixed top-0 left-0 right-0 bg-surface-container/98 backdrop-blur-xl border-b border-outline-variant/20 z-20 ios-safe-top ios-safe-left ios-safe-right elevation-2">
         <div className="px-3 py-3">
-          {/* Integrated Player with Logo - Redesigned layout */}
           <div className="bg-gradient-to-r from-surface-container-high/60 to-surface-container-high/40 backdrop-blur-sm rounded-2xl border border-outline-variant/30 shadow-lg">
-            {currentTrack ? (
-              <div className="flex items-center px-4 py-3 gap-4">
-                {/* Logo - Now larger and integrated into player */}
-                <div className="flex-shrink-0">
-                  <img 
-                    src={getLogoSrc()}
-                    alt="uRadio" 
-                    className={`h-10 w-auto object-contain transition-opacity duration-100 ${logoLoaded ? 'opacity-100' : 'opacity-0'}`}
-                  />
-                </div>
-                
-                {/* Vertical separator */}
-                <div className="w-px h-8 bg-outline-variant/30"></div>
-                
-                {/* Station Info - Better layout */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-3">
+            <div className="flex items-center px-4 py-3 gap-3 sm:gap-4 w-full">
+              {/* Logo */}
+              <div className="flex-shrink-0">
+                <img
+                  src={getLogoSrc()}
+                  alt="uRadio"
+                  className={`h-9 w-auto object-contain transition-opacity duration-100 ${logoLoaded ? 'opacity-100' : 'opacity-0'}`}
+                />
+              </div>
+
+              {/* Separator (hide on extra small devices) */}
+              <div className="hidden sm:block w-px h-8 bg-outline-variant/30"></div>
+
+              {/* Main Info/Controls */}
+              <div className="flex flex-1 min-w-0 items-center">
+                {currentTrack ? (
+                  <div className="flex items-center w-full gap-2 sm:gap-3">
+                    {/* Station Info, optimized for mobile */}
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-base font-bold text-on-surface truncate leading-tight">
-                        {currentTrack.name}
+                      <h3
+                        className={cn(
+                          "text-base font-bold truncate leading-tight text-on-surface",
+                          "max-w-[60vw] sm:max-w-none",
+                          "text-[15px] sm:text-base"
+                        )}
+                        style={{
+                          lineHeight: "1.15",
+                          wordBreak: "break-word"
+                        }}
+                        title={currentTrack.name}
+                      >
+                        <span className="block whitespace-pre-line">
+                          {currentTrack.name}
+                        </span>
                       </h3>
                       <div className="flex items-center gap-2 mt-1">
                         {loading && (
@@ -142,84 +155,82 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
                         )}
                       </div>
                     </div>
+
+                    {/* Compact Controls (player) */}
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      {/* Player Controls */}
+                      <MusicPlayer
+                        currentTrack={currentTrack}
+                        isPlaying={isPlaying}
+                        onPlayPause={handlePlayPause}
+                        onNext={handleNext}
+                        onPrevious={handlePrevious}
+                        volume={volume}
+                        onVolumeChange={setVolume}
+                        loading={loading}
+                        compact={true}
+                      />
+
+                      {/* Random Mode Toggle */}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setRandomMode(!randomMode)}
+                        className={cn(
+                          "h-9 w-9 rounded-xl transition-all duration-200 border ml-1 sm:ml-2",
+                          randomMode
+                            ? "bg-primary/20 text-primary border-primary/30 hover:bg-primary/30 shadow-sm"
+                            : "bg-surface-container-high/60 border-outline-variant/30 hover:bg-surface-container-high/80 text-on-surface-variant hover:text-on-surface"
+                        )}
+                        title={randomMode ? "Random mode on" : "Random mode off"}
+                      >
+                        <Shuffle className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
-                </div>
-                
-                {/* Player Controls - Compact */}
-                <div className="flex items-center gap-3 flex-shrink-0">
-                  <MusicPlayer
-                    currentTrack={currentTrack}
-                    isPlaying={isPlaying}
-                    onPlayPause={handlePlayPause}
-                    onNext={handleNext}
-                    onPrevious={handlePrevious}
-                    volume={volume}
-                    onVolumeChange={setVolume}
-                    loading={loading}
-                    compact={true}
-                  />
-                  
-                  {/* Random Mode Toggle */}
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setRandomMode(!randomMode)}
-                    className={cn(
-                      "h-9 w-9 rounded-xl transition-all duration-200 border",
-                      randomMode 
-                        ? "bg-primary/20 text-primary border-primary/30 hover:bg-primary/30 shadow-sm" 
-                        : "bg-surface-container-high/60 border-outline-variant/30 hover:bg-surface-container-high/80 text-on-surface-variant hover:text-on-surface"
-                    )}
-                    title={randomMode ? "Random mode on" : "Random mode off"}
-                  >
-                    <Shuffle className="h-4 w-4" />
-                  </Button>
-                </div>
+                ) : (
+                  <div className="flex items-center w-full gap-2 sm:gap-3">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-base font-medium text-on-surface-variant truncate">
+                        Select a station to start playing
+                      </p>
+                    </div>
+                    {/* Player Controls & Random (disabled) */}
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <MusicPlayer
+                        currentTrack={null}
+                        isPlaying={false}
+                        onPlayPause={() => {}}
+                        onNext={() => {}}
+                        onPrevious={() => {}}
+                        volume={volume}
+                        onVolumeChange={setVolume}
+                        loading={false}
+                        compact={true}
+                      />
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setRandomMode(!randomMode)}
+                        className={cn(
+                          "h-9 w-9 rounded-xl transition-all duration-200 border ml-1 sm:ml-2",
+                          randomMode
+                            ? "bg-primary/20 text-primary border-primary/30 hover:bg-primary/30 shadow-sm"
+                            : "bg-surface-container-high/60 border-outline-variant/30 hover:bg-surface-container-high/80 text-on-surface-variant hover:text-on-surface"
+                        )}
+                        title={randomMode ? "Random mode on" : "Random mode off"}
+                      >
+                        <Shuffle className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </div>
-            ) : (
-              <div className="flex items-center px-4 py-3 gap-4">
-                {/* Logo - Always visible */}
-                <div className="flex-shrink-0">
-                  <img 
-                    src={getLogoSrc()}
-                    alt="uRadio" 
-                    className={`h-10 w-auto object-contain transition-opacity duration-100 ${logoLoaded ? 'opacity-100' : 'opacity-0'}`}
-                  />
-                </div>
-                
-                {/* Vertical separator */}
-                <div className="w-px h-8 bg-outline-variant/30"></div>
-                
-                {/* No station message */}
-                <div className="flex-1">
-                  <p className="text-base font-medium text-on-surface-variant">
-                    Select a station to start playing
-                  </p>
-                </div>
-                
-                {/* Random Mode Toggle - Always visible */}
-                <div className="flex-shrink-0">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setRandomMode(!randomMode)}
-                    className={cn(
-                      "h-9 w-9 rounded-xl transition-all duration-200 border",
-                      randomMode 
-                        ? "bg-primary/20 text-primary border-primary/30 hover:bg-primary/30 shadow-sm" 
-                        : "bg-surface-container-high/60 border-outline-variant/30 hover:bg-surface-container-high/80 text-on-surface-variant hover:text-on-surface"
-                    )}
-                    title={randomMode ? "Random mode on" : "Random mode off"}
-                  >
-                    <Shuffle className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            )}
+            </div>
           </div>
         </div>
       </header>
-      
+
       {/* Main Content - Adjusted padding for new header height */}
       <main className={cn(
         "flex-grow px-3 pb-32 md:pb-28 overflow-x-hidden container mx-auto w-full ios-smooth-scroll ios-safe-left ios-safe-right",
@@ -227,7 +238,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
       )}>
         {children}
       </main>
-      
+
       {/* Enhanced Bottom Navigation with matching theme toggle */}
       <nav className="fixed bottom-0 left-0 right-0 p-2 sm:p-3 bg-surface-container/98 backdrop-blur-xl border-t border-outline-variant/20 elevation-3 z-10 bottom-nav-ios ios-safe-left ios-safe-right">
         <div className="container mx-auto px-0">
@@ -238,13 +249,13 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
                   variant="ghost"
                   className={cn(
                     "flex flex-col items-center gap-1.5 h-auto py-3 px-2 w-full transition-all duration-200 ease-out bg-transparent ios-touch-target rounded-xl",
-                    path === item.path 
-                      ? "text-primary bg-primary-container/40 after:absolute after:bottom-1 after:left-1/4 after:w-1/2 after:h-1 after:bg-primary after:rounded-full after:shadow-sm" 
+                    path === item.path
+                      ? "text-primary bg-primary-container/40 after:absolute after:bottom-1 after:left-1/4 after:w-1/2 after:h-1 after:bg-primary after:rounded-full after:shadow-sm"
                       : "text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high/60 active:bg-primary-container/20"
                   )}
                 >
                   <item.icon className={cn(
-                    "transition-all duration-200 ease-out", 
+                    "transition-all duration-200 ease-out",
                     path === item.path ? "h-6 w-6 scale-110" : "h-5 w-5 hover:scale-105"
                   )} />
                   <span className={cn(
@@ -256,7 +267,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
                 </Button>
               </Link>
             ))}
-            
+
             <div className="flex-1">
               <ThemeToggle />
             </div>
