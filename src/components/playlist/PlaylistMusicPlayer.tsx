@@ -29,13 +29,12 @@ export const PlaylistMusicPlayer: React.FC<PlaylistMusicPlayerProps> = ({
   const [currentTime, setCurrentTime] = useState(0);
   const [loading, setLoading] = useState(false);
   
+  // Use a DOM audio element, not off-DOM instance!
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const hlsRef = useRef<Hls | null>(null);
 
-  // Get playlist URLs for strict navigation
   const playlistUrls = playlistStations.map(station => station.url);
 
-  // Use the player controls hook with strict playlist boundaries
   const { handleNext, handlePrevious, handlePlayPause, handleSeek } = usePlayerControls({
     audioRef,
     isPlaying,
@@ -46,16 +45,10 @@ export const PlaylistMusicPlayer: React.FC<PlaylistMusicPlayerProps> = ({
     volume
   });
 
-  // Initialize audio element ONCE
+  // Ensure DOM-attached audioRef loads audio and handles events
   useEffect(() => {
-    if (!audioRef.current) {
-      console.log("PlaylistMusicPlayer - Creating single audio element");
-      audioRef.current = new Audio();
-      audioRef.current.crossOrigin = "anonymous";
-      audioRef.current.preload = "auto";
-    }
-
     const audio = audioRef.current;
+    if (!audio) return;
 
     const handleTimeUpdate = () => setCurrentTime(audio.currentTime);
     const handleDurationChange = () => setDuration(audio.duration);
@@ -78,7 +71,6 @@ export const PlaylistMusicPlayer: React.FC<PlaylistMusicPlayerProps> = ({
     };
   }, [handleNext]);
 
-  // Handle volume changes
   useEffect(() => {
     if (audioRef.current) {
       audioRef.current.volume = volume;
@@ -86,51 +78,45 @@ export const PlaylistMusicPlayer: React.FC<PlaylistMusicPlayerProps> = ({
     }
   }, [volume]);
 
-  // Handle station changes - ONLY playlist stations
+  // Handle station changes
   useEffect(() => {
-    if (playlistStations.length === 0 || currentPlaylistIndex < 0 || currentPlaylistIndex >= playlistStations.length) {
+    if (
+      playlistStations.length === 0 ||
+      currentPlaylistIndex < 0 ||
+      currentPlaylistIndex >= playlistStations.length
+    ) {
       console.log("PlaylistMusicPlayer - No valid playlist station to load");
       return;
     }
-
     const currentStation = playlistStations[currentPlaylistIndex];
-    if (!currentStation || !audioRef.current) {
-      return;
-    }
-
-    console.log("PlaylistMusicPlayer - Loading PLAYLIST station:", currentStation.name, "at playlist index:", currentPlaylistIndex);
-    console.log("PlaylistMusicPlayer - CONFIRMED: Only playing from playlist with", playlistStations.length, "stations");
-
     const audio = audioRef.current;
     setLoading(true);
 
-    // Clean up previous HLS instance
+    // Clean up HLS
     if (hlsRef.current) {
       hlsRef.current.destroy();
       hlsRef.current = null;
     }
 
-    // Check if URL is HLS stream
-    if (currentStation.url.includes('.m3u8') || Hls.isSupported()) {
-      const hls = new Hls({
-        enableWorker: true,
-        lowLatencyMode: false,
-      });
-      
+    // HLS stream?
+    if (
+      currentStation.url.includes(".m3u8") &&
+      Hls.isSupported() &&
+      audio
+    ) {
+      const hls = new Hls({ enableWorker: true, lowLatencyMode: false });
       hls.loadSource(currentStation.url);
       hls.attachMedia(audio);
       hlsRef.current = hls;
-      
+
       hls.on(Hls.Events.MANIFEST_PARSED, () => {
-        console.log("HLS manifest parsed for playlist station:", currentStation.name);
         setLoading(false);
       });
-
       hls.on(Hls.Events.ERROR, (event, data) => {
         console.error("HLS error:", data);
         setLoading(false);
       });
-    } else {
+    } else if (audio) {
       // Direct audio stream
       audio.src = currentStation.url;
       audio.load();
@@ -149,7 +135,6 @@ export const PlaylistMusicPlayer: React.FC<PlaylistMusicPlayerProps> = ({
     }
   };
 
-  // Show message if no playlist stations
   if (playlistStations.length === 0) {
     return (
       <Card className="p-6 bg-gradient-to-br from-background/40 to-background/20 backdrop-blur-md border-border/30 shadow-xl">
@@ -165,6 +150,13 @@ export const PlaylistMusicPlayer: React.FC<PlaylistMusicPlayerProps> = ({
 
   return (
     <Card className="p-4 bg-surface-container-low border border-outline-variant/30 shadow-xl shadow-black/5 rounded-3xl">
+      {/* HIDDEN AUDIO ELEMENT kept in DOM and controlled by ref */}
+      <audio
+        ref={audioRef}
+        style={{ display: "none" }}
+        preload="auto"
+        crossOrigin="anonymous"
+      />
       <div className="flex flex-col space-y-4">
         {/* Station info */}
         <div className="text-center px-2">
@@ -200,12 +192,16 @@ export const PlaylistMusicPlayer: React.FC<PlaylistMusicPlayerProps> = ({
             className="w-full"
           />
           <div className="flex justify-between text-xs text-muted-foreground mt-1">
-            <span>{Math.floor(currentTime / 60)}:{Math.floor(currentTime % 60).toString().padStart(2, '0')}</span>
             <span>
-              {duration && duration !== Infinity 
-                ? `${Math.floor(duration / 60)}:${Math.floor(duration % 60).toString().padStart(2, '0')}`
-                : "Live"
-              }
+              {Math.floor(currentTime / 60)}:
+              {Math.floor(currentTime % 60).toString().padStart(2, "0")}
+            </span>
+            <span>
+              {duration && duration !== Infinity
+                ? `${Math.floor(duration / 60)}:${Math.floor(duration % 60)
+                    .toString()
+                    .padStart(2, "0")}`
+                : "Live"}
             </span>
           </div>
         </div>
@@ -221,7 +217,6 @@ export const PlaylistMusicPlayer: React.FC<PlaylistMusicPlayerProps> = ({
           >
             <SkipBack className="h-6 w-6" />
           </Button>
-          
           <Button
             variant="default"
             size="icon"
@@ -234,7 +229,6 @@ export const PlaylistMusicPlayer: React.FC<PlaylistMusicPlayerProps> = ({
               <Play className="h-9 w-9 ml-1" />
             )}
           </Button>
-          
           <Button
             variant="ghost"
             size="icon"
