@@ -3,7 +3,7 @@ import { Track } from "@/types/track";
 
 // Storage key for consistency
 const TRACKS_STORAGE_KEY = 'musicTracks';
-const STORAGE_VERSION = 'v4'; // Updated version for language fix
+const STORAGE_VERSION = 'v5'; // Updated version for playlist preservation fix
 
 // Helper to create a structured storage format
 const createStorageStructure = (tracks: Track[]) => ({
@@ -54,7 +54,7 @@ export const loadTracksFromLocalStorage = (): Track[] => {
       return isValid;
     });
     
-    // Fill in any missing optional properties with defaults - ALWAYS PRESERVE LANGUAGE
+    // Fill in any missing optional properties with defaults - ALWAYS PRESERVE ALL PROPERTIES
     const normalizedTracks = validatedTracks.map((track: any) => ({
       url: track.url,
       name: track.name,
@@ -62,10 +62,16 @@ export const loadTracksFromLocalStorage = (): Track[] => {
       playTime: track.playTime !== undefined ? Number(track.playTime) : 0,
       isFeatured: track.isFeatured !== undefined ? Boolean(track.isFeatured) : false,
       // CRITICAL: Always preserve language, don't default to empty string if it exists
-      language: track.language !== undefined && track.language !== null ? String(track.language) : "Unknown"
+      language: track.language !== undefined && track.language !== null ? String(track.language) : "Unknown",
+      // CRITICAL FIX: Always preserve inPlaylist property - this was missing!
+      inPlaylist: track.inPlaylist !== undefined ? Boolean(track.inPlaylist) : false
     }));
     
-    console.log("Normalized tracks with languages:", normalizedTracks.map(t => ({ name: t.name, language: t.language })));
+    console.log("Normalized tracks with playlist status:", normalizedTracks.map(t => ({ 
+      name: t.name, 
+      language: t.language, 
+      inPlaylist: t.inPlaylist 
+    })));
     
     return normalizedTracks;
   } catch (error) {
@@ -81,7 +87,7 @@ export const saveTracksToLocalStorage = (tracks: Track[]): boolean => {
       return false;
     }
     
-    // Deep clone tracks to avoid reference issues and ensure language is preserved
+    // Deep clone tracks to avoid reference issues and ensure ALL properties are preserved
     const tracksToSave = tracks.map(track => ({
       url: track.url,
       name: track.name,
@@ -89,14 +95,20 @@ export const saveTracksToLocalStorage = (tracks: Track[]): boolean => {
       playTime: track.playTime || 0,
       isFeatured: track.isFeatured || false,
       // CRITICAL: Always preserve language exactly as it is
-      language: track.language || "Unknown"
+      language: track.language || "Unknown",
+      // CRITICAL FIX: Always preserve inPlaylist property - this was missing!
+      inPlaylist: track.inPlaylist || false
     }));
     
     // Use the structured storage format
     const storageData = createStorageStructure(tracksToSave);
     
     // Log before saving
-    console.log("About to save tracks with languages:", tracksToSave.map(t => ({ name: t.name, language: t.language })));
+    console.log("About to save tracks with playlist status:", tracksToSave.map(t => ({ 
+      name: t.name, 
+      language: t.language, 
+      inPlaylist: t.inPlaylist 
+    })));
     
     localStorage.setItem(TRACKS_STORAGE_KEY, JSON.stringify(storageData));
     
@@ -111,7 +123,11 @@ export const saveTracksToLocalStorage = (tracks: Track[]): boolean => {
       const parsedData = JSON.parse(savedJson);
       const savedTracks = parsedData.tracks || [];
       
-      console.log("Tracks saved to localStorage with languages:", savedTracks.map((t: any) => ({ name: t.name, language: t.language })));
+      console.log("Tracks saved to localStorage with playlist status:", savedTracks.map((t: any) => ({ 
+        name: t.name, 
+        language: t.language, 
+        inPlaylist: t.inPlaylist 
+      })));
       
       if (savedTracks.length !== tracks.length) {
         console.warn("Track count mismatch after saving:", 

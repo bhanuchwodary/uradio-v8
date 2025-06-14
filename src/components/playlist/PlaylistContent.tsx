@@ -34,18 +34,26 @@ const PlaylistContent: React.FC<PlaylistContentProps> = ({
 }) => {
   const isMobile = useIsMobile();
   
-  // Unique by url only, though in practice there shouldn't be duplicates
-  const uniquePlaylistStations = stations.filter(
+  // CRITICAL FIX: Filter by inPlaylist property, not just URL uniqueness
+  const playlistStations = stations.filter(station => station.inPlaylist === true);
+  
+  // Additional uniqueness filter by URL (as backup, though shouldn't be needed)
+  const uniquePlaylistStations = playlistStations.filter(
     (station, index, self) =>
       index === self.findIndex(s => s.url === station.url)
   );
+
+  console.log("PlaylistContent - Total stations:", stations.length);
+  console.log("PlaylistContent - Playlist stations:", playlistStations.length);
+  console.log("PlaylistContent - Unique playlist stations:", uniquePlaylistStations.length);
+  console.log("PlaylistContent - Stations with inPlaylist=true:", stations.filter(s => s.inPlaylist).map(s => s.name));
 
   return (
     <Card className="bg-gradient-to-br from-background/40 to-background/20 backdrop-blur-md border-border/30 shadow-xl">
       <CardHeader className="pb-3 px-3 sm:px-6">
         <div className="flex justify-between items-center">
           <CardTitle className="text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-            My Playlist
+            My Playlist ({uniquePlaylistStations.length})
           </CardTitle>
           {uniquePlaylistStations.length > 0 && onClearAll && (
             <Button
