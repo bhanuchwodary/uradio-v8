@@ -1,8 +1,11 @@
+
 import React, { useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useTrackStateContext } from "@/context/TrackStateContext";
+import { usePlayerCore } from "@/hooks/usePlayerCore";
 import { Track } from "@/types/track";
 import { useToast } from "@/hooks/use-toast";
+import HomePagePlayer from "@/components/home/HomePagePlayer";
 import FavoritesSection from "@/components/home/FavoritesSection";
 import StationsTabsSection from "@/components/home/StationsTabsSection";
 import HomePageDialogs from "@/components/home/HomePageDialogs";
@@ -42,6 +45,26 @@ const Index: React.FC = () => {
     isFeatured: true,
     playTime: 0
   }));
+  
+  // Derive URLs from tracks
+  const urls = tracks.map(track => track.url);
+  
+  // Use player core for player functionality
+  const {
+    volume,
+    setVolume,
+    loading,
+    handlePlayPause,
+    handleNext,
+    handlePrevious,
+  } = usePlayerCore({
+    urls,
+    currentIndex,
+    setCurrentIndex,
+    isPlaying,
+    setIsPlaying,
+    tracks
+  });
   
   // Calculate current track
   const currentTrack = tracks[currentIndex] || null;
@@ -101,7 +124,19 @@ const Index: React.FC = () => {
 
   return (
     <AppLayout>
-      <div className="space-y-6">
+      <div className="container mx-auto max-w-5xl space-y-6">
+        {/* Player Card */}
+        <HomePagePlayer
+          currentTrack={currentTrack}
+          isPlaying={isPlaying}
+          handlePlayPause={handlePlayPause}
+          handleNext={handleNext}
+          handlePrevious={handlePrevious}
+          volume={volume}
+          setVolume={setVolume}
+          loading={loading}
+        />
+
         {/* Favorites Section */}
         <FavoritesSection 
           favoriteStations={favoriteStations}

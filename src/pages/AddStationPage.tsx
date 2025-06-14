@@ -1,3 +1,4 @@
+
 import React from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -61,6 +62,11 @@ const AddStationPage: React.FC = () => {
   return (
     <AppLayout>
       <div className="container mx-auto max-w-5xl space-y-6 pt-4">
+        <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent flex items-center gap-2">
+          <Plus className="h-5 w-5 text-primary" />
+          Add Station
+        </h1>
+        
         <div className="max-w-lg mx-auto space-y-6">
           <Card className="bg-gradient-to-br from-background/40 to-background/20 backdrop-blur-md border-border/30 shadow-xl">
             <CardHeader className="pb-3 px-3 sm:px-6">

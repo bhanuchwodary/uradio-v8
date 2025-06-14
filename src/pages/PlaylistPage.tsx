@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useTrackStateContext } from "@/context/TrackStateContext";
@@ -29,6 +30,11 @@ const PlaylistPage: React.FC = () => {
   const userStations = tracks.filter(track => !track.isFeatured);
   const featuredStations = tracks.filter(track => track.isFeatured);
   const favoriteStations = tracks.filter(track => track.isFavorite);
+  
+  // Calculate popular stations based on play time
+  const popularStations = [...tracks]
+    .sort((a, b) => (b.playTime || 0) - (a.playTime || 0))
+    .slice(0, 8);
   
   // Add effect for smooth transition on page load
   useEffect(() => {
@@ -125,12 +131,13 @@ const PlaylistPage: React.FC = () => {
 
   return (
     <AppLayout>
-      <div className={`space-y-6 transition-opacity duration-300 ease-in-out ${isPageReady ? 'opacity-100' : 'opacity-0'}`}>
+      <div className={`container mx-auto max-w-5xl space-y-6 transition-opacity duration-300 ease-in-out pt-4 ${isPageReady ? 'opacity-100' : 'opacity-0'}`}>
         {/* Playlist Content Component - Now unified layout */}
         <PlaylistContent
           userStations={userStations}
           featuredStations={featuredStations}
           favoriteStations={favoriteStations}
+          popularStations={popularStations}
           currentIndex={currentIndex}
           currentTrack={currentTrack}
           isPlaying={isPlaying}
