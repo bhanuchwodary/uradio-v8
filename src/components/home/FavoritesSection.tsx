@@ -28,7 +28,7 @@ const FavoritesSection: React.FC<FavoritesSectionProps> = ({
   }
 
   return (
-    <Card className="bg-background/30 backdrop-blur-md border-none shadow-lg">
+    <Card className="bg-surface-container border border-outline-variant/30 rounded-lg elevation-1">
       <CardHeader className="pb-2">
         <CardTitle className="text-lg">Favorites</CardTitle>
       </CardHeader>

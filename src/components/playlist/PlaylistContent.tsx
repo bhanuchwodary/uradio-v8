@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -36,23 +35,20 @@ const PlaylistContent: React.FC<PlaylistContentProps> = ({
   onClearAll
 }) => {
   // FIXED: Combine all stations into one unified playlist (stations that are actually in the playlist)
-  const allPlaylistStations = [
+  const uniquePlaylistStations = [
     ...favoriteStations,
     ...popularStations,
     ...userStations.filter(station => !station.isFeatured),
     ...featuredStations
-  ];
-
-  // Remove duplicates based on URL
-  const uniquePlaylistStations = allPlaylistStations.filter((station, index, self) => 
+  ].filter((station, index, self) => 
     index === self.findIndex(s => s.url === station.url)
   );
 
   return (
-    <Card className="bg-gradient-to-br from-background/40 to-background/20 backdrop-blur-md border-border/30 shadow-xl">
+    <Card className="bg-surface-container border border-outline-variant/30 rounded-lg elevation-1">
       <CardHeader className="pb-3 px-3 sm:px-6">
         <div className="flex justify-between items-center">
-          <CardTitle className="text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+          <CardTitle className="text-xl font-bold text-on-surface">
             My Playlist
           </CardTitle>
           {/* FIXED: Only show clear all if there are stations in the playlist */}
@@ -101,4 +97,3 @@ const PlaylistContent: React.FC<PlaylistContentProps> = ({
 };
 
 export default PlaylistContent;
-

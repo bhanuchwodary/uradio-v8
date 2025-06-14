@@ -64,9 +64,9 @@ const AddStationPage: React.FC = () => {
       <div className="container mx-auto max-w-5xl space-y-6 pt-4">
         {/* Removed the Add Station page heading here */}
         <div className="max-w-lg mx-auto space-y-6">
-          <Card className="bg-gradient-to-br from-background/40 to-background/20 backdrop-blur-md border-border/30 shadow-xl">
+          <Card className="bg-surface-container border border-outline-variant/30 rounded-lg elevation-1">
             <CardHeader className="pb-3 px-3 sm:px-6">
-              <CardTitle className="text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">Add Radio Station</CardTitle>
+              <CardTitle className="text-xl font-bold text-on-surface">Add Radio Station</CardTitle>
               <CardDescription>Enter the URL and name of the radio station you want to add</CardDescription>
             </CardHeader>
             <CardContent className="px-3 sm:px-6">
@@ -74,9 +74,9 @@ const AddStationPage: React.FC = () => {
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-background/40 to-background/20 backdrop-blur-md border-border/30 shadow-xl">
+          <Card className="bg-surface-container border border-outline-variant/30 rounded-lg elevation-1">
             <CardHeader className="pb-3 px-3 sm:px-6">
-              <CardTitle className="text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent flex items-center gap-2">
+              <CardTitle className="text-xl font-bold text-on-surface flex items-center gap-2">
                 <Upload className="h-4 w-4" />
                 Import Stations
               </CardTitle>

@@ -87,15 +87,15 @@ const ImportStationsFromCsv: React.FC<ImportStationsFromCsvProps> = ({ onImport 
         placeholder="Paste CSV content here (format: name,url,language)"
         value={csvContent}
         onChange={e => setCsvContent(e.target.value)}
-        className="min-h-[120px] bg-white/20 backdrop-blur-sm border-none"
+        className="min-h-[120px]"
       />
       <div className="text-xs text-gray-400 italic">
         Expected format: <code>Station Name,Station URL,Language</code> (one per line)
       </div>
       <Button 
         onClick={handleImport} 
-        variant="outline" 
-        className="w-full bg-white/20 backdrop-blur-sm border-none material-shadow-1 hover:material-shadow-2 material-transition"
+        variant="secondary" 
+        className="w-full"
       >
         <Upload className="w-4 h-4 mr-2" />
         Import
