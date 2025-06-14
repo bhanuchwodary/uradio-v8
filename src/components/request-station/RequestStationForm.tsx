@@ -3,7 +3,13 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Send } from "lucide-react";
 
@@ -31,26 +37,20 @@ const RequestStationForm: React.FC<RequestStationFormProps> = ({
   return (
     <form onSubmit={onSubmit} className="space-y-6">
       {/* Request Type */}
-      <div className="space-y-3">
+      <div className="space-y-2">
         <Label className="text-base font-medium">Request Type</Label>
-        <RadioGroup
+        <Select
           value={formData.requestType}
           onValueChange={(value) => onInputChange("requestType", value)}
-          className="flex flex-col gap-4 sm:flex-row sm:gap-6"
         >
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="add" id="add" />
-            <Label htmlFor="add" className="cursor-pointer">
-              Add New Station
-            </Label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="modify" id="modify" />
-            <Label htmlFor="modify" className="cursor-pointer">
-              Modify Existing Station
-            </Label>
-          </div>
-        </RadioGroup>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Select a request type" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="add">Add New Station</SelectItem>
+            <SelectItem value="modify">Modify Existing Station</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Station Name */}
