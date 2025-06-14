@@ -6,7 +6,19 @@ import { useAppPlayer } from "@/hooks/useAppPlayer";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
+// Simple hook to detect mobile (viewport < 768px)
+function useIsMobile() {
+  const [isMobile, setIsMobile] = React.useState(() => window.innerWidth < 768);
+  React.useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+  return isMobile;
+}
+
 const MiniPlayerBar: React.FC = () => {
+  const isMobile = useIsMobile();
   const {
     currentTrack,
     isPlaying,
@@ -18,10 +30,11 @@ const MiniPlayerBar: React.FC = () => {
     setVolume
   } = useAppPlayer();
 
-  if (!currentTrack) return null;
+  // Only render mini-player on mobile and when there is a current track
+  if (!currentTrack || !isMobile) return null;
 
   return (
-    <div className="fixed bottom-[3.5rem] left-0 right-0 z-20 ios-safe-bottom pointer-events-none">
+    <div className="fixed bottom-[3.5rem] left-0 right-0 z-20 ios-safe-bottom pointer-events-none pb-16">
       <Card className="max-w-xl mx-auto bg-surface-container-lowest/90 backdrop-blur-md border-border/30 rounded-2xl shadow-2xl pointer-events-auto animate-fade-in">
         <div className="flex items-center px-3 py-2 gap-3 min-h-[56px]">
           <div className="flex-1 min-w-0">
