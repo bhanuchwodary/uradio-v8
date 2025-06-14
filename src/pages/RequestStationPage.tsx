@@ -85,8 +85,8 @@ ${formData.description || "No additional description provided"}
 This request was submitted via uRadio app.
     `.trim();
 
-    // Create mailto link with updated email address
-    const mailtoLink = `mailto:request_uradio@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    // Create mailto link with corrected email address
+    const mailtoLink = `mailto:request.uradio@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     
     // Open email client
     window.location.href = mailtoLink;
