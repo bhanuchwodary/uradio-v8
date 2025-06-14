@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,9 +5,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/hooks/use-toast";
 import { Mail, Send } from "lucide-react";
+import {
+  Select,
+  SelectTrigger,
+  SelectContent,
+  SelectItem,
+  SelectValue,
+  SelectLabel,
+  SelectGroup,
+} from "@/components/ui/select";
 
 const RequestStationPage: React.FC = () => {
   const { toast } = useToast();
@@ -119,23 +126,26 @@ This request was submitted via uRadio app.
           
           <CardContent className="space-y-6">
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Request Type */}
-              <div className="space-y-3">
-                <Label className="text-base font-medium">Request Type</Label>
-                <RadioGroup
+              {/* Request Type (Dropdown) */}
+              <div className="space-y-2">
+                <Label className="text-base font-medium" htmlFor="requestType">
+                  Request Type
+                </Label>
+                <Select
                   value={formData.requestType}
                   onValueChange={(value) => handleInputChange("requestType", value)}
-                  className="flex gap-6"
                 >
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="add" id="add" />
-                    <Label htmlFor="add" className="cursor-pointer">Add New Station</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="modify" id="modify" />
-                    <Label htmlFor="modify" className="cursor-pointer">Modify Existing Station</Label>
-                  </div>
-                </RadioGroup>
+                  <SelectTrigger id="requestType" className="w-full">
+                    <SelectValue placeholder="Select request type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectLabel>Options</SelectLabel>
+                      <SelectItem value="add">Add New Station</SelectItem>
+                      <SelectItem value="modify">Modify Existing Station</SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
               </div>
 
               {/* Station Name */}
