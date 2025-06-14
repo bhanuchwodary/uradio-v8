@@ -117,7 +117,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
                   <img 
                     src={getLogoSrc()}
                     alt="uRadio" 
-                    className={`h-20 w-auto object-contain transition-opacity duration-100 ${logoLoaded ? 'opacity-100' : 'opacity-0'}`}
+                    className={`h-12 w-auto object-contain transition-opacity duration-100 ${logoLoaded ? 'opacity-100' : 'opacity-0'}`}
                   />
                 </div>
                 
