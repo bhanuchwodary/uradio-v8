@@ -1,4 +1,3 @@
-
 import { Track } from "@/types/track";
 
 export const addStationUrl = (
@@ -7,7 +6,8 @@ export const addStationUrl = (
   isFeatured: boolean = false, 
   isFavorite: boolean = false, 
   tracks: Track[],
-  language: string = ""
+  language: string = "",
+  inPlaylist: boolean = false // ADDED for inPlaylist control
 ): { tracks: Track[], result: { success: boolean, message: string } } => {
   if (!url) {
     console.error("Cannot add empty URL");
@@ -46,7 +46,8 @@ export const addStationUrl = (
       isFavorite: isFavorite !== undefined ? isFavorite : updatedTracks[existingIndex].isFavorite,
       // CRITICAL FIX: Ensure language is always preserved and not overwritten with empty string
       language: language || updatedTracks[existingIndex].language || "",
-      playTime: updatedTracks[existingIndex].playTime || 0
+      playTime: updatedTracks[existingIndex].playTime || 0,
+      inPlaylist: inPlaylist !== undefined ? inPlaylist : updatedTracks[existingIndex].inPlaylist || false
     };
     
     console.log("Updated station data with language:", updatedTracks[existingIndex].language);
@@ -61,7 +62,8 @@ export const addStationUrl = (
       playTime: 0,
       isFeatured: !!isFeatured,
       // CRITICAL FIX: Ensure language is always set and not lost
-      language: language || ""
+      language: language || "",
+      inPlaylist: !!inPlaylist // ADDED
     };
     
     console.log("New track being added with language:", newTrack.language);

@@ -14,8 +14,8 @@ const PlaylistPage: React.FC = () => {
   const [stationToDelete, setStationToDelete] = useState<Track | null>(null);
   const [showClearDialog, setShowClearDialog] = useState(false);
   const [isPageReady, setIsPageReady] = useState(false);
-  
-  const { 
+
+  const {
     tracks,
     currentIndex,
     isPlaying,
@@ -23,35 +23,12 @@ const PlaylistPage: React.FC = () => {
     setIsPlaying,
     editStationByValue,
     removeStationByValue,
-    toggleFavorite
+    toggleFavorite,
+    toggleInPlaylist // <- Make sure this exists
   } = useTrackStateContext();
-  
-  // Make sure playlist only shows FAVORITES and FEATURED (no user station unless favorite or featured)
-  const favoriteStations = tracks.filter(track => track.isFavorite);
-  const featuredStations = tracks.filter(track => track.isFeatured);
 
-  // userStations for playlist, only include favorites (not ALL user stations)
-  const userStations = tracks.filter(track => !track.isFeatured && track.isFavorite);
-
-  // Calculate popular (favorites or featured, in case you use this elsewhere)
-  const popularStations = [...tracks]
-    .filter(track => track.isFavorite || track.isFeatured)
-    .sort((a, b) => (b.playTime || 0) - (a.playTime || 0))
-    .slice(0, 8);
-
-  // Gather ALL stations shown in the playlist (just like in PlaylistContent)
-  // But strictly: unique combination of only favorite and featured
-  const allPlaylistStations = [
-    ...favoriteStations,
-    ...popularStations,
-    ...featuredStations
-  ];
-
-  // Remove duplicates based on URL
-  const uniquePlaylistStations = allPlaylistStations.filter(
-    (station, index, self) =>
-      index === self.findIndex(s => s.url === station.url)
-  );
+  // Playlist stations are those with inPlaylist === true
+  const playlistStations = tracks.filter(track => track.inPlaylist);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -73,7 +50,7 @@ const PlaylistPage: React.FC = () => {
       }
     }
   };
-  
+
   const handleEditStation = (station: Track) => {
     setEditingStation(station);
   };
@@ -81,21 +58,15 @@ const PlaylistPage: React.FC = () => {
   const handleConfirmDelete = (station: Track) => {
     setStationToDelete(station);
   };
-  
+
   const handleDeleteStation = () => {
     if (stationToDelete) {
-      const stationName = stationToDelete.name;
-      if (!stationToDelete.isFeatured) {
+      const idx = tracks.findIndex(t => t.url === stationToDelete.url);
+      if (idx !== -1) {
+        toggleInPlaylist(idx); // Remove from playlist, not from library
         toast({
-          title: "Can't remove user station from playlist",
-          description: `${stationName} will stay available in your stations`,
-          variant: "destructive"
-        });
-      } else {
-        removeStationByValue(stationToDelete);
-        toast({
-          title: "Station removed",
-          description: `${stationName} has been removed from your playlist`
+          title: "Station removed from playlist",
+          description: `${stationToDelete.name} was removed from your playlist.`
         });
       }
       setStationToDelete(null);
@@ -103,9 +74,16 @@ const PlaylistPage: React.FC = () => {
   };
 
   const handleToggleFavorite = (station: Track) => {
-    const index = tracks.findIndex(t => t.url === station.url);
-    if (index !== -1) {
-      toggleFavorite(index);
+    const idx = tracks.findIndex(t => t.url === station.url);
+    if (idx !== -1) {
+      toggleFavorite(idx);
+    }
+  };
+
+  const handleToggleInPlaylist = (station: Track) => {
+    const idx = tracks.findIndex(t => t.url === station.url);
+    if (idx !== -1) {
+      toggleInPlaylist(idx);
     }
   };
 
@@ -114,22 +92,21 @@ const PlaylistPage: React.FC = () => {
   };
 
   const confirmClearAll = () => {
-    // Unfavorite all stations that are favorites (this will clear playlist view)
-    let countUnfavorited = 0;
-
+    // Remove all stations from playlist view (set inPlaylist to false for all tracks)
+    let countCleared = 0;
     tracks.forEach((station, idx) => {
-      if (station.isFavorite) {
-        toggleFavorite(idx);
-        countUnfavorited++;
+      if (station.inPlaylist) {
+        toggleInPlaylist(idx);
+        countCleared++;
       }
     });
 
     toast({
       title: "Playlist cleared",
       description: `${
-        countUnfavorited === 0
+        countCleared === 0
           ? "No stations were"
-          : countUnfavorited + " station" + (countUnfavorited === 1 ? " was" : "s were")
+          : countCleared + " station" + (countCleared === 1 ? " was" : "s were")
       } removed from your playlist.`,
     });
 
@@ -151,10 +128,7 @@ const PlaylistPage: React.FC = () => {
     <AppLayout>
       <div className={`container mx-auto max-w-5xl space-y-6 transition-opacity duration-300 ease-in-out pt-4 ${isPageReady ? 'opacity-100' : 'opacity-0'}`}>
         <PlaylistContent
-          userStations={userStations}
-          featuredStations={featuredStations}
-          favoriteStations={favoriteStations}
-          popularStations={popularStations}
+          stations={playlistStations}
           currentIndex={currentIndex}
           currentTrack={currentTrack}
           isPlaying={isPlaying}
@@ -162,6 +136,7 @@ const PlaylistPage: React.FC = () => {
           onEditStation={handleEditStation}
           onConfirmDelete={handleConfirmDelete}
           onToggleFavorite={handleToggleFavorite}
+          onToggleInPlaylist={handleToggleInPlaylist}
           onClearAll={handleClearAll}
         />
         <PlaylistDialogs

@@ -8,7 +8,8 @@ import {
   editStationByValue as editByValue,
   removeStationByValue as removeByValue,
   removeTrackByIndex,
-  toggleTrackFavorite
+  toggleTrackFavorite,
+  toggleTrackInPlaylist
 } from "./index";
 
 export const useTrackOperations = (
@@ -172,10 +173,22 @@ export const useTrackOperations = (
     });
   }, [setTracks, tracksRef]);
 
+  // New: Toggle inPlaylist status
+  const toggleInPlaylist = useCallback((index: number) => {
+    setTracks(currentTracks => {
+      const updatedTracks = toggleTrackInPlaylist(currentTracks, index);
+      // ... force save and ref update ...
+      saveTracksToLocalStorage(updatedTracks);
+      if (tracksRef) tracksRef.current = updatedTracks;
+      return updatedTracks;
+    });
+  }, [setTracks, tracksRef]);
+
   return {
     addUrl,
     removeUrl,
     toggleFavorite,
+    toggleInPlaylist, // <- NEW
     editTrack,
     updatePlayTime,
     checkIfStationExists,
