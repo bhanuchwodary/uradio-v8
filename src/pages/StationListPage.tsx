@@ -29,7 +29,7 @@ const StationListPage: React.FC = () => {
 
   return (
     <AppLayout>
-      <div className="container mx-auto max-w-5xl space-y-6 pt-4 animate-fade-in">
+      <div className="container mx-auto max-w-5xl space-y-6 pt-4">
         <StationSearch searchTerm={searchTerm} onSearchTermChange={setSearchTerm} />
 
         <UserStations
