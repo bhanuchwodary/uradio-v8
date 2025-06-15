@@ -26,8 +26,8 @@ const PlaylistPage: React.FC = () => {
     toggleFavorite
   } = useTrackStateContext();
   
-  // Split stations into different categories - ensure proper filtering
-  const userStations = tracks.filter(track => !track.isFeatured);
+  // A user station appears in the playlist only if it has been played.
+  const userStations = tracks.filter(track => !track.isFeatured && (track.playTime && track.playTime > 0));
   const featuredStations = tracks.filter(track => track.isFeatured);
   const favoriteStations = tracks.filter(track => track.isFavorite);
   
