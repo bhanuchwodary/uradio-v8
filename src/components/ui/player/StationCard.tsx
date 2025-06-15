@@ -50,9 +50,9 @@ export const StationCard: React.FC<StationCardProps> = ({
   return (
     <Card 
       className={cn(
-        "relative overflow-hidden group transition-all duration-200 cursor-pointer h-full active:scale-95 border-0",
+        "station-card relative overflow-hidden group transition-all duration-200 cursor-pointer h-full active:scale-95 border-0",
         isSelected 
-          ? "bg-gradient-to-br from-primary/20 to-primary/10 shadow-lg ring-2 ring-primary/30" 
+          ? "station-card-selected bg-gradient-to-br from-primary/20 to-primary/10 shadow-lg ring-2 ring-primary/30" 
           : "bg-gradient-to-br from-background/80 to-background/60 hover:from-accent/40 hover:to-accent/20 shadow-md hover:shadow-lg backdrop-blur-sm"
       )}
       onClick={onPlay}
@@ -78,7 +78,7 @@ export const StationCard: React.FC<StationCardProps> = ({
         {/* Language Badge - Always visible with proper language */}
         <div className="flex items-center justify-center">
           <span className={cn(
-            "bg-gradient-to-r px-2 py-0.5 rounded-full text-[10px] font-medium border shadow-sm",
+            "language-badge bg-gradient-to-r px-2 py-0.5 rounded-full text-[10px] font-medium border shadow-sm",
             isSelected 
               ? "from-primary/20 to-primary/10 text-primary border-primary/30" 
               : "from-muted/60 to-muted/40 text-muted-foreground border-muted/50"

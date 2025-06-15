@@ -137,44 +137,45 @@
   }
 
   .metallic {
-    /* Black Metallic Theme */
-    --background: 20 20 22; /* #141416 */
-    --foreground: 220 220 220; /* #dcdcdc */
+    /* iTunes-inspired Metallic Theme */
+    --background: 240 240 243; /* #f0f0f3 */
+    --foreground: 20 20 20; /* #141414 */
     
-    --surface: 28 28 30; /* #1c1c1e */
-    --surface-dim: 20 20 22;
-    --surface-bright: 52 52 56;
-    --surface-container-lowest: 16 16 18; /* #101012 */
-    --surface-container-low: 28 28 30;
-    --surface-container: 36 36 40; /* #242428 */
-    --surface-container-high: 44 44 48; /* #2c2c30 */
-    --surface-container-highest: 52 52 56; /* #343438 */
+    --surface: 238 238 241; /* #eeef1 */
+    --surface-dim: 230 230 233;
+    --surface-bright: 245 245 248;
+    --surface-container-lowest: 255 255 255;
+    --surface-container-low: 240 240 243; /* #f0f0f3 */
+    --surface-container: 228 228 231; /* #e4e4e7 */
+    --surface-container-high: 218 218 221; /* #dadadd */
+    --surface-container-highest: 208 208 211; /* #d0d0d3 */
     
-    --on-surface: 220 220 220;
-    --on-surface-variant: 180 180 180;
+    --on-surface: 20 20 20;
+    --on-surface-variant: 80 80 85;
     
-    --primary: 176 190 197; /* #b0bec5 - Blue Grey 100 */
-    --primary-container: 55 71 79; /* #37474f - Blue Grey 800 */
-    --on-primary: 10 10 10;
-    --on-primary-container: 207 216 220; /* #cfd8dc - Blue Grey 50 */
+    /* Classic Apple Blue */
+    --primary: 59 130 246; /* #3b82f6 */
+    --primary-container: 191 219 254; /* #bfdbfe - for selection */
+    --on-primary: 255 255 255;
+    --on-primary-container: 30 64 175; /* #1e40af */
     
-    --secondary: 158 158 158; /* #9e9e9e - Grey 500 */
-    --secondary-container: 69 90 100; /* #455a64 - Blue Grey 700 */
-    --on-secondary: 10 10 10;
-    --on-secondary-container: 207 216 220; /* #cfd8dc */
+    --secondary: 107 114 128; /* #6b7280 */
+    --secondary-container: 229 231 235; /* #e5e7eb */
+    --on-secondary: 255 255 255;
+    --on-secondary-container: 55 65 81; /* #374151 */
     
-    --tertiary: 227 187 200;
-    --tertiary-container: 99 59 72;
-    --on-tertiary: 80 37 50;
-    --on-tertiary-container: 255 216 228;
+    --tertiary: 125 82 96;
+    --tertiary-container: 255 216 228;
+    --on-tertiary: 255 255 255;
+    --on-tertiary-container: 55 11 30;
     
-    --error: 255 180 171;
-    --error-container: 147 0 10;
-    --on-error: 105 0 5;
-    --on-error-container: 255 218 214;
+    --error: 186 26 26;
+    --error-container: 255 218 214;
+    --on-error: 255 255 255;
+    --on-error-container: 65 0 2;
     
-    --outline: 97 97 97; /* #616161 */
-    --outline-variant: 70 70 70; /* #464646 */
+    --outline: 156 163 175; /* #9ca3af */
+    --outline-variant: 190 190 190; /* #bebebe */
     
     /* Legacy compatibility */
     --card: var(--surface-container);
@@ -183,8 +184,8 @@
     --popover-foreground: var(--on-surface);
     --muted: var(--surface-container-high);
     --muted-foreground: var(--on-surface-variant);
-    --accent: var(--secondary-container);
-    --accent-foreground: var(--on-secondary-container);
+    --accent: var(--primary-container);
+    --accent-foreground: var(--on-primary-container);
     --destructive: var(--error);
     --destructive-foreground: var(--on-error);
     --border: var(--outline-variant);
@@ -319,6 +320,210 @@
   .surface-container-highest {
     @apply bg-[rgb(var(--surface-container-highest))];
   }
+
+  /* Enhanced transitions */
+  .material-transition {
+    @apply transition-all duration-300 ease-out;
+  }
+
+  .material-transition-fast {
+    @apply transition-all duration-200 ease-out;
+  }
+
+  .material-transition-slow {
+    @apply transition-all duration-500 ease-out;
+  }
+
+  /* Enhanced responsive utilities */
+  .responsive-container {
+    @apply w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+  
+  .responsive-padding {
+    @apply px-4 sm:px-6 md:px-8;
+  }
+  
+  .responsive-grid {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4;
+  }
+  
+  /* Enhanced iOS Safe Area Support */
+  .ios-safe-top {
+    padding-top: max(env(safe-area-inset-top), 1rem);
+  }
+  
+  .ios-safe-bottom {
+    padding-bottom: max(env(safe-area-inset-bottom), 1rem);
+  }
+  
+  .ios-safe-left {
+    padding-left: max(env(safe-area-inset-left), 0px);
+  }
+  
+  .ios-safe-right {
+    padding-right: max(env(safe-area-inset-right), 0px);
+  }
+  
+  .ios-touch-target {
+    min-height: 44px;
+    min-width: 44px;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .ios-vh-fix {
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+  }
+  
+  .ios-no-bounce {
+    overscroll-behavior: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .ios-smooth-scroll {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+
+  /* Enhanced glassmorphism effects */
+  .glass-surface {
+    @apply backdrop-blur-xl bg-surface-container/90 border-outline-variant/20;
+  }
+  
+  .glass-primary {
+    @apply backdrop-blur-xl bg-primary-container/80 border-primary/20;
+  }
+
+  /* Enhanced metallic theme contouring */
+  .metallic body,
+  .metallic h1,
+  .metallic h2,
+  .metallic h3,
+  .metallic p,
+  .metallic span,
+  .metallic a,
+  .metallic button,
+  .metallic label {
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
+  }
+
+  .metallic svg {
+    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.6));
+  }
+
+  .metallic .elevation-1 {
+    box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.5), 0px 1px 3px 1px rgba(0, 0, 0, 0.3);
+  }
+  .metallic .elevation-2 {
+    box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.5), 0px 2px 6px 2px rgba(0, 0, 0, 0.3);
+  }
+  .metallic .elevation-3 {
+    box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.5), 0px 4px 8px 3px rgba(0, 0, 0, 0.3);
+  }
+  .metallic .elevation-4 {
+    box-shadow: 0px 2px 3px 0px rgba(0, 0, 0, 0.5), 0px 6px 10px 4px rgba(0, 0, 0, 0.3);
+  }
+  .metallic .elevation-5 {
+    box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.5), 0px 8px 12px 6px rgba(0, 0, 0, 0.3);
+  }
+
+  /* ---- iTunes Metallic Theme Overrides ---- */
+
+  /* Main App Layout Background */
+  .metallic .bg-gradient-to-br.from-surface-container-lowest {
+    background-image: linear-gradient(to bottom, #E4E4E7, #D0D0D3);
+  }
+
+  /* Station Card Styles */
+  .metallic .station-card {
+     @apply border shadow-sm;
+     border-color: rgb(var(--outline-variant));
+     background-image: linear-gradient(to bottom, #F8F8F8, #E4E4E7);
+     background-color: transparent;
+  }
+  .metallic .station-card:hover {
+     background-image: linear-gradient(to bottom, #FFFFFF, #EAEAEA);
+  }
+  .metallic .station-card.station-card-selected {
+     @apply ring-2;
+     --tw-ring-color: rgb(var(--primary) / 0.7);
+     background-image: linear-gradient(to bottom, #D4E5FE, #AECBFA);
+     border-color: #8FB6F8;
+  }
+  .metallic .station-card .font-medium {
+    color: rgb(var(--foreground));
+  }
+  .metallic .station-card.station-card-selected .font-medium {
+    color: rgb(var(--on-primary-container));
+  }
+
+  /* Language Badge on Card */
+  .metallic .station-card .language-badge {
+    @apply bg-black/5 border-black/10 text-black/70;
+    background-image: none;
+  }
+  .metallic .station-card.station-card-selected .language-badge {
+    @apply bg-white/20 border-white/30 text-on-primary-container;
+    background-image: none;
+  }
+
+  /* Main Play/Pause Button on Card */
+  .metallic .station-card .bg-secondary\/80 { /* Targets default play button */
+    @apply bg-transparent text-black shadow-[0_1px_0.5px_rgba(255,255,255,0.6)_inset,_0_1px_1px_rgba(0,0,0,0.1)] border;
+    border-color: #a0a0a0;
+    background-image: linear-gradient(to bottom, #fdfdfd, #e2e2e2);
+  }
+  .metallic .station-card .bg-primary { /* Targets playing button */
+     @apply text-white shadow-[0_1px_0.5px_rgba(255,255,255,0.4)_inset,_0_1px_1px_rgba(0,0,0,0.1)] border;
+     border-color: #2a65c8;
+     background-image: linear-gradient(to bottom, #72a8ff, #377dff);
+  }
+
+  /* Button component overrides */
+  .metallic button.bg-primary {
+    @apply border text-white shadow-[0_1px_0.5px_rgba(255,255,255,0.4)_inset,_0_1px_1px_rgba(0,0,0,0.1)];
+    border-color: #2a65c8;
+    background-color: transparent;
+    background-image: linear-gradient(to bottom, #72a8ff, #377dff);
+  }
+  .metallic button.bg-primary:hover {
+    background-image: linear-gradient(to bottom, #86b6ff, #4a8aff);
+  }
+
+  .metallic button.bg-secondary {
+    @apply border text-black shadow-[0_1px_0.5px_rgba(255,255,255,0.6)_inset,_0_1px_1px_rgba(0,0,0,0.1)];
+    border-color: #a0a0a0;
+    background-color: transparent;
+    background-image: linear-gradient(to bottom, #fdfdfd, #e2e2e2);
+  }
+  .metallic button.bg-secondary:hover {
+    background-image: linear-gradient(to bottom, #ffffff, #e8e8e8);
+  }
+  
+  /* Remove old metallic theme effects */
+  .metallic body,
+  .metallic h1,
+  .metallic h2,
+  .metallic h3,
+  .metallic p,
+  .metallic span,
+  .metallic a,
+  .metallic button,
+  .metallic label {
+    text-shadow: none;
+  }
+  .metallic svg {
+    filter: drop-shadow(0 0.5px 0.5px rgba(0, 0, 0, 0.15));
+  }
+  .metallic .elevation-1,
+  .metallic .elevation-2,
+  .metallic .elevation-3,
+  .metallic .elevation-4,
+  .metallic .elevation-5 {
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1), 0 0 1px rgba(0,0,0,0.1);
+  }
+  /* ---- End of iTunes Theme Overrides ---- */
 
   /* Enhanced transitions */
   .material-transition {
