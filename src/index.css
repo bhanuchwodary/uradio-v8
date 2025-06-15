@@ -50,30 +50,22 @@
   --on-surface-variant: 71 85 105;
   --outline: 148 163 184;
   --outline-variant: 203 213 225;
-  
-  /* Enhanced primary colors */
+
+  /* ... keep existing code (rest of light theme colors) */
   --primary-container: 219 234 254;
   --on-primary: 255 255 255;
   --on-primary-container: 30 64 175;
-  
-  /* Enhanced secondary colors */
   --secondary-container: 241 245 249;
   --on-secondary: 15 23 42;
   --on-secondary-container: 51 65 85;
-  
-  /* Enhanced tertiary colors */
   --tertiary: 139 69 19;
   --tertiary-container: 254 243 199;
   --on-tertiary: 255 255 255;
   --on-tertiary-container: 120 53 15;
-  
-  /* Enhanced error colors */
   --error: 239 68 68;
   --error-container: 254 226 226;
   --on-error: 255 255 255;
   --on-error-container: 153 27 27;
-
-  /* Enhanced sidebar colors */
   --sidebar-background: 255 255 255;
   --sidebar-foreground: 15 23 42;
   --sidebar-primary: 59 130 246;
@@ -85,7 +77,7 @@
 }
 
 .dark {
-  /* Enhanced dark mode colors */
+  /* ... keep existing code (dark theme colors) */
   --background: 2 6 23;
   --foreground: 248 250 252;
   --card: 3 7 18;
@@ -105,8 +97,6 @@
   --border: 30 41 59;
   --input: 30 41 59;
   --ring: 96 165 250;
-
-  /* Material Design 3 Dark Surface Colors - Enhanced */
   --surface: 2 6 23;
   --surface-dim: 1 4 19;
   --surface-bright: 15 23 42;
@@ -119,30 +109,20 @@
   --on-surface-variant: 148 163 184;
   --outline: 71 85 105;
   --outline-variant: 30 41 59;
-  
-  /* Enhanced primary colors - dark */
   --primary-container: 30 58 138;
   --on-primary: 1 5 17;
   --on-primary-container: 219 234 254;
-  
-  /* Enhanced secondary colors - dark */
   --secondary-container: 30 41 59;
   --on-secondary: 248 250 252;
   --on-secondary-container: 203 213 225;
-  
-  /* Enhanced tertiary colors - dark */
   --tertiary: 251 191 36;
   --tertiary-container: 146 64 14;
   --on-tertiary: 1 5 17;
   --on-tertiary-container: 254 243 199;
-  
-  /* Enhanced error colors - dark */
   --error: 248 113 113;
   --error-container: 153 27 27;
   --on-error: 248 250 252;
   --on-error-container: 254 226 226;
-
-  /* Enhanced sidebar colors - dark */
   --sidebar-background: 3 7 18;
   --sidebar-foreground: 248 250 252;
   --sidebar-primary: 96 165 250;
@@ -151,6 +131,77 @@
   --sidebar-accent-foreground: 248 250 252;
   --sidebar-border: 30 41 59;
   --sidebar-ring: 96 165 250;
+}
+
+/* NEW: iTunes-style Metallic Theme with Contouring Effects */
+.metallic {
+  /* Base metallic colors with silver/chrome gradients */
+  --background: 240 242 245;
+  --foreground: 32 35 42;
+  --card: 248 250 252;
+  --card-foreground: 32 35 42;
+  --popover: 252 253 254;
+  --popover-foreground: 32 35 42;
+  --primary: 100 116 139;
+  --primary-foreground: 255 255 255;
+  --secondary: 226 232 240;
+  --secondary-foreground: 32 35 42;
+  --muted: 226 232 240;
+  --muted-foreground: 100 116 139;
+  --accent: 203 213 225;
+  --accent-foreground: 32 35 42;
+  --destructive: 220 38 127;
+  --destructive-foreground: 255 255 255;
+  --border: 203 213 225;
+  --input: 226 232 240;
+  --ring: 100 116 139;
+  --radius: 0.75rem;
+
+  /* Metallic surface colors with contouring */
+  --surface: 240 242 245;
+  --surface-dim: 226 232 240;
+  --surface-bright: 248 250 252;
+  --surface-container-lowest: 252 253 254;
+  --surface-container-low: 248 250 252;
+  --surface-container: 241 245 249;
+  --surface-container-high: 226 232 240;
+  --surface-container-highest: 203 213 225;
+  --on-surface: 32 35 42;
+  --on-surface-variant: 71 85 105;
+  --outline: 148 163 184;
+  --outline-variant: 203 213 225;
+  
+  /* Metallic primary colors */
+  --primary-container: 203 213 225;
+  --on-primary: 255 255 255;
+  --on-primary-container: 51 65 85;
+  
+  /* Metallic secondary colors */
+  --secondary-container: 226 232 240;
+  --on-secondary: 32 35 42;
+  --on-secondary-container: 71 85 105;
+  
+  /* Metallic accent colors */
+  --tertiary: 79 70 229;
+  --tertiary-container: 196 181 253;
+  --on-tertiary: 255 255 255;
+  --on-tertiary-container: 55 48 163;
+  
+  /* Metallic error colors */
+  --error: 220 38 127;
+  --error-container: 251 207 232;
+  --on-error: 255 255 255;
+  --on-error-container: 157 23 77;
+
+  /* Metallic sidebar colors */
+  --sidebar-background: 248 250 252;
+  --sidebar-foreground: 32 35 42;
+  --sidebar-primary: 100 116 139;
+  --sidebar-primary-foreground: 255 255 255;
+  --sidebar-accent: 226 232 240;
+  --sidebar-accent-foreground: 32 35 42;
+  --sidebar-border: 203 213 225;
+  --sidebar-ring: 100 116 139;
 }
 
 /* Enhanced base styles */
@@ -165,7 +216,109 @@ body {
   scroll-behavior: smooth;
 }
 
-/* Enhanced Material Design utilities */
+/* iTunes-style Metallic Contouring Effects */
+.metallic .glass-card,
+.metallic [data-theme="metallic"] .glass-card {
+  background: linear-gradient(145deg, rgba(248, 250, 252, 0.95), rgba(226, 232, 240, 0.95));
+  backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(203, 213, 225, 0.6);
+  box-shadow: 
+    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+    inset 0 -1px 0 rgba(148, 163, 184, 0.3),
+    0 4px 12px rgba(0, 0, 0, 0.1),
+    0 2px 4px rgba(0, 0, 0, 0.06);
+}
+
+/* Metallic Button Styling with Contouring */
+.metallic button,
+.metallic .btn-metallic {
+  background: linear-gradient(145deg, rgb(248, 250, 252), rgb(226, 232, 240));
+  border: 1px solid rgb(203, 213, 225);
+  box-shadow: 
+    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+    inset 0 -1px 0 rgba(148, 163, 184, 0.2),
+    0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.metallic button:hover,
+.metallic .btn-metallic:hover {
+  background: linear-gradient(145deg, rgb(241, 245, 249), rgb(203, 213, 225));
+  box-shadow: 
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    inset 0 -1px 0 rgba(148, 163, 184, 0.3),
+    0 4px 8px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
+}
+
+.metallic button:active,
+.metallic .btn-metallic:active {
+  background: linear-gradient(145deg, rgb(226, 232, 240), rgb(203, 213, 225));
+  box-shadow: 
+    inset 0 2px 4px rgba(148, 163, 184, 0.3),
+    0 1px 2px rgba(0, 0, 0, 0.1);
+  transform: translateY(0);
+}
+
+/* Metallic Card Styling */
+.metallic .card,
+.metallic [data-radix-collection-item] {
+  background: linear-gradient(145deg, rgba(248, 250, 252, 0.9), rgba(241, 245, 249, 0.9));
+  border: 1px solid rgba(203, 213, 225, 0.5);
+  box-shadow: 
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    inset 0 -1px 0 rgba(148, 163, 184, 0.2),
+    0 2px 8px rgba(0, 0, 0, 0.08);
+  backdrop-filter: blur(12px);
+}
+
+/* Metallic Input Styling */
+.metallic input,
+.metallic textarea,
+.metallic select {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(248, 250, 252, 0.9));
+  border: 1px solid rgb(203, 213, 225);
+  box-shadow: 
+    inset 0 1px 2px rgba(148, 163, 184, 0.1),
+    0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.metallic input:focus,
+.metallic textarea:focus,
+.metallic select:focus {
+  border-color: rgb(100, 116, 139);
+  box-shadow: 
+    inset 0 1px 2px rgba(148, 163, 184, 0.15),
+    0 0 0 2px rgba(100, 116, 139, 0.2),
+    0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+/* Smooth Page Transitions */
+.page-transition {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.page-enter {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.page-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.page-exit {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.page-exit-active {
+  opacity: 0;
+  transform: translateY(-20px);
+}
+
+/* ... keep existing code (rest of CSS utilities and animations) */
 .material-transition {
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -186,7 +339,6 @@ body {
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
-/* Enhanced ripple effect for buttons */
 .ink-ripple {
   position: relative;
   overflow: hidden;
@@ -208,7 +360,6 @@ body {
   }
 }
 
-/* Enhanced iOS safe area handling */
 .ios-safe-top {
   padding-top: env(safe-area-inset-top);
 }
@@ -240,12 +391,10 @@ body {
   -webkit-overflow-scrolling: touch;
 }
 
-/* Enhanced focus styles for accessibility */
 .focus-ring {
   @apply focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2;
 }
 
-/* Enhanced scrollbar styling */
 .custom-scrollbar {
   scrollbar-width: thin;
   scrollbar-color: rgb(var(--outline)) transparent;
@@ -269,7 +418,6 @@ body {
   background-color: rgb(var(--outline-variant));
 }
 
-/* Enhanced line clamping */
 .line-clamp-1 {
   overflow: hidden;
   display: -webkit-box;
@@ -291,14 +439,12 @@ body {
   -webkit-line-clamp: 3;
 }
 
-/* Enhanced backdrop blur support */
 @supports (backdrop-filter: blur(12px)) {
   .backdrop-blur-enhanced {
     backdrop-filter: blur(12px) saturate(180%);
   }
 }
 
-/* Enhanced animations for better user experience */
 @keyframes fadeInUp {
   from {
     opacity: 0;
@@ -344,7 +490,6 @@ body {
   animation: scaleIn 0.3s ease-out;
 }
 
-/* Enhanced glass morphism effects */
 .glass-card {
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(20px);
@@ -356,7 +501,6 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* Enhanced button hover states */
 .btn-hover-lift {
   transition: all 0.2s ease-out;
 }
@@ -366,7 +510,6 @@ body {
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
 }
 
-/* Enhanced loading states */
 @keyframes shimmer {
   0% {
     background-position: -200px 0;

@@ -45,17 +45,17 @@ export const StationCard: React.FC<StationCardProps> = ({
   // Ensure language is preserved from station data with proper fallback
   const stationLanguage = station?.language && station.language !== "" ? station.language : "Unknown";
 
-  console.log("StationCard rendering:", { name: station.name, language: stationLanguage, isPlaying, isSelected });
-
   return (
     <Card 
       className={cn(
-        "relative overflow-hidden group transition-all duration-300 cursor-pointer h-full border-0 shadow-sm hover:shadow-xl",
+        "relative overflow-hidden group cursor-pointer h-full border-0 shadow-sm",
         "bg-gradient-to-br backdrop-blur-sm transform-gpu will-change-transform",
+        // FIXED: Smooth transitions without blinking
+        "transition-all duration-500 ease-out",
         isSelected 
           ? "from-primary/15 to-primary/5 shadow-xl ring-2 ring-primary/40 scale-[1.02] z-10" 
           : "from-surface-container/80 to-surface-container-high/60 hover:from-primary/8 hover:to-primary/3 hover:scale-[1.01]",
-        "active:scale-[0.98] active:shadow-md transition-all duration-200 ease-out"
+        "active:scale-[0.98] active:shadow-md"
       )}
       onClick={onPlay}
     >
@@ -63,13 +63,15 @@ export const StationCard: React.FC<StationCardProps> = ({
       <div className="absolute inset-0 bg-gradient-to-t from-black/5 to-transparent pointer-events-none" />
       
       <div className="relative px-3 py-3 flex flex-col items-center space-y-2 h-full">
-        {/* Enhanced Play Button with better visual hierarchy */}
+        {/* Enhanced Play Button with stable animations */}
         <div 
           className={cn(
-            "w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 shadow-lg",
+            "w-12 h-12 rounded-full flex items-center justify-center shadow-lg",
             "border border-white/10 backdrop-blur-sm transform-gpu",
+            // FIXED: Stable transitions to prevent blinking
+            "transition-all duration-300 ease-out",
             isPlaying 
-              ? "bg-gradient-to-br from-primary to-primary/80 text-white shadow-primary/30 shadow-lg scale-110 animate-pulse" 
+              ? "bg-gradient-to-br from-primary to-primary/80 text-white shadow-primary/30 shadow-lg scale-110" 
               : "bg-gradient-to-br from-surface-container-high to-surface-container text-on-surface group-hover:from-primary/20 group-hover:to-primary/10 group-hover:scale-110 group-hover:shadow-primary/20",
             "group-active:scale-105 ring-0 group-hover:ring-2 group-hover:ring-primary/20"
           )}
@@ -98,7 +100,7 @@ export const StationCard: React.FC<StationCardProps> = ({
                 : "from-surface-container to-surface-container-high text-on-surface-variant border-outline-variant/30 group-hover:from-primary/10 group-hover:to-primary/5 group-hover:text-primary/80 group-hover:border-primary/20"
             )}>
               <div className={cn(
-                "w-1.5 h-1.5 rounded-full",
+                "w-1.5 h-1.5 rounded-full transition-colors duration-200",
                 isSelected ? "bg-primary" : "bg-on-surface-variant/50 group-hover:bg-primary/60"
               )} />
               {stationLanguage}

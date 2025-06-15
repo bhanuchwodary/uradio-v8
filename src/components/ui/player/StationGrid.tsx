@@ -68,16 +68,8 @@ export const StationGrid: React.FC<StationGridProps> = ({
         const isCurrentlyPlaying = station.url === currentTrackUrl && isPlaying;
         const isSelected = station.url === currentTrackUrl;
         
-        // Create a stable key based on station properties that matter for rendering
-        const stationKey = `${station.url}-${station.name}-${station.language || 'unknown'}`;
-        
-        console.log("Rendering station in grid:", { 
-          name: station.name, 
-          language: station.language,
-          key: stationKey,
-          isSelected,
-          isPlaying: isCurrentlyPlaying
-        });
+        // FIXED: Use stable URL-based key to prevent blinking/re-renders
+        const stationKey = station.url;
         
         return (
           <div 
