@@ -15,7 +15,11 @@ import Index from "@/pages/Index";
 const App = () => {
   return (
     <ErrorBoundary>
-      <ThemeProvider defaultTheme="dark" storageKey="uradio-theme">
+      <ThemeProvider
+        attribute="class"
+        defaultTheme="dark"
+        storageKey="uradio-theme"
+      >
         <TrackStateProvider>
           <Router>
             <Routes>
