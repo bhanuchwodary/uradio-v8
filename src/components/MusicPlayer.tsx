@@ -6,6 +6,7 @@ import PlayerTrackInfo from "@/components/music-player/PlayerTrackInfo";
 import PlayerSlider from "@/components/music-player/PlayerSlider";
 import PlayerControlsRow from "@/components/music-player/PlayerControlsRow";
 import PlayerVolume from "@/components/music-player/PlayerVolume";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { usePlayerCore } from "@/hooks/usePlayerCore";
 import { usePhoneCallHandling } from "@/hooks/usePhoneCallHandling";
 
@@ -48,6 +49,17 @@ const MusicPlayer: React.FC<MusicPlayerProps> = memo(({
   // Add phone call handling
   usePhoneCallHandling(isPlaying, setIsPlaying);
 
+  // Show loading spinner if no tracks are available
+  if (urls.length === 0) {
+    return (
+      <PlayerLayout>
+        <div className="flex items-center justify-center py-8">
+          <LoadingSpinner text="Loading stations..." />
+        </div>
+      </PlayerLayout>
+    );
+  }
+
   return (
     <PlayerLayout>
       <PlayerTrackInfo
@@ -66,7 +78,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = memo(({
         onPlayPause={handlePlayPause}
         onNext={handleNext}
         onPrev={handlePrevious}
-        disabled={urls.length === 0}
+        disabled={urls.length === 0 || loading}
       />
       <PlayerVolume
         volume={volume}

@@ -1,181 +1,100 @@
 
 import { Track } from "@/types/track";
 
-// Storage key for consistency
-const TRACKS_STORAGE_KEY = 'musicTracks';
-const STORAGE_VERSION = 'v4'; // Updated version for language fix
+const STORAGE_KEY = 'uradio-tracks';
 
-// Helper to create a structured storage format
-const createStorageStructure = (tracks: Track[]) => ({
-  version: STORAGE_VERSION,
-  tracks,
-  lastUpdated: new Date().toISOString()
-});
-
-export const loadTracksFromLocalStorage = (): Track[] => {
+export const testLocalStorage = (): boolean => {
   try {
-    console.log("Loading tracks from localStorage...");
-    const savedTracks = localStorage.getItem(TRACKS_STORAGE_KEY);
-    
-    if (!savedTracks) {
-      console.log("No saved tracks found in localStorage");
-      return [];
-    }
-    
-    let parsedData;
-    try {
-      parsedData = JSON.parse(savedTracks);
-    } catch (parseError) {
-      console.error("Failed to parse tracks from localStorage:", parseError);
-      return [];
-    }
-    
-    // Handle both legacy format (direct array) and new structured format
-    const tracksArray = parsedData.tracks ? parsedData.tracks : parsedData;
-    
-    if (!Array.isArray(tracksArray)) {
-      console.error("Loaded tracks is not an array:", tracksArray);
-      return [];
-    }
-    
-    console.log("Loaded tracks from localStorage:", tracksArray.length);
-    
-    // Deep clone to avoid reference issues
-    const deepClonedTracks = JSON.parse(JSON.stringify(tracksArray));
-    
-    // Ensure all required properties are present and properly typed
-    const validatedTracks = deepClonedTracks.filter((track: any) => {
-      const isValid = track && 
-                      typeof track.url === 'string' && 
-                      typeof track.name === 'string';
-      if (!isValid) {
-        console.error("Invalid track found:", track);
-      }
-      return isValid;
-    });
-    
-    // Fill in any missing optional properties with defaults - ALWAYS PRESERVE LANGUAGE
-    const normalizedTracks = validatedTracks.map((track: any) => ({
-      url: track.url,
-      name: track.name,
-      isFavorite: track.isFavorite !== undefined ? Boolean(track.isFavorite) : false,
-      playTime: track.playTime !== undefined ? Number(track.playTime) : 0,
-      isFeatured: track.isFeatured !== undefined ? Boolean(track.isFeatured) : false,
-      // CRITICAL: Always preserve language, don't default to empty string if it exists
-      language: track.language !== undefined && track.language !== null ? String(track.language) : "Unknown"
-    }));
-    
-    console.log("Normalized tracks with languages:", normalizedTracks.map(t => ({ name: t.name, language: t.language })));
-    
-    return normalizedTracks;
+    const testKey = 'test-storage';
+    localStorage.setItem(testKey, 'test');
+    localStorage.removeItem(testKey);
+    return true;
   } catch (error) {
-    console.error("Error loading saved tracks:", error);
-    return [];
+    console.warn('localStorage is not available:', error);
+    return false;
   }
 };
 
 export const saveTracksToLocalStorage = (tracks: Track[]): boolean => {
   try {
-    if (!tracks || !Array.isArray(tracks)) {
-      console.error("Cannot save invalid tracks to localStorage:", tracks);
-      return false;
-    }
-    
-    // Deep clone tracks to avoid reference issues and ensure language is preserved
-    const tracksToSave = tracks.map(track => ({
-      url: track.url,
-      name: track.name,
-      isFavorite: track.isFavorite || false,
-      playTime: track.playTime || 0,
-      isFeatured: track.isFeatured || false,
-      // CRITICAL: Always preserve language exactly as it is
-      language: track.language || "Unknown"
-    }));
-    
-    // Use the structured storage format
-    const storageData = createStorageStructure(tracksToSave);
-    
-    // Log before saving
-    console.log("About to save tracks with languages:", tracksToSave.map(t => ({ name: t.name, language: t.language })));
-    
-    localStorage.setItem(TRACKS_STORAGE_KEY, JSON.stringify(storageData));
-    
-    // Verify the save worked by attempting to read it back
-    try {
-      const savedJson = localStorage.getItem(TRACKS_STORAGE_KEY);
-      if (!savedJson) {
-        console.error("Failed to verify saved tracks - no data found");
-        return false;
-      }
-      
-      const parsedData = JSON.parse(savedJson);
-      const savedTracks = parsedData.tracks || [];
-      
-      console.log("Tracks saved to localStorage with languages:", savedTracks.map((t: any) => ({ name: t.name, language: t.language })));
-      
-      if (savedTracks.length !== tracks.length) {
-        console.warn("Track count mismatch after saving:", 
-                    {original: tracks.length, saved: savedTracks.length});
-        return false;
-      }
-      return true;
-    } catch (verifyError) {
-      console.error("Error verifying saved tracks:", verifyError);
-      return false;
-    }
-  } catch (error) {
-    console.error("Error saving tracks to localStorage:", error);
-    return false;
-  }
-};
-
-// Function to check if localStorage is working properly
-export const testLocalStorage = (): boolean => {
-  try {
-    const testKey = "test_storage";
-    localStorage.setItem(testKey, "test");
-    const result = localStorage.getItem(testKey);
-    localStorage.removeItem(testKey);
-    console.log("LocalStorage test result:", result === "test");
-    return result === "test";
-  } catch (error) {
-    console.error("LocalStorage is not available:", error);
-    return false;
-  }
-};
-
-// Function to verify localStorage is synchronized with app state
-export const verifySyncStatus = (tracks: Track[]): boolean => {
-  try {
-    const savedJson = localStorage.getItem(TRACKS_STORAGE_KEY);
-    if (!savedJson) return false;
-    
-    const parsedData = JSON.parse(savedJson);
-    const savedTracks = parsedData.tracks || parsedData;
-    
-    if (!Array.isArray(savedTracks)) return false;
-    if (savedTracks.length !== tracks.length) return false;
-    
-    // Check if first few tracks match (URL and name should be good enough)
-    for (let i = 0; i < Math.min(3, tracks.length); i++) {
-      if (savedTracks[i].url !== tracks[i].url || savedTracks[i].name !== tracks[i].name) {
-        return false;
-      }
-    }
-    
+    const tracksJson = JSON.stringify(tracks);
+    localStorage.setItem(STORAGE_KEY, tracksJson);
+    console.log(`Saved ${tracks.length} tracks to localStorage`);
     return true;
   } catch (error) {
-    console.error("Error verifying sync status:", error);
+    console.error('Failed to save tracks to localStorage:', error);
     return false;
   }
 };
 
-// Helper to clear all tracks (for debugging/testing)
-export const clearAllTracks = (): void => {
+export const loadTracksFromLocalStorage = (): Track[] => {
   try {
-    localStorage.removeItem(TRACKS_STORAGE_KEY);
-    console.log("All tracks cleared from localStorage");
+    console.log('Loading tracks from localStorage...');
+    const tracksJson = localStorage.getItem(STORAGE_KEY);
+    
+    if (!tracksJson) {
+      console.log('No saved tracks found in localStorage');
+      return [];
+    }
+    
+    const tracks = JSON.parse(tracksJson) as Track[];
+    
+    // Validate the loaded tracks structure
+    if (!Array.isArray(tracks)) {
+      console.warn('Invalid tracks data structure, resetting to empty array');
+      return [];
+    }
+    
+    // Validate each track has required properties
+    const validTracks = tracks.filter(track => 
+      track && 
+      typeof track.url === 'string' && 
+      typeof track.name === 'string'
+    );
+    
+    if (validTracks.length !== tracks.length) {
+      console.warn(`Filtered out ${tracks.length - validTracks.length} invalid tracks`);
+    }
+    
+    console.log(`Loaded ${validTracks.length} tracks from localStorage`);
+    return validTracks;
   } catch (error) {
-    console.error("Error clearing tracks:", error);
+    console.error('Failed to load tracks from localStorage:', error);
+    return [];
+  }
+};
+
+export const clearTracksFromLocalStorage = (): boolean => {
+  try {
+    localStorage.removeItem(STORAGE_KEY);
+    console.log('Cleared tracks from localStorage');
+    return true;
+  } catch (error) {
+    console.error('Failed to clear tracks from localStorage:', error);
+    return false;
+  }
+};
+
+// Simplified sync verification that doesn't cause loops
+export const verifySyncStatus = (currentTracks: Track[]): boolean => {
+  try {
+    const storedTracksJson = localStorage.getItem(STORAGE_KEY);
+    const currentTracksJson = JSON.stringify(currentTracks);
+    
+    // If no storage data and no current tracks, they're in sync
+    if (!storedTracksJson && currentTracks.length === 0) {
+      return true;
+    }
+    
+    // If no storage data but we have current tracks, not in sync
+    if (!storedTracksJson && currentTracks.length > 0) {
+      return false;
+    }
+    
+    // If storage data exists, compare JSON strings
+    return storedTracksJson === currentTracksJson;
+  } catch (error) {
+    console.error('Error verifying sync status:', error);
+    return false; // Assume not in sync if we can't verify
   }
 };

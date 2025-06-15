@@ -1,10 +1,9 @@
-
 import React, { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useTrackStateContext } from "@/context/TrackStateContext";
 import { Track } from "@/types/track";
 import { useToast } from "@/hooks/use-toast";
-import { Button } from "@/components/ui/button";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import PlaylistContent from "@/components/playlist/PlaylistContent";
 import PlaylistDialogs from "@/components/playlist/PlaylistDialogs";
 
@@ -129,6 +128,17 @@ const PlaylistPage: React.FC = () => {
     }
   };
 
+  // Show loading spinner while page is initializing
+  if (!isPageReady) {
+    return (
+      <AppLayout>
+        <div className="container mx-auto max-w-5xl flex items-center justify-center min-h-[60vh]">
+          <LoadingSpinner size="lg" text="Loading your playlist..." />
+        </div>
+      </AppLayout>
+    );
+  }
+
   return (
     <AppLayout>
       <div className={`container mx-auto max-w-5xl space-y-6 transition-opacity duration-300 ease-in-out pt-4 ${isPageReady ? 'opacity-100' : 'opacity-0'}`}>
@@ -142,10 +152,15 @@ const PlaylistPage: React.FC = () => {
           currentTrack={currentTrack}
           isPlaying={isPlaying}
           onSelectStation={handleSelectStation}
-          onEditStation={handleEditStation}
-          onConfirmDelete={handleConfirmDelete}
-          onToggleFavorite={handleToggleFavorite}
-          onClearAll={handleClearAll}
+          onEditStation={(station) => setEditingStation(station)}
+          onConfirmDelete={(station) => setStationToDelete(station)}
+          onToggleFavorite={(station) => {
+            const index = tracks.findIndex(t => t.url === station.url);
+            if (index !== -1) {
+              toggleFavorite(index);
+            }
+          }}
+          onClearAll={() => setShowClearDialog(true)}
         />
         
         {/* Dialogs Component */}
@@ -153,9 +168,28 @@ const PlaylistPage: React.FC = () => {
           editingStation={editingStation}
           stationToDelete={stationToDelete}
           onCloseEditDialog={() => setEditingStation(null)}
-          onSaveEdit={handleSaveEdit}
+          onSaveEdit={(data) => {
+            if (editingStation) {
+              editStationByValue(editingStation, data);
+              toast({
+                title: "Station updated",
+                description: `"${data.name}" has been updated`,
+              });
+              setEditingStation(null);
+            }
+          }}
           onCloseDeleteDialog={() => setStationToDelete(null)}
-          onConfirmDelete={handleDeleteStation}
+          onConfirmDelete={() => {
+            if (stationToDelete) {
+              const stationName = stationToDelete.name;
+              removeStationByValue(stationToDelete);
+              toast({
+                title: "Station removed",
+                description: `${stationName} has been removed from your playlist`
+              });
+              setStationToDelete(null);
+            }
+          }}
         />
         
         {/* Clear All Confirmation Dialog */}
@@ -170,7 +204,25 @@ const PlaylistPage: React.FC = () => {
                 <Button variant="outline" onClick={() => setShowClearDialog(false)}>
                   Cancel
                 </Button>
-                <Button variant="destructive" onClick={confirmClearAll}>
+                <Button 
+                  variant="destructive" 
+                  onClick={() => {
+                    // Get count before clearing
+                    const stationCount = tracks.length;
+                    
+                    // Remove ALL stations from the tracks array (this is the playlist)
+                    const allStationsToRemove = [...tracks];
+                    allStationsToRemove.forEach(station => {
+                      removeStationByValue(station);
+                    });
+                    
+                    toast({
+                      title: "Playlist cleared",
+                      description: `${stationCount} stations removed from your playlist`
+                    });
+                    setShowClearDialog(false);
+                  }}
+                >
                   Clear All
                 </Button>
               </div>
