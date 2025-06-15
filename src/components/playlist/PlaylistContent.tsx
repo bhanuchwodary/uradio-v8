@@ -94,7 +94,7 @@ const PlaylistContent: React.FC<PlaylistContentProps> = ({
         ) : (
           <div className="text-center p-8 bg-gradient-to-br from-background/50 to-background/30 rounded-xl border border-border/50">
             <p className="text-muted-foreground">Your playlist is empty</p>
-            <p className="text-sm text-muted-foreground/70 mt-1">Play a station or add one to your favorites to see it here.</p>
+            <p className="text-sm text-muted-foreground/70 mt-1">Add a station to your favorites to see it here.</p>
           </div>
         )}
       </CardContent>

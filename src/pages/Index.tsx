@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useTrackStateContext } from "@/context/TrackStateContext";
@@ -71,11 +70,27 @@ const Index: React.FC = () => {
 
   // Handle selecting a station from any list
   const handleSelectStation = (stationIndex: number, stationList: typeof tracks) => {
-    // Find the corresponding index in the full tracks list
-    const mainIndex = tracks.findIndex(t => t.url === stationList[stationIndex].url);
-    if (mainIndex !== -1) {
-      setCurrentIndex(mainIndex);
-      setIsPlaying(true);
+    const selectedStation = stationList[stationIndex];
+    // Find the full track object from the main tracks list to get the most up-to-date state
+    const trackInMainList = tracks.find(t => t.url === selectedStation.url);
+
+    // A station is playable only if it's in the playlist (favorite or has playtime)
+    if (trackInMainList && (trackInMainList.isFavorite || (trackInMainList.playTime && trackInMainList.playTime > 0))) {
+      const mainIndex = tracks.findIndex(t => t.url === selectedStation.url);
+      if (mainIndex !== -1) {
+        // If clicking on the currently playing station, toggle pause/play
+        if (mainIndex === currentIndex && isPlaying) {
+          setIsPlaying(false);
+        } else {
+          setCurrentIndex(mainIndex);
+          setIsPlaying(true);
+        }
+      }
+    } else {
+      toast({
+        title: "Not in Playlist",
+        description: "Please add this station to your favorites to play it.",
+      });
     }
   };
   
