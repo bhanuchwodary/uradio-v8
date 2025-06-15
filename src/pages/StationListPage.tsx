@@ -57,7 +57,7 @@ const StationListPage: React.FC = () => {
       station.url,
       station.name,
       station.isFeatured || false,
-      true, // Set isFavorite to true to add to playlist
+      station.isFavorite || false,
       station.language || ""
     );
 

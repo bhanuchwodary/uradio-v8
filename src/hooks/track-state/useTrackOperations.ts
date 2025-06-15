@@ -115,36 +115,19 @@ export const useTrackOperations = (
   
   const removeStationByValue = useCallback((station: Track) => {
     console.log("Removing station by value:", JSON.stringify(station));
-    
-    // Use tracksRef for most up-to-date value when available
-    const currentTracks = tracksRef?.current || tracks;
-    
-    const index = currentTracks.findIndex(
-      track => track.url === station.url && track.name === station.name
-    );
-    
-    if (index === -1) {
-      console.warn("Station to remove not found in tracks list:", station);
-      return;
-    }
-    
-    const { tracks: updatedTracks, newCurrentIndex, shouldStopPlaying } = 
-      removeTrackByIndex(currentTracks, index, currentIndex);
-    
-    setTracks([...updatedTracks]);
-    setCurrentIndex(newCurrentIndex);
-    
-    if (shouldStopPlaying) {
-      setIsPlaying(false);
-    }
-    
-    // Force an immediate save to localStorage
-    saveTracksToLocalStorage(updatedTracks);
-    
-    if (tracksRef) {
-      tracksRef.current = updatedTracks;
-    }
-  }, [tracks, currentIndex, setTracks, setCurrentIndex, setIsPlaying, tracksRef]);
+    setTracks(currentTracks => {
+      const updatedTracks = removeByValue(currentTracks, station);
+      
+      // Force an immediate save to localStorage
+      saveTracksToLocalStorage(updatedTracks);
+      
+      if (tracksRef) {
+        tracksRef.current = updatedTracks;
+      }
+      
+      return updatedTracks;
+    });
+  }, [setTracks, tracksRef]);
 
   const removeUrl = useCallback((index: number) => {
     console.log("Removing track at index:", index);
@@ -189,60 +172,6 @@ export const useTrackOperations = (
     });
   }, [setTracks, tracksRef]);
 
-  const removeFromPlaylist = useCallback((station: Track) => {
-    console.log("Removing station from playlist:", JSON.stringify(station));
-    setTracks(currentTracks => {
-      const updatedTracks = currentTracks.map(t => {
-        if (t.url === station.url) {
-          return { ...t, isFavorite: false, playTime: 0 };
-        }
-        return t;
-      });
-      
-      saveTracksToLocalStorage(updatedTracks);
-      
-      if (tracksRef) {
-        tracksRef.current = updatedTracks;
-      }
-      
-      return updatedTracks;
-    });
-  }, [setTracks, tracksRef]);
-
-  const clearPlaylist = useCallback(() => {
-    console.log("Clearing playlist");
-
-    const currentTracks = tracksRef?.current || tracks;
-    const currentTrack = currentTracks[currentIndex];
-
-    // Determine if the currently playing track is part of the playlist being cleared
-    const shouldStopPlaying =
-      currentTrack &&
-      (currentTrack.isFavorite || (currentTrack.playTime && currentTrack.playTime > 0));
-
-    setTracks(currentTracks => {
-      const updatedTracks = currentTracks.map(t => {
-        if (t.isFavorite || (t.playTime && t.playTime > 0)) {
-          return { ...t, isFavorite: false, playTime: 0 };
-        }
-        return t;
-      });
-
-      saveTracksToLocalStorage(updatedTracks);
-      
-      if (tracksRef) {
-        tracksRef.current = updatedTracks;
-      }
-      
-      return updatedTracks;
-    });
-
-    // If the playing track was cleared, stop playback.
-    if (shouldStopPlaying) {
-      setIsPlaying(false);
-    }
-  }, [tracks, currentIndex, setTracks, setIsPlaying, tracksRef]);
-
   return {
     addUrl,
     removeUrl,
@@ -251,8 +180,6 @@ export const useTrackOperations = (
     updatePlayTime,
     checkIfStationExists,
     editStationByValue,
-    removeStationByValue,
-    removeFromPlaylist,
-    clearPlaylist,
+    removeStationByValue
   };
 };

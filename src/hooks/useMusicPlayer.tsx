@@ -1,3 +1,4 @@
+
 import { useState, useRef } from "react";
 import { Track } from "@/types/track";
 import { globalAudioRef } from "@/components/music-player/audioInstance";
@@ -59,8 +60,7 @@ export const useMusicPlayer = (props?: UseMusicPlayerProps) => {
     urls,
     currentIndex,
     setCurrentIndex,
-    volume,
-    tracks
+    volume
   });
 
   // Handle HLS streaming

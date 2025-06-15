@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useTrackStateContext } from "@/context/TrackStateContext";
@@ -21,8 +22,7 @@ const PlaylistPage: React.FC = () => {
     setCurrentIndex,
     setIsPlaying,
     editStationByValue,
-    removeFromPlaylist,
-    clearPlaylist,
+    removeStationByValue,
     toggleFavorite
   } = useTrackStateContext();
   
@@ -73,13 +73,13 @@ const PlaylistPage: React.FC = () => {
     setStationToDelete(station);
   };
   
-  // Handle actual removal from playlist after confirmation
+  // Handle actual deletion after confirmation
   const handleDeleteStation = () => {
     if (stationToDelete) {
       const stationName = stationToDelete.name;
-      removeFromPlaylist(stationToDelete);
+      removeStationByValue(stationToDelete);
       toast({
-        title: "Station Removed",
+        title: "Station removed",
         description: `${stationName} has been removed from your playlist`
       });
       setStationToDelete(null);
@@ -99,11 +99,16 @@ const PlaylistPage: React.FC = () => {
     setShowClearDialog(true);
   };
   
-  // Function to clear all stations from the playlist view
+  // FIXED: Clear all function now properly removes ALL stations from the playlist only
   const confirmClearAll = () => {
-    const stationCount = tracks.filter(t => t.isFavorite || (t.playTime && t.playTime > 0)).length;
+    // Get count before clearing
+    const stationCount = tracks.length;
     
-    clearPlaylist();
+    // Remove ALL stations from the tracks array (this is the playlist)
+    const allStationsToRemove = [...tracks];
+    allStationsToRemove.forEach(station => {
+      removeStationByValue(station);
+    });
     
     toast({
       title: "Playlist cleared",
@@ -166,7 +171,7 @@ const PlaylistPage: React.FC = () => {
                   Cancel
                 </Button>
                 <Button variant="destructive" onClick={confirmClearAll}>
-                  Clear Playlist
+                  Clear All
                 </Button>
               </div>
             </div>
