@@ -24,8 +24,8 @@ const AddStationPage: React.FC = () => {
           ? `${name} has been added to your stations.`
           : "The station has been added to your stations.",
       });
-      // Navigate to the playlist page after successful add
-      setTimeout(() => navigate("/playlist"), 500);
+      // Navigate to the station list page after successful add
+      setTimeout(() => navigate("/station-list"), 500);
       return true;
     } else {
       toast({
@@ -48,8 +48,8 @@ const AddStationPage: React.FC = () => {
         title: "Stations Imported",
         description: `${addedStations.length} stations have been imported.`,
       });
-      // Navigate to the playlist page after successful import
-      setTimeout(() => navigate("/playlist"), 500);
+      // Navigate to the station list page after successful import
+      setTimeout(() => navigate("/station-list"), 500);
     } else {
       toast({
         title: "Import Failed",
