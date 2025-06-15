@@ -211,6 +211,15 @@ export const useTrackOperations = (
 
   const clearPlaylist = useCallback(() => {
     console.log("Clearing playlist");
+
+    const currentTracks = tracksRef?.current || tracks;
+    const currentTrack = currentTracks[currentIndex];
+
+    // Determine if the currently playing track is part of the playlist being cleared
+    const shouldStopPlaying =
+      currentTrack &&
+      (currentTrack.isFavorite || (currentTrack.playTime && currentTrack.playTime > 0));
+
     setTracks(currentTracks => {
       const updatedTracks = currentTracks.map(t => {
         if (t.isFavorite || (t.playTime && t.playTime > 0)) {
@@ -227,7 +236,12 @@ export const useTrackOperations = (
       
       return updatedTracks;
     });
-  }, [setTracks, tracksRef]);
+
+    // If the playing track was cleared, stop playback.
+    if (shouldStopPlaying) {
+      setIsPlaying(false);
+    }
+  }, [tracks, currentIndex, setTracks, setIsPlaying, tracksRef]);
 
   return {
     addUrl,
