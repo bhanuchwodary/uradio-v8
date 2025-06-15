@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,7 +21,9 @@ const StationListPage: React.FC = () => {
     addUrl,
     editStationByValue,
     removeStationByValue,
-    getUserStations
+    getUserStations,
+    setCurrentIndex,
+    setIsPlaying,
   } = useTrackStateContext();
 
   // Get user stations
@@ -51,12 +54,13 @@ const StationListPage: React.FC = () => {
     stationsByLanguage[language].push(station);
   });
 
-  // Add station to playlist handler
+  // Add station to library handler
   const handleAddStation = (station: Track) => {
+    // When adding a station from featured, it becomes a user station.
     const result = addUrl(
       station.url,
       station.name,
-      station.isFeatured || false,
+      false, // It is no longer "featured" but a user station
       station.isFavorite || false,
       station.language || ""
     );
@@ -64,7 +68,7 @@ const StationListPage: React.FC = () => {
     if (result.success) {
       toast({
         title: "Station Added",
-        description: `${station.name} has been added to your playlist`,
+        description: `${station.name} has been added to your stations.`,
       });
     } else {
       toast({
@@ -72,6 +76,19 @@ const StationListPage: React.FC = () => {
         description: result.message || "Error adding station",
         variant: "destructive"
       });
+    }
+  };
+
+  // Handler to play a station from the user's library
+  const handlePlayUserStation = (station: Track) => {
+    const mainIndex = tracks.findIndex(t => t.url === station.url);
+    if (mainIndex !== -1) {
+      if (mainIndex === currentIndex && isPlaying) {
+        setIsPlaying(false);
+      } else {
+        setCurrentIndex(mainIndex);
+        setIsPlaying(true);
+      }
     }
   };
 
@@ -118,10 +135,10 @@ const StationListPage: React.FC = () => {
                 currentIndex={currentIndex}
                 currentTrackUrl={currentTrack?.url}
                 isPlaying={isPlaying}
-                onSelectStation={(index) => handleAddStation(userStations[index])}
+                onSelectStation={(index) => handlePlayUserStation(userStations[index])}
                 onEditStation={handleEditStation}
                 onDeleteStation={handleDeleteStation}
-                actionIcon="add"
+                actionIcon="play"
               />
             ) : (
               <div className="text-center p-8 bg-gradient-to-br from-background/50 to-background/30 rounded-xl border border-border/50 flex flex-col items-center justify-center gap-4">
