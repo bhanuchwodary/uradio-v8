@@ -28,11 +28,16 @@ const PlaylistPage: React.FC = () => {
   
   // A user station appears in the playlist only if it has been played.
   const userStations = tracks.filter(track => !track.isFeatured && (track.playTime && track.playTime > 0));
-  const featuredStations = tracks.filter(track => track.isFeatured);
-  const favoriteStations = tracks.filter(track => track.isFavorite);
   
-  // Calculate popular stations based on play time
+  // Featured stations are always shown as suggestions.
+  const featuredStations = tracks.filter(track => track.isFeatured);
+
+  // Favorite stations are only shown if they have been played.
+  const favoriteStations = tracks.filter(track => track.isFavorite && (track.playTime || 0) > 0);
+  
+  // Calculate popular stations based on play time, only including stations that have been played.
   const popularStations = [...tracks]
+    .filter(track => (track.playTime || 0) > 0)
     .sort((a, b) => (b.playTime || 0) - (a.playTime || 0))
     .slice(0, 8);
   
