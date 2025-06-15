@@ -10,6 +10,7 @@ import AddStationPage from "@/pages/AddStationPage";
 import NotFound from "@/pages/NotFound";
 import StationListPage from "@/pages/StationListPage";
 import RequestStationPage from "@/pages/RequestStationPage";
+import Index from "@/pages/Index";
 
 const App = () => {
   return (
@@ -18,7 +19,7 @@ const App = () => {
         <TrackStateProvider>
           <Router>
             <Routes>
-              <Route path="/" element={<PlaylistPage />} />
+              <Route path="/" element={<Index />} />
               <Route path="/playlist" element={<PlaylistPage />} />
               <Route path="/add" element={<AddStationPage />} />
               <Route path="/add-station" element={<AddStationPage />} />
