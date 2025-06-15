@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -128,7 +127,7 @@ const StationListPage: React.FC = () => {
       <div className="container mx-auto max-w-5xl space-y-6 pt-4">
         {/* Search Bar */}
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground z-10" />
           <Input
             type="search"
             placeholder="Search stations by name or language..."
