@@ -75,7 +75,6 @@ export const StationGrid: React.FC<StationGridProps> = ({
           <div 
             key={stationKey}
             className="animate-scale-in"
-            style={{ animationDelay: `${index * 50}ms` }}
           >
             <StationCard
               station={station}
