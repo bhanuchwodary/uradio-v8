@@ -12,36 +12,6 @@ export const TrackStateProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const [initialized, setInitialized] = useState(false);
   const renderCount = useRef(0);
   
-  // Effect to update play time
-  useEffect(() => {
-    const PLAY_TIME_UPDATE_INTERVAL = 5000; // 5 seconds
-    const SECONDS_PER_INTERVAL = 5;
-
-    let intervalId: NodeJS.Timeout | null = null;
-
-    if (trackState.isPlaying && trackState.currentIndex > -1) {
-      intervalId = setInterval(() => {
-        if (
-          trackState.tracks[trackState.currentIndex] &&
-          typeof trackState.updatePlayTime === "function"
-        ) {
-          trackState.updatePlayTime(trackState.currentIndex, SECONDS_PER_INTERVAL);
-        }
-      }, PLAY_TIME_UPDATE_INTERVAL);
-    }
-
-    return () => {
-      if (intervalId) {
-        clearInterval(intervalId);
-      }
-    };
-  }, [
-    trackState.isPlaying,
-    trackState.currentIndex,
-    trackState.updatePlayTime,
-    trackState.tracks,
-  ]);
-  
   // Enhanced logging to track state changes across renders, but only in development
   useEffect(() => {
     if (process.env.NODE_ENV === 'development') {
