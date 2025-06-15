@@ -1,20 +1,16 @@
-
 import React, { useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { EnhancedStationGrid } from "@/components/ui/player/EnhancedStationGrid";
-import { EmptyState } from "@/components/ui/EmptyState";
+import { StationGrid } from "@/components/ui/player/StationGrid";
 import { useTrackStateContext } from "@/context/TrackStateContext";
 import { useToast } from "@/hooks/use-toast";
 import { getStations } from "@/data/featuredStationsLoader";
 import { Track } from "@/types/track";
 import EditStationDialog from "@/components/EditStationDialog";
-import { ListMusic, Radio, Plus } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { ListMusic } from "lucide-react";
 
 const StationListPage: React.FC = () => {
   const { toast } = useToast();
-  const navigate = useNavigate();
   const [editingStation, setEditingStation] = useState<Track | null>(null);
 
   const {
@@ -108,17 +104,16 @@ const StationListPage: React.FC = () => {
   return (
     <AppLayout>
       <div className="container mx-auto max-w-5xl space-y-6 pt-4">
-        {/* My Stations Section */}
-        <Card className="bg-gradient-to-br from-surface-container/60 to-surface-container-low/60 backdrop-blur-md border-outline-variant/20 elevation-2">
-          <CardHeader className="pb-4 px-4 sm:px-6">
-            <CardTitle className="text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent flex items-center gap-2">
-              <ListMusic className="h-5 w-5 text-primary" />
-              My Stations
-            </CardTitle>
+        {/* REMOVED the Station List heading here */}
+
+        {/* FIXED User Stations to match playlist design */}
+        <Card className="bg-gradient-to-br from-background/40 to-background/20 backdrop-blur-md border-border/30 elevation-2">
+          <CardHeader className="pb-3 px-3 sm:px-6">
+            <CardTitle className="text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">My Stations</CardTitle>
           </CardHeader>
-          <CardContent className="px-4 sm:px-6">
+          <CardContent className="px-3 sm:px-6">
             {userStations.length > 0 ? (
-              <EnhancedStationGrid
+              <StationGrid
                 stations={userStations}
                 currentIndex={currentIndex}
                 currentTrackUrl={currentTrack?.url}
@@ -129,39 +124,31 @@ const StationListPage: React.FC = () => {
                 actionIcon="add"
               />
             ) : (
-              <EmptyState
-                icon={ListMusic}
-                title="No stations added yet"
-                description="Start building your collection by adding your favorite radio stations"
-                actionLabel="Add Your First Station"
-                onAction={() => navigate("/add")}
-                variant="minimal"
-              />
+              <div className="text-center p-8 bg-gradient-to-br from-background/50 to-background/30 rounded-xl border border-border/50 flex flex-col items-center justify-center gap-4">
+                <ListMusic className="h-12 w-12 text-muted-foreground/50" />
+                <div>
+                  <p className="text-muted-foreground font-semibold">No stations added yet</p>
+                  <p className="text-sm text-muted-foreground/70 mt-1">Add stations to build your collection</p>
+                </div>
+              </div>
             )}
           </CardContent>
         </Card>
 
-        {/* Featured Stations by Language */}
+        {/* FIXED Featured Stations to match playlist design */}
         {Object.entries(stationsByLanguage).map(([language, stations]) => (
-          <Card 
-            key={language} 
-            className="bg-gradient-to-br from-surface-container/60 to-surface-container-low/60 backdrop-blur-md border-outline-variant/20 elevation-2"
-          >
-            <CardHeader className="pb-4 px-4 sm:px-6">
-              <CardTitle className="text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent flex items-center gap-2">
-                <Radio className="h-5 w-5 text-primary" />
-                Featured {language} Stations
-              </CardTitle>
+          <Card key={language} className="bg-gradient-to-br from-background/40 to-background/20 backdrop-blur-md border-border/30 elevation-2">
+            <CardHeader className="pb-3 px-3 sm:px-6">
+              <CardTitle className="text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">Featured {language} Stations</CardTitle>
             </CardHeader>
-            <CardContent className="px-4 sm:px-6">
-              <EnhancedStationGrid
+            <CardContent className="px-3 sm:px-6">
+              <StationGrid
                 stations={stations}
                 currentIndex={currentIndex}
                 currentTrackUrl={currentTrack?.url}
                 isPlaying={isPlaying}
                 onSelectStation={(index) => handleAddStation(stations[index])}
                 actionIcon="add"
-                compact={true}
               />
             </CardContent>
           </Card>
