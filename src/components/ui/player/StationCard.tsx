@@ -1,11 +1,10 @@
 
 import React from "react";
 import { Card } from "@/components/ui/card";
-import { Play, Pause, Edit, Trash2, Star, Plus, Award } from "lucide-react";
+import { Play, Pause, Edit, Trash2, Star, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Track } from "@/types/track";
 import { cn } from "@/lib/utils";
-import Waveform from "./Waveform";
 
 interface StationCardProps {
   station: Track;
@@ -40,11 +39,7 @@ export const StationCard: React.FC<StationCardProps> = ({
       return <Plus className="w-5 h-5" />;
     }
     
-    if (isPlaying) {
-      return <Waveform />;
-    }
-    
-    return <Play className="w-5 h-5 ml-0.5" />;
+    return isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 ml-0.5" />;
   };
 
   // Ensure language is preserved from station data with proper fallback
@@ -62,13 +57,6 @@ export const StationCard: React.FC<StationCardProps> = ({
       )}
       onClick={onPlay}
     >
-      {station.isFeatured && (
-        <div className="absolute top-1.5 right-1.5 z-10">
-          <div className="flex items-center justify-center h-5 w-5 rounded-full bg-tertiary/80 text-on-tertiary shadow-md backdrop-blur-sm">
-            <Award className="w-3 h-3" />
-          </div>
-        </div>
-      )}
       <div className="px-2 py-2.5 flex flex-col items-center space-y-1.5 h-full">
         {/* Play Button - Remove animate-pulse to stop blinking */}
         <div 
