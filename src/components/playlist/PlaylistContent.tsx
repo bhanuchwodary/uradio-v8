@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -34,14 +35,19 @@ const PlaylistContent: React.FC<PlaylistContentProps> = ({
   onToggleFavorite,
   onClearAll
 }) => {
-  // FIXED: Combine all stations into one unified playlist (stations that are actually in the playlist)
-  const uniquePlaylistStations = [
+  // Combine all stations and filter for what should be in the playlist
+  const allStations = [
     ...favoriteStations,
     ...popularStations,
-    ...userStations.filter(station => !station.isFeatured),
+    ...userStations,
     ...featuredStations
   ].filter((station, index, self) => 
     index === self.findIndex(s => s.url === station.url)
+  );
+
+  // A station is in the playlist if it's a favorite or has been played.
+  const playlistStations = allStations.filter(
+    station => station.isFavorite || (station.playTime && station.playTime > 0)
   );
 
   return (
@@ -51,8 +57,8 @@ const PlaylistContent: React.FC<PlaylistContentProps> = ({
           <CardTitle className="text-xl font-bold text-on-surface">
             My Playlist
           </CardTitle>
-          {/* FIXED: Only show clear all if there are stations in the playlist */}
-          {uniquePlaylistStations.length > 0 && onClearAll && (
+          {/* Only show clear all if there are stations in the playlist */}
+          {playlistStations.length > 0 && onClearAll && (
             <Button
               variant="destructive"
               size="sm"
@@ -74,13 +80,13 @@ const PlaylistContent: React.FC<PlaylistContentProps> = ({
         </div>
       </CardHeader>
       <CardContent className="px-3 sm:px-6 space-y-6">
-        {uniquePlaylistStations.length > 0 ? (
+        {playlistStations.length > 0 ? (
           <StationGrid
-            stations={uniquePlaylistStations}
+            stations={playlistStations}
             currentIndex={currentIndex}
             currentTrackUrl={currentTrack?.url}
             isPlaying={isPlaying}
-            onSelectStation={(index) => onSelectStation(index, uniquePlaylistStations)}
+            onSelectStation={(index) => onSelectStation(index, playlistStations)}
             onEditStation={onEditStation}
             onDeleteStation={onConfirmDelete}
             onToggleFavorite={onToggleFavorite}
@@ -88,7 +94,7 @@ const PlaylistContent: React.FC<PlaylistContentProps> = ({
         ) : (
           <div className="text-center p-8 bg-gradient-to-br from-background/50 to-background/30 rounded-xl border border-border/50">
             <p className="text-muted-foreground">Your playlist is empty</p>
-            <p className="text-sm text-muted-foreground/70 mt-1">Add stations to build your collection</p>
+            <p className="text-sm text-muted-foreground/70 mt-1">Play a station or add one to your favorites to see it here.</p>
           </div>
         )}
       </CardContent>

@@ -1,4 +1,3 @@
-
 import React from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -15,7 +14,7 @@ const AddStationPage: React.FC = () => {
   const navigate = useNavigate();
 
   const handleAddUrl = (url: string, name: string, language: string) => {
-    const result = addUrl(url, name, false, false, language);
+    const result = addUrl(url, name, false, true, language); // Set isFavorite to true
     
     if (result.success) {
       toast({
@@ -39,7 +38,7 @@ const AddStationPage: React.FC = () => {
   
   const handleImport = (stations: Array<{ name: string; url: string; language?: string }>) => {
     const addedStations = stations.filter(station => {
-      const result = addUrl(station.url, station.name, false, false, station.language);
+      const result = addUrl(station.url, station.name, false, true, station.language); // Set isFavorite to true
       return result.success;
     });
     

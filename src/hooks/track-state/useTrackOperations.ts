@@ -172,6 +172,46 @@ export const useTrackOperations = (
     });
   }, [setTracks, tracksRef]);
 
+  const removeFromPlaylist = useCallback((station: Track) => {
+    console.log("Removing station from playlist:", JSON.stringify(station));
+    setTracks(currentTracks => {
+      const updatedTracks = currentTracks.map(t => {
+        if (t.url === station.url) {
+          return { ...t, isFavorite: false, playTime: 0 };
+        }
+        return t;
+      });
+      
+      saveTracksToLocalStorage(updatedTracks);
+      
+      if (tracksRef) {
+        tracksRef.current = updatedTracks;
+      }
+      
+      return updatedTracks;
+    });
+  }, [setTracks, tracksRef]);
+
+  const clearPlaylist = useCallback(() => {
+    console.log("Clearing playlist");
+    setTracks(currentTracks => {
+      const updatedTracks = currentTracks.map(t => {
+        if (t.isFavorite || (t.playTime && t.playTime > 0)) {
+          return { ...t, isFavorite: false, playTime: 0 };
+        }
+        return t;
+      });
+
+      saveTracksToLocalStorage(updatedTracks);
+      
+      if (tracksRef) {
+        tracksRef.current = updatedTracks;
+      }
+      
+      return updatedTracks;
+    });
+  }, [setTracks, tracksRef]);
+
   return {
     addUrl,
     removeUrl,
@@ -180,6 +220,8 @@ export const useTrackOperations = (
     updatePlayTime,
     checkIfStationExists,
     editStationByValue,
-    removeStationByValue
+    removeStationByValue,
+    removeFromPlaylist,
+    clearPlaylist,
   };
 };
