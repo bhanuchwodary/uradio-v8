@@ -1,4 +1,3 @@
-
 import { useTrackStateCore } from "./track-state/useTrackStateCore";
 import { useTrackOperations } from "./track-state/useTrackOperations";
 import { useTrackManagement } from "./track-state/useTrackManagement";
@@ -57,12 +56,6 @@ export const useTrackState = (): TrackStateResult => {
     getTopStations: management.getPopularStations,
     // Map stationExists to checkIfStationExists as required by TrackStateResult
     checkIfStationExists: management.stationExists,
-    // Include other operations from operations interface
-    editStationByValue: operations.editStationByValue,
-    removeStationByValue: operations.removeStationByValue,
-    // Add new playlist functions
-    removeFromPlaylist: operations.removeFromPlaylist,
-    clearPlaylist: operations.clearPlaylist,
     ...debug
   };
 };
