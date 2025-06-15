@@ -50,61 +50,81 @@ export const StationCard: React.FC<StationCardProps> = ({
   return (
     <Card 
       className={cn(
-        "relative overflow-hidden group transition-all duration-200 cursor-pointer h-full active:scale-95 border-0",
+        "relative overflow-hidden group transition-all duration-300 cursor-pointer h-full border-0 shadow-sm hover:shadow-xl",
+        "bg-gradient-to-br backdrop-blur-sm transform-gpu will-change-transform",
         isSelected 
-          ? "bg-gradient-to-br from-primary/20 to-primary/10 shadow-lg ring-2 ring-primary/30" 
-          : "bg-gradient-to-br from-background/80 to-background/60 hover:from-accent/40 hover:to-accent/20 shadow-md hover:shadow-lg backdrop-blur-sm"
+          ? "from-primary/15 to-primary/5 shadow-xl ring-2 ring-primary/40 scale-[1.02] z-10" 
+          : "from-surface-container/80 to-surface-container-high/60 hover:from-primary/8 hover:to-primary/3 hover:scale-[1.01]",
+        "active:scale-[0.98] active:shadow-md transition-all duration-200 ease-out"
       )}
       onClick={onPlay}
     >
-      <div className="px-2 py-2.5 flex flex-col items-center space-y-1.5 h-full">
-        {/* Play Button - Remove animate-pulse to stop blinking */}
+      {/* Subtle gradient overlay for depth */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/5 to-transparent pointer-events-none" />
+      
+      <div className="relative px-3 py-3 flex flex-col items-center space-y-2 h-full">
+        {/* Enhanced Play Button with better visual hierarchy */}
         <div 
           className={cn(
-            "w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 shadow-sm",
+            "w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 shadow-lg",
+            "border border-white/10 backdrop-blur-sm transform-gpu",
             isPlaying 
-              ? "bg-primary text-primary-foreground shadow-md scale-105" 
-              : "bg-secondary/80 text-secondary-foreground group-hover:bg-primary/30 group-hover:scale-105 group-active:scale-95"
+              ? "bg-gradient-to-br from-primary to-primary/80 text-white shadow-primary/30 shadow-lg scale-110 animate-pulse" 
+              : "bg-gradient-to-br from-surface-container-high to-surface-container text-on-surface group-hover:from-primary/20 group-hover:to-primary/10 group-hover:scale-110 group-hover:shadow-primary/20",
+            "group-active:scale-105 ring-0 group-hover:ring-2 group-hover:ring-primary/20"
           )}
         >
           {renderActionIcon()}
         </div>
         
-        {/* Station Name */}
-        <h3 className="font-medium text-xs line-clamp-2 w-full text-center leading-tight px-1 min-h-[2rem] flex items-center justify-center">
-          {station.name}
-        </h3>
-        
-        {/* Language Badge - Always visible with proper language */}
-        <div className="flex items-center justify-center">
-          <span className={cn(
-            "bg-gradient-to-r px-2 py-0.5 rounded-full text-[10px] font-medium border shadow-sm",
-            isSelected 
-              ? "from-primary/20 to-primary/10 text-primary border-primary/30" 
-              : "from-muted/60 to-muted/40 text-muted-foreground border-muted/50"
+        {/* Enhanced Station Name with better typography */}
+        <div className="w-full text-center space-y-1">
+          <h3 className={cn(
+            "font-semibold text-sm line-clamp-2 leading-tight px-1 min-h-[2.5rem] flex items-center justify-center",
+            "text-on-surface transition-colors duration-200",
+            isSelected ? "text-primary" : "group-hover:text-primary/80"
           )}>
-            {stationLanguage}
-          </span>
+            {station.name}
+          </h3>
+          
+          {/* Enhanced Language Badge with better visual treatment */}
+          <div className="flex items-center justify-center">
+            <span className={cn(
+              "inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium",
+              "border shadow-sm backdrop-blur-sm transition-all duration-200",
+              "bg-gradient-to-r",
+              isSelected 
+                ? "from-primary/20 to-primary/10 text-primary border-primary/30 shadow-primary/10" 
+                : "from-surface-container to-surface-container-high text-on-surface-variant border-outline-variant/30 group-hover:from-primary/10 group-hover:to-primary/5 group-hover:text-primary/80 group-hover:border-primary/20"
+            )}>
+              <div className={cn(
+                "w-1.5 h-1.5 rounded-full",
+                isSelected ? "bg-primary" : "bg-on-surface-variant/50 group-hover:bg-primary/60"
+              )} />
+              {stationLanguage}
+            </span>
+          </div>
         </div>
         
-        {/* Action Buttons */}
-        <div className="flex justify-center space-x-0.5 mt-auto pt-1">
+        {/* Enhanced Action Buttons with better spacing and interactions */}
+        <div className="flex justify-center items-center space-x-1 mt-auto pt-2 min-h-[32px]">
           {onToggleFavorite && (
             <Button 
               size="icon" 
               variant="ghost" 
               className={cn(
-                "h-6 w-6 rounded-full transition-all duration-200 active:scale-90", 
+                "h-7 w-7 rounded-full transition-all duration-200 shadow-sm",
+                "hover:shadow-md active:scale-90 transform-gpu",
                 station.isFavorite 
-                  ? "text-yellow-500 hover:text-yellow-600 bg-yellow-500/10 hover:bg-yellow-500/20" 
-                  : "text-muted-foreground hover:text-yellow-500 hover:bg-yellow-500/10"
+                  ? "text-yellow-500 hover:text-yellow-600 bg-yellow-500/15 hover:bg-yellow-500/25 shadow-yellow-500/20" 
+                  : "text-on-surface-variant hover:text-yellow-500 hover:bg-yellow-500/15 hover:shadow-yellow-500/10"
               )}
               onClick={(e) => handleButtonClick(e, onToggleFavorite)}
               aria-label={station.isFavorite ? "Remove from favorites" : "Add to favorites"}
             >
               <Star className={cn(
-                "h-3 w-3",
-                station.isFavorite && "fill-yellow-500"
+                "h-3.5 w-3.5 transition-all duration-200",
+                station.isFavorite && "fill-yellow-500 scale-110"
               )} />
             </Button>
           )}
@@ -113,11 +133,15 @@ export const StationCard: React.FC<StationCardProps> = ({
             <Button 
               size="icon" 
               variant="ghost" 
-              className="h-6 w-6 text-blue-500 hover:text-blue-600 hover:bg-blue-500/10 rounded-full transition-all duration-200 active:scale-90"
+              className={cn(
+                "h-7 w-7 rounded-full transition-all duration-200 shadow-sm",
+                "text-blue-500 hover:text-blue-600 hover:bg-blue-500/15 hover:shadow-md hover:shadow-blue-500/10",
+                "active:scale-90 transform-gpu"
+              )}
               onClick={(e) => handleButtonClick(e, onEdit)}
               aria-label="Edit station"
             >
-              <Edit className="h-3 w-3" />
+              <Edit className="h-3.5 w-3.5" />
             </Button>
           )}
           
@@ -125,11 +149,15 @@ export const StationCard: React.FC<StationCardProps> = ({
             <Button 
               size="icon" 
               variant="ghost" 
-              className="h-6 w-6 text-destructive hover:text-destructive/80 hover:bg-destructive/10 rounded-full transition-all duration-200 active:scale-90"
+              className={cn(
+                "h-7 w-7 rounded-full transition-all duration-200 shadow-sm",
+                "text-destructive hover:text-destructive/80 hover:bg-destructive/15 hover:shadow-md hover:shadow-destructive/10",
+                "active:scale-90 transform-gpu"
+              )}
               onClick={(e) => handleButtonClick(e, onDelete)}
               aria-label="Delete station"
             >
-              <Trash2 className="h-3 w-3" />
+              <Trash2 className="h-3.5 w-3.5" />
             </Button>
           )}
         </div>
