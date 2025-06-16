@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Track } from "@/types/track";
 import { loadTracksFromLocalStorage, testLocalStorage } from "./trackStorage";
+import { logger } from "@/utils/logger";
 
 export const useTrackInitialization = () => {
   const [tracks, setTracks] = useState<Track[]>([]);
@@ -18,25 +19,21 @@ export const useTrackInitialization = () => {
   // Initialization effect - runs only once
   useEffect(() => {
     if (isDevMode) {
-      console.log("useTrackInitialization - Initial load from localStorage");
       renderCount.current++;
+      logger.debug("useTrackInitialization - Initial load from localStorage");
     }
     
     // Test if localStorage is working properly
     const storageAvailable = testLocalStorage();
-    if (isDevMode) {
-      console.log("LocalStorage is available:", storageAvailable);
-    }
+    logger.info("LocalStorage availability check", { available: storageAvailable });
     
     if (storageAvailable) {
       const loadedTracks = loadTracksFromLocalStorage();
-      if (isDevMode) {
-        console.log("Initial tracks loaded from localStorage:", loadedTracks.length);
-      }
+      logger.info("Initial tracks loaded from localStorage", { count: loadedTracks.length });
       
       if (loadedTracks && loadedTracks.length > 0) {
         if (isDevMode) {
-          console.log("First loaded track:", JSON.stringify(loadedTracks[0]));
+          logger.debug("First loaded track", loadedTracks[0]);
         }
         
         // Use a deep clone to ensure we're working with a fresh copy
@@ -51,9 +48,7 @@ export const useTrackInitialization = () => {
     }
     
     setIsInitialized(true);
-    if (isDevMode) {
-      console.log("Track state initialized - render count:", renderCount.current);
-    }
+    logger.info("Track state initialized", { renderCount: renderCount.current });
   }, [isDevMode]);
 
   return {

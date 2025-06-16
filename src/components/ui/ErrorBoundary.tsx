@@ -7,28 +7,45 @@ import { RefreshCw, AlertTriangle } from "lucide-react";
 interface Props {
   children: ReactNode;
   fallback?: ReactNode;
+  onError?: (error: Error, errorInfo: ErrorInfo) => void;
 }
 
 interface State {
   hasError: boolean;
   error?: Error;
+  errorId: string;
 }
 
 export class ErrorBoundary extends Component<Props, State> {
   public state: State = {
-    hasError: false
+    hasError: false,
+    errorId: ""
   };
 
   public static getDerivedStateFromError(error: Error): State {
-    return { hasError: true, error };
+    return { 
+      hasError: true, 
+      error,
+      errorId: Math.random().toString(36).substr(2, 9)
+    };
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('ErrorBoundary caught an error:', error, errorInfo);
+    // Only log in development or for critical errors
+    if (process.env.NODE_ENV === 'development' || error.name === 'ChunkLoadError') {
+      console.error('ErrorBoundary caught an error:', error, errorInfo);
+    }
+    
+    // Call custom error handler if provided
+    this.props.onError?.(error, errorInfo);
   }
 
   private handleReset = () => {
-    this.setState({ hasError: false, error: undefined });
+    this.setState({ hasError: false, error: undefined, errorId: "" });
+  };
+
+  private handleReload = () => {
+    window.location.reload();
   };
 
   public render() {
@@ -48,12 +65,12 @@ export class ErrorBoundary extends Component<Props, State> {
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-sm text-muted-foreground">
-                An unexpected error occurred. Please try refreshing the page.
+                An unexpected error occurred. Please try refreshing or restarting the player.
               </p>
-              {this.state.error && (
+              {process.env.NODE_ENV === 'development' && this.state.error && (
                 <details className="text-xs bg-muted p-2 rounded">
                   <summary className="cursor-pointer font-medium">
-                    Error details
+                    Error details (ID: {this.state.errorId})
                   </summary>
                   <pre className="mt-2 whitespace-pre-wrap">
                     {this.state.error.message}
@@ -67,7 +84,7 @@ export class ErrorBoundary extends Component<Props, State> {
                 </Button>
                 <Button 
                   variant="outline" 
-                  onClick={() => window.location.reload()}
+                  onClick={this.handleReload}
                 >
                   Refresh page
                 </Button>

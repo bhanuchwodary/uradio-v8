@@ -1,8 +1,9 @@
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useTrackInitialization } from "./useTrackInitialization";
 import { useTrackStatePersistence } from "./useTrackStatePersistence";
 import { useTrackStateDebugCore } from "./useTrackStateDebugCore";
+import { logger } from "@/utils/logger";
 
 export const useTrackStateCore = () => {
   // Basic state
@@ -34,12 +35,24 @@ export const useTrackStateCore = () => {
     stateVersion
   });
 
+  // Memoize expensive operations
+  const memoizedTracks = useMemo(() => tracks, [tracks]);
+
+  // Enhanced setters with validation
+  const setCurrentIndexSafe = (index: number) => {
+    if (index >= 0 && index < tracks.length) {
+      setCurrentIndex(index);
+    } else {
+      logger.warn("Invalid track index", { index, tracksLength: tracks.length });
+    }
+  };
+
   return {
-    tracks,
+    tracks: memoizedTracks,
     setTracks,
     tracksRef,
     currentIndex,
-    setCurrentIndex,
+    setCurrentIndex: setCurrentIndexSafe,
     isPlaying,
     setIsPlaying,
     stateVersion,

@@ -1,7 +1,8 @@
 
-import React from "react";
+import React, { memo } from "react";
 import { Track } from "@/types/track";
 import { StationCard } from "@/components/ui/player/StationCard";
+import { logger } from "@/utils/logger";
 
 interface StationGridProps {
   stations: Track[];
@@ -15,7 +16,7 @@ interface StationGridProps {
   actionIcon?: "play" | "add";
 }
 
-export const StationGrid: React.FC<StationGridProps> = ({
+export const StationGrid: React.FC<StationGridProps> = memo(({
   stations,
   currentIndex,
   currentTrackUrl,
@@ -43,13 +44,16 @@ export const StationGrid: React.FC<StationGridProps> = ({
         // Create a stable key based on station properties that matter for rendering
         const stationKey = `${station.url}-${station.name}-${station.language || 'unknown'}`;
         
-        console.log("Rendering station in grid:", { 
-          name: station.name, 
-          language: station.language,
-          key: stationKey,
-          isSelected,
-          isPlaying: isCurrentlyPlaying
-        });
+        // Only log in development
+        if (process.env.NODE_ENV === 'development') {
+          logger.debug("Rendering station in grid", { 
+            name: station.name, 
+            language: station.language,
+            key: stationKey,
+            isSelected,
+            isPlaying: isCurrentlyPlaying
+          });
+        }
         
         return (
           <StationCard
@@ -67,4 +71,18 @@ export const StationGrid: React.FC<StationGridProps> = ({
       })}
     </div>
   );
-};
+}, (prevProps, nextProps) => {
+  // Custom comparison for better performance
+  return (
+    prevProps.stations.length === nextProps.stations.length &&
+    prevProps.currentTrackUrl === nextProps.currentTrackUrl &&
+    prevProps.isPlaying === nextProps.isPlaying &&
+    prevProps.stations.every((station, index) => 
+      station.url === nextProps.stations[index]?.url &&
+      station.name === nextProps.stations[index]?.name &&
+      station.isFavorite === nextProps.stations[index]?.isFavorite
+    )
+  );
+});
+
+StationGrid.displayName = "StationGrid";

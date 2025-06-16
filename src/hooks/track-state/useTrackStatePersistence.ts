@@ -2,6 +2,7 @@
 import { useEffect, useRef } from "react";
 import { Track } from "@/types/track";
 import { saveTracksToLocalStorage } from "./trackStorage";
+import { logger } from "@/utils/logger";
 
 interface UseTrackStatePersistenceProps {
   tracks: Track[];
@@ -32,8 +33,11 @@ export const useTrackStatePersistence = ({
       renderCount.current++;
       stateVersion.current++;
       const currentVersion = stateVersion.current;
-      console.log(`Tracks state changed - render count: ${renderCount.current}, state version: ${currentVersion}`);
-      console.log(`Current tracks in state (${tracks.length}):`, JSON.stringify(tracks));
+      logger.debug("Tracks state changed", { 
+        renderCount: renderCount.current, 
+        stateVersion: currentVersion,
+        tracksCount: tracks.length
+      });
     }
     
     // Update ref for direct access elsewhere
@@ -43,9 +47,7 @@ export const useTrackStatePersistence = ({
       // Only save if tracks have actually changed (prevents unnecessary writes)
       const currentTracksJSON = JSON.stringify(tracks);
       if (currentTracksJSON !== lastSavedTracksJSON.current) {
-        if (isDevMode) {
-          console.log("useTrackStatePersistence - Saving tracks to localStorage:", tracks.length);
-        }
+        logger.debug("Saving tracks to localStorage", { count: tracks.length });
         
         // Mark that we need to save
         needsSaving.current = true;
@@ -56,11 +58,9 @@ export const useTrackStatePersistence = ({
         if (saveSuccess) {
           needsSaving.current = false;
           lastSavedTracksJSON.current = currentTracksJSON;
-          if (isDevMode) {
-            console.log(`Successfully saved tracks to localStorage`);
-          }
-        } else if (isDevMode) {
-          console.error(`Failed to save tracks to localStorage`);
+          logger.info("Successfully saved tracks to localStorage");
+        } else {
+          logger.error("Failed to save tracks to localStorage");
         }
         
         syncInProgress.current = false;
@@ -75,9 +75,7 @@ export const useTrackStatePersistence = ({
     // Force save on page unload
     const handleBeforeUnload = () => {
       if (tracks.length > 0 && !syncInProgress.current) {
-        if (isDevMode) {
-          console.log("Page unloading - force saving tracks");
-        }
+        logger.info("Page unloading - force saving tracks");
         saveTracksToLocalStorage(tracks);
       }
     };
@@ -87,7 +85,7 @@ export const useTrackStatePersistence = ({
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
-  }, [tracks, isInitialized, isDevMode]);
+  }, [tracks, isInitialized]);
 
   return {
     needsSaving,

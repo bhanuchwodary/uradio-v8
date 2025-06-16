@@ -1,10 +1,11 @@
 
-import React from "react";
+import React, { memo } from "react";
 import { Card } from "@/components/ui/card";
 import { Play, Pause, Edit, Trash2, Star, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Track } from "@/types/track";
 import { cn } from "@/lib/utils";
+import { logger } from "@/utils/logger";
 
 interface StationCardProps {
   station: Track;
@@ -17,7 +18,7 @@ interface StationCardProps {
   actionIcon?: "play" | "add";
 }
 
-export const StationCard: React.FC<StationCardProps> = ({
+export const StationCard: React.FC<StationCardProps> = memo(({
   station,
   isPlaying,
   isSelected,
@@ -45,7 +46,15 @@ export const StationCard: React.FC<StationCardProps> = ({
   // Ensure language is preserved from station data with proper fallback
   const stationLanguage = station?.language && station.language !== "" ? station.language : "Unknown";
 
-  console.log("StationCard rendering:", { name: station.name, language: stationLanguage, isPlaying, isSelected });
+  // Only log in development
+  if (process.env.NODE_ENV === 'development') {
+    logger.debug("StationCard rendering", { 
+      name: station.name, 
+      language: stationLanguage, 
+      isPlaying, 
+      isSelected 
+    });
+  }
 
   return (
     <Card 
@@ -58,7 +67,7 @@ export const StationCard: React.FC<StationCardProps> = ({
       onClick={onPlay}
     >
       <div className="px-2 py-2.5 flex flex-col items-center space-y-1.5 h-full">
-        {/* Play Button - Remove animate-pulse to stop blinking */}
+        {/* Play Button */}
         <div 
           className={cn(
             "w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 shadow-sm",
@@ -75,7 +84,7 @@ export const StationCard: React.FC<StationCardProps> = ({
           {station.name}
         </h3>
         
-        {/* Language Badge - Always visible with proper language */}
+        {/* Language Badge */}
         <div className="flex items-center justify-center">
           <span className={cn(
             "bg-gradient-to-r px-2 py-0.5 rounded-full text-[10px] font-medium border shadow-sm",
@@ -136,4 +145,16 @@ export const StationCard: React.FC<StationCardProps> = ({
       </div>
     </Card>
   );
-};
+}, (prevProps, nextProps) => {
+  // Custom comparison for better performance
+  return (
+    prevProps.station.url === nextProps.station.url &&
+    prevProps.station.name === nextProps.station.name &&
+    prevProps.station.language === nextProps.station.language &&
+    prevProps.isPlaying === nextProps.isPlaying &&
+    prevProps.isSelected === nextProps.isSelected &&
+    prevProps.station.isFavorite === nextProps.station.isFavorite
+  );
+});
+
+StationCard.displayName = "StationCard";
