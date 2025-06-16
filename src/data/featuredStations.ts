@@ -224,5 +224,10 @@ export const featuredStations = [
     name: "Radio Surabhi",
     url: "https://radiosurabhi.streamguys1.com/live1-web",
     language: "Telugu"
+  },
+  {
+    name: "Radio Sangam",
+    url: "https://stream.voxx.pro/listen/radio_sangam/radio.mp3",
+    language: "Telugu"
   }
 ];
