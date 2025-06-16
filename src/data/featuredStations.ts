@@ -137,7 +137,7 @@ export const featuredStations = [
   },
   {
     name: "Radio Hungama",
-    url: "https://stream.zeno.fm/rm4i9pdex3cuv",
+    url: "https://stream.zeno.fm/ysucrq37uwzuv",
     language: "Telugu"
   },
   {
@@ -198,6 +198,21 @@ export const featuredStations = [
   {
     name: "VB Telugu Hyderabad",
     url: "https://air.pc.cdn.bitgravity.com/air/live/pbaudio034/playlist.m3u8",
+    language: "Telugu"
+  },
+  {
+    name: "Rainbow Viz",
+    url: "https://air.pc.cdn.bitgravity.com/air/live/pbaudio081/playlist.m3u8",
+    language: "Telugu"
+  },
+  {
+    name: "VB Telugu Hyd",
+    url: "https://air.pc.cdn.bitgravity.com/air/live/pbaudio034/playlist.m3u8",
+    language: "Telugu"
+  },
+  {
+    name: "Rainbow Vij",
+    url: "https://air.pc.cdn.bitgravity.com/air/live/pbaudio174/playlist.m3u8",
     language: "Telugu"
   }
 ];
