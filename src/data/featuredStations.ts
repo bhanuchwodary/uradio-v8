@@ -214,5 +214,10 @@ export const featuredStations = [
     name: "Rainbow Vij",
     url: "https://air.pc.cdn.bitgravity.com/air/live/pbaudio174/playlist.m3u8",
     language: "Telugu"
+  },
+  {
+    name: "Radio Beat",
+    url: "https://listen.openstream.co/3372/audio",
+    language: "Tamil"
   }
 ];
