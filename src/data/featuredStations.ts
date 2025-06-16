@@ -249,5 +249,10 @@ export const featuredStations = [
     name: "Radio Caravan",
     url: "https://streamlky.alsolnet.com/radiocaravanaudio",
     language: "Hindi"
+  },
+  {
+    name: "Vividh Bharati",
+    url: "https://air.pc.cdn.bitgravity.com/air/live/pbaudio001/playlist.m3u8",
+    language: "Hindi"
   }
 ];
