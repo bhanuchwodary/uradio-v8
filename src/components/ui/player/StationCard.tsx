@@ -51,20 +51,38 @@ export const StationCard: React.FC<StationCardProps> = ({
     <Card 
       className={cn(
         "relative overflow-hidden group transition-all duration-200 cursor-pointer h-full active:scale-95 border-0",
-        isSelected 
-          ? "bg-gradient-to-br from-primary/20 to-primary/10 shadow-lg ring-2 ring-primary/30" 
-          : "bg-gradient-to-br from-background/80 to-background/60 hover:from-accent/40 hover:to-accent/20 shadow-md hover:shadow-lg backdrop-blur-sm"
+        // Standard themes
+        !document.documentElement.classList.contains('metallic') && (
+          isSelected 
+            ? "bg-gradient-to-br from-primary/20 to-primary/10 shadow-lg ring-2 ring-primary/30" 
+            : "bg-gradient-to-br from-background/80 to-background/60 hover:from-accent/40 hover:to-accent/20 shadow-md hover:shadow-lg backdrop-blur-sm"
+        ),
+        // Metallic theme
+        document.documentElement.classList.contains('metallic') && (
+          isSelected 
+            ? "metallic-station-card selected"
+            : "metallic-station-card hover:elevation-2"
+        )
       )}
       onClick={onPlay}
     >
       <div className="px-2 py-2.5 flex flex-col items-center space-y-1.5 h-full">
-        {/* Play Button - Remove animate-pulse to stop blinking */}
+        {/* Play Button */}
         <div 
           className={cn(
             "w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 shadow-sm",
-            isPlaying 
-              ? "bg-primary text-primary-foreground shadow-md scale-105" 
-              : "bg-secondary/80 text-secondary-foreground group-hover:bg-primary/30 group-hover:scale-105 group-active:scale-95"
+            // Standard themes
+            !document.documentElement.classList.contains('metallic') && (
+              isPlaying 
+                ? "bg-primary text-primary-foreground shadow-md scale-105" 
+                : "bg-secondary/80 text-secondary-foreground group-hover:bg-primary/30 group-hover:scale-105 group-active:scale-95"
+            ),
+            // Metallic theme
+            document.documentElement.classList.contains('metallic') && (
+              isPlaying 
+                ? "metallic-play-button playing scale-105" 
+                : "metallic-play-button group-hover:scale-105 group-active:scale-95"
+            )
           )}
         >
           {renderActionIcon()}
@@ -75,13 +93,22 @@ export const StationCard: React.FC<StationCardProps> = ({
           {station.name}
         </h3>
         
-        {/* Language Badge - Always visible with proper language */}
+        {/* Language Badge */}
         <div className="flex items-center justify-center">
           <span className={cn(
-            "bg-gradient-to-r px-2 py-0.5 rounded-full text-[10px] font-medium border shadow-sm",
-            isSelected 
-              ? "from-primary/20 to-primary/10 text-primary border-primary/30" 
-              : "from-muted/60 to-muted/40 text-muted-foreground border-muted/50"
+            "px-2 py-0.5 rounded-full text-[10px] font-medium border shadow-sm",
+            // Standard themes
+            !document.documentElement.classList.contains('metallic') && (
+              isSelected 
+                ? "bg-gradient-to-r from-primary/20 to-primary/10 text-primary border-primary/30" 
+                : "bg-gradient-to-r from-muted/60 to-muted/40 text-muted-foreground border-muted/50"
+            ),
+            // Metallic theme
+            document.documentElement.classList.contains('metallic') && (
+              isSelected 
+                ? "metallic-language-badge selected"
+                : "metallic-language-badge"
+            )
           )}>
             {stationLanguage}
           </span>
@@ -94,17 +121,26 @@ export const StationCard: React.FC<StationCardProps> = ({
               size="icon" 
               variant="ghost" 
               className={cn(
-                "h-6 w-6 rounded-full transition-all duration-200 active:scale-90", 
-                station.isFavorite 
-                  ? "text-yellow-500 hover:text-yellow-600 bg-yellow-500/10 hover:bg-yellow-500/20" 
-                  : "text-muted-foreground hover:text-yellow-500 hover:bg-yellow-500/10"
+                "h-6 w-6 rounded-full transition-all duration-200 active:scale-90",
+                // Standard themes
+                !document.documentElement.classList.contains('metallic') && (
+                  station.isFavorite 
+                    ? "text-yellow-500 hover:text-yellow-600 bg-yellow-500/10 hover:bg-yellow-500/20" 
+                    : "text-muted-foreground hover:text-yellow-500 hover:bg-yellow-500/10"
+                ),
+                // Metallic theme
+                document.documentElement.classList.contains('metallic') && (
+                  station.isFavorite 
+                    ? "metallic-button text-yellow-400 hover:text-yellow-300" 
+                    : "metallic-button text-muted-foreground hover:text-yellow-400"
+                )
               )}
               onClick={(e) => handleButtonClick(e, onToggleFavorite)}
               aria-label={station.isFavorite ? "Remove from favorites" : "Add to favorites"}
             >
               <Star className={cn(
                 "h-3 w-3",
-                station.isFavorite && "fill-yellow-500"
+                station.isFavorite && "fill-current"
               )} />
             </Button>
           )}
@@ -113,7 +149,15 @@ export const StationCard: React.FC<StationCardProps> = ({
             <Button 
               size="icon" 
               variant="ghost" 
-              className="h-6 w-6 text-blue-500 hover:text-blue-600 hover:bg-blue-500/10 rounded-full transition-all duration-200 active:scale-90"
+              className={cn(
+                "h-6 w-6 rounded-full transition-all duration-200 active:scale-90",
+                // Standard themes
+                !document.documentElement.classList.contains('metallic') && 
+                  "text-blue-500 hover:text-blue-600 hover:bg-blue-500/10",
+                // Metallic theme
+                document.documentElement.classList.contains('metallic') && 
+                  "metallic-button text-blue-400 hover:text-blue-300"
+              )}
               onClick={(e) => handleButtonClick(e, onEdit)}
               aria-label="Edit station"
             >
@@ -125,7 +169,15 @@ export const StationCard: React.FC<StationCardProps> = ({
             <Button 
               size="icon" 
               variant="ghost" 
-              className="h-6 w-6 text-destructive hover:text-destructive/80 hover:bg-destructive/10 rounded-full transition-all duration-200 active:scale-90"
+              className={cn(
+                "h-6 w-6 rounded-full transition-all duration-200 active:scale-90",
+                // Standard themes
+                !document.documentElement.classList.contains('metallic') && 
+                  "text-destructive hover:text-destructive/80 hover:bg-destructive/10",
+                // Metallic theme
+                document.documentElement.classList.contains('metallic') && 
+                  "metallic-button text-red-400 hover:text-red-300"
+              )}
               onClick={(e) => handleButtonClick(e, onDelete)}
               aria-label="Delete station"
             >

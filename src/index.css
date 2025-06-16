@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -137,7 +138,7 @@
   }
 
   .metallic {
-    /* Black Metallic Theme */
+    /* Black Metallic Theme with Enhanced Contouring */
     --background: 20 20 22; /* #141416 */
     --foreground: 220 220 220; /* #dcdcdc */
     
@@ -394,7 +395,9 @@
     @apply backdrop-blur-xl bg-primary-container/80 border-primary/20;
   }
 
-  /* Enhanced metallic theme contouring */
+  /* METALLIC CONTOURING EFFECTS */
+  
+  /* Metallic Base Theme Enhancements */
   .metallic body,
   .metallic h1,
   .metallic h2,
@@ -404,27 +407,278 @@
   .metallic a,
   .metallic button,
   .metallic label {
-    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8), 0 0 1px rgba(255, 255, 255, 0.1);
   }
 
   .metallic svg {
-    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.6));
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.8)) drop-shadow(0 0 1px rgba(255, 255, 255, 0.1));
   }
 
+  /* Enhanced Metallic Elevation System with Contouring */
   .metallic .elevation-1 {
-    box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.5), 0px 1px 3px 1px rgba(0, 0, 0, 0.3);
+    box-shadow: 
+      inset 0 1px 0 rgba(255, 255, 255, 0.1),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.3),
+      0 2px 4px rgba(0, 0, 0, 0.6),
+      0 1px 2px rgba(0, 0, 0, 0.4);
   }
+  
   .metallic .elevation-2 {
-    box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.5), 0px 2px 6px 2px rgba(0, 0, 0, 0.3);
+    box-shadow: 
+      inset 0 1px 0 rgba(255, 255, 255, 0.15),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.4),
+      0 4px 8px rgba(0, 0, 0, 0.7),
+      0 2px 4px rgba(0, 0, 0, 0.5);
   }
+  
   .metallic .elevation-3 {
-    box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.5), 0px 4px 8px 3px rgba(0, 0, 0, 0.3);
+    box-shadow: 
+      inset 0 1px 0 rgba(255, 255, 255, 0.2),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.5),
+      0 6px 12px rgba(0, 0, 0, 0.8),
+      0 3px 6px rgba(0, 0, 0, 0.6);
   }
+  
   .metallic .elevation-4 {
-    box-shadow: 0px 2px 3px 0px rgba(0, 0, 0, 0.5), 0px 6px 10px 4px rgba(0, 0, 0, 0.3);
+    box-shadow: 
+      inset 0 2px 0 rgba(255, 255, 255, 0.25),
+      inset 0 -2px 0 rgba(0, 0, 0, 0.6),
+      0 8px 16px rgba(0, 0, 0, 0.9),
+      0 4px 8px rgba(0, 0, 0, 0.7);
   }
+  
   .metallic .elevation-5 {
-    box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.5), 0px 8px 12px 6px rgba(0, 0, 0, 0.3);
+    box-shadow: 
+      inset 0 2px 0 rgba(255, 255, 255, 0.3),
+      inset 0 -2px 0 rgba(0, 0, 0, 0.7),
+      0 10px 20px rgba(0, 0, 0, 1),
+      0 5px 10px rgba(0, 0, 0, 0.8);
+  }
+
+  /* Metallic Station Card Contouring */
+  .metallic .metallic-station-card {
+    background: linear-gradient(135deg, 
+      rgba(70, 70, 74, 0.9) 0%,
+      rgba(44, 44, 48, 0.95) 25%,
+      rgba(36, 36, 40, 1) 50%,
+      rgba(28, 28, 32, 0.95) 75%,
+      rgba(52, 52, 56, 0.9) 100%);
+    border: 1px solid rgba(97, 97, 97, 0.3);
+    box-shadow: 
+      inset 0 1px 0 rgba(255, 255, 255, 0.1),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.4),
+      inset 1px 0 0 rgba(255, 255, 255, 0.05),
+      inset -1px 0 0 rgba(0, 0, 0, 0.2),
+      0 2px 8px rgba(0, 0, 0, 0.6),
+      0 1px 3px rgba(0, 0, 0, 0.4);
+  }
+
+  .metallic .metallic-station-card.selected {
+    background: linear-gradient(135deg, 
+      rgba(176, 190, 197, 0.3) 0%,
+      rgba(69, 90, 100, 0.4) 25%,
+      rgba(55, 71, 79, 0.5) 50%,
+      rgba(69, 90, 100, 0.4) 75%,
+      rgba(176, 190, 197, 0.3) 100%);
+    border: 1px solid rgba(176, 190, 197, 0.4);
+    box-shadow: 
+      inset 0 2px 0 rgba(176, 190, 197, 0.2),
+      inset 0 -2px 0 rgba(0, 0, 0, 0.5),
+      inset 2px 0 0 rgba(176, 190, 197, 0.1),
+      inset -2px 0 0 rgba(0, 0, 0, 0.3),
+      0 0 12px rgba(176, 190, 197, 0.3),
+      0 4px 12px rgba(0, 0, 0, 0.7);
+  }
+
+  /* Metallic Button Contouring */
+  .metallic .metallic-button {
+    background: linear-gradient(135deg, 
+      rgba(97, 97, 97, 0.8) 0%,
+      rgba(70, 70, 70, 0.9) 50%,
+      rgba(97, 97, 97, 0.8) 100%);
+    border: 1px solid rgba(158, 158, 158, 0.3);
+    box-shadow: 
+      inset 0 1px 0 rgba(255, 255, 255, 0.15),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.4),
+      0 2px 4px rgba(0, 0, 0, 0.5);
+  }
+
+  .metallic .metallic-button:hover {
+    background: linear-gradient(135deg, 
+      rgba(120, 120, 120, 0.9) 0%,
+      rgba(90, 90, 90, 1) 50%,
+      rgba(120, 120, 120, 0.9) 100%);
+    box-shadow: 
+      inset 0 1px 0 rgba(255, 255, 255, 0.2),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.5),
+      0 3px 6px rgba(0, 0, 0, 0.6);
+  }
+
+  .metallic .metallic-button:active {
+    background: linear-gradient(135deg, 
+      rgba(50, 50, 50, 1) 0%,
+      rgba(70, 70, 70, 0.95) 50%,
+      rgba(50, 50, 50, 1) 100%);
+    box-shadow: 
+      inset 0 2px 4px rgba(0, 0, 0, 0.8),
+      inset 0 1px 2px rgba(0, 0, 0, 0.6),
+      0 1px 2px rgba(0, 0, 0, 0.3);
+  }
+
+  /* Metallic Primary Button */
+  .metallic .metallic-button-primary {
+    background: linear-gradient(135deg, 
+      rgba(176, 190, 197, 0.9) 0%,
+      rgba(144, 164, 174, 1) 25%,
+      rgba(120, 144, 156, 1) 50%,
+      rgba(144, 164, 174, 1) 75%,
+      rgba(176, 190, 197, 0.9) 100%);
+    border: 1px solid rgba(207, 216, 220, 0.3);
+    color: rgba(10, 10, 10, 0.9);
+    box-shadow: 
+      inset 0 1px 0 rgba(255, 255, 255, 0.3),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.2),
+      0 3px 6px rgba(0, 0, 0, 0.6),
+      0 1px 3px rgba(0, 0, 0, 0.4);
+  }
+
+  .metallic .metallic-button-primary:hover {
+    background: linear-gradient(135deg, 
+      rgba(196, 210, 217, 1) 0%,
+      rgba(164, 184, 194, 1) 25%,
+      rgba(140, 164, 176, 1) 50%,
+      rgba(164, 184, 194, 1) 75%,
+      rgba(196, 210, 217, 1) 100%);
+    box-shadow: 
+      inset 0 1px 0 rgba(255, 255, 255, 0.4),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.3),
+      0 4px 8px rgba(0, 0, 0, 0.7),
+      0 2px 4px rgba(0, 0, 0, 0.5);
+  }
+
+  .metallic .metallic-button-primary:active {
+    background: linear-gradient(135deg, 
+      rgba(120, 134, 141, 1) 0%,
+      rgba(144, 164, 174, 0.95) 25%,
+      rgba(100, 124, 136, 1) 50%,
+      rgba(144, 164, 174, 0.95) 75%,
+      rgba(120, 134, 141, 1) 100%);
+    box-shadow: 
+      inset 0 2px 4px rgba(0, 0, 0, 0.4),
+      inset 0 1px 2px rgba(0, 0, 0, 0.3),
+      0 1px 3px rgba(0, 0, 0, 0.5);
+  }
+
+  /* Metallic Play Button Specific */
+  .metallic .metallic-play-button {
+    background: radial-gradient(circle at 30% 30%, 
+      rgba(176, 190, 197, 1) 0%,
+      rgba(144, 164, 174, 1) 40%,
+      rgba(120, 144, 156, 1) 70%,
+      rgba(97, 121, 133, 1) 100%);
+    border: 2px solid rgba(207, 216, 220, 0.4);
+    box-shadow: 
+      inset 0 2px 0 rgba(255, 255, 255, 0.4),
+      inset 0 -2px 0 rgba(0, 0, 0, 0.3),
+      inset 2px 0 0 rgba(255, 255, 255, 0.2),
+      inset -2px 0 0 rgba(0, 0, 0, 0.2),
+      0 4px 12px rgba(0, 0, 0, 0.8),
+      0 2px 6px rgba(0, 0, 0, 0.6);
+  }
+
+  .metallic .metallic-play-button.playing {
+    background: radial-gradient(circle at 30% 30%, 
+      rgba(196, 210, 217, 1) 0%,
+      rgba(176, 190, 197, 1) 40%,
+      rgba(164, 184, 194, 1) 70%,
+      rgba(144, 164, 174, 1) 100%);
+    box-shadow: 
+      inset 0 3px 0 rgba(255, 255, 255, 0.5),
+      inset 0 -3px 0 rgba(0, 0, 0, 0.4),
+      inset 3px 0 0 rgba(255, 255, 255, 0.3),
+      inset -3px 0 0 rgba(0, 0, 0, 0.3),
+      0 0 16px rgba(176, 190, 197, 0.4),
+      0 6px 16px rgba(0, 0, 0, 0.9);
+  }
+
+  /* Metallic Navigation Contouring */
+  .metallic .metallic-nav {
+    background: linear-gradient(180deg, 
+      rgba(52, 52, 56, 0.98) 0%,
+      rgba(44, 44, 48, 1) 20%,
+      rgba(36, 36, 40, 1) 80%,
+      rgba(28, 28, 32, 0.98) 100%);
+    border-top: 1px solid rgba(97, 97, 97, 0.3);
+    box-shadow: 
+      inset 0 1px 0 rgba(255, 255, 255, 0.1),
+      0 -4px 16px rgba(0, 0, 0, 0.8),
+      0 -2px 8px rgba(0, 0, 0, 0.6);
+  }
+
+  .metallic .metallic-nav-item {
+    background: linear-gradient(135deg, 
+      rgba(70, 70, 74, 0.3) 0%,
+      rgba(52, 52, 56, 0.5) 50%,
+      rgba(70, 70, 74, 0.3) 100%);
+    border-radius: 12px;
+    border: 1px solid rgba(97, 97, 97, 0.2);
+    box-shadow: 
+      inset 0 1px 0 rgba(255, 255, 255, 0.08),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.3),
+      0 2px 4px rgba(0, 0, 0, 0.4);
+  }
+
+  .metallic .metallic-nav-item.active {
+    background: linear-gradient(135deg, 
+      rgba(176, 190, 197, 0.25) 0%,
+      rgba(69, 90, 100, 0.4) 50%,
+      rgba(176, 190, 197, 0.25) 100%);
+    border: 1px solid rgba(176, 190, 197, 0.3);
+    box-shadow: 
+      inset 0 1px 0 rgba(176, 190, 197, 0.15),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.4),
+      0 0 8px rgba(176, 190, 197, 0.2),
+      0 3px 6px rgba(0, 0, 0, 0.5);
+  }
+
+  /* Metallic Language Badge */
+  .metallic .metallic-language-badge {
+    background: linear-gradient(135deg, 
+      rgba(97, 97, 97, 0.6) 0%,
+      rgba(70, 70, 70, 0.8) 50%,
+      rgba(97, 97, 97, 0.6) 100%);
+    border: 1px solid rgba(158, 158, 158, 0.25);
+    box-shadow: 
+      inset 0 1px 0 rgba(255, 255, 255, 0.1),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.3),
+      0 1px 2px rgba(0, 0, 0, 0.5);
+  }
+
+  .metallic .metallic-language-badge.selected {
+    background: linear-gradient(135deg, 
+      rgba(176, 190, 197, 0.4) 0%,
+      rgba(69, 90, 100, 0.6) 50%,
+      rgba(176, 190, 197, 0.4) 100%);
+    border: 1px solid rgba(176, 190, 197, 0.4);
+    color: rgba(176, 190, 197, 1);
+    box-shadow: 
+      inset 0 1px 0 rgba(176, 190, 197, 0.2),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.4),
+      0 0 4px rgba(176, 190, 197, 0.3),
+      0 2px 4px rgba(0, 0, 0, 0.6);
+  }
+
+  /* Metallic Ripple Effect Override */
+  .metallic .ripple-effect {
+    background: radial-gradient(circle, 
+      rgba(176, 190, 197, 0.4) 0%, 
+      rgba(176, 190, 197, 0.2) 50%, 
+      transparent 100%);
+  }
+
+  /* Smooth Transitions for All Metallic Elements */
+  .metallic * {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 
