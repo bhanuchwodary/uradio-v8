@@ -395,23 +395,33 @@
     @apply backdrop-blur-xl bg-primary-container/80 border-primary/20;
   }
 
-  /* METALLIC CONTOURING EFFECTS */
+  /* METALLIC THEME ENHANCEMENTS */
   
-  /* Metallic Base Theme Enhancements */
-  .metallic body,
+  /* Remove text shadows from headings and unify text appearance */
   .metallic h1,
   .metallic h2,
   .metallic h3,
+  .metallic h4,
+  .metallic h5,
+  .metallic h6 {
+    text-shadow: none !important;
+    font-weight: 600;
+    color: rgb(var(--on-surface));
+  }
+
+  /* Unified text appearance - remove 3D effects */
+  .metallic body,
   .metallic p,
   .metallic span,
   .metallic a,
   .metallic button,
   .metallic label {
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8), 0 0 1px rgba(255, 255, 255, 0.1);
+    text-shadow: none !important;
   }
 
+  /* Keep subtle shadow only for icons */
   .metallic svg {
-    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.8)) drop-shadow(0 0 1px rgba(255, 255, 255, 0.1));
+    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.3));
   }
 
   /* Enhanced Metallic Elevation System with Contouring */
@@ -455,7 +465,7 @@
       0 5px 10px rgba(0, 0, 0, 0.8);
   }
 
-  /* Metallic Station Card Contouring */
+  /* Unified Station Card Styling - Remove Glassy Glow */
   .metallic .metallic-station-card {
     background: linear-gradient(135deg, 
       rgba(70, 70, 74, 0.9) 0%,
@@ -471,58 +481,63 @@
       inset -1px 0 0 rgba(0, 0, 0, 0.2),
       0 2px 8px rgba(0, 0, 0, 0.6),
       0 1px 3px rgba(0, 0, 0, 0.4);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
+  /* Remove glow effect from selected cards */
   .metallic .metallic-station-card.selected {
     background: linear-gradient(135deg, 
-      rgba(176, 190, 197, 0.3) 0%,
-      rgba(69, 90, 100, 0.4) 25%,
-      rgba(55, 71, 79, 0.5) 50%,
-      rgba(69, 90, 100, 0.4) 75%,
-      rgba(176, 190, 197, 0.3) 100%);
-    border: 1px solid rgba(176, 190, 197, 0.4);
+      rgba(120, 134, 141, 0.9) 0%,
+      rgba(69, 90, 100, 0.95) 25%,
+      rgba(55, 71, 79, 1) 50%,
+      rgba(69, 90, 100, 0.95) 75%,
+      rgba(120, 134, 141, 0.9) 100%);
+    border: 1px solid rgba(176, 190, 197, 0.5);
     box-shadow: 
       inset 0 2px 0 rgba(176, 190, 197, 0.2),
       inset 0 -2px 0 rgba(0, 0, 0, 0.5),
       inset 2px 0 0 rgba(176, 190, 197, 0.1),
       inset -2px 0 0 rgba(0, 0, 0, 0.3),
-      0 0 12px rgba(176, 190, 197, 0.3),
-      0 4px 12px rgba(0, 0, 0, 0.7);
+      0 4px 12px rgba(0, 0, 0, 0.8),
+      0 2px 6px rgba(0, 0, 0, 0.6);
   }
 
-  /* Metallic Button Contouring */
-  .metallic .metallic-button {
+  /* Universal Button Styling for Metallic Theme */
+  .metallic button:not(.metallic-button-primary):not(.metallic-play-button) {
     background: linear-gradient(135deg, 
       rgba(97, 97, 97, 0.8) 0%,
       rgba(70, 70, 70, 0.9) 50%,
-      rgba(97, 97, 97, 0.8) 100%);
-    border: 1px solid rgba(158, 158, 158, 0.3);
+      rgba(97, 97, 97, 0.8) 100%) !important;
+    border: 1px solid rgba(158, 158, 158, 0.3) !important;
     box-shadow: 
       inset 0 1px 0 rgba(255, 255, 255, 0.15),
       inset 0 -1px 0 rgba(0, 0, 0, 0.4),
-      0 2px 4px rgba(0, 0, 0, 0.5);
+      0 2px 4px rgba(0, 0, 0, 0.5) !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
   }
 
-  .metallic .metallic-button:hover {
+  .metallic button:not(.metallic-button-primary):not(.metallic-play-button):hover {
     background: linear-gradient(135deg, 
       rgba(120, 120, 120, 0.9) 0%,
       rgba(90, 90, 90, 1) 50%,
-      rgba(120, 120, 120, 0.9) 100%);
+      rgba(120, 120, 120, 0.9) 100%) !important;
     box-shadow: 
       inset 0 1px 0 rgba(255, 255, 255, 0.2),
       inset 0 -1px 0 rgba(0, 0, 0, 0.5),
-      0 3px 6px rgba(0, 0, 0, 0.6);
+      0 3px 6px rgba(0, 0, 0, 0.6) !important;
+    transform: translateY(-1px);
   }
 
-  .metallic .metallic-button:active {
+  .metallic button:not(.metallic-button-primary):not(.metallic-play-button):active {
     background: linear-gradient(135deg, 
       rgba(50, 50, 50, 1) 0%,
       rgba(70, 70, 70, 0.95) 50%,
-      rgba(50, 50, 50, 1) 100%);
+      rgba(50, 50, 50, 1) 100%) !important;
     box-shadow: 
       inset 0 2px 4px rgba(0, 0, 0, 0.8),
       inset 0 1px 2px rgba(0, 0, 0, 0.6),
-      0 1px 2px rgba(0, 0, 0, 0.3);
+      0 1px 2px rgba(0, 0, 0, 0.3) !important;
+    transform: translateY(0px);
   }
 
   /* Metallic Primary Button */
@@ -540,6 +555,7 @@
       inset 0 -1px 0 rgba(0, 0, 0, 0.2),
       0 3px 6px rgba(0, 0, 0, 0.6),
       0 1px 3px rgba(0, 0, 0, 0.4);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .metallic .metallic-button-primary:hover {
@@ -554,6 +570,7 @@
       inset 0 -1px 0 rgba(0, 0, 0, 0.3),
       0 4px 8px rgba(0, 0, 0, 0.7),
       0 2px 4px rgba(0, 0, 0, 0.5);
+    transform: translateY(-1px);
   }
 
   .metallic .metallic-button-primary:active {
@@ -567,6 +584,7 @@
       inset 0 2px 4px rgba(0, 0, 0, 0.4),
       inset 0 1px 2px rgba(0, 0, 0, 0.3),
       0 1px 3px rgba(0, 0, 0, 0.5);
+    transform: translateY(0px);
   }
 
   /* Metallic Play Button Specific */
@@ -584,6 +602,23 @@
       inset -2px 0 0 rgba(0, 0, 0, 0.2),
       0 4px 12px rgba(0, 0, 0, 0.8),
       0 2px 6px rgba(0, 0, 0, 0.6);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .metallic .metallic-play-button:hover {
+    background: radial-gradient(circle at 30% 30%, 
+      rgba(196, 210, 217, 1) 0%,
+      rgba(176, 190, 197, 1) 40%,
+      rgba(164, 184, 194, 1) 70%,
+      rgba(144, 164, 174, 1) 100%);
+    box-shadow: 
+      inset 0 2px 0 rgba(255, 255, 255, 0.5),
+      inset 0 -2px 0 rgba(0, 0, 0, 0.4),
+      inset 2px 0 0 rgba(255, 255, 255, 0.3),
+      inset -2px 0 0 rgba(0, 0, 0, 0.3),
+      0 6px 16px rgba(0, 0, 0, 0.9),
+      0 3px 8px rgba(0, 0, 0, 0.7);
+    transform: translateY(-1px) scale(1.05);
   }
 
   .metallic .metallic-play-button.playing {
@@ -596,9 +631,9 @@
       inset 0 3px 0 rgba(255, 255, 255, 0.5),
       inset 0 -3px 0 rgba(0, 0, 0, 0.4),
       inset 3px 0 0 rgba(255, 255, 255, 0.3),
-      inset -3px 0 0 rgba(0, 0, 0, 0.3),
-      0 0 16px rgba(176, 190, 197, 0.4),
+      in-3px 0 0 rgba(0, 0, 0, 0.3),
       0 6px 16px rgba(0, 0, 0, 0.9);
+    transform: scale(1.05);
   }
 
   /* Metallic Navigation Contouring */
@@ -626,18 +661,18 @@
       inset 0 1px 0 rgba(255, 255, 255, 0.08),
       inset 0 -1px 0 rgba(0, 0, 0, 0.3),
       0 2px 4px rgba(0, 0, 0, 0.4);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .metallic .metallic-nav-item.active {
     background: linear-gradient(135deg, 
-      rgba(176, 190, 197, 0.25) 0%,
-      rgba(69, 90, 100, 0.4) 50%,
-      rgba(176, 190, 197, 0.25) 100%);
+      rgba(120, 134, 141, 0.4) 0%,
+      rgba(69, 90, 100, 0.6) 50%,
+      rgba(120, 134, 141, 0.4) 100%);
     border: 1px solid rgba(176, 190, 197, 0.3);
     box-shadow: 
       inset 0 1px 0 rgba(176, 190, 197, 0.15),
       inset 0 -1px 0 rgba(0, 0, 0, 0.4),
-      0 0 8px rgba(176, 190, 197, 0.2),
       0 3px 6px rgba(0, 0, 0, 0.5);
   }
 
@@ -652,19 +687,19 @@
       inset 0 1px 0 rgba(255, 255, 255, 0.1),
       inset 0 -1px 0 rgba(0, 0, 0, 0.3),
       0 1px 2px rgba(0, 0, 0, 0.5);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .metallic .metallic-language-badge.selected {
     background: linear-gradient(135deg, 
-      rgba(176, 190, 197, 0.4) 0%,
-      rgba(69, 90, 100, 0.6) 50%,
-      rgba(176, 190, 197, 0.4) 100%);
+      rgba(120, 134, 141, 0.7) 0%,
+      rgba(69, 90, 100, 0.9) 50%,
+      rgba(120, 134, 141, 0.7) 100%);
     border: 1px solid rgba(176, 190, 197, 0.4);
     color: rgba(176, 190, 197, 1);
     box-shadow: 
       inset 0 1px 0 rgba(176, 190, 197, 0.2),
       inset 0 -1px 0 rgba(0, 0, 0, 0.4),
-      0 0 4px rgba(176, 190, 197, 0.3),
       0 2px 4px rgba(0, 0, 0, 0.6);
   }
 
@@ -676,9 +711,18 @@
       transparent 100%);
   }
 
-  /* Smooth Transitions for All Metallic Elements */
+  /* Smooth Transitions for All Metallic Elements - Match Other Themes */
   .metallic * {
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Remove any transform scale differences on hover for consistency */
+  .metallic .metallic-station-card:hover {
+    transform: translateY(-2px);
+  }
+
+  .metallic .metallic-nav-item:hover {
+    transform: translateY(-1px);
   }
 }
 

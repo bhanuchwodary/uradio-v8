@@ -13,6 +13,8 @@ export const navItems = [
 ];
 
 const NavItem: React.FC<{ item: typeof navItems[0]; isActive: boolean }> = ({ item, isActive }) => {
+  const isMetallic = document.documentElement.classList.contains('metallic');
+
   return (
     <Link to={item.path} className="flex-1 text-center group">
       <div
@@ -24,13 +26,13 @@ const NavItem: React.FC<{ item: typeof navItems[0]; isActive: boolean }> = ({ it
           className={cn(
             "flex items-center justify-center rounded-full transition-all duration-300 ease-in-out h-8 w-16",
             // Standard themes
-            !document.documentElement.classList.contains('metallic') && (
+            !isMetallic && (
               isActive
                 ? "bg-secondary-container text-on-secondary-container"
                 : "text-on-surface-variant group-hover:bg-on-surface/10"
             ),
             // Metallic theme
-            document.documentElement.classList.contains('metallic') && (
+            isMetallic && (
               isActive
                 ? "metallic-nav-item active"
                 : "metallic-nav-item hover:elevation-1"
@@ -53,15 +55,16 @@ const NavItem: React.FC<{ item: typeof navItems[0]; isActive: boolean }> = ({ it
 export const BottomNav: React.FC = () => {
   const location = useLocation();
   const path = location.pathname;
+  const isMetallic = document.documentElement.classList.contains('metallic');
 
   return (
     <nav className={cn(
       "fixed bottom-0 left-0 right-0 p-2 sm:p-3 backdrop-blur-xl border-t elevation-3 z-10 bottom-nav-ios ios-safe-left ios-safe-right",
       // Standard themes
-      !document.documentElement.classList.contains('metallic') && 
+      !isMetallic && 
         "bg-surface-container/98 border-outline-variant/20",
       // Metallic theme
-      document.documentElement.classList.contains('metallic') && 
+      isMetallic && 
         "metallic-nav border-outline-variant/30"
     )}>
       <div className="container mx-auto px-0">
@@ -75,10 +78,10 @@ export const BottomNav: React.FC = () => {
                 <div className={cn(
                   "flex items-center justify-center rounded-full h-8 w-16 transition-all duration-300 ease-in-out",
                   // Standard themes
-                  !document.documentElement.classList.contains('metallic') && 
+                  !isMetallic && 
                     "text-on-surface-variant group-hover:bg-on-surface/10",
                   // Metallic theme
-                  document.documentElement.classList.contains('metallic') && 
+                  isMetallic && 
                     "metallic-nav-item hover:elevation-1"
                 )}>
                   <div className="relative h-6 w-6">
