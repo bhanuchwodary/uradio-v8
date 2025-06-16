@@ -244,5 +244,10 @@ export const featuredStations = [
     name: "Chilled Luv",
     url: "https://funasia.streamguys1.com/live7",
     language: "English"
+  },
+  {
+    name: "Radio Caravan",
+    url: "https://streamlky.alsolnet.com/radiocaravanaudio",
+    language: "Hindi"
   }
 ];
