@@ -13,8 +13,6 @@ export const navItems = [
 ];
 
 const NavItem: React.FC<{ item: typeof navItems[0]; isActive: boolean }> = ({ item, isActive }) => {
-  const isMetallic = document.documentElement.classList.contains('metallic');
-
   return (
     <Link to={item.path} className="flex-1 text-center group">
       <div
@@ -25,18 +23,9 @@ const NavItem: React.FC<{ item: typeof navItems[0]; isActive: boolean }> = ({ it
         <div
           className={cn(
             "flex items-center justify-center rounded-full transition-all duration-300 ease-in-out h-8 w-16",
-            // Standard themes
-            !isMetallic && (
-              isActive
-                ? "bg-secondary-container text-on-secondary-container"
-                : "text-on-surface-variant group-hover:bg-on-surface/10"
-            ),
-            // Metallic theme
-            isMetallic && (
-              isActive
-                ? "metallic-nav-item active"
-                : "metallic-nav-item hover:elevation-1"
-            )
+            isActive
+              ? "bg-secondary-container text-on-secondary-container"
+              : "text-on-surface-variant group-hover:bg-on-surface/10"
           )}
         >
           <item.icon className="h-6 w-6" />
@@ -52,21 +41,13 @@ const NavItem: React.FC<{ item: typeof navItems[0]; isActive: boolean }> = ({ it
   );
 };
 
+
 export const BottomNav: React.FC = () => {
   const location = useLocation();
   const path = location.pathname;
-  const isMetallic = document.documentElement.classList.contains('metallic');
 
   return (
-    <nav className={cn(
-      "fixed bottom-0 left-0 right-0 p-2 sm:p-3 backdrop-blur-xl border-t elevation-3 z-10 bottom-nav-ios ios-safe-left ios-safe-right",
-      // Standard themes
-      !isMetallic && 
-        "bg-surface-container/98 border-outline-variant/20",
-      // Metallic theme
-      isMetallic && 
-        "metallic-nav border-outline-variant/30"
-    )}>
+    <nav className="fixed bottom-0 left-0 right-0 p-2 sm:p-3 bg-surface-container/98 backdrop-blur-xl border-t border-outline-variant/20 elevation-3 z-10 bottom-nav-ios ios-safe-left ios-safe-right">
       <div className="container mx-auto px-0">
         <div className="flex justify-around items-start">
           {navItems.map((item) => (
@@ -75,15 +56,7 @@ export const BottomNav: React.FC = () => {
           <div className="flex-1 text-center group">
              <ThemeToggle>
               <div className="flex flex-col items-center justify-center gap-1 w-full py-1 transition-all duration-300 ease-out ios-touch-target rounded-xl cursor-pointer">
-                <div className={cn(
-                  "flex items-center justify-center rounded-full h-8 w-16 transition-all duration-300 ease-in-out",
-                  // Standard themes
-                  !isMetallic && 
-                    "text-on-surface-variant group-hover:bg-on-surface/10",
-                  // Metallic theme
-                  isMetallic && 
-                    "metallic-nav-item hover:elevation-1"
-                )}>
+                <div className="flex items-center justify-center rounded-full text-on-surface-variant group-hover:bg-on-surface/10 h-8 w-16 transition-all duration-300 ease-in-out">
                   <div className="relative h-6 w-6">
                     <Sun className="absolute h-6 w-6 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
                     <Moon className="absolute h-6 w-6 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />

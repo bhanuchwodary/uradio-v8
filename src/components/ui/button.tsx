@@ -1,4 +1,3 @@
-
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"
@@ -77,13 +76,9 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       }
     };
 
-    // Check if metallic theme is active for special styling
-    const isMetallic = document.documentElement.classList.contains('metallic');
-    const metallicClass = isMetallic ? 'metallic-button' : '';
-
     return (
       <Comp
-        className={cn(buttonVariants({ variant, size, className }), "ink-ripple", metallicClass)}
+        className={cn(buttonVariants({ variant, size, className }), "ink-ripple")}
         ref={ref}
         {...props}
         onClick={handleClick}
