@@ -229,5 +229,20 @@ export const featuredStations = [
     name: "Radio Sangam",
     url: "https://stream.voxx.pro/listen/radio_sangam/radio.mp3",
     language: "Telugu"
+  },
+  {
+    name: "Luv UAE 107.1",
+    url: "https://funasia.streamguys1.com/live2",
+    language: "English"
+  },
+  {
+    name: "Luv Legends",
+    url: "https://funasia.streamguys1.com/live8",
+    language: "English"
+  },
+  {
+    name: "Chilled Luv",
+    url: "https://funasia.streamguys1.com/live7",
+    language: "English"
   }
 ];
