@@ -219,5 +219,10 @@ export const featuredStations = [
     name: "Radio Beat",
     url: "https://listen.openstream.co/3372/audio",
     language: "Tamil"
+  },
+  {
+    name: "Radio Surabhi",
+    url: "https://radiosurabhi.streamguys1.com/live1-web",
+    language: "Telugu"
   }
 ];
