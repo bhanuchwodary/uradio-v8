@@ -1,7 +1,7 @@
 
 import { useRef, useEffect } from "react";
 import Hls from "hls.js";
-import { globalAudioRef } from "@/components/music-player/audioInstance";
+import { globalAudioRef, shouldResumeAfterNavigation } from "@/components/music-player/audioInstance";
 import { logger } from "@/utils/logger";
 import { detectStreamType, configureAudioForStream, handleDirectStreamError } from "@/utils/streamHandler";
 
@@ -30,16 +30,25 @@ export const useHlsHandler = ({
       return;
     }
 
-    // Check if we're already playing this URL and don't reload
-    if (url === lastUrlRef.current && audioRef.current.src && !audioRef.current.paused === isPlaying) {
-      logger.debug("URL and playback state unchanged, maintaining current playback");
-      return;
+    // Check if we're already playing this URL - enhanced logic for navigation
+    if (url === lastUrlRef.current && audioRef.current.src) {
+      // If URL is the same but we're navigating, check if we should resume
+      if (globalAudioRef.navigationInProgress) {
+        logger.debug("Navigation in progress, maintaining current state");
+        return;
+      }
+      
+      // If not navigating and URL is same, sync playback state without reloading
+      if (!audioRef.current.paused === isPlaying) {
+        logger.debug("URL and playback state unchanged, maintaining current playback");
+        return;
+      }
     }
 
     lastUrlRef.current = url;
     
-    // Only show loading if we're actually changing the URL
-    if (audioRef.current.src !== url) {
+    // Only show loading if we're actually changing the URL or loading for first time
+    if (audioRef.current.src !== url || !audioRef.current.src) {
       setLoading(true);
     }
     
@@ -54,7 +63,7 @@ export const useHlsHandler = ({
     const streamConfig = detectStreamType(url);
     configureAudioForStream(audioRef.current, streamConfig);
 
-    // Handle HLS streams
+    // Handle HLS streams with enhanced state management
     if (streamConfig.type === 'hls' && Hls.isSupported()) {
       logger.info("Loading HLS stream", { url, config: streamConfig });
       
@@ -99,13 +108,16 @@ export const useHlsHandler = ({
           }
           
           setLoading(false);
-          retryCountRef.current = 0; // Reset retry count on successful load
+          retryCountRef.current = 0;
           
-          if (isPlaying) {
+          // Enhanced playback logic - only auto-play if should resume
+          if (isPlaying && shouldResumeAfterNavigation()) {
             audioRef.current?.play().catch(error => {
               logger.error("Error playing HLS stream", error);
               setIsPlaying(false);
             });
+          } else if (globalAudioRef.explicitlyPaused) {
+            logger.debug("Stream was explicitly paused, not auto-resuming");
           }
         });
         
@@ -154,27 +166,29 @@ export const useHlsHandler = ({
         globalAudioRef.hls.loadSource(url);
       }
     } else if (audioRef.current.src !== url) {
-      // Handle direct streams (including the Suryan FM type URLs)
+      // Handle direct streams with enhanced state management
       logger.info("Loading direct audio stream", { url, config: streamConfig });
       audioRef.current.src = url;
       audioRef.current.load();
       
       audioRef.current.oncanplay = () => {
         setLoading(false);
-        retryCountRef.current = 0; // Reset retry count on successful load
+        retryCountRef.current = 0;
         
-        if (isPlaying) {
+        // Enhanced playback logic for direct streams
+        if (isPlaying && shouldResumeAfterNavigation()) {
           audioRef.current?.play().catch(error => {
             logger.error("Error playing direct stream", error);
             setIsPlaying(false);
           });
+        } else if (globalAudioRef.explicitlyPaused) {
+          logger.debug("Direct stream was explicitly paused, not auto-resuming");
         }
       };
 
       audioRef.current.onerror = async () => {
         logger.warn("Direct stream error, attempting fallback", { url });
         
-        // Try fallback handling for direct streams
         const success = await handleDirectStreamError(audioRef.current!, streamConfig);
         if (!success) {
           setLoading(false);
@@ -182,13 +196,13 @@ export const useHlsHandler = ({
         }
       };
     } else {
-      // URL is the same, just sync playback state
-      if (isPlaying) {
+      // URL is the same, just sync playback state without auto-resume issues
+      if (isPlaying && shouldResumeAfterNavigation()) {
         audioRef.current.play().catch(error => {
           logger.error("Error resuming audio stream", error);
           setIsPlaying(false);
         });
-      } else {
+      } else if (!isPlaying) {
         audioRef.current.pause();
       }
       setLoading(false);

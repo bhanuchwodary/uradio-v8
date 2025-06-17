@@ -1,6 +1,5 @@
-
 import { useEffect } from "react";
-import { globalAudioRef, updateGlobalPlaybackState } from "@/components/music-player/audioInstance";
+import { globalAudioRef, updateGlobalPlaybackState, setNavigationState } from "@/components/music-player/audioInstance";
 
 interface UseAudioInitializationProps {
   audioRef: React.MutableRefObject<HTMLAudioElement | null>;
@@ -14,6 +13,9 @@ export const useAudioInitialization = ({
   volume
 }: UseAudioInitializationProps) => {
   useEffect(() => {
+    // Set navigation state when component mounts
+    setNavigationState(true);
+    
     // Create audio element if it doesn't exist (should only happen once globally)
     if (!globalAudioRef.element) {
       console.log("Creating new global audio element");
@@ -26,23 +28,27 @@ export const useAudioInitialization = ({
       // Using type assertion to handle playsInline
       (globalAudioRef.element as any).playsInline = true;
       
-      // Add global event listeners to track state
+      // Enhanced global event listeners to track explicit user actions
       globalAudioRef.element.addEventListener('play', () => {
-        updateGlobalPlaybackState(true, false);
+        updateGlobalPlaybackState(true, false, false);
       });
       
-      globalAudioRef.element.addEventListener('pause', () => {
-        updateGlobalPlaybackState(false, true);
+      globalAudioRef.element.addEventListener('pause', (event) => {
+        // Check if this was triggered by user interaction or programmatically
+        const isExplicitPause = !globalAudioRef.navigationInProgress;
+        updateGlobalPlaybackState(false, true, isExplicitPause);
       });
       
       globalAudioRef.element.addEventListener('ended', () => {
-        updateGlobalPlaybackState(false, false);
+        updateGlobalPlaybackState(false, false, false);
+        globalAudioRef.explicitlyPaused = false; // Reset on track end
       });
       
       // Prevent audio element from being garbage collected
       globalAudioRef.element.addEventListener('canplay', () => {
         // This empty handler helps keep the audio element alive
       });
+      
       globalAudioRef.isInitialized = true;
     }
 
@@ -57,12 +63,15 @@ export const useAudioInitialization = ({
       audioRef.current.volume = volume;
     }
 
-    // Log that we're using the existing audio element instead of creating a new one
     console.log("Using existing global audio element for page:", window.location.pathname);
     
-    // This is crucial - we're not cleaning up the audio element on unmount
-    // to maintain continuous playback between page navigations
+    // Signal that navigation is complete after a short delay
+    const navigationTimer = setTimeout(() => {
+      setNavigationState(false);
+    }, 100);
+    
     return () => {
+      clearTimeout(navigationTimer);
       console.log("Component unmounting, audio reference removed but playback continues");
       // Don't reset anything here, let the audio continue playing
     };

@@ -16,6 +16,7 @@ interface StationCardProps {
   onDelete?: () => void;
   onToggleFavorite?: () => void;
   actionIcon?: "play" | "add";
+  context?: "playlist" | "library"; // New prop to determine context
 }
 
 export const StationCard: React.FC<StationCardProps> = memo(({
@@ -26,7 +27,8 @@ export const StationCard: React.FC<StationCardProps> = memo(({
   onEdit,
   onDelete,
   onToggleFavorite,
-  actionIcon = "play"
+  actionIcon = "play",
+  context = "library" // Default to library context
 }) => {
   // Prevent event bubbling for control buttons
   const handleButtonClick = (e: React.MouseEvent, callback?: () => void) => {
@@ -46,13 +48,25 @@ export const StationCard: React.FC<StationCardProps> = memo(({
   // Ensure language is preserved from station data with proper fallback
   const stationLanguage = station?.language && station.language !== "" ? station.language : "Unknown";
 
+  // Determine if edit button should be shown
+  const shouldShowEditButton = () => {
+    // In playlist context, don't show edit for user-added stations (non-featured)
+    if (context === "playlist" && !station.isFeatured) {
+      return false;
+    }
+    // In library context, show edit for non-featured stations
+    return !station.isFeatured && onEdit;
+  };
+
   // Only log in development
   if (process.env.NODE_ENV === 'development') {
     logger.debug("StationCard rendering", { 
       name: station.name, 
       language: stationLanguage, 
       isPlaying, 
-      isSelected 
+      isSelected,
+      context,
+      showEdit: shouldShowEditButton()
     });
   }
 
@@ -118,7 +132,7 @@ export const StationCard: React.FC<StationCardProps> = memo(({
             </Button>
           )}
           
-          {onEdit && !station.isFeatured && (
+          {shouldShowEditButton() && (
             <Button 
               size="icon" 
               variant="ghost" 
@@ -136,7 +150,7 @@ export const StationCard: React.FC<StationCardProps> = memo(({
               variant="ghost" 
               className="h-6 w-6 text-destructive hover:text-destructive/80 hover:bg-destructive/10 rounded-full transition-all duration-200 active:scale-90"
               onClick={(e) => handleButtonClick(e, onDelete)}
-              aria-label="Delete station"
+              aria-label={context === "playlist" ? "Remove from playlist" : "Delete station"}
             >
               <Trash2 className="h-3 w-3" />
             </Button>
@@ -153,7 +167,8 @@ export const StationCard: React.FC<StationCardProps> = memo(({
     prevProps.station.language === nextProps.station.language &&
     prevProps.isPlaying === nextProps.isPlaying &&
     prevProps.isSelected === nextProps.isSelected &&
-    prevProps.station.isFavorite === nextProps.station.isFavorite
+    prevProps.station.isFavorite === nextProps.station.isFavorite &&
+    prevProps.context === nextProps.context
   );
 });
 

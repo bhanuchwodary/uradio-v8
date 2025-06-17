@@ -14,6 +14,7 @@ interface StationGridProps {
   onDeleteStation?: (station: Track) => void;
   onToggleFavorite?: (station: Track) => void;
   actionIcon?: "play" | "add";
+  context?: "playlist" | "library"; // New prop to determine context
 }
 
 export const StationGrid: React.FC<StationGridProps> = memo(({
@@ -25,7 +26,8 @@ export const StationGrid: React.FC<StationGridProps> = memo(({
   onEditStation,
   onDeleteStation,
   onToggleFavorite,
-  actionIcon = "play"
+  actionIcon = "play",
+  context = "library" // Default to library context
 }) => {
   if (!stations || stations.length === 0) {
     return (
@@ -51,7 +53,8 @@ export const StationGrid: React.FC<StationGridProps> = memo(({
             language: station.language,
             key: stationKey,
             isSelected,
-            isPlaying: isCurrentlyPlaying
+            isPlaying: isCurrentlyPlaying,
+            context
           });
         }
         
@@ -66,6 +69,7 @@ export const StationGrid: React.FC<StationGridProps> = memo(({
             onDelete={onDeleteStation ? () => onDeleteStation(station) : undefined}
             onToggleFavorite={onToggleFavorite ? () => onToggleFavorite(station) : undefined}
             actionIcon={actionIcon}
+            context={context}
           />
         );
       })}
@@ -77,6 +81,7 @@ export const StationGrid: React.FC<StationGridProps> = memo(({
     prevProps.stations.length === nextProps.stations.length &&
     prevProps.currentTrackUrl === nextProps.currentTrackUrl &&
     prevProps.isPlaying === nextProps.isPlaying &&
+    prevProps.context === nextProps.context &&
     prevProps.stations.every((station, index) => 
       station.url === nextProps.stations[index]?.url &&
       station.name === nextProps.stations[index]?.name &&

@@ -83,12 +83,12 @@ export const useMediaSession = ({
         
         navigator.mediaSession.setActionHandler('previoustrack', () => {
           console.log("Media session previous track action triggered", { randomMode });
-          onSkipPrevious(); // Now uses the enhanced handler with random mode logic
+          onSkipPrevious();
         });
         
         navigator.mediaSession.setActionHandler('nexttrack', () => {
           console.log("Media session next track action triggered", { randomMode });
-          onSkipNext(); // Now uses the enhanced handler with random mode logic
+          onSkipNext();
         });
         
         // Enhanced seek handling for iOS
@@ -109,13 +109,34 @@ export const useMediaSession = ({
         console.warn("Error setting media session action handlers:", error);
       }
 
-      // Fix the playbackRate error - use very small value instead of 0 when paused
+      // Fixed playbackRate error - enhanced handling for different stream types
       try {
         if (trackDuration && trackDuration !== Infinity && !isNaN(trackDuration)) {
+          const currentTrack = tracks[currentIndex];
+          const isHlsStream = currentTrack?.url?.includes('.m3u8');
+          
+          // Use different playback rate strategies for different stream types
+          let playbackRate: number;
+          if (isHlsStream) {
+            // For HLS streams, use a slightly higher minimum to prevent auto-resume issues
+            playbackRate = isPlaying ? 1.0 : 0.001;
+          } else {
+            // For other streams, use the standard approach
+            playbackRate = isPlaying ? 1.0 : 0.0001;
+          }
+          
           navigator.mediaSession.setPositionState({
             duration: trackDuration,
             position: Math.min(trackPosition || 0, trackDuration),
-            playbackRate: isPlaying ? 1.0 : 0.0001, // Use very small value instead of 0
+            playbackRate: playbackRate,
+          });
+          
+          console.log("Set position state with enhanced playback rate:", {
+            duration: trackDuration,
+            position: trackPosition,
+            playbackRate,
+            isHlsStream,
+            streamUrl: currentTrack?.url
           });
         }
       } catch (error) {
@@ -134,7 +155,6 @@ export const useMediaSession = ({
         console.warn('Error initializing Android Auto service:', err);
       }
 
-      // Enhanced callbacks for iOS compatibility with random mode awareness
       androidAutoService.registerCallbacks({
         onPlay: () => {
           console.log("Android Auto play callback triggered");
@@ -146,11 +166,11 @@ export const useMediaSession = ({
         },
         onSkipNext: () => {
           console.log("Android Auto skip next callback triggered", { randomMode });
-          onSkipNext(); // Uses enhanced handler with random mode logic
+          onSkipNext();
         },
         onSkipPrevious: () => {
           console.log("Android Auto skip previous callback triggered", { randomMode });
-          onSkipPrevious(); // Uses enhanced handler with random mode logic
+          onSkipPrevious();
         },
         onSeek: (position) => {
           console.log("Android Auto seek callback triggered:", position);
@@ -158,7 +178,6 @@ export const useMediaSession = ({
         },
       });
       
-      // Enhanced wake lock for iOS
       try {
         await audioWakeLockService.requestWakeLock();
         console.log("Wake lock requested successfully");
@@ -177,7 +196,6 @@ export const useMediaSession = ({
     };
   }, []);
 
-  // Enhanced track info updates with uRadio branding
   useEffect(() => {
     if (tracks.length > 0 && currentIndex < tracks.length) {
       const currentTrack = tracks[currentIndex];
@@ -201,7 +219,6 @@ export const useMediaSession = ({
     }
   }, [tracks, currentIndex, trackDuration, trackPosition, tracks[currentIndex]?.name, randomMode]);
 
-  // Enhanced playback state updates for iOS
   useEffect(() => {
     console.log("Updating Android Auto playback state:", isPlaying ? "playing" : "paused", { randomMode });
     androidAutoService.updatePlaybackState(isPlaying);

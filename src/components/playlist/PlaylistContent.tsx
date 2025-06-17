@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -34,7 +35,7 @@ const PlaylistContent: React.FC<PlaylistContentProps> = ({
   onToggleFavorite,
   onClearAll
 }) => {
-  // FIXED: Combine all stations into one unified playlist (stations that are actually in the playlist)
+  // Combine all stations into one unified playlist
   const uniquePlaylistStations = [
     ...favoriteStations,
     ...popularStations,
@@ -51,14 +52,13 @@ const PlaylistContent: React.FC<PlaylistContentProps> = ({
           <CardTitle className="text-xl font-bold text-on-surface">
             My Playlist
           </CardTitle>
-          {/* FIXED: Only show clear all if there are stations in the playlist */}
           {uniquePlaylistStations.length > 0 && onClearAll && (
             <Button
               variant="destructive"
               size="sm"
               onClick={onClearAll}
               className="flex items-center gap-2"
-              aria-label="Clear all stations"
+              aria-label="Clear all stations from playlist"
             >
               {/* Icon only on mobile */}
               <span className="inline-flex sm:hidden">
@@ -67,7 +67,7 @@ const PlaylistContent: React.FC<PlaylistContentProps> = ({
               {/* Icon + label on desktop */}
               <span className="hidden sm:inline-flex items-center gap-2">
                 <Trash2 className="h-4 w-4" />
-                Clear All
+                Clear Playlist
               </span>
             </Button>
           )}
@@ -84,6 +84,7 @@ const PlaylistContent: React.FC<PlaylistContentProps> = ({
             onEditStation={onEditStation}
             onDeleteStation={onConfirmDelete}
             onToggleFavorite={onToggleFavorite}
+            context="playlist"
           />
         ) : (
           <div className="text-center p-8 bg-gradient-to-br from-background/50 to-background/30 rounded-xl border border-border/50">
