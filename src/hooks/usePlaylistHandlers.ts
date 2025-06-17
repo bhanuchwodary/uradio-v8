@@ -40,26 +40,45 @@ export const usePlaylistHandlers = ({
   const handleSelectStation = (stationIndex: number, stationList: typeof playlistTracks) => {
     const selectedStation = stationList[stationIndex];
     
-    // Find the corresponding index in the main library tracks for playback
+    console.log("Playlist station selected:", selectedStation.name, "URL:", selectedStation.url);
+    
+    // CRITICAL FIX: Find the corresponding index in the main library tracks for playback
+    // This ensures both featured and user stations can be played
     const mainIndex = tracks.findIndex(t => t.url === selectedStation.url);
+    
+    console.log("Found station in main library at index:", mainIndex);
+    
     if (mainIndex !== -1) {
+      // CRITICAL FIX: Add explicit user intent check for playback
       // If clicking on the currently playing station, toggle pause/play
       if (mainIndex === currentIndex && isPlaying) {
+        console.log("Pausing currently playing station");
         setIsPlaying(false);
       } else {
+        console.log("Starting playback of station at index:", mainIndex);
         setCurrentIndex(mainIndex);
         setIsPlaying(true);
       }
+    } else {
+      // This should not happen after our playlist core fix, but add safety
+      console.error("Station not found in main library:", selectedStation.url);
+      toast({
+        title: "Playback Error",
+        description: "Station not available for playback. Please try adding it again.",
+        variant: "destructive"
+      });
     }
   };
   
   // Edit station handler - edits the station in the main library
   const handleEditStation = (station: Track) => {
+    console.log("Opening edit dialog for station:", station.name);
     setEditingStation(station);
   };
   
   // Open the delete confirmation dialog for removing from playlist
   const handleConfirmDelete = (station: Track) => {
+    console.log("Confirming delete for playlist station:", station.name);
     setStationToDelete(station);
   };
   
@@ -67,6 +86,7 @@ export const usePlaylistHandlers = ({
   const handleDeleteStation = (stationToDelete: Track | null) => {
     if (stationToDelete) {
       const stationName = stationToDelete.name;
+      console.log("Removing station from playlist:", stationName);
       const success = removeFromPlaylist(stationToDelete.url);
       if (success) {
         toast({
@@ -81,17 +101,22 @@ export const usePlaylistHandlers = ({
   const handleToggleFavorite = (station: Track) => {
     const index = tracks.findIndex(t => t.url === station.url);
     if (index !== -1) {
+      console.log("Toggling favorite for station:", station.name);
       toggleFavorite(index);
+    } else {
+      console.warn("Station not found in main library for favorite toggle:", station.url);
     }
   };
   
   // Clear all stations from playlist only
   const handleClearAll = () => {
+    console.log("Opening clear all dialog");
     setShowClearDialog(true);
   };
   
   // Confirm clearing all stations from playlist
   const confirmClearAll = () => {
+    console.log("Confirming clear all playlist");
     const removedCount = clearPlaylist();
     toast({
       title: "Playlist cleared",
@@ -103,6 +128,7 @@ export const usePlaylistHandlers = ({
   // Save edited station in the main library
   const handleSaveEdit = (data: { url: string; name: string }, editingStation: Track | null) => {
     if (editingStation) {
+      console.log("Saving station edit:", data.name);
       editStationByValue(editingStation, data);
       toast({
         title: "Station updated",

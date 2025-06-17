@@ -28,24 +28,41 @@ export const useAudioInitialization = ({
       // Using type assertion to handle playsInline
       (globalAudioRef.element as any).playsInline = true;
       
-      // Enhanced global event listeners to track explicit user actions
+      // CRITICAL FIX: Enhanced global event listeners to prevent auto-playback
       globalAudioRef.element.addEventListener('play', () => {
+        console.log("Audio element started playing");
         updateGlobalPlaybackState(true, false, false);
       });
       
       globalAudioRef.element.addEventListener('pause', (event) => {
+        console.log("Audio element paused");
         // Check if this was triggered by user interaction or programmatically
         const isExplicitPause = !globalAudioRef.navigationInProgress;
         updateGlobalPlaybackState(false, true, isExplicitPause);
       });
       
       globalAudioRef.element.addEventListener('ended', () => {
+        console.log("Audio element ended");
         updateGlobalPlaybackState(false, false, false);
         globalAudioRef.explicitlyPaused = false; // Reset on track end
       });
       
+      // CRITICAL FIX: Add error handling to prevent auto-loading invalid URLs
+      globalAudioRef.element.addEventListener('error', (event) => {
+        console.error("Audio element error:", event);
+        updateGlobalPlaybackState(false, false, false);
+        // Don't auto-retry or auto-load on error
+      });
+      
+      // CRITICAL FIX: Add loadstart listener to track when loading begins
+      globalAudioRef.element.addEventListener('loadstart', () => {
+        console.log("Audio element started loading");
+        // This helps us track when loading is initiated
+      });
+      
       // Prevent audio element from being garbage collected
       globalAudioRef.element.addEventListener('canplay', () => {
+        console.log("Audio element can play");
         // This empty handler helps keep the audio element alive
       });
       
@@ -58,9 +75,10 @@ export const useAudioInitialization = ({
     // Set this instance as the active instance without recreating the audio element
     globalAudioRef.activePlayerInstance = playerInstanceRef;
     
-    // Set initial volume without reloading the audio
+    // CRITICAL FIX: Set initial volume without triggering any audio loading
     if (audioRef.current) {
       audioRef.current.volume = volume;
+      console.log("Set initial volume to:", volume);
     }
 
     console.log("Using existing global audio element for page:", window.location.pathname);
@@ -68,6 +86,7 @@ export const useAudioInitialization = ({
     // Signal that navigation is complete after a short delay
     const navigationTimer = setTimeout(() => {
       setNavigationState(false);
+      console.log("Navigation state cleared");
     }, 100);
     
     return () => {

@@ -13,7 +13,7 @@ export interface PlaylistTrack extends Track {
 
 export const usePlaylistCore = () => {
   const [playlistTracks, setPlaylistTracks] = useState<PlaylistTrack[]>([]);
-  const { tracks: allTracks } = useTrackStateContext();
+  const { tracks: allTracks, addUrl } = useTrackStateContext();
 
   // Load playlist from localStorage on init
   useEffect(() => {
@@ -45,6 +45,18 @@ export const usePlaylistCore = () => {
     if (exists) {
       logger.warn("Track already in playlist", { url: track.url });
       return false;
+    }
+
+    // CRITICAL FIX: If this is a featured station, ensure it exists in main library
+    const existsInLibrary = allTracks.some(t => t.url === track.url);
+    if (!existsInLibrary) {
+      logger.info("Adding featured station to main library first", { name: track.name });
+      // Add to main library without triggering playback
+      const result = addUrl(track.url, track.name, track.isFeatured || false, track.isFavorite || false, track.language || "");
+      if (!result.success) {
+        logger.error("Failed to add featured station to library", { error: result.message });
+        return false;
+      }
     }
 
     const playlistTrack: PlaylistTrack = {

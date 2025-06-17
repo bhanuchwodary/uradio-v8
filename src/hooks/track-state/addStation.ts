@@ -50,10 +50,10 @@ export const addStationUrl = (
     };
     
     console.log("Updated station data with language:", updatedTracks[existingIndex].language);
-    resultMessage = "Station updated in playlist";
+    resultMessage = "Station updated in library";
   } else {
     // If not found, add as a new station
-    console.log("Station doesn't exist in playlist, adding as new");
+    console.log("Station doesn't exist in library, adding as new");
     const newTrack: Track = { 
       url, 
       name: name || `Station ${tracksClone.length + 1}`,
@@ -68,10 +68,11 @@ export const addStationUrl = (
     
     // Critical fix: create a fresh array to ensure state change detection
     updatedTracks = [...tracksClone, newTrack];
-    resultMessage = "Station added to playlist";
+    resultMessage = "Station added to library";
   }
   
   console.log("Updated tracks array now has", updatedTracks.length, "tracks");
+  console.log("IMPORTANT: Station addition should NOT trigger playback");
   
   // Sanity check our data before returning
   const hasInvalidTracks = updatedTracks.some((track: Track) => !track.url || !track.name);
