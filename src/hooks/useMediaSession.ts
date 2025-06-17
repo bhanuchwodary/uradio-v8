@@ -1,3 +1,4 @@
+
 import { useEffect } from "react";
 import androidAutoService from "../services/androidAutoService";
 import audioWakeLockService from "../services/audioWakeLockService";
@@ -13,6 +14,7 @@ interface UseMediaSessionProps {
   onSkipNext: () => void;
   onSkipPrevious: () => void;
   onSeek: (position: number) => void;
+  randomMode?: boolean;
 }
 
 export const useMediaSession = ({
@@ -25,6 +27,7 @@ export const useMediaSession = ({
   onSkipNext,
   onSkipPrevious,
   onSeek,
+  randomMode = false,
 }: UseMediaSessionProps) => {
   // Enhanced media session controls with uRadio branding
   useEffect(() => {
@@ -51,7 +54,8 @@ export const useMediaSession = ({
           console.log("Updated media session metadata with uRadio branding:", {
             title: currentTrack?.name,
             artist: 'uRadio',
-            stationUrl: currentTrack?.url
+            stationUrl: currentTrack?.url,
+            randomMode
           });
         } catch (error) {
           console.warn("Error setting media session metadata:", error);
@@ -65,7 +69,7 @@ export const useMediaSession = ({
         console.warn("Error setting playback state:", error);
       }
 
-      // Enhanced action handlers with better iOS support
+      // Enhanced action handlers with better iOS support and random mode awareness
       try {
         navigator.mediaSession.setActionHandler('play', () => {
           console.log("Media session play action triggered");
@@ -78,13 +82,13 @@ export const useMediaSession = ({
         });
         
         navigator.mediaSession.setActionHandler('previoustrack', () => {
-          console.log("Media session previous track action triggered");
-          onSkipPrevious();
+          console.log("Media session previous track action triggered", { randomMode });
+          onSkipPrevious(); // Now uses the enhanced handler with random mode logic
         });
         
         navigator.mediaSession.setActionHandler('nexttrack', () => {
-          console.log("Media session next track action triggered");
-          onSkipNext();
+          console.log("Media session next track action triggered", { randomMode });
+          onSkipNext(); // Now uses the enhanced handler with random mode logic
         });
         
         // Enhanced seek handling for iOS
@@ -118,7 +122,7 @@ export const useMediaSession = ({
         console.warn("Error setting position state:", error);
       }
     }
-  }, [tracks, currentIndex, isPlaying, trackDuration, trackPosition, tracks[currentIndex]?.name]);
+  }, [tracks, currentIndex, isPlaying, trackDuration, trackPosition, tracks[currentIndex]?.name, randomMode]);
 
   // Enhanced initialization with uRadio branding
   useEffect(() => {
@@ -130,7 +134,7 @@ export const useMediaSession = ({
         console.warn('Error initializing Android Auto service:', err);
       }
 
-      // Enhanced callbacks for iOS compatibility
+      // Enhanced callbacks for iOS compatibility with random mode awareness
       androidAutoService.registerCallbacks({
         onPlay: () => {
           console.log("Android Auto play callback triggered");
@@ -141,12 +145,12 @@ export const useMediaSession = ({
           setIsPlaying(false);
         },
         onSkipNext: () => {
-          console.log("Android Auto skip next callback triggered");
-          onSkipNext();
+          console.log("Android Auto skip next callback triggered", { randomMode });
+          onSkipNext(); // Uses enhanced handler with random mode logic
         },
         onSkipPrevious: () => {
-          console.log("Android Auto skip previous callback triggered");
-          onSkipPrevious();
+          console.log("Android Auto skip previous callback triggered", { randomMode });
+          onSkipPrevious(); // Uses enhanced handler with random mode logic
         },
         onSeek: (position) => {
           console.log("Android Auto seek callback triggered:", position);
@@ -188,18 +192,18 @@ export const useMediaSession = ({
           artworkUrl: '/lovable-uploads/f6bddacc-e4ab-42a4-bdd9-3ea0d18320c0.png',
         };
         
-        console.log("Updating track info for notifications with uRadio branding:", trackInfo);
+        console.log("Updating track info for notifications with uRadio branding:", trackInfo, { randomMode });
         
         androidAutoService.updateTrackInfo(trackInfo).catch(err => 
           console.warn('Error updating track info:', err)
         );
       }
     }
-  }, [tracks, currentIndex, trackDuration, trackPosition, tracks[currentIndex]?.name]);
+  }, [tracks, currentIndex, trackDuration, trackPosition, tracks[currentIndex]?.name, randomMode]);
 
   // Enhanced playback state updates for iOS
   useEffect(() => {
-    console.log("Updating Android Auto playback state:", isPlaying ? "playing" : "paused");
+    console.log("Updating Android Auto playback state:", isPlaying ? "playing" : "paused", { randomMode });
     androidAutoService.updatePlaybackState(isPlaying);
     
     if (isPlaying) {
@@ -207,5 +211,5 @@ export const useMediaSession = ({
         console.warn('Error requesting wake lock on play:', err)
       );
     }
-  }, [isPlaying]);
+  }, [isPlaying, randomMode]);
 };

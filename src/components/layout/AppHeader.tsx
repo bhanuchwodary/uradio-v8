@@ -33,21 +33,6 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
     setIsPlaying
   } = useTrackStateContext();
 
-  // Use player core for player functionality
-  const {
-    loading,
-    handlePlayPause,
-    handleNext: originalHandleNext,
-    handlePrevious: originalHandlePrevious,
-  } = usePlayerCore({
-    urls: tracks.map(track => track.url),
-    currentIndex,
-    setCurrentIndex,
-    isPlaying,
-    setIsPlaying,
-    tracks
-  });
-
   // Enhanced next/previous handlers for random mode
   const handleNext = () => {
     if (randomMode && tracks.length > 1) {
@@ -57,7 +42,8 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
       } while (randomIndex === currentIndex && tracks.length > 1);
       setCurrentIndex(randomIndex);
     } else {
-      originalHandleNext();
+      const nextIndex = (currentIndex + 1) % tracks.length;
+      setCurrentIndex(nextIndex);
     }
   };
 
@@ -69,9 +55,29 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
       } while (randomIndex === currentIndex && tracks.length > 1);
       setCurrentIndex(randomIndex);
     } else {
-      originalHandlePrevious();
+      const prevIndex = (currentIndex - 1 + tracks.length) % tracks.length;
+      setCurrentIndex(prevIndex);
     }
   };
+
+  // Use player core with enhanced handlers that will be passed to media session
+  const {
+    loading,
+    handlePlayPause,
+  } = usePlayerCore({
+    urls: tracks.map(track => track.url),
+    currentIndex,
+    setCurrentIndex,
+    isPlaying,
+    setIsPlaying,
+    tracks,
+    // Pass the random-aware handlers to be used by media session
+    enhancedHandlers: {
+      handleNext,
+      handlePrevious,
+      randomMode
+    }
+  });
 
   // Calculate current track
   const currentTrack = tracks[currentIndex] || null;

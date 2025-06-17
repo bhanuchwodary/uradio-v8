@@ -16,6 +16,11 @@ interface UseMusicPlayerProps {
   setIsPlaying: (playing: boolean) => void;
   tracks?: Track[];
   initialVolume?: number;
+  enhancedHandlers?: {
+    handleNext: () => void;
+    handlePrevious: () => void;
+    randomMode: boolean;
+  };
 }
 
 export const useMusicPlayer = (props?: UseMusicPlayerProps) => {
@@ -28,6 +33,7 @@ export const useMusicPlayer = (props?: UseMusicPlayerProps) => {
     setIsPlaying = () => {},
     tracks = [],
     initialVolume = 0.7,
+    enhancedHandlers,
   } = props || {};
 
   const [duration, setDuration] = useState<number>(0);
@@ -49,8 +55,8 @@ export const useMusicPlayer = (props?: UseMusicPlayerProps) => {
 
   // Set up player controls
   const {
-    handleNext,
-    handlePrevious,
+    handleNext: basicHandleNext,
+    handlePrevious: basicHandlePrevious,
     handlePlayPause,
     handleSeek
   } = usePlayerControls({
@@ -62,6 +68,10 @@ export const useMusicPlayer = (props?: UseMusicPlayerProps) => {
     setCurrentIndex,
     volume
   });
+
+  // Use enhanced handlers if available, otherwise fall back to basic ones
+  const handleNext = enhancedHandlers?.handleNext || basicHandleNext;
+  const handlePrevious = enhancedHandlers?.handlePrevious || basicHandlePrevious;
 
   // Handle HLS streaming
   useHlsHandler({
@@ -81,7 +91,7 @@ export const useMusicPlayer = (props?: UseMusicPlayerProps) => {
     setLoading
   });
 
-  // Set up media session API
+  // Set up media session API with enhanced handlers
   useMediaSession({
     tracks,
     currentIndex,
@@ -89,11 +99,12 @@ export const useMusicPlayer = (props?: UseMusicPlayerProps) => {
     trackDuration: duration,
     trackPosition: currentTime,
     setIsPlaying,
-    onSkipNext: handleNext,
-    onSkipPrevious: handlePrevious,
+    onSkipNext: handleNext, // Now uses enhanced handler if available
+    onSkipPrevious: handlePrevious, // Now uses enhanced handler if available
     onSeek: (position) => {
       handleSeek([position]);
     },
+    randomMode: enhancedHandlers?.randomMode || false,
   });
 
   return {
