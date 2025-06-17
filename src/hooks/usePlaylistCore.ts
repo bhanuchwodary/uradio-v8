@@ -39,15 +39,20 @@ export const usePlaylistCore = () => {
     }
   }, [playlistTracks]);
 
-  // Add track to playlist
+  // Add track to playlist with enhanced duplicate prevention
   const addToPlaylist = (track: Track): boolean => {
-    const exists = playlistTracks.some(t => t.url === track.url);
+    // Check for duplicates more strictly - compare both URL and name
+    const exists = playlistTracks.some(t => 
+      t.url.toLowerCase().trim() === track.url.toLowerCase().trim() &&
+      t.name.toLowerCase().trim() === track.name.toLowerCase().trim()
+    );
+    
     if (exists) {
-      logger.warn("Track already in playlist", { url: track.url });
+      logger.warn("Track already in playlist", { url: track.url, name: track.name });
       return false;
     }
 
-    // CRITICAL FIX: If this is a featured station, ensure it exists in main library
+    // If this is a featured station, ensure it exists in main library first
     const existsInLibrary = allTracks.some(t => t.url === track.url);
     if (!existsInLibrary) {
       logger.info("Adding featured station to main library first", { name: track.name });
@@ -64,7 +69,21 @@ export const usePlaylistCore = () => {
       addedToPlaylistAt: Date.now()
     };
 
-    setPlaylistTracks(prev => [...prev, playlistTrack]);
+    setPlaylistTracks(prev => {
+      // Double-check for duplicates before adding
+      const alreadyExists = prev.some(t => 
+        t.url.toLowerCase().trim() === track.url.toLowerCase().trim() &&
+        t.name.toLowerCase().trim() === track.name.toLowerCase().trim()
+      );
+      
+      if (alreadyExists) {
+        logger.warn("Duplicate prevented during state update", { url: track.url });
+        return prev;
+      }
+      
+      return [...prev, playlistTrack];
+    });
+    
     logger.info("Added track to playlist", { name: track.name });
     return true;
   };
