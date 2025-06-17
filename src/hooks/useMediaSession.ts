@@ -109,13 +109,13 @@ export const useMediaSession = ({
         console.warn("Error setting media session action handlers:", error);
       }
 
-      // Enhanced position state for iOS
+      // Fix the playbackRate error - use very small value instead of 0 when paused
       try {
         if (trackDuration && trackDuration !== Infinity && !isNaN(trackDuration)) {
           navigator.mediaSession.setPositionState({
             duration: trackDuration,
             position: Math.min(trackPosition || 0, trackDuration),
-            playbackRate: isPlaying ? 1.0 : 0,
+            playbackRate: isPlaying ? 1.0 : 0.0001, // Use very small value instead of 0
           });
         }
       } catch (error) {

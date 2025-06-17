@@ -3,6 +3,7 @@ import { useRef, useEffect } from "react";
 import Hls from "hls.js";
 import { globalAudioRef } from "@/components/music-player/audioInstance";
 import { logger } from "@/utils/logger";
+import { detectStreamType, configureAudioForStream, handleDirectStreamError } from "@/utils/streamHandler";
 
 interface UseHlsHandlerProps {
   audioRef: React.MutableRefObject<HTMLAudioElement | null>;
@@ -49,9 +50,13 @@ export const useHlsHandler = ({
       globalAudioRef.hls = null;
     }
 
-    // Check if the URL is an HLS stream
-    if (url.includes('.m3u8') && Hls.isSupported()) {
-      logger.info("Loading HLS stream", { url });
+    // Detect stream type and configure accordingly
+    const streamConfig = detectStreamType(url);
+    configureAudioForStream(audioRef.current, streamConfig);
+
+    // Handle HLS streams
+    if (streamConfig.type === 'hls' && Hls.isSupported()) {
+      logger.info("Loading HLS stream", { url, config: streamConfig });
       
       // Only create a new HLS instance if needed
       if (!globalAudioRef.hls) {
@@ -75,10 +80,6 @@ export const useHlsHandler = ({
         hls.on(Hls.Events.MEDIA_ATTACHED, () => {
           hls.loadSource(url);
         });
-        
-        if (audioRef.current) {
-          audioRef.current.preload = "auto";
-        }
         
         hls.on(Hls.Events.MANIFEST_PARSED, (event, data) => {
           logger.info("HLS manifest loaded", { levels: data.levels?.length || 0 });
@@ -153,17 +154,10 @@ export const useHlsHandler = ({
         globalAudioRef.hls.loadSource(url);
       }
     } else if (audioRef.current.src !== url) {
-      // Regular audio stream
-      logger.info("Loading regular audio stream", { url });
+      // Handle direct streams (including the Suryan FM type URLs)
+      logger.info("Loading direct audio stream", { url, config: streamConfig });
       audioRef.current.src = url;
       audioRef.current.load();
-      
-      try {
-        audioRef.current.autoplay = false;
-        audioRef.current.preload = "auto";
-      } catch (e) {
-        logger.warn("Some audio enhancements not supported by this browser");
-      }
       
       audioRef.current.oncanplay = () => {
         setLoading(false);
@@ -171,16 +165,21 @@ export const useHlsHandler = ({
         
         if (isPlaying) {
           audioRef.current?.play().catch(error => {
-            logger.error("Error playing audio stream", error);
+            logger.error("Error playing direct stream", error);
             setIsPlaying(false);
           });
         }
       };
 
-      audioRef.current.onerror = () => {
-        logger.error("Audio loading error", { url });
-        setLoading(false);
-        setIsPlaying(false);
+      audioRef.current.onerror = async () => {
+        logger.warn("Direct stream error, attempting fallback", { url });
+        
+        // Try fallback handling for direct streams
+        const success = await handleDirectStreamError(audioRef.current!, streamConfig);
+        if (!success) {
+          setLoading(false);
+          setIsPlaying(false);
+        }
       };
     } else {
       // URL is the same, just sync playback state

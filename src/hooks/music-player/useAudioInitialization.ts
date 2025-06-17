@@ -1,5 +1,6 @@
+
 import { useEffect } from "react";
-import { globalAudioRef } from "@/components/music-player/audioInstance";
+import { globalAudioRef, updateGlobalPlaybackState } from "@/components/music-player/audioInstance";
 
 interface UseAudioInitializationProps {
   audioRef: React.MutableRefObject<HTMLAudioElement | null>;
@@ -24,6 +25,19 @@ export const useAudioInitialization = ({
       globalAudioRef.element.autoplay = false;
       // Using type assertion to handle playsInline
       (globalAudioRef.element as any).playsInline = true;
+      
+      // Add global event listeners to track state
+      globalAudioRef.element.addEventListener('play', () => {
+        updateGlobalPlaybackState(true, false);
+      });
+      
+      globalAudioRef.element.addEventListener('pause', () => {
+        updateGlobalPlaybackState(false, true);
+      });
+      
+      globalAudioRef.element.addEventListener('ended', () => {
+        updateGlobalPlaybackState(false, false);
+      });
       
       // Prevent audio element from being garbage collected
       globalAudioRef.element.addEventListener('canplay', () => {
