@@ -1,4 +1,3 @@
-
 import { useRef, useEffect } from "react";
 import Hls from "hls.js";
 import { globalAudioRef, shouldResumeAfterNavigation } from "@/components/music-player/audioInstance";
@@ -32,15 +31,20 @@ export const useHlsHandler = ({
 
     // Check if we're already playing this URL - enhanced logic for navigation
     if (url === lastUrlRef.current && audioRef.current.src) {
-      // If URL is the same but we're navigating, check if we should resume
-      if (globalAudioRef.navigationInProgress) {
-        logger.debug("Navigation in progress, maintaining current state");
+      // CRITICAL FIX: If isPlaying is true, this is likely a user-initiated playback request
+      // Always attempt to play when user explicitly requests it
+      if (isPlaying) {
+        logger.debug("User requested playback for current URL, ensuring playback starts");
+        audioRef.current.play().catch(error => {
+          logger.error("Error playing current stream", error);
+          setIsPlaying(false);
+        });
         return;
       }
       
-      // If not navigating and URL is same, sync playback state without reloading
-      if (!audioRef.current.paused === isPlaying) {
-        logger.debug("URL and playback state unchanged, maintaining current playback");
+      // If URL is the same but we're navigating, check if we should resume
+      if (globalAudioRef.navigationInProgress && !isPlaying) {
+        logger.debug("Navigation in progress, maintaining current state");
         return;
       }
     }
@@ -110,14 +114,21 @@ export const useHlsHandler = ({
           setLoading(false);
           retryCountRef.current = 0;
           
-          // Enhanced playback logic - only auto-play if should resume
-          if (isPlaying && shouldResumeAfterNavigation()) {
+          // CRITICAL FIX: Prioritize explicit user playback requests
+          if (isPlaying) {
+            logger.debug("User requested playback, starting HLS stream immediately");
             audioRef.current?.play().catch(error => {
               logger.error("Error playing HLS stream", error);
               setIsPlaying(false);
             });
-          } else if (globalAudioRef.explicitlyPaused) {
-            logger.debug("Stream was explicitly paused, not auto-resuming");
+          } else if (shouldResumeAfterNavigation()) {
+            logger.debug("Auto-resuming HLS stream after navigation");
+            audioRef.current?.play().catch(error => {
+              logger.error("Error resuming HLS stream", error);
+              setIsPlaying(false);
+            });
+          } else {
+            logger.debug("HLS stream loaded but not auto-playing");
           }
         });
         
@@ -175,14 +186,21 @@ export const useHlsHandler = ({
         setLoading(false);
         retryCountRef.current = 0;
         
-        // Enhanced playback logic for direct streams
-        if (isPlaying && shouldResumeAfterNavigation()) {
+        // CRITICAL FIX: Prioritize explicit user playback requests
+        if (isPlaying) {
+          logger.debug("User requested playback, starting direct stream immediately");
           audioRef.current?.play().catch(error => {
             logger.error("Error playing direct stream", error);
             setIsPlaying(false);
           });
-        } else if (globalAudioRef.explicitlyPaused) {
-          logger.debug("Direct stream was explicitly paused, not auto-resuming");
+        } else if (shouldResumeAfterNavigation()) {
+          logger.debug("Auto-resuming direct stream after navigation");
+          audioRef.current?.play().catch(error => {
+            logger.error("Error resuming direct stream", error);
+            setIsPlaying(false);
+          });
+        } else {
+          logger.debug("Direct stream loaded but not auto-playing");
         }
       };
 
@@ -196,10 +214,11 @@ export const useHlsHandler = ({
         }
       };
     } else {
-      // URL is the same, just sync playback state without auto-resume issues
-      if (isPlaying && shouldResumeAfterNavigation()) {
+      // CRITICAL FIX: URL is the same, prioritize user playback requests
+      if (isPlaying) {
+        logger.debug("User requested playback for same URL, ensuring playback starts");
         audioRef.current.play().catch(error => {
-          logger.error("Error resuming audio stream", error);
+          logger.error("Error starting playback for same URL", error);
           setIsPlaying(false);
         });
       } else if (!isPlaying) {

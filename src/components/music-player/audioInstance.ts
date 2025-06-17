@@ -9,8 +9,8 @@ type AudioInstanceType = {
   currentUrl: string | null;
   isPlaying: boolean;
   isPaused: boolean;
-  navigationInProgress: boolean; // New flag to track navigation state
-  explicitlyPaused: boolean; // Track if user explicitly paused vs auto-pause
+  navigationInProgress: boolean;
+  explicitlyPaused: boolean;
 };
 
 // Maintains a shared audio and HLS context across the app
@@ -48,7 +48,7 @@ export const updateGlobalPlaybackState = (
   });
 };
 
-// New helper to manage navigation state
+// Helper to manage navigation state
 export const setNavigationState = (inProgress: boolean) => {
   globalAudioRef.navigationInProgress = inProgress;
   console.log("Navigation state updated:", { navigationInProgress: inProgress });
@@ -64,4 +64,23 @@ export const shouldResumeAfterNavigation = (): boolean => {
     navigationInProgress: globalAudioRef.navigationInProgress
   });
   return shouldResume;
+};
+
+// CRITICAL FIX: New helper to reset audio state for user-initiated actions
+export const resetAudioStateForUserAction = () => {
+  globalAudioRef.explicitlyPaused = false;
+  globalAudioRef.navigationInProgress = false;
+  globalAudioRef.isPaused = false;
+  console.log("Audio state reset for user action");
+};
+
+// CRITICAL FIX: Helper to check if we should allow immediate playback
+export const shouldAllowImmediatePlayback = (): boolean => {
+  // Allow immediate playback if not explicitly paused and not in middle of navigation
+  const shouldAllow = !globalAudioRef.explicitlyPaused;
+  console.log("Should allow immediate playback:", { 
+    shouldAllow,
+    explicitlyPaused: globalAudioRef.explicitlyPaused
+  });
+  return shouldAllow;
 };

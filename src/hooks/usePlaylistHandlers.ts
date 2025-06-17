@@ -2,6 +2,7 @@
 import { Track } from "@/types/track";
 import { useTrackStateContext } from "@/context/TrackStateContext";
 import { useToast } from "@/hooks/use-toast";
+import { updateGlobalPlaybackState, setNavigationState } from "@/components/music-player/audioInstance";
 
 interface UsePlaylistHandlersProps {
   tracks: Track[];
@@ -43,21 +44,29 @@ export const usePlaylistHandlers = ({
     console.log("Playlist station selected:", selectedStation.name, "URL:", selectedStation.url);
     
     // CRITICAL FIX: Find the corresponding index in the main library tracks for playback
-    // This ensures both featured and user stations can be played
     const mainIndex = tracks.findIndex(t => t.url === selectedStation.url);
     
     console.log("Found station in main library at index:", mainIndex);
     
     if (mainIndex !== -1) {
-      // CRITICAL FIX: Add explicit user intent check for playback
-      // If clicking on the currently playing station, toggle pause/play
+      // CRITICAL FIX: Reset navigation and explicit pause states for immediate playback
+      setNavigationState(false);
+      updateGlobalPlaybackState(false, false, false);
+      
+      console.log("User explicitly selected station for playback - resetting audio state");
+      
+      // CRITICAL FIX: If clicking on the currently playing station, toggle pause/play
       if (mainIndex === currentIndex && isPlaying) {
         console.log("Pausing currently playing station");
         setIsPlaying(false);
       } else {
         console.log("Starting playback of station at index:", mainIndex);
+        // Set the index first, then immediately trigger playback
         setCurrentIndex(mainIndex);
-        setIsPlaying(true);
+        // Use setTimeout to ensure index change is processed before playback
+        setTimeout(() => {
+          setIsPlaying(true);
+        }, 50);
       }
     } else {
       // This should not happen after our playlist core fix, but add safety
@@ -76,13 +85,11 @@ export const usePlaylistHandlers = ({
     setEditingStation(station);
   };
   
-  // Open the delete confirmation dialog for removing from playlist
   const handleConfirmDelete = (station: Track) => {
     console.log("Confirming delete for playlist station:", station.name);
     setStationToDelete(station);
   };
   
-  // Handle actual deletion from playlist only (not from library)
   const handleDeleteStation = (stationToDelete: Track | null) => {
     if (stationToDelete) {
       const stationName = stationToDelete.name;
@@ -97,7 +104,6 @@ export const usePlaylistHandlers = ({
     }
   };
   
-  // Toggle favorite for a station in the main library
   const handleToggleFavorite = (station: Track) => {
     const index = tracks.findIndex(t => t.url === station.url);
     if (index !== -1) {
@@ -108,13 +114,11 @@ export const usePlaylistHandlers = ({
     }
   };
   
-  // Clear all stations from playlist only
   const handleClearAll = () => {
     console.log("Opening clear all dialog");
     setShowClearDialog(true);
   };
   
-  // Confirm clearing all stations from playlist
   const confirmClearAll = () => {
     console.log("Confirming clear all playlist");
     const removedCount = clearPlaylist();
@@ -125,7 +129,6 @@ export const usePlaylistHandlers = ({
     setShowClearDialog(false);
   };
   
-  // Save edited station in the main library
   const handleSaveEdit = (data: { url: string; name: string }, editingStation: Track | null) => {
     if (editingStation) {
       console.log("Saving station edit:", data.name);
