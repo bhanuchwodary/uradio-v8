@@ -5,16 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 import { StationGrid } from "@/components/ui/player/StationGrid";
 import { Track } from "@/types/track";
+import { PlaylistTrack } from "@/hooks/usePlaylistCore";
 
 interface PlaylistContentProps {
-  userStations: Track[];
-  featuredStations: Track[];
-  favoriteStations: Track[];
-  popularStations: Track[];
+  playlistTracks: PlaylistTrack[];
   currentIndex: number;
   currentTrack: Track | null;
   isPlaying: boolean;
-  onSelectStation: (index: number, stationList: Track[]) => void;
+  onSelectStation: (index: number, stationList: PlaylistTrack[]) => void;
   onEditStation: (station: Track) => void;
   onConfirmDelete: (station: Track) => void;
   onToggleFavorite: (station: Track) => void;
@@ -22,10 +20,7 @@ interface PlaylistContentProps {
 }
 
 const PlaylistContent: React.FC<PlaylistContentProps> = ({
-  userStations,
-  featuredStations,
-  favoriteStations,
-  popularStations,
+  playlistTracks,
   currentIndex,
   currentTrack,
   isPlaying,
@@ -35,24 +30,14 @@ const PlaylistContent: React.FC<PlaylistContentProps> = ({
   onToggleFavorite,
   onClearAll
 }) => {
-  // Combine all stations into one unified playlist
-  const uniquePlaylistStations = [
-    ...favoriteStations,
-    ...popularStations,
-    ...userStations.filter(station => !station.isFeatured),
-    ...featuredStations
-  ].filter((station, index, self) => 
-    index === self.findIndex(s => s.url === station.url)
-  );
-
   return (
     <Card className="bg-surface-container border border-outline-variant/30 rounded-lg elevation-1">
       <CardHeader className="pb-3 px-3 sm:px-6">
         <div className="flex justify-between items-center">
           <CardTitle className="text-xl font-bold text-on-surface">
-            My Playlist
+            My Playlist ({playlistTracks.length} stations)
           </CardTitle>
-          {uniquePlaylistStations.length > 0 && onClearAll && (
+          {playlistTracks.length > 0 && onClearAll && (
             <Button
               variant="destructive"
               size="sm"
@@ -74,13 +59,13 @@ const PlaylistContent: React.FC<PlaylistContentProps> = ({
         </div>
       </CardHeader>
       <CardContent className="px-3 sm:px-6 space-y-6">
-        {uniquePlaylistStations.length > 0 ? (
+        {playlistTracks.length > 0 ? (
           <StationGrid
-            stations={uniquePlaylistStations}
+            stations={playlistTracks}
             currentIndex={currentIndex}
             currentTrackUrl={currentTrack?.url}
             isPlaying={isPlaying}
-            onSelectStation={(index) => onSelectStation(index, uniquePlaylistStations)}
+            onSelectStation={(index) => onSelectStation(index, playlistTracks)}
             onEditStation={onEditStation}
             onDeleteStation={onConfirmDelete}
             onToggleFavorite={onToggleFavorite}
@@ -89,7 +74,7 @@ const PlaylistContent: React.FC<PlaylistContentProps> = ({
         ) : (
           <div className="text-center p-8 bg-gradient-to-br from-background/50 to-background/30 rounded-xl border border-border/50">
             <p className="text-muted-foreground">Your playlist is empty</p>
-            <p className="text-sm text-muted-foreground/70 mt-1">Add stations to build your collection</p>
+            <p className="text-sm text-muted-foreground/70 mt-1">Add stations from the Stations screen to build your playlist</p>
           </div>
         )}
       </CardContent>

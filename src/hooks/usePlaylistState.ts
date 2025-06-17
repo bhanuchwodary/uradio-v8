@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { useTrackStateContext } from "@/context/TrackStateContext";
+import { usePlaylistCore } from "@/hooks/usePlaylistCore";
 import { Track } from "@/types/track";
 
 export const usePlaylistState = () => {
@@ -9,8 +10,9 @@ export const usePlaylistState = () => {
   const [showClearDialog, setShowClearDialog] = useState(false);
   const [isPageReady, setIsPageReady] = useState(false);
   
+  // Get main library tracks for playback control
   const { 
-    tracks,
+    tracks: libraryTracks,
     currentIndex,
     isPlaying,
     setCurrentIndex,
@@ -18,13 +20,23 @@ export const usePlaylistState = () => {
     toggleFavorite
   } = useTrackStateContext();
   
-  // Split stations into different categories - ensure proper filtering
-  const userStations = tracks.filter(track => !track.isFeatured);
-  const featuredStations = tracks.filter(track => track.isFeatured);
-  const favoriteStations = tracks.filter(track => track.isFavorite);
+  // Get playlist-specific functionality
+  const {
+    playlistTracks,
+    addToPlaylist,
+    removeFromPlaylist,
+    clearPlaylist,
+    isInPlaylist,
+    playlistCount
+  } = usePlaylistCore();
   
-  // Calculate popular stations based on play time
-  const popularStations = [...tracks]
+  // Split library stations into different categories
+  const userStations = libraryTracks.filter(track => !track.isFeatured);
+  const featuredStations = libraryTracks.filter(track => track.isFeatured);
+  const favoriteStations = libraryTracks.filter(track => track.isFavorite);
+  
+  // Calculate popular stations based on play time from library
+  const popularStations = [...libraryTracks]
     .sort((a, b) => (b.playTime || 0) - (a.playTime || 0))
     .slice(0, 8);
   
@@ -37,8 +49,8 @@ export const usePlaylistState = () => {
     return () => clearTimeout(timer);
   }, []);
   
-  // Calculate current track
-  const currentTrack = tracks[currentIndex] || null;
+  // Calculate current track from library
+  const currentTrack = libraryTracks[currentIndex] || null;
 
   return {
     editingStation,
@@ -48,16 +60,25 @@ export const usePlaylistState = () => {
     showClearDialog,
     setShowClearDialog,
     isPageReady,
-    tracks,
+    // Library tracks for playback
+    tracks: libraryTracks,
     currentIndex,
     isPlaying,
     setCurrentIndex,
     setIsPlaying,
     toggleFavorite,
+    // Categorized library stations
     userStations,
     featuredStations,
     favoriteStations,
     popularStations,
-    currentTrack
+    currentTrack,
+    // Playlist-specific functionality
+    playlistTracks,
+    addToPlaylist,
+    removeFromPlaylist,
+    clearPlaylist,
+    isInPlaylist,
+    playlistCount
   };
 };

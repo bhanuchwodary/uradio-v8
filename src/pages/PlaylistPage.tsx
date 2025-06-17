@@ -23,11 +23,11 @@ const PlaylistPage: React.FC = () => {
     setCurrentIndex,
     setIsPlaying,
     toggleFavorite,
-    userStations,
-    featuredStations,
-    favoriteStations,
-    popularStations,
-    currentTrack
+    currentTrack,
+    // Playlist-specific state
+    playlistTracks,
+    removeFromPlaylist,
+    clearPlaylist
   } = usePlaylistState();
 
   const {
@@ -48,7 +48,10 @@ const PlaylistPage: React.FC = () => {
     toggleFavorite,
     setEditingStation,
     setStationToDelete,
-    setShowClearDialog
+    setShowClearDialog,
+    playlistTracks,
+    removeFromPlaylist,
+    clearPlaylist
   });
 
   // Show loading spinner while page is initializing
@@ -65,12 +68,9 @@ const PlaylistPage: React.FC = () => {
   return (
     <AppLayout>
       <div className={`container mx-auto max-w-5xl space-y-6 transition-opacity duration-300 ease-in-out pt-4 ${isPageReady ? 'opacity-100' : 'opacity-0'}`}>
-        {/* Playlist Content Component - Now unified layout */}
+        {/* Playlist Content Component - Now uses separate playlist tracks */}
         <PlaylistContent
-          userStations={userStations}
-          featuredStations={featuredStations}
-          favoriteStations={favoriteStations}
-          popularStations={popularStations}
+          playlistTracks={playlistTracks}
           currentIndex={currentIndex}
           currentTrack={currentTrack}
           isPlaying={isPlaying}

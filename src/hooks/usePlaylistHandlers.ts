@@ -13,6 +13,10 @@ interface UsePlaylistHandlersProps {
   setEditingStation: (station: Track | null) => void;
   setStationToDelete: (station: Track | null) => void;
   setShowClearDialog: (show: boolean) => void;
+  // Playlist-specific handlers
+  playlistTracks: Track[];
+  removeFromPlaylist: (trackUrl: string) => boolean;
+  clearPlaylist: () => number;
 }
 
 export const usePlaylistHandlers = ({
@@ -24,15 +28,20 @@ export const usePlaylistHandlers = ({
   toggleFavorite,
   setEditingStation,
   setStationToDelete,
-  setShowClearDialog
+  setShowClearDialog,
+  playlistTracks,
+  removeFromPlaylist,
+  clearPlaylist
 }: UsePlaylistHandlersProps) => {
   const { toast } = useToast();
-  const { editStationByValue, removeStationByValue } = useTrackStateContext();
+  const { editStationByValue } = useTrackStateContext();
 
-  // Handle selecting a station from a grid with pause functionality
-  const handleSelectStation = (stationIndex: number, stationList: typeof tracks) => {
-    // Find the corresponding index in the full tracks list
-    const mainIndex = tracks.findIndex(t => t.url === stationList[stationIndex].url);
+  // Handle selecting a station from playlist for playback
+  const handleSelectStation = (stationIndex: number, stationList: typeof playlistTracks) => {
+    const selectedStation = stationList[stationIndex];
+    
+    // Find the corresponding index in the main library tracks for playback
+    const mainIndex = tracks.findIndex(t => t.url === selectedStation.url);
     if (mainIndex !== -1) {
       // If clicking on the currently playing station, toggle pause/play
       if (mainIndex === currentIndex && isPlaying) {
@@ -44,29 +53,31 @@ export const usePlaylistHandlers = ({
     }
   };
   
-  // Edit station handler
+  // Edit station handler - edits the station in the main library
   const handleEditStation = (station: Track) => {
     setEditingStation(station);
   };
   
-  // Open the delete confirmation dialog for a station
+  // Open the delete confirmation dialog for removing from playlist
   const handleConfirmDelete = (station: Track) => {
     setStationToDelete(station);
   };
   
-  // Handle actual deletion after confirmation
+  // Handle actual deletion from playlist only (not from library)
   const handleDeleteStation = (stationToDelete: Track | null) => {
     if (stationToDelete) {
       const stationName = stationToDelete.name;
-      removeStationByValue(stationToDelete);
-      toast({
-        title: "Station removed",
-        description: `${stationName} has been removed from your playlist`
-      });
+      const success = removeFromPlaylist(stationToDelete.url);
+      if (success) {
+        toast({
+          title: "Station removed from playlist",
+          description: `${stationName} has been removed from your playlist`
+        });
+      }
     }
   };
   
-  // Toggle favorite for a station
+  // Toggle favorite for a station in the main library
   const handleToggleFavorite = (station: Track) => {
     const index = tracks.findIndex(t => t.url === station.url);
     if (index !== -1) {
@@ -74,30 +85,22 @@ export const usePlaylistHandlers = ({
     }
   };
   
-  // Clear all stations from playlist
+  // Clear all stations from playlist only
   const handleClearAll = () => {
     setShowClearDialog(true);
   };
   
-  // FIXED: Clear all function now properly removes ALL stations from the playlist only
+  // Confirm clearing all stations from playlist
   const confirmClearAll = () => {
-    // Get count before clearing
-    const stationCount = tracks.length;
-    
-    // Remove ALL stations from the tracks array (this is the playlist)
-    const allStationsToRemove = [...tracks];
-    allStationsToRemove.forEach(station => {
-      removeStationByValue(station);
-    });
-    
+    const removedCount = clearPlaylist();
     toast({
       title: "Playlist cleared",
-      description: `${stationCount} stations removed from your playlist`
+      description: `${removedCount} stations removed from your playlist`
     });
     setShowClearDialog(false);
   };
   
-  // Save edited station
+  // Save edited station in the main library
   const handleSaveEdit = (data: { url: string; name: string }, editingStation: Track | null) => {
     if (editingStation) {
       editStationByValue(editingStation, data);

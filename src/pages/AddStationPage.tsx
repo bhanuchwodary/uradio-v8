@@ -19,13 +19,13 @@ const AddStationPage: React.FC = () => {
     
     if (result.success) {
       toast({
-        title: "Station Added",
+        title: "Station Added to Library",
         description: name
-          ? `${name} has been added to your stations.`
+          ? `${name} has been added to your stations. You can now add it to your playlist from the Stations screen.`
           : "The station has been added to your stations.",
       });
-      // Navigate to the playlist page after successful add
-      setTimeout(() => navigate("/playlist"), 500);
+      // Navigate to the stations page after successful add
+      setTimeout(() => navigate("/stations"), 500);
       return true;
     } else {
       toast({
@@ -46,10 +46,10 @@ const AddStationPage: React.FC = () => {
     if (addedStations.length > 0) {
       toast({
         title: "Stations Imported",
-        description: `${addedStations.length} stations have been imported.`,
+        description: `${addedStations.length} stations have been imported to your library.`,
       });
-      // Navigate to the playlist page after successful import
-      setTimeout(() => navigate("/playlist"), 500);
+      // Navigate to the stations page after successful import
+      setTimeout(() => navigate("/stations"), 500);
     } else {
       toast({
         title: "Import Failed",
@@ -62,12 +62,11 @@ const AddStationPage: React.FC = () => {
   return (
     <AppLayout>
       <div className="container mx-auto max-w-5xl space-y-6 pt-4">
-        {/* Removed the Add Station page heading here */}
         <div className="max-w-lg mx-auto space-y-6">
           <Card className="bg-surface-container border border-outline-variant/30 rounded-lg elevation-1">
             <CardHeader className="pb-3 px-3 sm:px-6">
               <CardTitle className="text-xl font-bold text-on-surface">Add Radio Station</CardTitle>
-              <CardDescription>Enter the URL and name of the radio station you want to add</CardDescription>
+              <CardDescription>Add a new station to your library. You can then add it to your playlist from the Stations screen.</CardDescription>
             </CardHeader>
             <CardContent className="px-3 sm:px-6">
               <AddUrlForm onAddUrl={handleAddUrl} />
@@ -80,7 +79,7 @@ const AddStationPage: React.FC = () => {
                 <Upload className="h-4 w-4" />
                 Import Stations
               </CardTitle>
-              <CardDescription>Import multiple stations from a CSV file</CardDescription>
+              <CardDescription>Import multiple stations from a CSV file to your library</CardDescription>
             </CardHeader>
             <CardContent className="px-3 sm:px-6">
               <ImportStationsFromCsv onImport={handleImport} />

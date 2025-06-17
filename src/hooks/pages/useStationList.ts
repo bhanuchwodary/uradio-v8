@@ -1,6 +1,7 @@
 
 import { useState } from "react";
 import { useTrackStateContext } from "@/context/TrackStateContext";
+import { usePlaylistCore } from "@/hooks/usePlaylistCore";
 import { useToast } from "@/hooks/use-toast";
 import { getStations } from "@/data/featuredStationsLoader";
 import { Track } from "@/types/track";
@@ -14,13 +15,15 @@ export const useStationList = () => {
     tracks,
     currentIndex,
     isPlaying,
-    addUrl,
     editStationByValue,
     removeStationByValue,
     getUserStations
   } = useTrackStateContext();
 
-  // Get user stations
+  // Get playlist functionality for adding stations to playlist
+  const { addToPlaylist } = usePlaylistCore();
+
+  // Get user stations from library
   const userStations = getUserStations();
 
   // Get featured stations from loader
@@ -66,36 +69,30 @@ export const useStationList = () => {
       return acc;
     }, {} as Record<string, Track[]>);
 
-  // Add station to playlist handler
+  // Add station to playlist handler (not to main library)
   const handleAddStation = (station: Track) => {
-    const result = addUrl(
-      station.url,
-      station.name,
-      station.isFeatured || false,
-      station.isFavorite || false,
-      station.language || ""
-    );
+    const success = addToPlaylist(station);
 
-    if (result.success) {
+    if (success) {
       toast({
-        title: "Station Added",
+        title: "Station Added to Playlist",
         description: `${station.name} has been added to your playlist`,
       });
     } else {
       toast({
-        title: "Failed to Add Station",
-        description: result.message || "Error adding station",
+        title: "Station Already in Playlist",
+        description: `${station.name} is already in your playlist`,
         variant: "destructive"
       });
     }
   };
 
-  // Handle edit station
+  // Handle edit station (edits in main library)
   const handleEditStation = (station: Track) => {
     setEditingStation(station);
   };
 
-  // Handle delete station
+  // Handle delete station (removes from main library)
   const handleDeleteStation = (station: Track) => {
     removeStationByValue(station);
     toast({
@@ -104,7 +101,7 @@ export const useStationList = () => {
     });
   };
 
-  // Save edited station
+  // Save edited station (updates in main library)
   const handleSaveEdit = (data: { url: string; name: string; language?: string }) => {
     if (editingStation) {
       editStationByValue(editingStation, data);
