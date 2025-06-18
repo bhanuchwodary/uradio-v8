@@ -1,60 +1,55 @@
 
-import { useContext } from "react";
+import React, { useContext } from "react";
 import { Track } from "@/types/track";
+import { usePlaylist } from "@/context/PlaylistContext";
 import { logger } from "@/utils/logger";
 
 // Create a separate hook for playlist navigation to avoid circular dependencies
 export const usePlaylistNavigation = () => {
+  const { playlistTracks } = usePlaylist();
+
   const getPlaylistTracks = (): Track[] => {
-    try {
-      // Dynamically import playlist context to avoid circular dependency
-      const PlaylistContext = require("@/context/PlaylistContext");
-      const context = React.useContext(PlaylistContext.PlaylistContext);
-      return context?.playlistTracks || [];
-    } catch (error) {
-      logger.warn("Could not access playlist context", error);
-      return [];
-    }
+    return playlistTracks || [];
   };
 
   const getNextTrack = (currentTrack: Track | null, randomMode: boolean): Track | null => {
-    const playlistTracks = getPlaylistTracks();
+    const tracks = getPlaylistTracks();
     
-    if (!currentTrack || playlistTracks.length <= 1) return null;
+    if (!currentTrack || tracks.length <= 1) return null;
     
-    const currentIndex = playlistTracks.findIndex(t => t.url === currentTrack.url);
+    const currentIndex = tracks.findIndex(t => t.url === currentTrack.url);
     if (currentIndex === -1) return null;
     
     let nextIndex;
     if (randomMode) {
       do {
-        nextIndex = Math.floor(Math.random() * playlistTracks.length);
-      } while (nextIndex === currentIndex && playlistTracks.length > 1);
+        nextIndex = Math.floor(Math.random() * tracks.length);
+      } while (nextIndex === currentIndex && tracks.length > 1);
     } else {
-      nextIndex = (currentIndex + 1) % playlistTracks.length;
+      nextIndex = (currentIndex + 1) % tracks.length;
     }
     
-    return playlistTracks[nextIndex] || null;
+    return tracks[nextIndex] || null;
   };
 
   const getPreviousTrack = (currentTrack: Track | null, randomMode: boolean): Track | null => {
-    const playlistTracks = getPlaylistTracks();
+    const tracks = getPlaylistTracks();
     
-    if (!currentTrack || playlistTracks.length <= 1) return null;
+    if (!currentTrack || tracks.length <= 1) return null;
     
-    const currentIndex = playlistTracks.findIndex(t => t.url === currentTrack.url);
+    const currentIndex = tracks.findIndex(t => t.url === currentTrack.url);
     if (currentIndex === -1) return null;
     
     let prevIndex;
     if (randomMode) {
       do {
-        prevIndex = Math.floor(Math.random() * playlistTracks.length);
-      } while (prevIndex === currentIndex && playlistTracks.length > 1);
+        prevIndex = Math.floor(Math.random() * tracks.length);
+      } while (prevIndex === currentIndex && tracks.length > 1);
     } else {
-      prevIndex = (currentIndex - 1 + playlistTracks.length) % playlistTracks.length;
+      prevIndex = (currentIndex - 1 + tracks.length) % tracks.length;
     }
     
-    return playlistTracks[prevIndex] || null;
+    return tracks[prevIndex] || null;
   };
 
   return {
