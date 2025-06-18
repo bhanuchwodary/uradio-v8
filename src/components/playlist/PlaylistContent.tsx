@@ -5,14 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 import { StationGrid } from "@/components/ui/player/StationGrid";
 import { Track } from "@/types/track";
-import { PlaylistTrack } from "@/hooks/usePlaylistCore";
+import { PlaylistTrack } from "@/context/PlaylistContext";
 
 interface PlaylistContentProps {
   playlistTracks: PlaylistTrack[];
   currentIndex: number;
   currentTrack: Track | null;
   isPlaying: boolean;
-  onSelectStation: (index: number, stationList: PlaylistTrack[]) => void;
+  onSelectStation: (index: number) => void;
   onEditStation: (station: Track) => void;
   onConfirmDelete: (station: Track) => void;
   onToggleFavorite: (station: Track) => void;
@@ -30,6 +30,8 @@ const PlaylistContent: React.FC<PlaylistContentProps> = ({
   onToggleFavorite,
   onClearAll
 }) => {
+  console.log("PlaylistContent rendering with tracks:", playlistTracks.length, playlistTracks);
+
   return (
     <Card className="bg-surface-container border border-outline-variant/30 rounded-lg elevation-1">
       <CardHeader className="pb-3 px-3 sm:px-6">
@@ -65,7 +67,7 @@ const PlaylistContent: React.FC<PlaylistContentProps> = ({
             currentIndex={currentIndex}
             currentTrackUrl={currentTrack?.url}
             isPlaying={isPlaying}
-            onSelectStation={(index) => onSelectStation(index, playlistTracks)}
+            onSelectStation={onSelectStation}
             onEditStation={onEditStation}
             onDeleteStation={onConfirmDelete}
             onToggleFavorite={onToggleFavorite}

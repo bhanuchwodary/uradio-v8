@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { useTrackStateContext } from "@/context/TrackStateContext";
-import { usePlaylistCore } from "@/hooks/usePlaylistCore";
+import { usePlaylist } from "@/context/PlaylistContext";
 import { useToast } from "@/hooks/use-toast";
 import { getStations } from "@/data/featuredStationsLoader";
 import { Track } from "@/types/track";
@@ -20,8 +20,8 @@ export const useStationList = () => {
     getUserStations
   } = useTrackStateContext();
 
-  // Get playlist functionality for adding stations to playlist
-  const { addToPlaylist } = usePlaylistCore();
+  // Get playlist functionality - using the same context as PlaylistPage
+  const { addToPlaylist } = usePlaylist();
 
   // Get user stations from library
   const userStations = getUserStations();
@@ -69,16 +69,19 @@ export const useStationList = () => {
       return acc;
     }, {} as Record<string, Track[]>);
 
-  // Add station to playlist handler (not to main library)
+  // Add station to playlist handler (using PlaylistContext)
   const handleAddStation = (station: Track) => {
+    console.log("Adding station to playlist:", station.name, station.url);
     const success = addToPlaylist(station);
 
     if (success) {
+      console.log("Successfully added to playlist");
       toast({
         title: "Station Added to Playlist",
         description: `${station.name} has been added to your playlist`,
       });
     } else {
+      console.log("Station already in playlist");
       toast({
         title: "Station Already in Playlist",
         description: `${station.name} is already in your playlist`,
