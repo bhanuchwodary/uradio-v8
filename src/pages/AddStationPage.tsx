@@ -7,35 +7,12 @@ import ImportStationsFromCsv from "@/components/ImportStationsFromCsv";
 import { useTrackStateContext } from "@/context/TrackStateContext";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
-import { Plus, Upload } from "lucide-react";
+import { Upload } from "lucide-react";
 
 const AddStationPage: React.FC = () => {
   const { addUrl } = useTrackStateContext();
   const { toast } = useToast();
   const navigate = useNavigate();
-
-  const handleAddUrl = (url: string, name: string, language: string) => {
-    const result = addUrl(url, name, false, false, language);
-    
-    if (result.success) {
-      toast({
-        title: "Station Added to Library",
-        description: name
-          ? `${name} has been added to your stations. You can now add it to your playlist from the Stations screen.`
-          : "The station has been added to your stations.",
-      });
-      // Navigate to the stations page after successful add
-      setTimeout(() => navigate("/stations"), 500);
-      return true;
-    } else {
-      toast({
-        title: "Station Not Added",
-        description: result.message || "Failed to add station.",
-        variant: "destructive"
-      });
-      return false;
-    }
-  };
   
   const handleImport = (stations: Array<{ name: string; url: string; language?: string }>) => {
     const addedStations = stations.filter(station => {
@@ -69,7 +46,7 @@ const AddStationPage: React.FC = () => {
               <CardDescription>Add a new station to your library. You can then add it to your playlist from the Stations screen.</CardDescription>
             </CardHeader>
             <CardContent className="px-3 sm:px-6">
-              <AddUrlForm onAddUrl={handleAddUrl} />
+              <AddUrlForm />
             </CardContent>
           </Card>
 
