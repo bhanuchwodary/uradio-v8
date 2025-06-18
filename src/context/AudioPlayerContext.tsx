@@ -55,18 +55,46 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({
   
   // Enhanced next/previous handlers for random mode and playlist navigation
   const handleNext = () => {
+    logger.info("Next track requested", { randomMode });
     const nextTrack = getNextTrack(currentTrack, randomMode);
     if (nextTrack) {
       setCurrentTrack(nextTrack);
-      logger.info("Next track selected from playlist", { name: nextTrack.name });
+      logger.info("Next track selected from playlist", { name: nextTrack.name, randomMode });
+      
+      // Update media session metadata for external controls
+      if ('mediaSession' in navigator) {
+        navigator.mediaSession.metadata = new MediaMetadata({
+          title: nextTrack.name,
+          artist: nextTrack.language || 'Radio Station',
+          album: 'uRadio'
+        });
+        
+        // Set action handlers for external controls
+        navigator.mediaSession.setActionHandler('nexttrack', handleNext);
+        navigator.mediaSession.setActionHandler('previoustrack', handlePrevious);
+      }
     }
   };
 
   const handlePrevious = () => {
+    logger.info("Previous track requested", { randomMode });
     const prevTrack = getPreviousTrack(currentTrack, randomMode);
     if (prevTrack) {
       setCurrentTrack(prevTrack);
-      logger.info("Previous track selected from playlist", { name: prevTrack.name });
+      logger.info("Previous track selected from playlist", { name: prevTrack.name, randomMode });
+      
+      // Update media session metadata for external controls
+      if ('mediaSession' in navigator) {
+        navigator.mediaSession.metadata = new MediaMetadata({
+          title: prevTrack.name,
+          artist: prevTrack.language || 'Radio Station',
+          album: 'uRadio'
+        });
+        
+        // Set action handlers for external controls
+        navigator.mediaSession.setActionHandler('nexttrack', handleNext);
+        navigator.mediaSession.setActionHandler('previoustrack', handlePrevious);
+      }
     }
   };
 
@@ -106,6 +134,38 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({
       setCurrentIndex(-1);
     }
   }, [currentTrack, tracks]);
+
+  // Setup media session when track changes
+  useEffect(() => {
+    if (currentTrack && 'mediaSession' in navigator) {
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: currentTrack.name,
+        artist: currentTrack.language || 'Radio Station',
+        album: 'uRadio'
+      });
+      
+      // Set action handlers for external controls with random mode support
+      navigator.mediaSession.setActionHandler('play', () => {
+        logger.info("External control: play");
+        resumePlayback();
+      });
+      
+      navigator.mediaSession.setActionHandler('pause', () => {
+        logger.info("External control: pause");
+        pausePlayback();
+      });
+      
+      navigator.mediaSession.setActionHandler('nexttrack', () => {
+        logger.info("External control: next track", { randomMode });
+        handleNext();
+      });
+      
+      navigator.mediaSession.setActionHandler('previoustrack', () => {
+        logger.info("External control: previous track", { randomMode });
+        handlePrevious();
+      });
+    }
+  }, [currentTrack, randomMode]);
 
   // CRITICAL: Only play track when explicitly requested by user
   const playTrack = (track: Track) => {

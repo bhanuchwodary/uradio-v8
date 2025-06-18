@@ -150,7 +150,7 @@ const AddUrlForm: React.FC = () => {
                 <SelectValue placeholder="Select a language" />
               </SelectTrigger>
               <SelectContent className="bg-popover border border-border shadow-lg z-50">
-                <SelectItem value="">No language specified</SelectItem>
+                <SelectItem value="none">No language specified</SelectItem>
                 {commonLanguages.map((lang) => (
                   <SelectItem key={lang} value={lang}>
                     {lang}

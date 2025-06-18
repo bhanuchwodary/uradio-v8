@@ -7,6 +7,7 @@ import { useTrackStateContext } from "@/context/TrackStateContext";
 import { useToast } from "@/hooks/use-toast";
 import PlaylistContent from "@/components/playlist/PlaylistContent";
 import PlaylistDialogs from "@/components/playlist/PlaylistDialogs";
+import ClearAllDialog from "@/components/playlist/ClearAllDialog";
 import { Track } from "@/types/track";
 
 interface PlaylistPageProps {
@@ -147,6 +148,12 @@ const PlaylistPage: React.FC<PlaylistPageProps> = ({
           stationToDelete={stationToDelete}
           onCloseDeleteDialog={() => setStationToDelete(null)}
           onConfirmDelete={() => handleDeleteStation(stationToDelete)}
+        />
+
+        <ClearAllDialog
+          isOpen={showClearDialog}
+          onClose={() => setShowClearDialog(false)}
+          onConfirm={confirmClearAll}
         />
       </div>
     </AppLayout>
