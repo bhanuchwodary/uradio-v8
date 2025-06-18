@@ -21,26 +21,8 @@ const AddUrlForm: React.FC = () => {
 
   // Common languages for radio stations
   const commonLanguages = [
-    "English",
-    "Spanish",
-    "French", 
-    "German",
-    "Italian",
-    "Portuguese",
-    "Russian",
-    "Chinese",
-    "Japanese",
-    "Korean",
-    "Arabic",
-    "Hindi",
-    "Dutch",
-    "Swedish",
-    "Norwegian",
-    "Danish",
-    "Polish",
-    "Turkish",
-    "Greek",
-    "Hebrew"
+  "English", "Hindi", "Telugu", "Tamil", "Malayalam", "Kannada", 
+  "Bengali", "Punjabi", "Marathi", "Gujarati", "Classical Music", "Other"
   ];
 
   const handleSubmit = async (e: React.FormEvent) => {
