@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useState, useRef, useEffect } from "react";
 import { Track } from "@/types/track";
 import { usePlayerCore } from "@/hooks/usePlayerCore";
+import { usePlaylistNavigation } from "@/hooks/usePlaylistNavigation";
 import { logger } from "@/utils/logger";
 
 interface AudioPlayerContextType {
@@ -49,44 +50,23 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({
   // User interaction tracking to prevent auto-play
   const userInitiatedRef = useRef(false);
   
-  // Enhanced next/previous handlers for random mode
+  // Get playlist navigation functions
+  const { getNextTrack, getPreviousTrack } = usePlaylistNavigation();
+  
+  // Enhanced next/previous handlers for random mode and playlist navigation
   const handleNext = () => {
-    if (!currentTrack || tracks.length <= 1) return;
-    
-    let nextIndex;
-    if (randomMode) {
-      do {
-        nextIndex = Math.floor(Math.random() * tracks.length);
-      } while (nextIndex === currentIndex && tracks.length > 1);
-    } else {
-      nextIndex = (currentIndex + 1) % tracks.length;
-    }
-    
-    const nextTrack = tracks[nextIndex];
+    const nextTrack = getNextTrack(currentTrack, randomMode);
     if (nextTrack) {
-      setCurrentIndex(nextIndex);
       setCurrentTrack(nextTrack);
-      logger.info("Next track selected", { name: nextTrack.name });
+      logger.info("Next track selected from playlist", { name: nextTrack.name });
     }
   };
 
   const handlePrevious = () => {
-    if (!currentTrack || tracks.length <= 1) return;
-    
-    let prevIndex;
-    if (randomMode) {
-      do {
-        prevIndex = Math.floor(Math.random() * tracks.length);
-      } while (prevIndex === currentIndex && tracks.length > 1);
-    } else {
-      prevIndex = (currentIndex - 1 + tracks.length) % tracks.length;
-    }
-    
-    const prevTrack = tracks[prevIndex];
+    const prevTrack = getPreviousTrack(currentTrack, randomMode);
     if (prevTrack) {
-      setCurrentIndex(prevIndex);
       setCurrentTrack(prevTrack);
-      logger.info("Previous track selected", { name: prevTrack.name });
+      logger.info("Previous track selected from playlist", { name: prevTrack.name });
     }
   };
 

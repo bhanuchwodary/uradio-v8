@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useTrackStateContext } from "@/context/TrackStateContext";
 import { useNavigate } from "react-router-dom";
@@ -17,6 +18,30 @@ const AddUrlForm: React.FC = () => {
   const { addUrl, checkIfStationExists } = useTrackStateContext();
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  // Common languages for radio stations
+  const commonLanguages = [
+    "English",
+    "Spanish",
+    "French", 
+    "German",
+    "Italian",
+    "Portuguese",
+    "Russian",
+    "Chinese",
+    "Japanese",
+    "Korean",
+    "Arabic",
+    "Hindi",
+    "Dutch",
+    "Swedish",
+    "Norwegian",
+    "Danish",
+    "Polish",
+    "Turkish",
+    "Greek",
+    "Hebrew"
+  ];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -120,14 +145,19 @@ const AddUrlForm: React.FC = () => {
           
           <div>
             <Label htmlFor="language">Language (Optional)</Label>
-            <Input
-              id="language"
-              type="text"
-              value={language}
-              onChange={(e) => setLanguage(e.target.value)}
-              placeholder="English, Spanish, etc."
-              disabled={isSubmitting}
-            />
+            <Select value={language} onValueChange={setLanguage} disabled={isSubmitting}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select a language" />
+              </SelectTrigger>
+              <SelectContent className="bg-popover border border-border shadow-lg z-50">
+                <SelectItem value="">No language specified</SelectItem>
+                {commonLanguages.map((lang) => (
+                  <SelectItem key={lang} value={lang}>
+                    {lang}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           
           <Button 
