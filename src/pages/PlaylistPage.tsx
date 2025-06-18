@@ -114,7 +114,7 @@ const PlaylistPage: React.FC<PlaylistPageProps> = ({
     setShowClearDialog(false);
   };
 
-  const handleSaveEdit = (data: { url: string; name: string }, editingStation: Track | null) => {
+  const handleSaveEdit = (data: { url: string; name: string }) => {
     if (editingStation) {
       editStationByValue(editingStation, data);
       toast({
@@ -142,14 +142,11 @@ const PlaylistPage: React.FC<PlaylistPageProps> = ({
 
         <PlaylistDialogs
           editingStation={editingStation}
-          setEditingStation={setEditingStation}
-          stationToDelete={stationToDelete}
-          setStationToDelete={setStationToDelete}
-          showClearDialog={showClearDialog}
-          setShowClearDialog={setShowClearDialog}
+          onCloseEditDialog={() => setEditingStation(null)}
           onSaveEdit={handleSaveEdit}
-          onDeleteStation={handleDeleteStation}
-          onConfirmClearAll={confirmClearAll}
+          stationToDelete={stationToDelete}
+          onCloseDeleteDialog={() => setStationToDelete(null)}
+          onConfirmDelete={() => handleDeleteStation(stationToDelete)}
         />
       </div>
     </AppLayout>
