@@ -1,77 +1,136 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import { usePlaylist } from "@/context/PlaylistContext";
+import { useAudioPlayer } from "@/context/AudioPlayerContext";
+import { useTrackStateContext } from "@/context/TrackStateContext";
+import { useToast } from "@/hooks/use-toast";
 import PlaylistContent from "@/components/playlist/PlaylistContent";
 import PlaylistDialogs from "@/components/playlist/PlaylistDialogs";
-import ClearAllDialog from "@/components/playlist/ClearAllDialog";
-import { usePlaylistState } from "@/hooks/usePlaylistState";
-import { usePlaylistHandlers } from "@/hooks/usePlaylistHandlers";
+import { Track } from "@/types/track";
 
-const PlaylistPage: React.FC = () => {
+interface PlaylistPageProps {
+  randomMode: boolean;
+  setRandomMode: (rand: boolean) => void;
+  volume: number;
+  setVolume: (v: number) => void;
+}
+
+const PlaylistPage: React.FC<PlaylistPageProps> = ({
+  randomMode,
+  setRandomMode,
+  volume,
+  setVolume
+}) => {
+  const [editingStation, setEditingStation] = useState<Track | null>(null);
+  const [stationToDelete, setStationToDelete] = useState<Track | null>(null);
+  const [showClearDialog, setShowClearDialog] = useState(false);
+
+  const { toast } = useToast();
+  const { editStationByValue } = useTrackStateContext();
+  
+  // Get playlist state
   const {
-    editingStation,
-    setEditingStation,
-    stationToDelete,
-    setStationToDelete,
-    showClearDialog,
-    setShowClearDialog,
-    isPageReady,
-    tracks,
-    currentIndex,
-    isPlaying,
-    setCurrentIndex,
-    setIsPlaying,
-    toggleFavorite,
+    playlistTracks,
+    removeFromPlaylist,
+    clearPlaylist
+  } = usePlaylist();
+
+  // Get audio player state
+  const {
     currentTrack,
-    // Playlist-specific state
-    playlistTracks,
-    removeFromPlaylist,
-    clearPlaylist
-  } = usePlaylistState();
-
-  const {
-    handleSelectStation,
-    handleEditStation,
-    handleConfirmDelete,
-    handleDeleteStation,
-    handleToggleFavorite,
-    handleClearAll,
-    confirmClearAll,
-    handleSaveEdit
-  } = usePlaylistHandlers({
-    tracks,
-    currentIndex,
     isPlaying,
-    setCurrentIndex,
-    setIsPlaying,
-    toggleFavorite,
-    setEditingStation,
-    setStationToDelete,
-    setShowClearDialog,
-    playlistTracks,
-    removeFromPlaylist,
-    clearPlaylist
-  });
+    playTrack,
+    clearCurrentTrack
+  } = useAudioPlayer();
 
-  // Show loading spinner while page is initializing
-  if (!isPageReady) {
-    return (
-      <AppLayout>
-        <div className="container mx-auto max-w-5xl flex items-center justify-center min-h-[60vh]">
-          <LoadingSpinner size="lg" text="Loading your playlist..." />
-        </div>
-      </AppLayout>
-    );
-  }
+  // Handle selecting a station for playback
+  const handleSelectStation = (index: number) => {
+    const selectedStation = playlistTracks[index];
+    if (selectedStation) {
+      // CRITICAL: Only start playback when user explicitly clicks
+      playTrack(selectedStation);
+    }
+  };
+
+  // Edit station handler
+  const handleEditStation = (station: Track) => {
+    setEditingStation(station);
+  };
+
+  const handleConfirmDelete = (station: Track) => {
+    setStationToDelete(station);
+  };
+
+  const handleDeleteStation = (stationToDelete: Track | null) => {
+    if (stationToDelete) {
+      const stationName = stationToDelete.name;
+      
+      // Check if this is the currently playing station
+      const isCurrentlyPlaying = currentTrack?.url === stationToDelete.url;
+      
+      const success = removeFromPlaylist(stationToDelete.url);
+      if (success) {
+        // If we removed the currently playing station, clear it from player
+        if (isCurrentlyPlaying) {
+          clearCurrentTrack();
+        }
+        
+        toast({
+          title: "Station removed from playlist",
+          description: `${stationName} has been removed from your playlist`
+        });
+      }
+    }
+  };
+
+  const handleToggleFavorite = (station: Track) => {
+    // This toggles favorite in the main library, not just playlist
+    toast({
+      title: station.isFavorite ? "Removed from favorites" : "Added to favorites",
+      description: `${station.name} ${station.isFavorite ? "removed from" : "added to"} favorites`
+    });
+  };
+
+  const handleClearAll = () => {
+    setShowClearDialog(true);
+  };
+
+  const confirmClearAll = () => {
+    // Check if currently playing station is in the playlist being cleared
+    const isCurrentInPlaylist = currentTrack && playlistTracks.some(t => t.url === currentTrack.url);
+    
+    const removedCount = clearPlaylist();
+    
+    // If the currently playing station was in the playlist, clear it from player
+    if (isCurrentInPlaylist) {
+      clearCurrentTrack();
+    }
+    
+    toast({
+      title: "Playlist cleared",
+      description: `${removedCount} stations removed from your playlist`
+    });
+    setShowClearDialog(false);
+  };
+
+  const handleSaveEdit = (data: { url: string; name: string }, editingStation: Track | null) => {
+    if (editingStation) {
+      editStationByValue(editingStation, data);
+      toast({
+        title: "Station updated",
+        description: `"${data.name}" has been updated`,
+      });
+      setEditingStation(null);
+    }
+  };
 
   return (
     <AppLayout>
-      <div className={`container mx-auto max-w-5xl space-y-6 transition-opacity duration-300 ease-in-out pt-4 ${isPageReady ? 'opacity-100' : 'opacity-0'}`}>
-        {/* Playlist Content Component - Now uses separate playlist tracks */}
+      <div className="container mx-auto max-w-5xl space-y-6 pt-4">
         <PlaylistContent
           playlistTracks={playlistTracks}
-          currentIndex={currentIndex}
+          currentIndex={-1} // Not needed anymore since we track by URL
           currentTrack={currentTrack}
           isPlaying={isPlaying}
           onSelectStation={handleSelectStation}
@@ -80,22 +139,17 @@ const PlaylistPage: React.FC = () => {
           onToggleFavorite={handleToggleFavorite}
           onClearAll={handleClearAll}
         />
-        
-        {/* Dialogs Component */}
+
         <PlaylistDialogs
           editingStation={editingStation}
+          setEditingStation={setEditingStation}
           stationToDelete={stationToDelete}
-          onCloseEditDialog={() => setEditingStation(null)}
-          onSaveEdit={(data) => handleSaveEdit(data, editingStation)}
-          onCloseDeleteDialog={() => setStationToDelete(null)}
-          onConfirmDelete={() => handleDeleteStation(stationToDelete)}
-        />
-        
-        {/* Clear All Confirmation Dialog */}
-        <ClearAllDialog
-          isOpen={showClearDialog}
-          onClose={() => setShowClearDialog(false)}
-          onConfirm={confirmClearAll}
+          setStationToDelete={setStationToDelete}
+          showClearDialog={showClearDialog}
+          setShowClearDialog={setShowClearDialog}
+          onSaveEdit={handleSaveEdit}
+          onDeleteStation={handleDeleteStation}
+          onConfirmClearAll={confirmClearAll}
         />
       </div>
     </AppLayout>

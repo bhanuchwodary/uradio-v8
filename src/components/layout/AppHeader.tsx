@@ -5,8 +5,7 @@ import { Shuffle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/components/ThemeProvider";
 import { MusicPlayer } from "@/components/ui/player/MusicPlayer";
-import { useTrackStateContext } from "@/context/TrackStateContext";
-import { usePlayerCore } from "@/hooks/usePlayerCore";
+import { useAudioPlayer } from "@/context/AudioPlayerContext";
 
 interface AppHeaderProps {
   randomMode: boolean;
@@ -24,63 +23,21 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   const { theme } = useTheme();
   const [logoLoaded, setLogoLoaded] = useState(false);
 
-  // Get track state for integrated player
+  // Get audio player state - this is now the ONLY player in the app
   const {
-    tracks,
-    currentIndex,
+    currentTrack,
     isPlaying,
-    setCurrentIndex,
-    setIsPlaying
-  } = useTrackStateContext();
-
-  // Enhanced next/previous handlers for random mode
-  const handleNext = () => {
-    if (randomMode && tracks.length > 1) {
-      let randomIndex;
-      do {
-        randomIndex = Math.floor(Math.random() * tracks.length);
-      } while (randomIndex === currentIndex && tracks.length > 1);
-      setCurrentIndex(randomIndex);
-    } else {
-      const nextIndex = (currentIndex + 1) % tracks.length;
-      setCurrentIndex(nextIndex);
-    }
-  };
-
-  const handlePrevious = () => {
-    if (randomMode && tracks.length > 1) {
-      let randomIndex;
-      do {
-        randomIndex = Math.floor(Math.random() * tracks.length);
-      } while (randomIndex === currentIndex && tracks.length > 1);
-      setCurrentIndex(randomIndex);
-    } else {
-      const prevIndex = (currentIndex - 1 + tracks.length) % tracks.length;
-      setCurrentIndex(prevIndex);
-    }
-  };
-
-  // Use player core with enhanced handlers that will be passed to media session
-  const {
     loading,
-    handlePlayPause,
-  } = usePlayerCore({
-    urls: tracks.map(track => track.url),
-    currentIndex,
-    setCurrentIndex,
-    isPlaying,
-    setIsPlaying,
-    tracks,
-    // Pass the random-aware handlers to be used by media session
-    enhancedHandlers: {
-      handleNext,
-      handlePrevious,
-      randomMode
-    }
-  });
+    togglePlayPause,
+    nextTrack,
+    previousTrack,
+    setVolume: setPlayerVolume
+  } = useAudioPlayer();
 
-  // Calculate current track
-  const currentTrack = tracks[currentIndex] || null;
+  // Sync volume between header state and player
+  useEffect(() => {
+    setPlayerVolume(volume);
+  }, [volume, setPlayerVolume]);
 
   // Determine which logo to use based on theme with preload
   const getLogoSrc = () => {
@@ -114,7 +71,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
           />
         </div>
         
-        {/* Main Info/Controls */}
+        {/* Main Info/Controls - THIS IS THE ONLY PLAYER IN THE APP */}
         <div className="flex flex-1 min-w-0 items-center">
           {currentTrack ? (
             <div className="flex items-center w-full gap-2 sm:gap-3">
@@ -137,14 +94,14 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
                   )}
                 </div>
               </div>
-              {/* Compact Controls (player) */}
+              {/* Compact Controls */}
               <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
                 <MusicPlayer
                   currentTrack={currentTrack}
                   isPlaying={isPlaying}
-                  onPlayPause={handlePlayPause}
-                  onNext={handleNext}
-                  onPrevious={handlePrevious}
+                  onPlayPause={togglePlayPause}
+                  onNext={nextTrack}
+                  onPrevious={previousTrack}
                   volume={volume}
                   onVolumeChange={setVolume}
                   loading={loading}

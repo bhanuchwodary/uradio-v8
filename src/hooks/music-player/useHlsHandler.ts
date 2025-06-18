@@ -1,7 +1,7 @@
 
 import { useRef, useEffect } from "react";
 import Hls from "hls.js";
-import { globalAudioRef, shouldResumeAfterNavigation } from "@/components/music-player/audioInstance";
+import { globalAudioRef } from "@/components/music-player/audioInstance";
 import { logger } from "@/utils/logger";
 import { detectStreamType, configureAudioForStream, handleDirectStreamError } from "@/utils/streamHandler";
 
@@ -30,42 +30,28 @@ export const useHlsHandler = ({
       return;
     }
 
-    // Check if we're already playing this URL
+    // CRITICAL: Only handle explicit play/pause requests, never auto-start
     if (url === lastUrlRef.current && audioRef.current.src) {
-      // For explicit user playback requests, always attempt to play
-      if (isPlaying && !globalAudioRef.explicitlyPaused) {
-        logger.debug("User requested playback for current URL, ensuring playback starts");
+      // URL hasn't changed, just handle play/pause state
+      if (isPlaying) {
+        logger.debug("Explicit play request for current URL");
         audioRef.current.play().catch(error => {
           logger.error("Error playing current stream", error);
           setIsPlaying(false);
         });
-        return;
-      }
-      
-      // If not playing, ensure we pause (especially important for M3U8 streams)
-      if (!isPlaying) {
-        logger.debug("Ensuring stream is paused");
+      } else {
+        logger.debug("Explicit pause request");
         audioRef.current.pause();
-        return;
       }
-      
-      // If URL is the same but we're navigating, be more careful about auto-resume
-      if (globalAudioRef.navigationInProgress && !isPlaying) {
-        logger.debug("Navigation in progress, maintaining current state");
-        return;
-      }
+      return;
     }
 
     lastUrlRef.current = url;
+    setLoading(true);
     
-    // Only show loading if we're actually changing the URL or loading for first time
-    if (audioRef.current.src !== url || !audioRef.current.src) {
-      setLoading(true);
-    }
-    
-    // Clean up previous HLS instance if exists and if URL has changed
+    // Clean up previous HLS instance if URL changed
     if (globalAudioRef.hls && audioRef.current.src !== url) {
-      logger.debug("Destroying previous HLS instance");
+      logger.debug("Destroying previous HLS instance for URL change");
       globalAudioRef.hls.destroy();
       globalAudioRef.hls = null;
     }
@@ -74,15 +60,14 @@ export const useHlsHandler = ({
     const streamConfig = detectStreamType(url);
     configureAudioForStream(audioRef.current, streamConfig);
 
-    // Handle HLS streams with enhanced state management
+    // Handle HLS streams - LOAD ONLY, NO AUTO-PLAY
     if (streamConfig.type === 'hls' && Hls.isSupported()) {
-      logger.info("Loading HLS stream", { url, config: streamConfig });
+      logger.info("Loading HLS stream (no auto-play)", { url, config: streamConfig });
       
-      // Only create a new HLS instance if needed
       if (!globalAudioRef.hls) {
         const hls = new Hls({
           enableWorker: false,
-          maxBufferLength: 15, // Reduced buffer for better pause/resume control
+          maxBufferLength: 15,
           maxMaxBufferLength: 30,
           maxBufferSize: 30 * 1000 * 1000,
           maxBufferHole: 0.3,
@@ -121,21 +106,15 @@ export const useHlsHandler = ({
           setLoading(false);
           retryCountRef.current = 0;
           
-          // Only auto-play if explicitly requested by user and not paused
-          if (isPlaying && !globalAudioRef.explicitlyPaused) {
-            logger.debug("User requested playback, starting HLS stream");
+          // CRITICAL: NEVER auto-play, only play if explicitly requested
+          if (isPlaying) {
+            logger.debug("HLS loaded and explicit play requested, starting playback");
             audioRef.current?.play().catch(error => {
               logger.error("Error playing HLS stream", error);
               setIsPlaying(false);
             });
-          } else if (shouldResumeAfterNavigation() && !globalAudioRef.explicitlyPaused) {
-            logger.debug("Auto-resuming HLS stream after navigation");
-            audioRef.current?.play().catch(error => {
-              logger.error("Error resuming HLS stream", error);
-              setIsPlaying(false);
-            });
           } else {
-            logger.debug("HLS stream loaded but not auto-playing");
+            logger.debug("HLS stream loaded and ready, waiting for user interaction");
           }
         });
         
@@ -143,7 +122,6 @@ export const useHlsHandler = ({
           logger.debug(`HLS quality level switched to: ${data.level}`);
         });
         
-        // Enhanced error handling for M3U8 streams
         hls.on(Hls.Events.ERROR, (event, data) => {
           logger.error("HLS error", data);
           
@@ -185,8 +163,8 @@ export const useHlsHandler = ({
         globalAudioRef.hls.loadSource(url);
       }
     } else if (audioRef.current.src !== url) {
-      // Handle direct streams with enhanced state management
-      logger.info("Loading direct audio stream", { url, config: streamConfig });
+      // Handle direct streams - LOAD ONLY, NO AUTO-PLAY
+      logger.info("Loading direct audio stream (no auto-play)", { url, config: streamConfig });
       audioRef.current.src = url;
       audioRef.current.load();
       
@@ -194,21 +172,15 @@ export const useHlsHandler = ({
         setLoading(false);
         retryCountRef.current = 0;
         
-        // Only auto-play if explicitly requested and not paused
-        if (isPlaying && !globalAudioRef.explicitlyPaused) {
-          logger.debug("User requested playback, starting direct stream");
+        // CRITICAL: NEVER auto-play, only play if explicitly requested
+        if (isPlaying) {
+          logger.debug("Direct stream loaded and explicit play requested, starting playback");
           audioRef.current?.play().catch(error => {
             logger.error("Error playing direct stream", error);
             setIsPlaying(false);
           });
-        } else if (shouldResumeAfterNavigation() && !globalAudioRef.explicitlyPaused) {
-          logger.debug("Auto-resuming direct stream after navigation");
-          audioRef.current?.play().catch(error => {
-            logger.error("Error resuming direct stream", error);
-            setIsPlaying(false);
-          });
         } else {
-          logger.debug("Direct stream loaded but not auto-playing");
+          logger.debug("Direct stream loaded and ready, waiting for user interaction");
         }
       };
 
@@ -222,15 +194,15 @@ export const useHlsHandler = ({
         }
       };
     } else {
-      // URL is the same, handle play/pause appropriately
-      if (isPlaying && !globalAudioRef.explicitlyPaused) {
-        logger.debug("User requested playback for same URL, ensuring playback starts");
+      // URL is the same, handle explicit play/pause
+      if (isPlaying) {
+        logger.debug("Explicit play request for loaded stream");
         audioRef.current.play().catch(error => {
-          logger.error("Error starting playback for same URL", error);
+          logger.error("Error starting playback", error);
           setIsPlaying(false);
         });
-      } else if (!isPlaying) {
-        logger.debug("Pausing playback for same URL");
+      } else {
+        logger.debug("Explicit pause request");
         audioRef.current.pause();
       }
       setLoading(false);
