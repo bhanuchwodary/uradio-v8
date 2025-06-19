@@ -39,6 +39,17 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
     setPlayerVolume(volume);
   }, [volume, setPlayerVolume]);
 
+  // CRITICAL FIX: Enhanced next/previous functions that respect random mode
+  const handleNext = () => {
+    console.log("Header: Next track clicked with random mode:", randomMode);
+    nextTrack(); // This already uses enhanced handlers with random mode
+  };
+
+  const handlePrevious = () => {
+    console.log("Header: Previous track clicked with random mode:", randomMode);
+    previousTrack(); // This already uses enhanced handlers with random mode
+  };
+
   // Determine which logo to use based on theme with preload
   const getLogoSrc = () => {
     const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
@@ -92,6 +103,11 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
                       {currentTrack.language}
                     </span>
                   )}
+                  {randomMode && (
+                    <span className="inline-block px-2 py-0.5 text-xs bg-secondary/20 text-secondary-foreground rounded-full font-medium">
+                      Random
+                    </span>
+                  )}
                 </div>
               </div>
               {/* Compact Controls */}
@@ -100,8 +116,8 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
                   currentTrack={currentTrack}
                   isPlaying={isPlaying}
                   onPlayPause={togglePlayPause}
-                  onNext={nextTrack}
-                  onPrevious={previousTrack}
+                  onNext={handleNext}
+                  onPrevious={handlePrevious}
                   volume={volume}
                   onVolumeChange={setVolume}
                   loading={loading}
@@ -152,7 +168,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
                     randomMode
                       ? "bg-primary/20 text-primary"
                       : "text-on-surface-variant hover:bg-surface-container-high"
-                  )}
+                    )}
                   title={randomMode ? "Random mode on" : "Random mode off"}
                 >
                   <Shuffle className="h-5 w-5" />

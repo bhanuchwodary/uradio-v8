@@ -55,11 +55,14 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({
   
   // Enhanced next/previous handlers for random mode and playlist navigation
   const handleNext = () => {
-    logger.info("Next track requested", { randomMode });
+    logger.info("AudioPlayerContext: Next track requested", { randomMode, currentTrack: currentTrack?.name });
+    console.log("RANDOM MODE DEBUG: handleNext called with randomMode:", randomMode);
+    
     const nextTrack = getNextTrack(currentTrack, randomMode);
     if (nextTrack) {
       setCurrentTrack(nextTrack);
       logger.info("Next track selected from playlist", { name: nextTrack.name, randomMode });
+      console.log("RANDOM MODE DEBUG: Selected next track:", nextTrack.name, "Random mode:", randomMode);
       
       // Update media session metadata for external controls
       if ('mediaSession' in navigator) {
@@ -73,15 +76,20 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({
         navigator.mediaSession.setActionHandler('nexttrack', handleNext);
         navigator.mediaSession.setActionHandler('previoustrack', handlePrevious);
       }
+    } else {
+      console.log("RANDOM MODE DEBUG: No next track found");
     }
   };
 
   const handlePrevious = () => {
-    logger.info("Previous track requested", { randomMode });
+    logger.info("AudioPlayerContext: Previous track requested", { randomMode, currentTrack: currentTrack?.name });
+    console.log("RANDOM MODE DEBUG: handlePrevious called with randomMode:", randomMode);
+    
     const prevTrack = getPreviousTrack(currentTrack, randomMode);
     if (prevTrack) {
       setCurrentTrack(prevTrack);
       logger.info("Previous track selected from playlist", { name: prevTrack.name, randomMode });
+      console.log("RANDOM MODE DEBUG: Selected previous track:", prevTrack.name, "Random mode:", randomMode);
       
       // Update media session metadata for external controls
       if ('mediaSession' in navigator) {
@@ -95,6 +103,8 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({
         navigator.mediaSession.setActionHandler('nexttrack', handleNext);
         navigator.mediaSession.setActionHandler('previoustrack', handlePrevious);
       }
+    } else {
+      console.log("RANDOM MODE DEBUG: No previous track found");
     }
   };
 
@@ -135,8 +145,13 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({
     }
   }, [currentTrack, tracks]);
 
-  // Setup media session when track changes
+  // Setup media session when track changes or random mode changes
   useEffect(() => {
+    console.log("RANDOM MODE DEBUG: Media session setup effect triggered", { 
+      currentTrack: currentTrack?.name, 
+      randomMode 
+    });
+    
     if (currentTrack && 'mediaSession' in navigator) {
       navigator.mediaSession.metadata = new MediaMetadata({
         title: currentTrack.name,
@@ -157,11 +172,13 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({
       
       navigator.mediaSession.setActionHandler('nexttrack', () => {
         logger.info("External control: next track", { randomMode });
+        console.log("RANDOM MODE DEBUG: External control next track with randomMode:", randomMode);
         handleNext();
       });
       
       navigator.mediaSession.setActionHandler('previoustrack', () => {
         logger.info("External control: previous track", { randomMode });
+        console.log("RANDOM MODE DEBUG: External control previous track with randomMode:", randomMode);
         handlePrevious();
       });
     }
@@ -203,13 +220,15 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({
   };
 
   const nextTrack = () => {
-    logger.info("User clicked next track");
+    logger.info("User clicked next track", { randomMode });
+    console.log("RANDOM MODE DEBUG: User clicked next track, randomMode:", randomMode);
     userInitiatedRef.current = true;
     handleNext();
   };
 
   const previousTrack = () => {
-    logger.info("User clicked previous track");
+    logger.info("User clicked previous track", { randomMode });
+    console.log("RANDOM MODE DEBUG: User clicked previous track, randomMode:", randomMode);
     userInitiatedRef.current = true;
     handlePrevious();
   };
