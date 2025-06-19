@@ -45,10 +45,13 @@ const PlaylistPage: React.FC<PlaylistPageProps> = ({
     clearCurrentTrack
   } = useAudioPlayer();
 
+  console.log("PlaylistPage: Random mode is", randomMode);
+
   // Handle selecting a station for playback
   const handleSelectStation = (index: number) => {
     const selectedStation = playlistTracks[index];
     if (selectedStation) {
+      console.log("PlaylistPage: User selected station", selectedStation.name, "with random mode:", randomMode);
       // CRITICAL: Only start playback when user explicitly clicks
       playTrack(selectedStation);
     }

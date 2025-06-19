@@ -103,11 +103,6 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
                       {currentTrack.language}
                     </span>
                   )}
-                  {randomMode && (
-                    <span className="inline-block px-2 py-0.5 text-xs bg-secondary/20 text-secondary-foreground rounded-full font-medium">
-                      Random
-                    </span>
-                  )}
                 </div>
               </div>
               {/* Compact Controls */}
@@ -127,7 +122,10 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => setRandomMode(!randomMode)}
+                  onClick={() => {
+                    console.log("Random mode toggle clicked, changing from", randomMode, "to", !randomMode);
+                    setRandomMode(!randomMode);
+                  }}
                   className={cn(
                     "h-10 w-10 rounded-full transition-all duration-200",
                     randomMode
@@ -162,7 +160,10 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => setRandomMode(!randomMode)}
+                  onClick={() => {
+                    console.log("Random mode toggle clicked, changing from", randomMode, "to", !randomMode);
+                    setRandomMode(!randomMode);
+                  }}
                   className={cn(
                     "h-10 w-10 rounded-full transition-all duration-200",
                     randomMode

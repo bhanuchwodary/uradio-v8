@@ -33,11 +33,16 @@ export const usePlaylistNavigation = () => {
     
     let nextIndex;
     if (randomMode) {
-      console.log("RANDOM MODE DEBUG: Using random selection");
-      do {
-        nextIndex = Math.floor(Math.random() * tracks.length);
-        console.log("RANDOM MODE DEBUG: Generated random index:", nextIndex);
-      } while (nextIndex === currentIndex && tracks.length > 1);
+      console.log("RANDOM MODE DEBUG: Using random selection for next track");
+      // Generate random index different from current
+      const availableIndices = tracks.map((_, i) => i).filter(i => i !== currentIndex);
+      if (availableIndices.length === 0) {
+        console.log("RANDOM MODE DEBUG: No other tracks available for random selection");
+        return null;
+      }
+      const randomChoice = Math.floor(Math.random() * availableIndices.length);
+      nextIndex = availableIndices[randomChoice];
+      console.log("RANDOM MODE DEBUG: Random selection - available indices:", availableIndices, "chosen:", nextIndex);
     } else {
       console.log("RANDOM MODE DEBUG: Using sequential selection");
       nextIndex = (currentIndex + 1) % tracks.length;
@@ -47,7 +52,8 @@ export const usePlaylistNavigation = () => {
     console.log("RANDOM MODE DEBUG: Selected next track:", {
       nextIndex,
       trackName: nextTrack?.name,
-      randomMode
+      randomMode,
+      fromIndex: currentIndex
     });
     
     return nextTrack;
@@ -74,11 +80,16 @@ export const usePlaylistNavigation = () => {
     
     let prevIndex;
     if (randomMode) {
-      console.log("RANDOM MODE DEBUG: Using random selection for previous");
-      do {
-        prevIndex = Math.floor(Math.random() * tracks.length);
-        console.log("RANDOM MODE DEBUG: Generated random index for previous:", prevIndex);
-      } while (prevIndex === currentIndex && tracks.length > 1);
+      console.log("RANDOM MODE DEBUG: Using random selection for previous track");
+      // Generate random index different from current
+      const availableIndices = tracks.map((_, i) => i).filter(i => i !== currentIndex);
+      if (availableIndices.length === 0) {
+        console.log("RANDOM MODE DEBUG: No other tracks available for random selection");
+        return null;
+      }
+      const randomChoice = Math.floor(Math.random() * availableIndices.length);
+      prevIndex = availableIndices[randomChoice];
+      console.log("RANDOM MODE DEBUG: Random selection for previous - available indices:", availableIndices, "chosen:", prevIndex);
     } else {
       console.log("RANDOM MODE DEBUG: Using sequential selection for previous");
       prevIndex = (currentIndex - 1 + tracks.length) % tracks.length;
@@ -88,7 +99,8 @@ export const usePlaylistNavigation = () => {
     console.log("RANDOM MODE DEBUG: Selected previous track:", {
       prevIndex,
       trackName: prevTrack?.name,
-      randomMode
+      randomMode,
+      fromIndex: currentIndex
     });
     
     return prevTrack;
