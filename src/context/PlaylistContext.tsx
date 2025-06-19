@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect, useMemo } from "react";
 import { Track } from "@/types/track";
 import { logger } from "@/utils/logger";
 
@@ -9,11 +9,13 @@ export interface PlaylistTrack extends Track {
 
 interface PlaylistContextType {
   playlistTracks: PlaylistTrack[];
+  sortedPlaylistTracks: PlaylistTrack[];
   addToPlaylist: (track: Track) => boolean;
   removeFromPlaylist: (trackUrl: string) => boolean;
   clearPlaylist: () => number;
   isInPlaylist: (trackUrl: string) => boolean;
   getPlaylistTrack: (trackUrl: string) => PlaylistTrack | undefined;
+  updatePlaylistTrackFavorite: (trackUrl: string, isFavorite: boolean) => void;
   playlistCount: number;
 }
 
@@ -46,6 +48,17 @@ export const PlaylistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     } catch (error) {
       logger.error("Error saving playlist to storage", error);
     }
+  }, [playlistTracks]);
+
+  // Sorted playlist tracks with favorites first
+  const sortedPlaylistTracks = useMemo(() => {
+    return [...playlistTracks].sort((a, b) => {
+      // Favorites first
+      if (a.isFavorite && !b.isFavorite) return -1;
+      if (!a.isFavorite && b.isFavorite) return 1;
+      // Then by added time (newest first for same favorite status)
+      return b.addedToPlaylistAt - a.addedToPlaylistAt;
+    });
   }, [playlistTracks]);
 
   const addToPlaylist = (track: Track): boolean => {
@@ -96,13 +109,26 @@ export const PlaylistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     return playlistTracks.find(t => t.url === trackUrl);
   };
 
+  const updatePlaylistTrackFavorite = (trackUrl: string, isFavorite: boolean): void => {
+    setPlaylistTracks(prev => 
+      prev.map(track => 
+        track.url === trackUrl 
+          ? { ...track, isFavorite }
+          : track
+      )
+    );
+    logger.info("Updated playlist track favorite status", { url: trackUrl, isFavorite });
+  };
+
   const contextValue: PlaylistContextType = {
     playlistTracks,
+    sortedPlaylistTracks,
     addToPlaylist,
     removeFromPlaylist,
     clearPlaylist,
     isInPlaylist,
     getPlaylistTrack,
+    updatePlaylistTrackFavorite,
     playlistCount: playlistTracks.length
   };
 

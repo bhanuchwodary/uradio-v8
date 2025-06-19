@@ -6,10 +6,10 @@ import { logger } from "@/utils/logger";
 
 // Create a separate hook for playlist navigation to avoid circular dependencies
 export const usePlaylistNavigation = () => {
-  const { playlistTracks } = usePlaylist();
+  const { sortedPlaylistTracks } = usePlaylist();
 
   const getPlaylistTracks = (): Track[] => {
-    return playlistTracks || [];
+    return sortedPlaylistTracks || [];
   };
 
   const getNextTrack = (currentTrack: Track | null, randomMode: boolean): Track | null => {

@@ -28,13 +28,14 @@ const PlaylistPage: React.FC<PlaylistPageProps> = ({
   const [showClearDialog, setShowClearDialog] = useState(false);
 
   const { toast } = useToast();
-  const { editStationByValue } = useTrackStateContext();
+  const { editStationByValue, toggleFavorite, tracks } = useTrackStateContext();
   
   // Get playlist state
   const {
-    playlistTracks,
+    sortedPlaylistTracks,
     removeFromPlaylist,
-    clearPlaylist
+    clearPlaylist,
+    updatePlaylistTrackFavorite
   } = usePlaylist();
 
   // Get audio player state
@@ -49,10 +50,9 @@ const PlaylistPage: React.FC<PlaylistPageProps> = ({
 
   // Handle selecting a station for playback
   const handleSelectStation = (index: number) => {
-    const selectedStation = playlistTracks[index];
+    const selectedStation = sortedPlaylistTracks[index];
     if (selectedStation) {
       console.log("PlaylistPage: User selected station", selectedStation.name, "with random mode:", randomMode);
-      // CRITICAL: Only start playback when user explicitly clicks
       playTrack(selectedStation);
     }
   };
@@ -89,11 +89,21 @@ const PlaylistPage: React.FC<PlaylistPageProps> = ({
   };
 
   const handleToggleFavorite = (station: Track) => {
-    // This toggles favorite in the main library, not just playlist
-    toast({
-      title: station.isFavorite ? "Removed from favorites" : "Added to favorites",
-      description: `${station.name} ${station.isFavorite ? "removed from" : "added to"} favorites`
-    });
+    // Find the station in the main library
+    const stationIndex = tracks.findIndex(t => t.url === station.url);
+    
+    if (stationIndex !== -1) {
+      // Toggle favorite in the main library
+      toggleFavorite(stationIndex);
+      
+      // Update the playlist track favorite status
+      updatePlaylistTrackFavorite(station.url, !station.isFavorite);
+      
+      toast({
+        title: !station.isFavorite ? "Added to favorites" : "Removed from favorites",
+        description: `${station.name} ${!station.isFavorite ? "added to" : "removed from"} favorites`
+      });
+    }
   };
 
   const handleClearAll = () => {
@@ -102,7 +112,7 @@ const PlaylistPage: React.FC<PlaylistPageProps> = ({
 
   const confirmClearAll = () => {
     // Check if currently playing station is in the playlist being cleared
-    const isCurrentInPlaylist = currentTrack && playlistTracks.some(t => t.url === currentTrack.url);
+    const isCurrentInPlaylist = currentTrack && sortedPlaylistTracks.some(t => t.url === currentTrack.url);
     
     const removedCount = clearPlaylist();
     
@@ -133,8 +143,8 @@ const PlaylistPage: React.FC<PlaylistPageProps> = ({
     <AppLayout>
       <div className="container mx-auto max-w-5xl space-y-6 pt-4">
         <PlaylistContent
-          playlistTracks={playlistTracks}
-          currentIndex={-1} // Not needed anymore since we track by URL
+          playlistTracks={sortedPlaylistTracks}
+          currentIndex={-1}
           currentTrack={currentTrack}
           isPlaying={isPlaying}
           onSelectStation={handleSelectStation}

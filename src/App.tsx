@@ -18,6 +18,8 @@ const App = () => {
   const [randomMode, setRandomMode] = useState(false);
   const [volume, setVolume] = useState(0.7);
 
+  console.log("App: Random mode state is", randomMode);
+
   return (
     <ErrorBoundary>
       <ThemeProvider defaultTheme="dark" storageKey="uradio-theme">
@@ -54,10 +56,10 @@ const TrackStateWrapper: React.FC<{
 }> = ({ children, randomMode, volume }) => {
   const { tracks } = useTrackState();
   
-  console.log("RANDOM MODE DEBUG: TrackStateWrapper - passing randomMode to AudioPlayerProvider:", randomMode);
+  console.log("TrackStateWrapper: Random mode being passed to AudioPlayerProvider:", randomMode);
   
   return (
-    <AudioPlayerProvider tracks={tracks} randomMode={randomMode}>
+    <AudioPlayerProvider tracks={tracks} randomMode={randomMode} volume={volume}>
       {children}
     </AudioPlayerProvider>
   );
