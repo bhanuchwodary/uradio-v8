@@ -46,10 +46,16 @@ const AddUrlForm: React.FC = () => {
       return;
     }
 
-    if (checkIfStationExists(url.trim())) {
+    // CRITICAL FIX: checkIfStationExists returns an object, not a boolean
+    const stationCheck = checkIfStationExists(url.trim());
+    console.log("Station existence check result:", stationCheck);
+    console.log("Checking URL:", url.trim());
+    
+    if (stationCheck.exists) {
+      const existsInText = stationCheck.isUserStation ? "your stations" : "featured stations";
       toast({
         title: "Station already exists",
-        description: "This station is already in your collection",
+        description: `This station is already in ${existsInText}`,
         variant: "destructive"
       });
       return;
@@ -59,6 +65,7 @@ const AddUrlForm: React.FC = () => {
 
     try {
       const result = addUrl(url.trim(), name.trim(), false, false, language.trim());
+      console.log("Add URL result:", result);
       
       if (result.success) {
         toast({
