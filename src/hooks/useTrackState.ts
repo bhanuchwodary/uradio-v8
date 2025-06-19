@@ -51,15 +51,19 @@ export const useTrackState = (): TrackStateResult => {
     isPlaying,
     setCurrentIndex,
     setIsPlaying,
-    ...operations,
+    // Include operations but exclude the incorrect checkIfStationExists to avoid conflict
+    addUrl: operations.addUrl,
+    removeUrl: operations.removeUrl,
+    toggleFavorite: operations.toggleFavorite,
+    editTrack: operations.editTrack,
+    updatePlayTime: operations.updatePlayTime,
+    editStationByValue: operations.editStationByValue,
+    removeStationByValue: operations.removeStationByValue,
     // Map management functions to match TrackStateResult interface
     getUserStations: management.getMyStations,
     getTopStations: management.getPopularStations,
-    // Map stationExists to checkIfStationExists as required by TrackStateResult
+    // Map stationExists to checkIfStationExists as required by TrackStateResult - this is the CORRECT comprehensive validation
     checkIfStationExists: management.stationExists,
-    // Include other operations from operations interface
-    editStationByValue: operations.editStationByValue,
-    removeStationByValue: operations.removeStationByValue,
     ...debug
   };
 };
