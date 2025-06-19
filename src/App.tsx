@@ -59,7 +59,7 @@ const TrackStateWrapper: React.FC<{
   console.log("TrackStateWrapper: Random mode being passed to AudioPlayerProvider:", randomMode);
   
   return (
-    <AudioPlayerProvider tracks={tracks} randomMode={randomMode} volume={volume}>
+    <AudioPlayerProvider tracks={tracks} randomMode={randomMode}>
       {children}
     </AudioPlayerProvider>
   );
