@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useRef, useEffect } from "react";
 import { Track } from "@/types/track";
 import { usePlayerCore } from "@/hooks/usePlayerCore";
@@ -52,6 +51,8 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({
   
   // Get playlist navigation functions
   const { getNextTrack, getPreviousTrack } = usePlaylistNavigation();
+  
+  console.log("RANDOM MODE DEBUG: AudioPlayerProvider initialized with randomMode:", randomMode);
   
   // Enhanced next/previous handlers for random mode and playlist navigation
   const handleNext = () => {
@@ -112,7 +113,7 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({
   const urls = currentTrack ? [currentTrack.url] : [];
   const playerCurrentIndex = currentTrack ? 0 : -1;
 
-  // Use player core with enhanced handlers
+  // Use player core with enhanced handlers that include current randomMode
   const {
     duration,
     currentTime,
@@ -131,7 +132,7 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({
     enhancedHandlers: {
       handleNext,
       handlePrevious,
-      randomMode
+      randomMode // Pass current randomMode to player core
     }
   });
 

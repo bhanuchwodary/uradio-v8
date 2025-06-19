@@ -12,6 +12,7 @@ import AddStationPage from "@/pages/AddStationPage";
 import NotFound from "@/pages/NotFound";
 import StationListPage from "@/pages/StationListPage";
 import RequestStationPage from "@/pages/RequestStationPage";
+import { useTrackState } from "@/hooks/useTrackState";
 
 const App = () => {
   const [randomMode, setRandomMode] = useState(false);
@@ -45,14 +46,18 @@ const App = () => {
   );
 };
 
-// Wrapper component to access TrackStateContext
+// Wrapper component to access TrackStateContext and pass all tracks
 const TrackStateWrapper: React.FC<{
   children: React.ReactNode;
   randomMode: boolean;
   volume: number;
 }> = ({ children, randomMode, volume }) => {
+  const { tracks } = useTrackState();
+  
+  console.log("RANDOM MODE DEBUG: TrackStateWrapper - passing randomMode to AudioPlayerProvider:", randomMode);
+  
   return (
-    <AudioPlayerProvider tracks={[]} randomMode={randomMode}>
+    <AudioPlayerProvider tracks={tracks} randomMode={randomMode}>
       {children}
     </AudioPlayerProvider>
   );
