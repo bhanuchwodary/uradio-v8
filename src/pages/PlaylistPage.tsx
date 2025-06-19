@@ -96,23 +96,22 @@ const PlaylistPage: React.FC<PlaylistPageProps> = ({
     const stationIndex = tracks.findIndex(t => t.url === station.url);
     
     if (stationIndex !== -1) {
-      // Get the current favorite state from the main library
-      const currentFavoriteState = tracks[stationIndex].isFavorite;
-      const newFavoriteState = !currentFavoriteState;
-      
-      console.log("FAVORITES DEBUG: Main library favorite state:", currentFavoriteState, "-> New state:", newFavoriteState);
-      
-      // Toggle favorite in the main library first
+      // Toggle favorite in main library first
       toggleFavorite(stationIndex);
       
+      // Get the updated favorite state after toggle
+      const updatedFavoriteState = !station.isFavorite;
+      
+      console.log("FAVORITES DEBUG: New favorite state:", updatedFavoriteState);
+      
       // Update the playlist track favorite status to match
-      updatePlaylistTrackFavorite(station.url, newFavoriteState);
+      updatePlaylistTrackFavorite(station.url, updatedFavoriteState);
       
       console.log("FAVORITES DEBUG: Updated both main library and playlist");
       
       toast({
-        title: newFavoriteState ? "Added to favorites" : "Removed from favorites",
-        description: `${station.name} ${newFavoriteState ? "added to" : "removed from"} favorites`
+        title: updatedFavoriteState ? "Added to favorites" : "Removed from favorites",
+        description: `${station.name} ${updatedFavoriteState ? "added to" : "removed from"} favorites`
       });
     } else {
       console.log("FAVORITES DEBUG: Station not found in main library");
