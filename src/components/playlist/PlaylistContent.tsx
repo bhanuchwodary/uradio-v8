@@ -71,7 +71,7 @@ const PlaylistContent: React.FC<PlaylistContentProps> = ({
             onEditStation={onEditStation}
             onDeleteStation={onConfirmDelete}
             onToggleFavorite={onToggleFavorite}
-            context="PlaylistContext"
+            context="playlist"
           />
         ) : (
           <div className="text-center p-8 bg-gradient-to-br from-background/50 to-background/30 rounded-xl border border-border/50">
