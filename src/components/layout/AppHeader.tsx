@@ -31,7 +31,8 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
     togglePlayPause,
     nextTrack,
     previousTrack,
-    setVolume: setPlayerVolume
+    setVolume: setPlayerVolume,
+    setRandomMode: setPlayerRandomMode
   } = useAudioPlayer();
 
   // Sync volume between header state and player
@@ -39,7 +40,13 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
     setPlayerVolume(volume);
   }, [volume, setPlayerVolume]);
 
-  // CRITICAL FIX: Enhanced next/previous functions that respect random mode
+  // Sync random mode between header state and player
+  useEffect(() => {
+    console.log("RANDOM MODE DEBUG: Header syncing randomMode to player:", randomMode);
+    setPlayerRandomMode(randomMode);
+  }, [randomMode, setPlayerRandomMode]);
+
+  // Enhanced next/previous functions that respect random mode
   const handleNext = () => {
     console.log("Header: Next track clicked with random mode:", randomMode);
     nextTrack(); // This already uses enhanced handlers with random mode

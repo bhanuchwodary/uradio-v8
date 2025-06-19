@@ -1,7 +1,7 @@
+
 import React, { createContext, useContext, useState, useRef, useEffect } from "react";
 import { Track } from "@/types/track";
 import { usePlayerCore } from "@/hooks/usePlayerCore";
-import { usePlaylistNavigation } from "@/hooks/usePlaylistNavigation";
 import { logger } from "@/utils/logger";
 
 interface AudioPlayerContextType {
@@ -12,6 +12,7 @@ interface AudioPlayerContextType {
   volume: number;
   currentTime: number;
   duration: number;
+  randomMode: boolean;
   
   // Player controls - ONLY triggered by explicit user action
   playTrack: (track: Track) => void;
@@ -22,6 +23,7 @@ interface AudioPlayerContextType {
   previousTrack: () => void;
   setVolume: (volume: number) => void;
   seekTo: (time: number) => void;
+  setRandomMode: (randomMode: boolean) => void;
   
   // Track management
   setCurrentTrack: (track: Track | null) => void;
@@ -39,27 +41,131 @@ interface AudioPlayerProviderProps {
 export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({ 
   children, 
   tracks,
-  randomMode 
+  randomMode: initialRandomMode 
 }) => {
   // Core state
   const [currentTrack, setCurrentTrack] = useState<Track | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(-1);
+  const [randomMode, setRandomMode] = useState(initialRandomMode);
   
   // User interaction tracking to prevent auto-play
   const userInitiatedRef = useRef(false);
   
-  // Get playlist navigation functions
-  const { getNextTrack, getPreviousTrack } = usePlaylistNavigation();
-  
   console.log("RANDOM MODE DEBUG: AudioPlayerProvider initialized with randomMode:", randomMode);
   
+  // Sync random mode with prop changes
+  useEffect(() => {
+    console.log("RANDOM MODE DEBUG: Syncing randomMode from prop:", initialRandomMode);
+    setRandomMode(initialRandomMode);
+  }, [initialRandomMode]);
+  
+  // Get playlist tracks - use tracks directly from context
+  const getPlaylistTracks = (): Track[] => {
+    return tracks || [];
+  };
+
+  // Enhanced random track selection
+  const getNextTrack = (currentTrack: Track | null): Track | null => {
+    const playlistTracks = getPlaylistTracks();
+    console.log("RANDOM MODE DEBUG: getNextTrack called", { 
+      currentTrack: currentTrack?.name, 
+      randomMode, 
+      totalTracks: playlistTracks.length 
+    });
+    
+    if (!currentTrack || playlistTracks.length <= 1) {
+      console.log("RANDOM MODE DEBUG: No next track - insufficient tracks");
+      return null;
+    }
+    
+    const currentIndex = playlistTracks.findIndex(t => t.url === currentTrack.url);
+    if (currentIndex === -1) {
+      console.log("RANDOM MODE DEBUG: Current track not found in playlist");
+      return null;
+    }
+    
+    let nextIndex;
+    if (randomMode) {
+      console.log("RANDOM MODE DEBUG: Using random selection for next track");
+      // Generate random index different from current
+      const availableIndices = playlistTracks.map((_, i) => i).filter(i => i !== currentIndex);
+      if (availableIndices.length === 0) {
+        console.log("RANDOM MODE DEBUG: No other tracks available for random selection");
+        return null;
+      }
+      const randomChoice = Math.floor(Math.random() * availableIndices.length);
+      nextIndex = availableIndices[randomChoice];
+      console.log("RANDOM MODE DEBUG: Random selection - available indices:", availableIndices, "chosen:", nextIndex);
+    } else {
+      console.log("RANDOM MODE DEBUG: Using sequential selection");
+      nextIndex = (currentIndex + 1) % playlistTracks.length;
+    }
+    
+    const nextTrack = playlistTracks[nextIndex] || null;
+    console.log("RANDOM MODE DEBUG: Selected next track:", {
+      nextIndex,
+      trackName: nextTrack?.name,
+      randomMode,
+      fromIndex: currentIndex
+    });
+    
+    return nextTrack;
+  };
+
+  const getPreviousTrack = (currentTrack: Track | null): Track | null => {
+    const playlistTracks = getPlaylistTracks();
+    console.log("RANDOM MODE DEBUG: getPreviousTrack called", { 
+      currentTrack: currentTrack?.name, 
+      randomMode, 
+      totalTracks: playlistTracks.length 
+    });
+    
+    if (!currentTrack || playlistTracks.length <= 1) {
+      console.log("RANDOM MODE DEBUG: No previous track - insufficient tracks");
+      return null;
+    }
+    
+    const currentIndex = playlistTracks.findIndex(t => t.url === currentTrack.url);
+    if (currentIndex === -1) {
+      console.log("RANDOM MODE DEBUG: Current track not found in playlist");
+      return null;
+    }
+    
+    let prevIndex;
+    if (randomMode) {
+      console.log("RANDOM MODE DEBUG: Using random selection for previous track");
+      // Generate random index different from current
+      const availableIndices = playlistTracks.map((_, i) => i).filter(i => i !== currentIndex);
+      if (availableIndices.length === 0) {
+        console.log("RANDOM MODE DEBUG: No other tracks available for random selection");
+        return null;
+      }
+      const randomChoice = Math.floor(Math.random() * availableIndices.length);
+      prevIndex = availableIndices[randomChoice];
+      console.log("RANDOM MODE DEBUG: Random selection for previous - available indices:", availableIndices, "chosen:", prevIndex);
+    } else {
+      console.log("RANDOM MODE DEBUG: Using sequential selection for previous");
+      prevIndex = (currentIndex - 1 + playlistTracks.length) % playlistTracks.length;
+    }
+    
+    const prevTrack = playlistTracks[prevIndex] || null;
+    console.log("RANDOM MODE DEBUG: Selected previous track:", {
+      prevIndex,
+      trackName: prevTrack?.name,
+      randomMode,
+      fromIndex: currentIndex
+    });
+    
+    return prevTrack;
+  };
+
   // Enhanced next/previous handlers for random mode and playlist navigation
   const handleNext = () => {
     logger.info("AudioPlayerContext: Next track requested", { randomMode, currentTrack: currentTrack?.name });
     console.log("RANDOM MODE DEBUG: handleNext called with randomMode:", randomMode);
     
-    const nextTrack = getNextTrack(currentTrack, randomMode);
+    const nextTrack = getNextTrack(currentTrack);
     if (nextTrack) {
       setCurrentTrack(nextTrack);
       logger.info("Next track selected from playlist", { name: nextTrack.name, randomMode });
@@ -72,10 +178,6 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({
           artist: nextTrack.language || 'Radio Station',
           album: 'uRadio'
         });
-        
-        // Set action handlers for external controls
-        navigator.mediaSession.setActionHandler('nexttrack', handleNext);
-        navigator.mediaSession.setActionHandler('previoustrack', handlePrevious);
       }
     } else {
       console.log("RANDOM MODE DEBUG: No next track found");
@@ -86,7 +188,7 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({
     logger.info("AudioPlayerContext: Previous track requested", { randomMode, currentTrack: currentTrack?.name });
     console.log("RANDOM MODE DEBUG: handlePrevious called with randomMode:", randomMode);
     
-    const prevTrack = getPreviousTrack(currentTrack, randomMode);
+    const prevTrack = getPreviousTrack(currentTrack);
     if (prevTrack) {
       setCurrentTrack(prevTrack);
       logger.info("Previous track selected from playlist", { name: prevTrack.name, randomMode });
@@ -99,10 +201,6 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({
           artist: prevTrack.language || 'Radio Station',
           album: 'uRadio'
         });
-        
-        // Set action handlers for external controls
-        navigator.mediaSession.setActionHandler('nexttrack', handleNext);
-        navigator.mediaSession.setActionHandler('previoustrack', handlePrevious);
       }
     } else {
       console.log("RANDOM MODE DEBUG: No previous track found");
@@ -256,6 +354,7 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({
     volume,
     currentTime,
     duration,
+    randomMode,
     playTrack,
     pausePlayback,
     resumePlayback,
@@ -265,7 +364,8 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({
     setVolume: setVolumeWrapper,
     seekTo,
     setCurrentTrack,
-    clearCurrentTrack
+    clearCurrentTrack,
+    setRandomMode
   };
 
   return (

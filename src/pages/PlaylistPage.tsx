@@ -30,7 +30,7 @@ const PlaylistPage: React.FC<PlaylistPageProps> = ({
   const { toast } = useToast();
   const { editStationByValue, toggleFavorite, tracks } = useTrackStateContext();
   
-  // Get playlist state
+  // Get playlist state with sorted tracks (favorites first)
   const {
     sortedPlaylistTracks,
     removeFromPlaylist,
@@ -46,7 +46,8 @@ const PlaylistPage: React.FC<PlaylistPageProps> = ({
     clearCurrentTrack
   } = useAudioPlayer();
 
-  console.log("PlaylistPage: Random mode is", randomMode);
+  console.log("PLAYLIST DEBUG: Current tracks:", sortedPlaylistTracks.length);
+  console.log("PLAYLIST DEBUG: Sorted tracks (favorites first):", sortedPlaylistTracks.map(t => ({ name: t.name, favorite: t.isFavorite })));
 
   // Handle selecting a station for playback
   const handleSelectStation = (index: number) => {
@@ -89,20 +90,32 @@ const PlaylistPage: React.FC<PlaylistPageProps> = ({
   };
 
   const handleToggleFavorite = (station: Track) => {
+    console.log("FAVORITES DEBUG: Toggling favorite for:", station.name, "Current state:", station.isFavorite);
+    
     // Find the station in the main library
     const stationIndex = tracks.findIndex(t => t.url === station.url);
     
     if (stationIndex !== -1) {
-      // Toggle favorite in the main library
+      // Get the current favorite state from the main library
+      const currentFavoriteState = tracks[stationIndex].isFavorite;
+      const newFavoriteState = !currentFavoriteState;
+      
+      console.log("FAVORITES DEBUG: Main library favorite state:", currentFavoriteState, "-> New state:", newFavoriteState);
+      
+      // Toggle favorite in the main library first
       toggleFavorite(stationIndex);
       
-      // Update the playlist track favorite status
-      updatePlaylistTrackFavorite(station.url, !station.isFavorite);
+      // Update the playlist track favorite status to match
+      updatePlaylistTrackFavorite(station.url, newFavoriteState);
+      
+      console.log("FAVORITES DEBUG: Updated both main library and playlist");
       
       toast({
-        title: !station.isFavorite ? "Added to favorites" : "Removed from favorites",
-        description: `${station.name} ${!station.isFavorite ? "added to" : "removed from"} favorites`
+        title: newFavoriteState ? "Added to favorites" : "Removed from favorites",
+        description: `${station.name} ${newFavoriteState ? "added to" : "removed from"} favorites`
       });
+    } else {
+      console.log("FAVORITES DEBUG: Station not found in main library");
     }
   };
 
