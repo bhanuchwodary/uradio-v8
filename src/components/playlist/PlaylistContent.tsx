@@ -6,6 +6,7 @@ import { Trash2 } from "lucide-react";
 import { StationGrid } from "@/components/ui/player/StationGrid";
 import { Track } from "@/types/track";
 import { PlaylistTrack } from "@/context/PlaylistContext";
+import ExportPlaylistButtons from "./ExportPlaylistButtons";
 
 interface PlaylistContentProps {
   playlistTracks: PlaylistTrack[];
@@ -39,25 +40,34 @@ const PlaylistContent: React.FC<PlaylistContentProps> = ({
           <CardTitle className="text-xl font-bold text-on-surface">
             My Playlist ({playlistTracks.length} stations)
           </CardTitle>
-          {playlistTracks.length > 0 && onClearAll && (
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={onClearAll}
-              className="flex items-center gap-2"
-              aria-label="Clear all stations from playlist"
-            >
-              {/* Icon only on mobile */}
-              <span className="inline-flex sm:hidden">
-                <Trash2 className="h-5 w-5" />
-              </span>
-              {/* Icon + label on desktop */}
-              <span className="hidden sm:inline-flex items-center gap-2">
-                <Trash2 className="h-4 w-4" />
-                Clear Playlist
-              </span>
-            </Button>
-          )}
+          <div className="flex items-center gap-2">
+            {/* Export buttons */}
+            <ExportPlaylistButtons 
+              tracks={playlistTracks} 
+              disabled={playlistTracks.length === 0}
+            />
+            
+            {/* Clear all button */}
+            {playlistTracks.length > 0 && onClearAll && (
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={onClearAll}
+                className="flex items-center gap-2"
+                aria-label="Clear all stations from playlist"
+              >
+                {/* Icon only on mobile */}
+                <span className="inline-flex sm:hidden">
+                  <Trash2 className="h-5 w-5" />
+                </span>
+                {/* Icon + label on desktop */}
+                <span className="hidden sm:inline-flex items-center gap-2">
+                  <Trash2 className="h-4 w-4" />
+                  Clear Playlist
+                </span>
+              </Button>
+            )}
+          </div>
         </div>
       </CardHeader>
       <CardContent className="px-3 sm:px-6 space-y-6">

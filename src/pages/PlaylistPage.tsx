@@ -28,7 +28,7 @@ const PlaylistPage: React.FC<PlaylistPageProps> = ({
   const [showClearDialog, setShowClearDialog] = useState(false);
 
   const { toast } = useToast();
-  const { editStationByValue, toggleFavorite, tracks } = useTrackStateContext();
+  const { editStationByValue, toggleFavorite, tracks, addUrl } = useTrackStateContext();
   
   // Get playlist state with sorted tracks (favorites first)
   const {
@@ -93,9 +93,42 @@ const PlaylistPage: React.FC<PlaylistPageProps> = ({
     console.log("FAVORITES DEBUG: Toggling favorite for:", station.name, "Current state:", station.isFavorite);
     
     // Find the station in the main library
-    const stationIndex = tracks.findIndex(t => t.url === station.url);
+    let stationIndex = tracks.findIndex(t => t.url === station.url);
     
-    if (stationIndex !== -1) {
+    // If station is not in main library (likely a featured station), add it first
+    if (stationIndex === -1) {
+      console.log("FAVORITES DEBUG: Station not found in main library, adding it first");
+      
+      const addResult = addUrl(
+        station.url,
+        station.name,
+        station.isFeatured || false,
+        !station.isFavorite, // Toggle the favorite state when adding
+        station.language || ""
+      );
+      
+      if (addResult.success) {
+        console.log("FAVORITES DEBUG: Successfully added station to main library with favorite state:", !station.isFavorite);
+        
+        // Update the playlist track favorite status to match the new state
+        updatePlaylistTrackFavorite(station.url, !station.isFavorite);
+        
+        toast({
+          title: !station.isFavorite ? "Added to favorites" : "Removed from favorites",
+          description: `${station.name} ${!station.isFavorite ? "added to" : "removed from"} favorites`
+        });
+      } else {
+        console.log("FAVORITES DEBUG: Failed to add station to main library:", addResult.message);
+        toast({
+          title: "Error",
+          description: addResult.message,
+          variant: "destructive"
+        });
+      }
+    } else {
+      // Station exists in main library, toggle normally
+      console.log("FAVORITES DEBUG: Station found in main library at index:", stationIndex);
+      
       // Toggle favorite in main library first
       toggleFavorite(stationIndex);
       
@@ -113,8 +146,6 @@ const PlaylistPage: React.FC<PlaylistPageProps> = ({
         title: updatedFavoriteState ? "Added to favorites" : "Removed from favorites",
         description: `${station.name} ${updatedFavoriteState ? "added to" : "removed from"} favorites`
       });
-    } else {
-      console.log("FAVORITES DEBUG: Station not found in main library");
     }
   };
 
