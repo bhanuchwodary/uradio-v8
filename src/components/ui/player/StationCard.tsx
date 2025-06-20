@@ -1,11 +1,10 @@
 
-import React, { memo } from "react";
+import React, { memo, useCallback } from "react";
 import { Card } from "@/components/ui/card";
 import { Play, Pause, Edit, Trash2, Star, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Track } from "@/types/track";
 import { cn } from "@/lib/utils";
-import { logger } from "@/utils/logger";
 
 interface StationCardProps {
   station: Track;
@@ -16,7 +15,7 @@ interface StationCardProps {
   onDelete?: () => void;
   onToggleFavorite?: () => void;
   actionIcon?: "play" | "add";
-  context?: "playlist" | "library"; // New prop to determine context
+  context?: "playlist" | "library";
 }
 
 export const StationCard: React.FC<StationCardProps> = memo(({
@@ -28,22 +27,28 @@ export const StationCard: React.FC<StationCardProps> = memo(({
   onDelete,
   onToggleFavorite,
   actionIcon = "play",
-  context = "library" // Default to library context
+  context = "library"
 }) => {
-  // Prevent event bubbling for control buttons
-  const handleButtonClick = (e: React.MouseEvent, callback?: () => void) => {
+  // Memoize event handlers to prevent unnecessary re-renders
+  const handleButtonClick = useCallback((e: React.MouseEvent, callback?: () => void) => {
     e.stopPropagation();
     if (callback) callback();
-  };
+  }, []);
+
+  const handleEditClick = useCallback((e: React.MouseEvent) => {
+    handleButtonClick(e, onEdit);
+  }, [handleButtonClick, onEdit]);
+
+  const handleDeleteClick = useCallback((e: React.MouseEvent) => {
+    handleButtonClick(e, onDelete);
+  }, [handleButtonClick, onDelete]);
+
+  const handleFavoriteClick = useCallback((e: React.MouseEvent) => {
+    handleButtonClick(e, onToggleFavorite);
+  }, [handleButtonClick, onToggleFavorite]);
 
   // Determine the main action icon
-  const renderActionIcon = () => {
-    if (actionIcon === "add") {
-      return <Plus className="w-5 h-5" />;
-    }
-    
-    return isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 ml-0.5" />;
-  };
+  const ActionIcon = actionIcon === "add" ? Plus : (isPlaying ? Pause : Play);
 
   // Ensure language is preserved from station data with proper fallback
   const stationLanguage = station?.language && station.language !== "" ? station.language : "Unknown";
@@ -58,50 +63,50 @@ export const StationCard: React.FC<StationCardProps> = memo(({
     return !station.isFeatured && onEdit;
   };
 
-  // Only log in development
-  if (process.env.NODE_ENV === 'development') {
-    logger.debug("StationCard rendering", { 
-      name: station.name, 
-      language: stationLanguage, 
-      isPlaying, 
-      isSelected,
-      context,
-      showEdit: shouldShowEditButton()
-    });
-  }
-
   return (
     <Card 
       className={cn(
-        "relative overflow-hidden group transition-all duration-200 cursor-pointer h-full active:scale-95 border-0",
+        "relative overflow-hidden group transition-all duration-300 cursor-pointer h-full",
+        "transform hover:scale-105 active:scale-95 border-0 backdrop-blur-sm",
+        "hover:shadow-xl hover:-translate-y-1",
         isSelected 
-          ? "bg-gradient-to-br from-primary/20 to-primary/10 shadow-lg ring-2 ring-primary/30" 
-          : "bg-gradient-to-br from-background/80 to-background/60 hover:from-accent/40 hover:to-accent/20 shadow-md hover:shadow-lg backdrop-blur-sm"
+          ? "bg-gradient-to-br from-primary/20 to-primary/10 shadow-lg ring-2 ring-primary/30 scale-105" 
+          : "bg-gradient-to-br from-background/80 to-background/60 hover:from-accent/40 hover:to-accent/20 shadow-md"
       )}
       onClick={onPlay}
     >
       <div className="px-2 py-2.5 flex flex-col items-center space-y-1.5 h-full">
-        {/* Play Button */}
+        {/* Play Button with enhanced animations */}
         <div 
           className={cn(
-            "w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 shadow-sm",
+            "w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 shadow-sm",
+            "transform group-hover:scale-110 group-active:scale-95",
             isPlaying 
-              ? "bg-primary text-primary-foreground shadow-md scale-105" 
-              : "bg-secondary/80 text-secondary-foreground group-hover:bg-primary/30 group-hover:scale-105 group-active:scale-95"
+              ? "bg-primary text-primary-foreground shadow-md scale-110 animate-pulse" 
+              : "bg-secondary/80 text-secondary-foreground group-hover:bg-primary/30"
           )}
         >
-          {renderActionIcon()}
+          <ActionIcon className={cn(
+            "transition-transform duration-200",
+            actionIcon !== "add" && !isPlaying && "ml-0.5",
+            "w-5 h-5"
+          )} />
         </div>
         
-        {/* Station Name */}
-        <h3 className="font-medium text-xs line-clamp-2 w-full text-center leading-tight px-1 min-h-[2rem] flex items-center justify-center">
+        {/* Station Name with better typography */}
+        <h3 className={cn(
+          "font-medium text-xs line-clamp-2 w-full text-center leading-tight px-1",
+          "min-h-[2rem] flex items-center justify-center transition-colors duration-200",
+          isSelected ? "text-primary font-semibold" : "text-foreground"
+        )}>
           {station.name}
         </h3>
         
-        {/* Language Badge */}
+        {/* Language Badge with enhanced styling */}
         <div className="flex items-center justify-center">
           <span className={cn(
             "bg-gradient-to-r px-2 py-0.5 rounded-full text-[10px] font-medium border shadow-sm",
+            "transition-all duration-200 transform group-hover:scale-105",
             isSelected 
               ? "from-primary/20 to-primary/10 text-primary border-primary/30" 
               : "from-muted/60 to-muted/40 text-muted-foreground border-muted/50"
@@ -110,23 +115,23 @@ export const StationCard: React.FC<StationCardProps> = memo(({
           </span>
         </div>
         
-        {/* Action Buttons */}
-        <div className="flex justify-center space-x-0.5 mt-auto pt-1">
+        {/* Action Buttons with improved hover states */}
+        <div className="flex justify-center space-x-0.5 mt-auto pt-1 opacity-80 group-hover:opacity-100 transition-opacity duration-200">
           {onToggleFavorite && (
             <Button 
               size="icon" 
               variant="ghost" 
               className={cn(
-                "h-6 w-6 rounded-full transition-all duration-200 active:scale-90", 
+                "h-6 w-6 rounded-full transition-all duration-200 transform hover:scale-110 active:scale-90", 
                 station.isFavorite 
                   ? "text-yellow-500 hover:text-yellow-600 bg-yellow-500/10 hover:bg-yellow-500/20" 
                   : "text-muted-foreground hover:text-yellow-500 hover:bg-yellow-500/10"
               )}
-              onClick={(e) => handleButtonClick(e, onToggleFavorite)}
+              onClick={handleFavoriteClick}
               aria-label={station.isFavorite ? "Remove from favorites" : "Add to favorites"}
             >
               <Star className={cn(
-                "h-3 w-3",
+                "h-3 w-3 transition-all duration-200",
                 station.isFavorite && "fill-yellow-500"
               )} />
             </Button>
@@ -136,8 +141,8 @@ export const StationCard: React.FC<StationCardProps> = memo(({
             <Button 
               size="icon" 
               variant="ghost" 
-              className="h-6 w-6 text-blue-500 hover:text-blue-600 hover:bg-blue-500/10 rounded-full transition-all duration-200 active:scale-90"
-              onClick={(e) => handleButtonClick(e, onEdit)}
+              className="h-6 w-6 text-blue-500 hover:text-blue-600 hover:bg-blue-500/10 rounded-full transition-all duration-200 transform hover:scale-110 active:scale-90"
+              onClick={handleEditClick}
               aria-label="Edit station"
             >
               <Edit className="h-3 w-3" />
@@ -148,8 +153,8 @@ export const StationCard: React.FC<StationCardProps> = memo(({
             <Button 
               size="icon" 
               variant="ghost" 
-              className="h-6 w-6 text-destructive hover:text-destructive/80 hover:bg-destructive/10 rounded-full transition-all duration-200 active:scale-90"
-              onClick={(e) => handleButtonClick(e, onDelete)}
+              className="h-6 w-6 text-destructive hover:text-destructive/80 hover:bg-destructive/10 rounded-full transition-all duration-200 transform hover:scale-110 active:scale-90"
+              onClick={handleDeleteClick}
               aria-label={context === "playlist" ? "Remove from playlist" : "Delete station"}
             >
               <Trash2 className="h-3 w-3" />
@@ -160,7 +165,7 @@ export const StationCard: React.FC<StationCardProps> = memo(({
     </Card>
   );
 }, (prevProps, nextProps) => {
-  // Custom comparison for better performance
+  // Enhanced comparison for better performance
   return (
     prevProps.station.url === nextProps.station.url &&
     prevProps.station.name === nextProps.station.name &&
@@ -168,7 +173,8 @@ export const StationCard: React.FC<StationCardProps> = memo(({
     prevProps.isPlaying === nextProps.isPlaying &&
     prevProps.isSelected === nextProps.isSelected &&
     prevProps.station.isFavorite === nextProps.station.isFavorite &&
-    prevProps.context === nextProps.context
+    prevProps.context === nextProps.context &&
+    prevProps.actionIcon === nextProps.actionIcon
   );
 });
 

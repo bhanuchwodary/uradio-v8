@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useEffect, useState, useRef, useMemo } from 'react';
+import React, { createContext, useContext, useEffect, useState, useRef, useMemo, useCallback } from 'react';
 import { useTrackState } from '@/hooks/useTrackState';
 import { TrackStateResult } from '@/hooks/track-state/types';
 
@@ -11,6 +11,7 @@ export const TrackStateProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const trackState = useTrackState();
   const [initialized, setInitialized] = useState(false);
   const renderCount = useRef(0);
+  const cleanupFunctions = useRef<(() => void)[]>([]);
   
   // Enhanced logging to track state changes across renders, but only in development
   useEffect(() => {
@@ -33,21 +34,45 @@ export const TrackStateProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     }
   }, [trackState.tracks, initialized]);
   
-  // Create a stable context value with more specific dependencies to avoid unnecessary rerenders
+  // Cleanup function
+  useEffect(() => {
+    return () => {
+      // Run all cleanup functions
+      cleanupFunctions.current.forEach(cleanup => {
+        try {
+          cleanup();
+        } catch (error) {
+          if (process.env.NODE_ENV === 'development') {
+            console.warn('Error during cleanup:', error);
+          }
+        }
+      });
+      cleanupFunctions.current = [];
+    };
+  }, []);
+
+  // Register cleanup function
+  const registerCleanup = useCallback((cleanup: () => void) => {
+    cleanupFunctions.current.push(cleanup);
+  }, []);
+  
+  // Create a stable context value with memoization to avoid unnecessary rerenders
   const contextValue = useMemo(() => {
     return {
       ...trackState,
       // Force explicit equality checks for key properties
       tracks: trackState.tracks,
       currentIndex: trackState.currentIndex,
-      isPlaying: trackState.isPlaying
+      isPlaying: trackState.isPlaying,
+      // Add cleanup registration
+      registerCleanup
     };
   }, [
     trackState.tracks,
     trackState.currentIndex,
     trackState.isPlaying,
-    // Only add other dependencies that should trigger context updates
-    trackState.debugState
+    trackState.debugState,
+    registerCleanup
   ]);
   
   return (

@@ -1,5 +1,5 @@
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useTrackInitialization } from "./useTrackInitialization";
 import { useTrackStatePersistence } from "./useTrackStatePersistence";
 import { useTrackStateDebugCore } from "./useTrackStateDebugCore";
@@ -35,25 +35,27 @@ export const useTrackStateCore = () => {
     stateVersion
   });
 
-  // Memoize expensive operations
+  // Memoize tracks to prevent unnecessary re-renders
   const memoizedTracks = useMemo(() => tracks, [tracks]);
 
-  // Enhanced setters with validation and playback safeguards
-  const setCurrentIndexSafe = (index: number) => {
+  // Enhanced setters with validation and playback safeguards - memoized with useCallback
+  const setCurrentIndexSafe = useCallback((index: number) => {
     if (index >= 0 && index < tracks.length) {
-      console.log("Setting current index to:", index, "Track:", tracks[index]?.name);
+      if (process.env.NODE_ENV === 'development') {
+        console.log("Setting current index to:", index, "Track:", tracks[index]?.name);
+      }
       setCurrentIndex(index);
     } else {
       logger.warn("Invalid track index", { index, tracksLength: tracks.length });
-      // CRITICAL FIX: Reset to safe state if invalid index
+      // Reset to safe state if invalid index
       if (tracks.length > 0) {
         setCurrentIndex(0);
       }
     }
-  };
+  }, [tracks]);
 
-  // CRITICAL FIX: Enhanced setIsPlaying with intent validation
-  const setIsPlayingSafe = (playing: boolean) => {
+  // Enhanced setIsPlaying with intent validation - memoized with useCallback
+  const setIsPlayingSafe = useCallback((playing: boolean) => {
     // Only allow playback if we have valid tracks and current index
     if (playing && (tracks.length === 0 || currentIndex >= tracks.length || currentIndex < 0)) {
       logger.warn("Attempted to start playback with invalid state", { 
@@ -63,9 +65,11 @@ export const useTrackStateCore = () => {
       return;
     }
     
-    console.log("Setting playback state to:", playing, "Current track:", tracks[currentIndex]?.name);
+    if (process.env.NODE_ENV === 'development') {
+      console.log("Setting playback state to:", playing, "Current track:", tracks[currentIndex]?.name);
+    }
     setIsPlaying(playing);
-  };
+  }, [tracks, currentIndex]);
 
   return {
     tracks: memoizedTracks,

@@ -10,12 +10,14 @@ interface LogConfig {
 class Logger {
   private config: LogConfig;
   private logs: Array<{ timestamp: Date; level: LogLevel; message: string; data?: any }> = [];
+  private isDevelopment: boolean;
 
   constructor() {
+    this.isDevelopment = process.env.NODE_ENV === 'development';
     this.config = {
-      enableConsole: process.env.NODE_ENV === 'development',
-      level: process.env.NODE_ENV === 'development' ? 'debug' : 'error',
-      maxEntries: 100
+      enableConsole: this.isDevelopment,
+      level: this.isDevelopment ? 'debug' : 'error',
+      maxEntries: this.isDevelopment ? 100 : 50
     };
   }
 
@@ -25,6 +27,9 @@ class Logger {
   }
 
   private addLog(level: LogLevel, message: string, data?: any) {
+    // Only store logs in development or for critical errors
+    if (!this.isDevelopment && level !== 'error') return;
+    
     if (this.logs.length >= this.config.maxEntries) {
       this.logs.shift();
     }
@@ -38,7 +43,7 @@ class Logger {
   }
 
   debug(message: string, data?: any) {
-    if (!this.shouldLog('debug')) return;
+    if (!this.shouldLog('debug') || !this.isDevelopment) return;
     
     this.addLog('debug', message, data);
     if (this.config.enableConsole) {
@@ -73,7 +78,10 @@ class Logger {
     }
   }
 
+  // Production-safe methods
   getLogs(level?: LogLevel) {
+    if (!this.isDevelopment && level !== 'error') return [];
+    
     if (level) {
       return this.logs.filter(log => log.level === level);
     }
@@ -81,11 +89,15 @@ class Logger {
   }
 
   clearLogs() {
-    this.logs = [];
+    if (this.isDevelopment) {
+      this.logs = [];
+    }
   }
 
   setConfig(newConfig: Partial<LogConfig>) {
-    this.config = { ...this.config, ...newConfig };
+    if (this.isDevelopment) {
+      this.config = { ...this.config, ...newConfig };
+    }
   }
 }
 

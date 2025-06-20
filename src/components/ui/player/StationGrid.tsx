@@ -1,7 +1,8 @@
 
-import React, { memo } from "react";
+import React, { memo, useMemo } from "react";
 import { Track } from "@/types/track";
 import { StationCard } from "@/components/ui/player/StationCard";
+import { StationGridSkeleton } from "@/components/ui/skeleton/StationGridSkeleton";
 import { logger } from "@/utils/logger";
 
 interface StationGridProps {
@@ -14,7 +15,8 @@ interface StationGridProps {
   onDeleteStation?: (station: Track) => void;
   onToggleFavorite?: (station: Track) => void;
   actionIcon?: "play" | "add";
-  context?: "playlist" | "library"; // New prop to determine context
+  context?: "playlist" | "library";
+  loading?: boolean;
 }
 
 export const StationGrid: React.FC<StationGridProps> = memo(({
@@ -27,8 +29,20 @@ export const StationGrid: React.FC<StationGridProps> = memo(({
   onDeleteStation,
   onToggleFavorite,
   actionIcon = "play",
-  context = "library" // Default to library context
+  context = "library",
+  loading = false
 }) => {
+  // Memoize station keys to prevent unnecessary re-renders
+  const stationKeys = useMemo(() => 
+    stations.map(station => `${station.url}-${station.name}-${station.language || 'unknown'}`),
+    [stations]
+  );
+
+  // Show loading skeleton
+  if (loading) {
+    return <StationGridSkeleton count={12} />;
+  }
+
   if (!stations || stations.length === 0) {
     return (
       <div className="text-center p-6 bg-gradient-to-br from-background/50 to-background/30 rounded-xl border border-border/50 backdrop-blur-sm">
@@ -42,9 +56,7 @@ export const StationGrid: React.FC<StationGridProps> = memo(({
       {stations.map((station, index) => {
         const isCurrentlyPlaying = station.url === currentTrackUrl && isPlaying;
         const isSelected = station.url === currentTrackUrl;
-        
-        // Create a stable key based on station properties that matter for rendering
-        const stationKey = `${station.url}-${station.name}-${station.language || 'unknown'}`;
+        const stationKey = stationKeys[index];
         
         // Only log in development
         if (process.env.NODE_ENV === 'development') {
@@ -76,18 +88,22 @@ export const StationGrid: React.FC<StationGridProps> = memo(({
     </div>
   );
 }, (prevProps, nextProps) => {
-  // Custom comparison for better performance
-  return (
-    prevProps.stations.length === nextProps.stations.length &&
-    prevProps.currentTrackUrl === nextProps.currentTrackUrl &&
-    prevProps.isPlaying === nextProps.isPlaying &&
-    prevProps.context === nextProps.context &&
-    prevProps.stations.every((station, index) => 
-      station.url === nextProps.stations[index]?.url &&
-      station.name === nextProps.stations[index]?.name &&
-      station.isFavorite === nextProps.stations[index]?.isFavorite
-    )
-  );
+  // Enhanced comparison for better performance
+  if (prevProps.loading !== nextProps.loading) return false;
+  if (prevProps.stations.length !== nextProps.stations.length) return false;
+  if (prevProps.currentTrackUrl !== nextProps.currentTrackUrl) return false;
+  if (prevProps.isPlaying !== nextProps.isPlaying) return false;
+  if (prevProps.context !== nextProps.context) return false;
+  
+  // Deep comparison only when necessary
+  return prevProps.stations.every((station, index) => {
+    const nextStation = nextProps.stations[index];
+    return nextStation &&
+      station.url === nextStation.url &&
+      station.name === nextStation.name &&
+      station.isFavorite === nextStation.isFavorite &&
+      station.language === nextStation.language;
+  });
 });
 
 StationGrid.displayName = "StationGrid";

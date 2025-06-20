@@ -31,14 +31,16 @@ const PlaylistContent: React.FC<PlaylistContentProps> = ({
   onToggleFavorite,
   onClearAll
 }) => {
-  console.log("PlaylistContent rendering with tracks:", playlistTracks.length, playlistTracks);
+  if (process.env.NODE_ENV === 'development') {
+    console.log("PlaylistContent rendering with tracks:", playlistTracks.length, playlistTracks);
+  }
 
   return (
     <Card className="bg-surface-container border border-outline-variant/30 rounded-lg elevation-1">
       <CardHeader className="pb-3 px-3 sm:px-6">
         <div className="flex justify-between items-center">
           <CardTitle className="text-xl font-bold text-on-surface">
-            My Playlist ({playlistTracks.length} stations)
+            My Playlist
           </CardTitle>
           <div className="flex items-center gap-2">
             {/* Export buttons */}
