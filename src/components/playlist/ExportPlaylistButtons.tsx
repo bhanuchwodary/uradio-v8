@@ -1,7 +1,13 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Download, FileText, FileJson } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Share, FileText, FileJson } from "lucide-react";
 import { PlaylistTrack } from "@/context/PlaylistContext";
 import { exportPlaylistAsJSON, exportPlaylistAsCSV } from "@/utils/playlistExport";
 import { useToast } from "@/hooks/use-toast";
@@ -54,39 +60,34 @@ const ExportPlaylistButtons: React.FC<ExportPlaylistButtonsProps> = ({
   }
 
   return (
-    <div className="flex gap-2">
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={handleExportJSON}
-        className="flex items-center gap-2"
-        aria-label="Export playlist as JSON"
-      >
-        <span className="inline-flex sm:hidden">
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="outline"
+          size="sm"
+          className="flex items-center gap-2"
+          aria-label="Share playlist"
+        >
+          <span className="inline-flex sm:hidden">
+            <Share className="h-4 w-4" />
+          </span>
+          <span className="hidden sm:inline-flex items-center gap-2">
+            <Share className="h-4 w-4" />
+            Share
+          </span>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem onClick={handleExportJSON} className="flex items-center gap-2">
           <FileJson className="h-4 w-4" />
-        </span>
-        <span className="hidden sm:inline-flex items-center gap-2">
-          <FileJson className="h-4 w-4" />
-          JSON
-        </span>
-      </Button>
-      
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={handleExportCSV}
-        className="flex items-center gap-2"
-        aria-label="Export playlist as CSV"
-      >
-        <span className="inline-flex sm:hidden">
+          Export as JSON
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={handleExportCSV} className="flex items-center gap-2">
           <FileText className="h-4 w-4" />
-        </span>
-        <span className="hidden sm:inline-flex items-center gap-2">
-          <FileText className="h-4 w-4" />
-          CSV
-        </span>
-      </Button>
-    </div>
+          Export as CSV
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 };
 
