@@ -196,11 +196,6 @@ export const featuredStations = [
     language: "Hindi"
   },
   {
-    name: "VB Telugu Hyderabad",
-    url: "https://air.pc.cdn.bitgravity.com/air/live/pbaudio034/playlist.m3u8",
-    language: "Telugu"
-  },
-  {
     name: "Rainbow Viz",
     url: "https://air.pc.cdn.bitgravity.com/air/live/pbaudio081/playlist.m3u8",
     language: "Telugu"
@@ -254,5 +249,25 @@ export const featuredStations = [
     name: "Vividh Bharati",
     url: "https://air.pc.cdn.bitgravity.com/air/live/pbaudio001/playlist.m3u8",
     language: "Hindi"
+  },
+  {
+    name: "Suryan FM",
+    url: "https://radios.crabdance.com:8002/2",
+    language: "Tamil"
+  },
+  {
+    name: "KGF Radio",
+    url: "https://stream.zeno.fm/wk7hppypta0uv",
+    language: "Telugu"
+  },
+  {
+    name: "90s Telugu Hits",
+    url: "https://stream.zeno.fm/zuu89d1pgzzuv",
+    language: "Telugu"
+  },
+  {
+    name: "Telugu Junction",
+    url: "https://stream.zeno.fm/ige35g4gzhhtv",
+    language: "Telugu"
   }
 ];
