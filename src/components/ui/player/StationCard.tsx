@@ -82,7 +82,7 @@ export const StationCard: React.FC<StationCardProps> = memo(({
             "w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 shadow-sm",
             "transform group-hover:scale-110 group-active:scale-95",
             isPlaying 
-              ? "bg-primary text-primary-foreground shadow-md scale-110 animate-pulse" 
+              ? "bg-primary text-primary-foreground shadow-md scale-110" 
               : "bg-secondary/80 text-secondary-foreground group-hover:bg-primary/30"
           )}
         >
