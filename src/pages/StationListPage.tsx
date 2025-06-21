@@ -25,6 +25,7 @@ const StationListPage: React.FC = () => {
     handleSaveEdit,
     setEditingStation,
     showNoResults,
+    isInPlaylist,
   } = useStationList();
 
   return (
@@ -42,6 +43,7 @@ const StationListPage: React.FC = () => {
           onDeleteStation={handleDeleteStation}
           searchTerm={searchTerm}
           allUserStationsCount={userStations.length}
+          isInPlaylist={isInPlaylist}
         />
 
         <FeaturedStations
@@ -50,6 +52,7 @@ const StationListPage: React.FC = () => {
           isPlaying={isPlaying}
           currentIndex={currentIndex}
           onAddStation={handleAddStation}
+          isInPlaylist={isInPlaylist}
         />
 
         {showNoResults && <NoSearchResults />}

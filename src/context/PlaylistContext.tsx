@@ -50,14 +50,14 @@ export const PlaylistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   }, [playlistTracks]);
 
-  // Sorted playlist tracks with favorites first
+  // Sorted playlist tracks with favorites first, then by chronological order (first added first)
   const sortedPlaylistTracks = useMemo(() => {
     return [...playlistTracks].sort((a, b) => {
       // Favorites first
       if (a.isFavorite && !b.isFavorite) return -1;
       if (!a.isFavorite && b.isFavorite) return 1;
-      // Then by added time (newest first for same favorite status)
-      return b.addedToPlaylistAt - a.addedToPlaylistAt;
+      // Then by added time (oldest first for same favorite status)
+      return a.addedToPlaylistAt - b.addedToPlaylistAt;
     });
   }, [playlistTracks]);
 

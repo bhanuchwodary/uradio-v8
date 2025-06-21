@@ -10,6 +10,7 @@ interface FeaturedStationsProps {
   isPlaying: boolean;
   currentIndex: number;
   onAddStation: (station: Track) => void;
+  isInPlaylist: (trackUrl: string) => boolean;
 }
 
 const FeaturedStations: React.FC<FeaturedStationsProps> = ({
@@ -18,6 +19,7 @@ const FeaturedStations: React.FC<FeaturedStationsProps> = ({
   isPlaying,
   currentIndex,
   onAddStation,
+  isInPlaylist,
 }) => {
   return (
     <>
@@ -34,6 +36,7 @@ const FeaturedStations: React.FC<FeaturedStationsProps> = ({
               isPlaying={isPlaying}
               onSelectStation={(index) => onAddStation(stations[index])}
               actionIcon="add"
+              isInPlaylist={isInPlaylist}
             />
           </CardContent>
         </Card>

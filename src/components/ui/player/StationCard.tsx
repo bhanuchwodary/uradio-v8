@@ -1,7 +1,7 @@
 
 import React, { memo, useCallback } from "react";
 import { Card } from "@/components/ui/card";
-import { Play, Pause, Edit, Trash2, Star, Plus } from "lucide-react";
+import { Play, Pause, Edit, Trash2, Star, Plus, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Track } from "@/types/track";
 import { cn } from "@/lib/utils";
@@ -16,6 +16,7 @@ interface StationCardProps {
   onToggleFavorite?: () => void;
   actionIcon?: "play" | "add";
   context?: "playlist" | "library";
+  inPlaylist?: boolean;
 }
 
 export const StationCard: React.FC<StationCardProps> = memo(({
@@ -27,7 +28,8 @@ export const StationCard: React.FC<StationCardProps> = memo(({
   onDelete,
   onToggleFavorite,
   actionIcon = "play",
-  context = "library"
+  context = "library",
+  inPlaylist = false
 }) => {
   // Memoize event handlers to prevent unnecessary re-renders
   const handleButtonClick = useCallback((e: React.MouseEvent, callback?: () => void) => {
@@ -47,8 +49,10 @@ export const StationCard: React.FC<StationCardProps> = memo(({
     handleButtonClick(e, onToggleFavorite);
   }, [handleButtonClick, onToggleFavorite]);
 
-  // Determine the main action icon
-  const ActionIcon = actionIcon === "add" ? Plus : (isPlaying ? Pause : Play);
+  // Determine the main action icon based on context and playlist status
+  const ActionIcon = actionIcon === "add" 
+    ? (inPlaylist ? Check : Plus) 
+    : (isPlaying ? Pause : Play);
 
   // Ensure language is preserved from station data with proper fallback
   const stationLanguage = station?.language && station.language !== "" ? station.language : "Unknown";
@@ -76,13 +80,15 @@ export const StationCard: React.FC<StationCardProps> = memo(({
       onClick={onPlay}
     >
       <div className="px-2 py-2.5 flex flex-col items-center space-y-1.5 h-full">
-        {/* Play Button with enhanced animations */}
+        {/* Play Button with enhanced animations and playlist status */}
         <div 
           className={cn(
             "w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 shadow-sm",
             "transform group-hover:scale-110 group-active:scale-95",
             isPlaying 
               ? "bg-primary text-primary-foreground shadow-md scale-110" 
+              : inPlaylist && actionIcon === "add"
+              ? "bg-green-500/20 text-green-600 border border-green-500/30"
               : "bg-secondary/80 text-secondary-foreground group-hover:bg-primary/30"
           )}
         >
@@ -102,16 +108,19 @@ export const StationCard: React.FC<StationCardProps> = memo(({
           {station.name}
         </h3>
         
-        {/* Language Badge with enhanced styling */}
+        {/* Language Badge with enhanced styling and playlist indicator */}
         <div className="flex items-center justify-center">
           <span className={cn(
             "bg-gradient-to-r px-2 py-0.5 rounded-full text-[10px] font-medium border shadow-sm",
             "transition-all duration-200 transform group-hover:scale-105",
             isSelected 
               ? "from-primary/20 to-primary/10 text-primary border-primary/30" 
+              : inPlaylist && actionIcon === "add"
+              ? "from-green-500/20 to-green-500/10 text-green-600 border-green-500/30"
               : "from-muted/60 to-muted/40 text-muted-foreground border-muted/50"
           )}>
             {stationLanguage}
+            {inPlaylist && actionIcon === "add" && " ✓"}
           </span>
         </div>
         
@@ -174,7 +183,8 @@ export const StationCard: React.FC<StationCardProps> = memo(({
     prevProps.isSelected === nextProps.isSelected &&
     prevProps.station.isFavorite === nextProps.station.isFavorite &&
     prevProps.context === nextProps.context &&
-    prevProps.actionIcon === nextProps.actionIcon
+    prevProps.actionIcon === nextProps.actionIcon &&
+    prevProps.inPlaylist === nextProps.inPlaylist
   );
 });
 

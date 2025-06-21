@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useTrackStateContext } from "@/context/TrackStateContext";
 import { usePlaylist } from "@/context/PlaylistContext";
+import { useAudioPlayer } from "@/context/AudioPlayerContext";
 import { useToast } from "@/hooks/use-toast";
 import { getStations } from "@/data/featuredStationsLoader";
 import { Track } from "@/types/track";
@@ -20,8 +21,11 @@ export const useStationList = () => {
     getUserStations
   } = useTrackStateContext();
 
-  // Get playlist functionality - using the same context as PlaylistPage
-  const { addToPlaylist } = usePlaylist();
+  // Get playlist functionality with isInPlaylist check
+  const { addToPlaylist, isInPlaylist } = usePlaylist();
+
+  // Get current track from audio player context instead of track state
+  const { currentTrack } = useAudioPlayer();
 
   // Get user stations from library
   const userStations = getUserStations();
@@ -36,9 +40,6 @@ export const useStationList = () => {
     isFeatured: true,
     playTime: 0
   }));
-
-  // Get current track
-  const currentTrack = tracks[currentIndex];
 
   // Group featured stations by language
   const stationsByLanguage: Record<string, Track[]> = {};
@@ -72,6 +73,18 @@ export const useStationList = () => {
   // Add station to playlist handler (using PlaylistContext)
   const handleAddStation = (station: Track) => {
     console.log("Adding station to playlist:", station.name, station.url);
+    
+    // Check if already in playlist before attempting to add
+    if (isInPlaylist(station.url)) {
+      console.log("Station already in playlist");
+      toast({
+        title: "Station Already in Playlist",
+        description: `${station.name} is already in your playlist`,
+        variant: "destructive"
+      });
+      return;
+    }
+
     const success = addToPlaylist(station);
 
     if (success) {
@@ -81,10 +94,10 @@ export const useStationList = () => {
         description: `${station.name} has been added to your playlist`,
       });
     } else {
-      console.log("Station already in playlist");
+      console.log("Failed to add to playlist");
       toast({
-        title: "Station Already in Playlist",
-        description: `${station.name} is already in your playlist`,
+        title: "Failed to Add Station",
+        description: `Could not add ${station.name} to your playlist`,
         variant: "destructive"
       });
     }
@@ -134,5 +147,6 @@ export const useStationList = () => {
     handleSaveEdit,
     setEditingStation,
     showNoResults,
+    isInPlaylist, // Export isInPlaylist for components to use
   };
 };

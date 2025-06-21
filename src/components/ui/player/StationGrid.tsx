@@ -17,6 +17,7 @@ interface StationGridProps {
   actionIcon?: "play" | "add";
   context?: "playlist" | "library";
   loading?: boolean;
+  isInPlaylist?: (trackUrl: string) => boolean;
 }
 
 export const StationGrid: React.FC<StationGridProps> = memo(({
@@ -30,7 +31,8 @@ export const StationGrid: React.FC<StationGridProps> = memo(({
   onToggleFavorite,
   actionIcon = "play",
   context = "library",
-  loading = false
+  loading = false,
+  isInPlaylist
 }) => {
   // Memoize station keys to prevent unnecessary re-renders
   const stationKeys = useMemo(() => 
@@ -57,6 +59,7 @@ export const StationGrid: React.FC<StationGridProps> = memo(({
         const isCurrentlyPlaying = station.url === currentTrackUrl && isPlaying;
         const isSelected = station.url === currentTrackUrl;
         const stationKey = stationKeys[index];
+        const inPlaylist = isInPlaylist ? isInPlaylist(station.url) : false;
         
         // Only log in development
         if (process.env.NODE_ENV === 'development') {
@@ -66,7 +69,8 @@ export const StationGrid: React.FC<StationGridProps> = memo(({
             key: stationKey,
             isSelected,
             isPlaying: isCurrentlyPlaying,
-            context
+            context,
+            inPlaylist
           });
         }
         
@@ -82,6 +86,7 @@ export const StationGrid: React.FC<StationGridProps> = memo(({
             onToggleFavorite={onToggleFavorite ? () => onToggleFavorite(station) : undefined}
             actionIcon={actionIcon}
             context={context}
+            inPlaylist={inPlaylist}
           />
         );
       })}
