@@ -49,6 +49,19 @@ export const StationCard: React.FC<StationCardProps> = memo(({
     handleButtonClick(e, onToggleFavorite);
   }, [handleButtonClick, onToggleFavorite]);
 
+  const handlePlayClick = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    // Prevent adding to playlist if already in playlist when using add action
+    if (actionIcon === "add" && inPlaylist) {
+      console.log("STATION CARD: Blocked click - already in playlist", { 
+        name: station.name, 
+        url: station.url 
+      });
+      return;
+    }
+    onPlay();
+  }, [actionIcon, inPlaylist, onPlay, station.name, station.url]);
+
   // Determine the main action icon based on context and playlist status
   const ActionIcon = actionIcon === "add" 
     ? (inPlaylist ? Check : Plus) 
@@ -67,6 +80,17 @@ export const StationCard: React.FC<StationCardProps> = memo(({
     return !station.isFeatured && onEdit;
   };
 
+  // Add logging for debugging
+  if (process.env.NODE_ENV === 'development' && actionIcon === "add") {
+    console.log("STATION CARD RENDER:", {
+      name: station.name,
+      url: station.url,
+      inPlaylist,
+      actionIcon,
+      context
+    });
+  }
+
   return (
     <Card 
       className={cn(
@@ -75,9 +99,13 @@ export const StationCard: React.FC<StationCardProps> = memo(({
         "hover:shadow-xl hover:-translate-y-1",
         isSelected 
           ? "bg-gradient-to-br from-primary/20 to-primary/10 shadow-lg ring-2 ring-primary/30 scale-105" 
-          : "bg-gradient-to-br from-background/80 to-background/60 hover:from-accent/40 hover:to-accent/20 shadow-md"
+          : inPlaylist && actionIcon === "add"
+          ? "bg-gradient-to-br from-green-500/10 to-green-500/5 shadow-md ring-1 ring-green-500/20"
+          : "bg-gradient-to-br from-background/80 to-background/60 hover:from-accent/40 hover:to-accent/20 shadow-md",
+        // Disable hover effects if already in playlist and using add action
+        inPlaylist && actionIcon === "add" && "hover:scale-100 cursor-default"
       )}
-      onClick={onPlay}
+      onClick={handlePlayClick}
     >
       <div className="px-2 py-2.5 flex flex-col items-center space-y-1.5 h-full">
         {/* Play Button with enhanced animations and playlist status */}
@@ -89,7 +117,9 @@ export const StationCard: React.FC<StationCardProps> = memo(({
               ? "bg-primary text-primary-foreground shadow-md scale-110" 
               : inPlaylist && actionIcon === "add"
               ? "bg-green-500/20 text-green-600 border border-green-500/30"
-              : "bg-secondary/80 text-secondary-foreground group-hover:bg-primary/30"
+              : "bg-secondary/80 text-secondary-foreground group-hover:bg-primary/30",
+            // Disable hover scale if already in playlist
+            inPlaylist && actionIcon === "add" && "group-hover:scale-100"
           )}
         >
           <ActionIcon className={cn(
@@ -103,7 +133,9 @@ export const StationCard: React.FC<StationCardProps> = memo(({
         <h3 className={cn(
           "font-medium text-xs line-clamp-2 w-full text-center leading-tight px-1",
           "min-h-[2rem] flex items-center justify-center transition-colors duration-200",
-          isSelected ? "text-primary font-semibold" : "text-foreground"
+          isSelected ? "text-primary font-semibold" 
+          : inPlaylist && actionIcon === "add" ? "text-green-700 font-medium"
+          : "text-foreground"
         )}>
           {station.name}
         </h3>

@@ -70,13 +70,22 @@ export const useStationList = () => {
       return acc;
     }, {} as Record<string, Track[]>);
 
-  // Add station to playlist handler (using PlaylistContext)
+  // Add station to playlist handler with enhanced duplicate checking
   const handleAddStation = (station: Track) => {
-    console.log("Adding station to playlist:", station.name, station.url);
+    console.log("STATION ADD ATTEMPT: Starting add process", { 
+      name: station.name, 
+      url: station.url 
+    });
     
     // Check if already in playlist before attempting to add
-    if (isInPlaylist(station.url)) {
-      console.log("Station already in playlist");
+    const alreadyInPlaylist = isInPlaylist(station.url);
+    console.log("STATION ADD CHECK: Playlist status", { 
+      alreadyInPlaylist,
+      url: station.url 
+    });
+    
+    if (alreadyInPlaylist) {
+      console.log("STATION ADD BLOCKED: Already in playlist");
       toast({
         title: "Station Already in Playlist",
         description: `${station.name} is already in your playlist`,
@@ -85,16 +94,17 @@ export const useStationList = () => {
       return;
     }
 
+    console.log("STATION ADD PROCEEDING: Attempting to add to playlist");
     const success = addToPlaylist(station);
 
     if (success) {
-      console.log("Successfully added to playlist");
+      console.log("STATION ADD SUCCESS: Successfully added to playlist");
       toast({
         title: "Station Added to Playlist",
         description: `${station.name} has been added to your playlist`,
       });
     } else {
-      console.log("Failed to add to playlist");
+      console.log("STATION ADD FAILED: Could not add to playlist");
       toast({
         title: "Failed to Add Station",
         description: `Could not add ${station.name} to your playlist`,

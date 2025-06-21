@@ -56,19 +56,51 @@ export const PlaylistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       // Favorites first
       if (a.isFavorite && !b.isFavorite) return -1;
       if (!a.isFavorite && b.isFavorite) return 1;
-      // Then by added time (oldest first for same favorite status)
+      // Then by added time (first added first for same favorite status)
       return a.addedToPlaylistAt - b.addedToPlaylistAt;
     });
   }, [playlistTracks]);
 
-  const addToPlaylist = (track: Track): boolean => {
-    // Check for duplicates
+  const isInPlaylist = (trackUrl: string): boolean => {
+    const normalizedUrl = trackUrl.toLowerCase().trim();
     const exists = playlistTracks.some(t => 
-      t.url.toLowerCase().trim() === track.url.toLowerCase().trim()
+      t.url.toLowerCase().trim() === normalizedUrl
     );
+    
+    if (process.env.NODE_ENV === 'development') {
+      console.log("PLAYLIST CHECK: Checking if in playlist", { 
+        url: trackUrl, 
+        normalizedUrl, 
+        exists,
+        playlistUrls: playlistTracks.map(t => t.url)
+      });
+    }
+    
+    return exists;
+  };
+
+  const addToPlaylist = (track: Track): boolean => {
+    const normalizedUrl = track.url.toLowerCase().trim();
+    
+    // Enhanced duplicate check with logging
+    const exists = playlistTracks.some(t => {
+      const existingUrl = t.url.toLowerCase().trim();
+      const isDuplicate = existingUrl === normalizedUrl;
+      
+      if (process.env.NODE_ENV === 'development' && isDuplicate) {
+        console.log("PLAYLIST DUPLICATE FOUND:", {
+          newTrack: { name: track.name, url: track.url },
+          existingTrack: { name: t.name, url: t.url },
+          normalizedUrls: { new: normalizedUrl, existing: existingUrl }
+        });
+      }
+      
+      return isDuplicate;
+    });
     
     if (exists) {
       logger.warn("Track already in playlist", { url: track.url, name: track.name });
+      console.log("PLAYLIST ADD BLOCKED: Duplicate detected");
       return false;
     }
 
@@ -77,6 +109,7 @@ export const PlaylistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       addedToPlaylistAt: Date.now()
     };
 
+    console.log("PLAYLIST ADD SUCCESS: Adding new track", { name: track.name, url: track.url });
     setPlaylistTracks(prev => [...prev, playlistTrack]);
     logger.info("Added track to playlist", { name: track.name });
     return true;
@@ -99,10 +132,6 @@ export const PlaylistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     setPlaylistTracks([]);
     logger.info("Cleared playlist", { removedCount: count });
     return count;
-  };
-
-  const isInPlaylist = (trackUrl: string): boolean => {
-    return playlistTracks.some(t => t.url === trackUrl);
   };
 
   const getPlaylistTrack = (trackUrl: string): PlaylistTrack | undefined => {
