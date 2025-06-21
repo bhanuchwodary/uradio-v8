@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useTrackStateContext } from "@/context/TrackStateContext";
 import { usePlaylist } from "@/context/PlaylistContext";
 import { useAudioPlayer } from "@/context/AudioPlayerContext";
@@ -22,7 +21,7 @@ export const useStationList = () => {
   } = useTrackStateContext();
 
   // Get playlist functionality with isInPlaylist check
-  const { addToPlaylist, isInPlaylist } = usePlaylist();
+  const { addToPlaylist, isInPlaylist, isAddingToPlaylist } = usePlaylist();
 
   // Get current track from audio player context instead of track state
   const { currentTrack } = useAudioPlayer();
@@ -70,12 +69,19 @@ export const useStationList = () => {
       return acc;
     }, {} as Record<string, Track[]>);
 
-  // Add station to playlist handler with enhanced duplicate checking
-  const handleAddStation = (station: Track) => {
+  // Add station to playlist handler with enhanced duplicate checking and debouncing
+  const handleAddStation = useCallback((station: Track) => {
     console.log("STATION ADD ATTEMPT: Starting add process", { 
       name: station.name, 
-      url: station.url 
+      url: station.url,
+      isAddingToPlaylist
     });
+    
+    // Prevent multiple simultaneous additions
+    if (isAddingToPlaylist) {
+      console.log("STATION ADD BLOCKED: Already processing an addition");
+      return;
+    }
     
     // Check if already in playlist before attempting to add
     const alreadyInPlaylist = isInPlaylist(station.url);
@@ -111,7 +117,7 @@ export const useStationList = () => {
         variant: "destructive"
       });
     }
-  };
+  }, [addToPlaylist, isInPlaylist, isAddingToPlaylist, toast]);
 
   // Handle edit station (edits in main library)
   const handleEditStation = (station: Track) => {
@@ -157,6 +163,7 @@ export const useStationList = () => {
     handleSaveEdit,
     setEditingStation,
     showNoResults,
-    isInPlaylist, // Export isInPlaylist for components to use
+    isInPlaylist,
+    isAddingToPlaylist,
   };
 };

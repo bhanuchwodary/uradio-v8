@@ -26,6 +26,7 @@ const StationListPage: React.FC = () => {
     setEditingStation,
     showNoResults,
     isInPlaylist,
+    isAddingToPlaylist,
   } = useStationList();
 
   return (
@@ -44,6 +45,7 @@ const StationListPage: React.FC = () => {
           searchTerm={searchTerm}
           allUserStationsCount={userStations.length}
           isInPlaylist={isInPlaylist}
+          isAddingToPlaylist={isAddingToPlaylist}
         />
 
         <FeaturedStations
@@ -53,6 +55,7 @@ const StationListPage: React.FC = () => {
           currentIndex={currentIndex}
           onAddStation={handleAddStation}
           isInPlaylist={isInPlaylist}
+          isAddingToPlaylist={isAddingToPlaylist}
         />
 
         {showNoResults && <NoSearchResults />}

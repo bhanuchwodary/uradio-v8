@@ -16,6 +16,7 @@ interface UserStationsProps {
   searchTerm: string;
   allUserStationsCount: number;
   isInPlaylist: (trackUrl: string) => boolean;
+  isAddingToPlaylist: boolean;
 }
 
 const UserStations: React.FC<UserStationsProps> = ({
@@ -29,6 +30,7 @@ const UserStations: React.FC<UserStationsProps> = ({
   searchTerm,
   allUserStationsCount,
   isInPlaylist,
+  isAddingToPlaylist,
 }) => {
   return (
     <Card className="bg-gradient-to-br from-background/40 to-background/20 backdrop-blur-md border-border/30 elevation-2">
@@ -47,6 +49,7 @@ const UserStations: React.FC<UserStationsProps> = ({
             onDeleteStation={onDeleteStation}
             actionIcon="add"
             isInPlaylist={isInPlaylist}
+            isAddingToPlaylist={isAddingToPlaylist}
           />
         ) : (
           searchTerm === '' && allUserStationsCount === 0 && (

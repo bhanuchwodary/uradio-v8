@@ -17,6 +17,7 @@ interface StationCardProps {
   actionIcon?: "play" | "add";
   context?: "playlist" | "library";
   inPlaylist?: boolean;
+  isAddingToPlaylist?: boolean;
 }
 
 export const StationCard: React.FC<StationCardProps> = memo(({
@@ -29,7 +30,8 @@ export const StationCard: React.FC<StationCardProps> = memo(({
   onToggleFavorite,
   actionIcon = "play",
   context = "library",
-  inPlaylist = false
+  inPlaylist = false,
+  isAddingToPlaylist = false
 }) => {
   // Memoize event handlers to prevent unnecessary re-renders
   const handleButtonClick = useCallback((e: React.MouseEvent, callback?: () => void) => {
@@ -51,16 +53,20 @@ export const StationCard: React.FC<StationCardProps> = memo(({
 
   const handlePlayClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
-    // Prevent adding to playlist if already in playlist when using add action
-    if (actionIcon === "add" && inPlaylist) {
-      console.log("STATION CARD: Blocked click - already in playlist", { 
+    
+    // Prevent adding to playlist if already in playlist or currently being added
+    if (actionIcon === "add" && (inPlaylist || isAddingToPlaylist)) {
+      console.log("STATION CARD: Blocked click", { 
         name: station.name, 
-        url: station.url 
+        url: station.url,
+        inPlaylist,
+        isAddingToPlaylist
       });
       return;
     }
+    
     onPlay();
-  }, [actionIcon, inPlaylist, onPlay, station.name, station.url]);
+  }, [actionIcon, inPlaylist, isAddingToPlaylist, onPlay, station.name, station.url]);
 
   // Determine the main action icon based on context and playlist status
   const ActionIcon = actionIcon === "add" 
@@ -80,16 +86,9 @@ export const StationCard: React.FC<StationCardProps> = memo(({
     return !station.isFeatured && onEdit;
   };
 
-  // Add logging for debugging
-  if (process.env.NODE_ENV === 'development' && actionIcon === "add") {
-    console.log("STATION CARD RENDER:", {
-      name: station.name,
-      url: station.url,
-      inPlaylist,
-      actionIcon,
-      context
-    });
-  }
+  // Check if the station is being processed
+  const isProcessing = actionIcon === "add" && isAddingToPlaylist;
+  const isDisabled = actionIcon === "add" && (inPlaylist || isAddingToPlaylist);
 
   return (
     <Card 
@@ -101,9 +100,11 @@ export const StationCard: React.FC<StationCardProps> = memo(({
           ? "bg-gradient-to-br from-primary/20 to-primary/10 shadow-lg ring-2 ring-primary/30 scale-105" 
           : inPlaylist && actionIcon === "add"
           ? "bg-gradient-to-br from-green-500/10 to-green-500/5 shadow-md ring-1 ring-green-500/20"
+          : isProcessing
+          ? "bg-gradient-to-br from-blue-500/10 to-blue-500/5 shadow-md ring-1 ring-blue-500/20"
           : "bg-gradient-to-br from-background/80 to-background/60 hover:from-accent/40 hover:to-accent/20 shadow-md",
-        // Disable hover effects if already in playlist and using add action
-        inPlaylist && actionIcon === "add" && "hover:scale-100 cursor-default"
+        // Disable hover effects if already in playlist or being processed
+        isDisabled && "hover:scale-100 cursor-default"
       )}
       onClick={handlePlayClick}
     >
@@ -117,9 +118,11 @@ export const StationCard: React.FC<StationCardProps> = memo(({
               ? "bg-primary text-primary-foreground shadow-md scale-110" 
               : inPlaylist && actionIcon === "add"
               ? "bg-green-500/20 text-green-600 border border-green-500/30"
+              : isProcessing
+              ? "bg-blue-500/20 text-blue-600 border border-blue-500/30 animate-pulse"
               : "bg-secondary/80 text-secondary-foreground group-hover:bg-primary/30",
-            // Disable hover scale if already in playlist
-            inPlaylist && actionIcon === "add" && "group-hover:scale-100"
+            // Disable hover scale if already in playlist or being processed
+            isDisabled && "group-hover:scale-100"
           )}
         >
           <ActionIcon className={cn(
@@ -135,6 +138,7 @@ export const StationCard: React.FC<StationCardProps> = memo(({
           "min-h-[2rem] flex items-center justify-center transition-colors duration-200",
           isSelected ? "text-primary font-semibold" 
           : inPlaylist && actionIcon === "add" ? "text-green-700 font-medium"
+          : isProcessing ? "text-blue-700 font-medium"
           : "text-foreground"
         )}>
           {station.name}
@@ -149,10 +153,13 @@ export const StationCard: React.FC<StationCardProps> = memo(({
               ? "from-primary/20 to-primary/10 text-primary border-primary/30" 
               : inPlaylist && actionIcon === "add"
               ? "from-green-500/20 to-green-500/10 text-green-600 border-green-500/30"
+              : isProcessing
+              ? "from-blue-500/20 to-blue-500/10 text-blue-600 border-blue-500/30"
               : "from-muted/60 to-muted/40 text-muted-foreground border-muted/50"
           )}>
             {stationLanguage}
             {inPlaylist && actionIcon === "add" && " ✓"}
+            {isProcessing && " ..."}
           </span>
         </div>
         
@@ -216,7 +223,8 @@ export const StationCard: React.FC<StationCardProps> = memo(({
     prevProps.station.isFavorite === nextProps.station.isFavorite &&
     prevProps.context === nextProps.context &&
     prevProps.actionIcon === nextProps.actionIcon &&
-    prevProps.inPlaylist === nextProps.inPlaylist
+    prevProps.inPlaylist === nextProps.inPlaylist &&
+    prevProps.isAddingToPlaylist === nextProps.isAddingToPlaylist
   );
 });
 

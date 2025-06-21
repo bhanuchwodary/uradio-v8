@@ -1,5 +1,4 @@
-
-import React, { createContext, useContext, useState, useEffect, useMemo } from "react";
+import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from "react";
 import { Track } from "@/types/track";
 import { logger } from "@/utils/logger";
 
@@ -17,6 +16,7 @@ interface PlaylistContextType {
   getPlaylistTrack: (trackUrl: string) => PlaylistTrack | undefined;
   updatePlaylistTrackFavorite: (trackUrl: string, isFavorite: boolean) => void;
   playlistCount: number;
+  isAddingToPlaylist: boolean;
 }
 
 const PlaylistContext = createContext<PlaylistContextType | undefined>(undefined);
@@ -25,6 +25,7 @@ const PLAYLIST_STORAGE_KEY = 'uradio_playlist';
 
 export const PlaylistProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [playlistTracks, setPlaylistTracks] = useState<PlaylistTrack[]>([]);
+  const [isAddingToPlaylist, setIsAddingToPlaylist] = useState(false);
 
   // Load playlist from localStorage on init
   useEffect(() => {
@@ -61,61 +62,80 @@ export const PlaylistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     });
   }, [playlistTracks]);
 
-  const isInPlaylist = (trackUrl: string): boolean => {
+  const isInPlaylist = useCallback((trackUrl: string): boolean => {
     const normalizedUrl = trackUrl.toLowerCase().trim();
     const exists = playlistTracks.some(t => 
       t.url.toLowerCase().trim() === normalizedUrl
     );
     
-    if (process.env.NODE_ENV === 'development') {
-      console.log("PLAYLIST CHECK: Checking if in playlist", { 
-        url: trackUrl, 
-        normalizedUrl, 
-        exists,
-        playlistUrls: playlistTracks.map(t => t.url)
-      });
-    }
-    
-    return exists;
-  };
-
-  const addToPlaylist = (track: Track): boolean => {
-    const normalizedUrl = track.url.toLowerCase().trim();
-    
-    // Enhanced duplicate check with logging
-    const exists = playlistTracks.some(t => {
-      const existingUrl = t.url.toLowerCase().trim();
-      const isDuplicate = existingUrl === normalizedUrl;
-      
-      if (process.env.NODE_ENV === 'development' && isDuplicate) {
-        console.log("PLAYLIST DUPLICATE FOUND:", {
-          newTrack: { name: track.name, url: track.url },
-          existingTrack: { name: t.name, url: t.url },
-          normalizedUrls: { new: normalizedUrl, existing: existingUrl }
-        });
-      }
-      
-      return isDuplicate;
+    console.log("PLAYLIST CHECK: Checking if in playlist", { 
+      url: trackUrl, 
+      normalizedUrl, 
+      exists,
+      playlistCount: playlistTracks.length
     });
     
-    if (exists) {
-      logger.warn("Track already in playlist", { url: track.url, name: track.name });
-      console.log("PLAYLIST ADD BLOCKED: Duplicate detected");
+    return exists;
+  }, [playlistTracks]);
+
+  const addToPlaylist = useCallback((track: Track): boolean => {
+    // Prevent multiple simultaneous additions
+    if (isAddingToPlaylist) {
+      console.log("PLAYLIST ADD BLOCKED: Already adding to playlist");
       return false;
     }
 
-    const playlistTrack: PlaylistTrack = {
-      ...track,
-      addedToPlaylistAt: Date.now()
-    };
+    setIsAddingToPlaylist(true);
 
-    console.log("PLAYLIST ADD SUCCESS: Adding new track", { name: track.name, url: track.url });
-    setPlaylistTracks(prev => [...prev, playlistTrack]);
-    logger.info("Added track to playlist", { name: track.name });
-    return true;
-  };
+    try {
+      const normalizedUrl = track.url.toLowerCase().trim();
+      
+      // Enhanced duplicate check with current state
+      const exists = playlistTracks.some(t => {
+        const existingUrl = t.url.toLowerCase().trim();
+        const isDuplicate = existingUrl === normalizedUrl;
+        
+        if (isDuplicate) {
+          console.log("PLAYLIST DUPLICATE FOUND:", {
+            newTrack: { name: track.name, url: track.url },
+            existingTrack: { name: t.name, url: t.url },
+            normalizedUrls: { new: normalizedUrl, existing: existingUrl }
+          });
+        }
+        
+        return isDuplicate;
+      });
+      
+      if (exists) {
+        logger.warn("Track already in playlist", { url: track.url, name: track.name });
+        console.log("PLAYLIST ADD BLOCKED: Duplicate detected");
+        return false;
+      }
 
-  const removeFromPlaylist = (trackUrl: string): boolean => {
+      const playlistTrack: PlaylistTrack = {
+        ...track,
+        addedToPlaylistAt: Date.now()
+      };
+
+      console.log("PLAYLIST ADD SUCCESS: Adding new track", { name: track.name, url: track.url });
+      
+      setPlaylistTracks(prev => {
+        const newTracks = [...prev, playlistTrack];
+        console.log("PLAYLIST STATE UPDATED: New count", newTracks.length);
+        return newTracks;
+      });
+      
+      logger.info("Added track to playlist", { name: track.name });
+      return true;
+    } finally {
+      // Reset the flag after a short delay to ensure state has updated
+      setTimeout(() => {
+        setIsAddingToPlaylist(false);
+      }, 100);
+    }
+  }, [playlistTracks, isAddingToPlaylist]);
+
+  const removeFromPlaylist = useCallback((trackUrl: string): boolean => {
     const exists = playlistTracks.some(t => t.url === trackUrl);
     if (!exists) {
       logger.warn("Track not found in playlist", { url: trackUrl });
@@ -125,20 +145,20 @@ export const PlaylistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     setPlaylistTracks(prev => prev.filter(t => t.url !== trackUrl));
     logger.info("Removed track from playlist", { url: trackUrl });
     return true;
-  };
+  }, [playlistTracks]);
 
-  const clearPlaylist = (): number => {
+  const clearPlaylist = useCallback((): number => {
     const count = playlistTracks.length;
     setPlaylistTracks([]);
     logger.info("Cleared playlist", { removedCount: count });
     return count;
-  };
+  }, [playlistTracks]);
 
-  const getPlaylistTrack = (trackUrl: string): PlaylistTrack | undefined => {
+  const getPlaylistTrack = useCallback((trackUrl: string): PlaylistTrack | undefined => {
     return playlistTracks.find(t => t.url === trackUrl);
-  };
+  }, [playlistTracks]);
 
-  const updatePlaylistTrackFavorite = (trackUrl: string, isFavorite: boolean): void => {
+  const updatePlaylistTrackFavorite = useCallback((trackUrl: string, isFavorite: boolean): void => {
     setPlaylistTracks(prev => 
       prev.map(track => 
         track.url === trackUrl 
@@ -147,7 +167,7 @@ export const PlaylistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       )
     );
     logger.info("Updated playlist track favorite status", { url: trackUrl, isFavorite });
-  };
+  }, []);
 
   const contextValue: PlaylistContextType = {
     playlistTracks,
@@ -158,7 +178,8 @@ export const PlaylistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     isInPlaylist,
     getPlaylistTrack,
     updatePlaylistTrackFavorite,
-    playlistCount: playlistTracks.length
+    playlistCount: playlistTracks.length,
+    isAddingToPlaylist
   };
 
   return (

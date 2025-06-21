@@ -18,6 +18,7 @@ interface StationGridProps {
   context?: "playlist" | "library";
   loading?: boolean;
   isInPlaylist?: (trackUrl: string) => boolean;
+  isAddingToPlaylist?: boolean;
 }
 
 export const StationGrid: React.FC<StationGridProps> = memo(({
@@ -32,7 +33,8 @@ export const StationGrid: React.FC<StationGridProps> = memo(({
   actionIcon = "play",
   context = "library",
   loading = false,
-  isInPlaylist
+  isInPlaylist,
+  isAddingToPlaylist = false
 }) => {
   // Memoize station keys to prevent unnecessary re-renders
   const stationKeys = useMemo(() => 
@@ -70,7 +72,8 @@ export const StationGrid: React.FC<StationGridProps> = memo(({
             isSelected,
             isPlaying: isCurrentlyPlaying,
             context,
-            inPlaylist
+            inPlaylist,
+            isAddingToPlaylist
           });
         }
         
@@ -87,6 +90,7 @@ export const StationGrid: React.FC<StationGridProps> = memo(({
             actionIcon={actionIcon}
             context={context}
             inPlaylist={inPlaylist}
+            isAddingToPlaylist={isAddingToPlaylist}
           />
         );
       })}
@@ -99,6 +103,7 @@ export const StationGrid: React.FC<StationGridProps> = memo(({
   if (prevProps.currentTrackUrl !== nextProps.currentTrackUrl) return false;
   if (prevProps.isPlaying !== nextProps.isPlaying) return false;
   if (prevProps.context !== nextProps.context) return false;
+  if (prevProps.isAddingToPlaylist !== nextProps.isAddingToPlaylist) return false;
   
   // Deep comparison only when necessary
   return prevProps.stations.every((station, index) => {
