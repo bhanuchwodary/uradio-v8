@@ -97,7 +97,7 @@ export const StationCard: React.FC<StationCardProps> = memo(({
         "transform hover:scale-105 active:scale-95 border-0 backdrop-blur-sm",
         "hover:shadow-xl hover:-translate-y-1",
         isSelected 
-          ? "bg-gradient-to-br from-primary/20 to-primary/10 shadow-lg ring-2 ring-primary/30 scale-105" 
+          ? "bg-gradient-to-br from-primary/20 to-primary/10 shadow-lg ring-2 ring-primary/30" 
           : inPlaylist && actionIcon === "add"
           ? "bg-gradient-to-br from-green-500/10 to-green-500/5 shadow-md ring-1 ring-green-500/20"
           : isProcessing
@@ -115,7 +115,7 @@ export const StationCard: React.FC<StationCardProps> = memo(({
             "w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 shadow-sm",
             "transform group-hover:scale-110 group-active:scale-95",
             isPlaying 
-              ? "bg-primary text-primary-foreground shadow-md scale-110" 
+              ? "bg-primary text-primary-foreground shadow-md" 
               : inPlaylist && actionIcon === "add"
               ? "bg-green-500/20 text-green-600 border border-green-500/30"
               : isProcessing
