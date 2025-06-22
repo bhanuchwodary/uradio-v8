@@ -1,9 +1,9 @@
-
 import React, { createContext, useContext, useState, useRef, useEffect } from "react";
 import { Track } from "@/types/track";
 import { usePlayerCore } from "@/hooks/usePlayerCore";
 import { logger } from "@/utils/logger";
 import { usePlaylist } from "@/context/PlaylistContext";
+import { getVolumePreference } from "@/utils/volumeStorage";
 
 interface AudioPlayerContextType {
   // Current playback state
@@ -44,7 +44,7 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({
   tracks,
   randomMode: initialRandomMode 
 }) => {
-  // Core state
+  // Core state - initialize volume from stored preference
   const [currentTrack, setCurrentTrack] = useState<Track | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [randomMode, setRandomMode] = useState(initialRandomMode);
@@ -174,7 +174,7 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({
   const urls = currentTrack ? [currentTrack.url] : [];
   const playerCurrentIndex = currentTrack ? 0 : -1;
 
-  // Use player core with enhanced handlers
+  // Use player core with enhanced handlers and proper volume initialization
   const {
     duration,
     currentTime,
