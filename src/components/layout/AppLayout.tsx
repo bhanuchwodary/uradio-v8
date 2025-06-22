@@ -1,17 +1,23 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { AppHeader } from "./AppHeader";
 import { BottomNav } from "./BottomNav";
 import { cn } from "@/lib/utils";
+import { getVolumePreference, saveVolumePreference } from "@/utils/volumeStorage";
 
 interface AppLayoutProps {
   children: React.ReactNode;
 }
 
 export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
-  // Shared state for controlling volume and random between header/player
+  // Initialize volume from stored preference instead of hardcoded default
+  const [volume, setVolume] = useState(() => getVolumePreference());
   const [randomMode, setRandomMode] = useState(false);
-  const [volume, setVolume] = useState(0.7);
+
+  // Save volume preference whenever it changes
+  useEffect(() => {
+    saveVolumePreference(volume);
+  }, [volume]);
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-surface-container-lowest via-surface to-surface-container dark:from-surface-dim dark:via-surface dark:to-surface-bright ios-vh-fix ios-no-bounce">
