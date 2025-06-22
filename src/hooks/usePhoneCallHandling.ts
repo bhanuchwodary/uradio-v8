@@ -1,65 +1,137 @@
 
-import { useEffect } from "react";
-import { registerPlugin } from "@capacitor/core";
-
-// Create a custom interface for our call state plugin
-interface CallStatePlugin {
-  addListener: (eventName: string, callback: (data: { state: string }) => void) => void;
-  removeAllListeners: () => void;
-}
+import { useEffect, useRef } from "react";
 
 export const usePhoneCallHandling = (
   isPlaying: boolean,
   setIsPlaying: (isPlaying: boolean) => void
 ) => {
-  // Handle phone call interruptions
+  const wasPlayingRef = useRef(false);
+
   useEffect(() => {
-    const handleCallStateChanged = (state: string) => {
-      if (state === "RINGING" || state === "OFFHOOK") {
+    // Handle phone call interruptions using Web Audio API and visibility changes
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        // Page is hidden (could be due to phone call or other interruption)
         if (isPlaying) {
+          wasPlayingRef.current = true;
           setIsPlaying(false);
+          console.log("Audio paused due to page visibility change (possible phone call)");
+        }
+      } else {
+        // Page is visible again
+        if (wasPlayingRef.current) {
+          // Small delay to ensure stability
+          setTimeout(() => {
+            setIsPlaying(true);
+            wasPlayingRef.current = false;
+            console.log("Audio resumed after page became visible");
+          }, 500);
         }
       }
     };
 
-    // Try to use Capacitor plugin if available
-    try {
-      // This is a placeholder for potential Capacitor implementation
-      // We'll use a more generic approach to avoid TypeScript errors
-      const setupCallListener = async () => {
-        try {
-          // Try to register the plugin dynamically
-          const CallState = registerPlugin<CallStatePlugin>('CallState');
-          
-          if (CallState) {
-            CallState.addListener('callStateChanged', ({ state }) => {
-              handleCallStateChanged(state);
-            });
-          }
-        } catch (err) {
-          console.log('CallState plugin not available:', err);
-        }
-      };
-
-      setupCallListener();
-      
-      return () => {
-        // Clean up listeners if needed
-        try {
-          const cleanup = async () => {
-            const CallState = registerPlugin<CallStatePlugin>('CallState');
-            if (CallState) {
-              CallState.removeAllListeners();
+    // Handle audio interruptions through audio context state changes
+    const handleAudioInterruption = () => {
+      try {
+        // Create audio context to monitor audio session state
+        const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+        
+        const checkAudioState = () => {
+          if (audioContext.state === 'interrupted' || audioContext.state === 'suspended') {
+            if (isPlaying) {
+              wasPlayingRef.current = true;
+              setIsPlaying(false);
+              console.log("Audio paused due to audio context interruption");
             }
-          };
-          cleanup();
-        } catch (err) {
-          // Ignore cleanup errors
-        }
-      };
-    } catch (err) {
-      // No Capacitor environment, no need for phone call handling
-      console.log('Not in a Capacitor environment, phone call handling disabled');
-    }
+          } else if (audioContext.state === 'running' && wasPlayingRef.current) {
+            setTimeout(() => {
+              setIsPlaying(true);
+              wasPlayingRef.current = false;
+              console.log("Audio resumed after audio context resumed");
+            }, 500);
+          }
+        };
+
+        audioContext.addEventListener('statechange', checkAudioState);
+        
+        return () => {
+          audioContext.removeEventListener('statechange', checkAudioState);
+          audioContext.close();
+        };
+      } catch (error) {
+        console.log("Audio context not available for interruption handling:", error);
+        return () => {};
+      }
+    };
+
+    // Handle media session interruptions
+    const handleMediaSessionActions = () => {
+      if ('mediaSession' in navigator) {
+        navigator.mediaSession.setActionHandler('pause', () => {
+          console.log("External pause request (possible phone call)");
+          wasPlayingRef.current = true;
+          setIsPlaying(false);
+        });
+
+        navigator.mediaSession.setActionHandler('play', () => {
+          console.log("External play request");
+          if (wasPlayingRef.current) {
+            setIsPlaying(true);
+            wasPlayingRef.current = false;
+          }
+        });
+      }
+    };
+
+    // Handle beforeunload for app switching
+    const handleBeforeUnload = () => {
+      if (isPlaying) {
+        wasPlayingRef.current = true;
+      }
+    };
+
+    // Handle focus/blur events
+    const handleWindowBlur = () => {
+      if (isPlaying) {
+        wasPlayingRef.current = true;
+        setIsPlaying(false);
+        console.log("Audio paused due to window blur (possible phone call)");
+      }
+    };
+
+    const handleWindowFocus = () => {
+      if (wasPlayingRef.current) {
+        setTimeout(() => {
+          setIsPlaying(true);
+          wasPlayingRef.current = false;
+          console.log("Audio resumed after window focus");
+        }, 500);
+      }
+    };
+
+    // Add all event listeners
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    window.addEventListener('blur', handleWindowBlur);
+    window.addEventListener('focus', handleWindowFocus);
+    
+    const audioCleanup = handleAudioInterruption();
+    handleMediaSessionActions();
+
+    // Cleanup function
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      window.removeEventListener('blur', handleWindowBlur);
+      window.removeEventListener('focus', handleWindowFocus);
+      audioCleanup();
+    };
   }, [isPlaying, setIsPlaying]);
+
+  // Reset the ref when playback state changes externally
+  useEffect(() => {
+    if (isPlaying) {
+      wasPlayingRef.current = false;
+    }
+  }, [isPlaying]);
 };

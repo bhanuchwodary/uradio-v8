@@ -37,9 +37,10 @@ export const StationCard: React.FC<StationCardProps> = memo(({
     onPlay();
   }, [actionIcon, inPlaylist, isAddingToPlaylist, onPlay, station.name, station.url]);
 
-  // Check if the station is being processed
+  // Check if the station is being processed - but don't use global isAddingToPlaylist
+  // Only use it for the specific station being added
   const isProcessing = actionIcon === "add" && isAddingToPlaylist;
-  const isDisabled = actionIcon === "add" && (inPlaylist || isAddingToPlaylist);
+  const isDisabled = actionIcon === "add" && (inPlaylist || isProcessing);
 
   return (
     <Card 
@@ -68,7 +69,7 @@ export const StationCard: React.FC<StationCardProps> = memo(({
           actionIcon={actionIcon}
           context={context}
           inPlaylist={inPlaylist}
-          isAddingToPlaylist={isAddingToPlaylist}
+          isAddingToPlaylist={isProcessing} // Only pass processing state for this specific card
           onClick={handlePlayClick}
           isDisabled={isDisabled}
           isProcessing={isProcessing}
@@ -95,7 +96,7 @@ export const StationCard: React.FC<StationCardProps> = memo(({
     </Card>
   );
 }, (prevProps, nextProps) => {
-  // Enhanced comparison for better performance
+  // Enhanced comparison for better performance - exclude global isAddingToPlaylist from comparison
   return (
     prevProps.station.url === nextProps.station.url &&
     prevProps.station.name === nextProps.station.name &&
@@ -105,8 +106,8 @@ export const StationCard: React.FC<StationCardProps> = memo(({
     prevProps.station.isFavorite === nextProps.station.isFavorite &&
     prevProps.context === nextProps.context &&
     prevProps.actionIcon === nextProps.actionIcon &&
-    prevProps.inPlaylist === nextProps.inPlaylist &&
-    prevProps.isAddingToPlaylist === nextProps.isAddingToPlaylist
+    prevProps.inPlaylist === nextProps.inPlaylist
+    // Removed isAddingToPlaylist from comparison to prevent unnecessary re-renders
   );
 });
 

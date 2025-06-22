@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from "react";
 import { Track } from "@/types/track";
 import { logger } from "@/utils/logger";
@@ -64,18 +65,9 @@ export const PlaylistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   const isInPlaylist = useCallback((trackUrl: string): boolean => {
     const normalizedUrl = trackUrl.toLowerCase().trim();
-    const exists = playlistTracks.some(t => 
+    return playlistTracks.some(t => 
       t.url.toLowerCase().trim() === normalizedUrl
     );
-    
-    console.log("PLAYLIST CHECK: Checking if in playlist", { 
-      url: trackUrl, 
-      normalizedUrl, 
-      exists,
-      playlistCount: playlistTracks.length
-    });
-    
-    return exists;
   }, [playlistTracks]);
 
   const addToPlaylist = useCallback((track: Track): boolean => {
@@ -85,54 +77,42 @@ export const PlaylistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       return false;
     }
 
+    // Check for duplicates first
+    const normalizedUrl = track.url.toLowerCase().trim();
+    const exists = playlistTracks.some(t => {
+      const existingUrl = t.url.toLowerCase().trim();
+      return existingUrl === normalizedUrl;
+    });
+    
+    if (exists) {
+      logger.warn("Track already in playlist", { url: track.url, name: track.name });
+      console.log("PLAYLIST ADD BLOCKED: Duplicate detected");
+      return false;
+    }
+
+    // Set adding state briefly to prevent double-clicks
     setIsAddingToPlaylist(true);
 
-    try {
-      const normalizedUrl = track.url.toLowerCase().trim();
-      
-      // Enhanced duplicate check with current state
-      const exists = playlistTracks.some(t => {
-        const existingUrl = t.url.toLowerCase().trim();
-        const isDuplicate = existingUrl === normalizedUrl;
-        
-        if (isDuplicate) {
-          console.log("PLAYLIST DUPLICATE FOUND:", {
-            newTrack: { name: track.name, url: track.url },
-            existingTrack: { name: t.name, url: t.url },
-            normalizedUrls: { new: normalizedUrl, existing: existingUrl }
-          });
-        }
-        
-        return isDuplicate;
-      });
-      
-      if (exists) {
-        logger.warn("Track already in playlist", { url: track.url, name: track.name });
-        console.log("PLAYLIST ADD BLOCKED: Duplicate detected");
-        return false;
-      }
+    const playlistTrack: PlaylistTrack = {
+      ...track,
+      addedToPlaylistAt: Date.now()
+    };
 
-      const playlistTrack: PlaylistTrack = {
-        ...track,
-        addedToPlaylistAt: Date.now()
-      };
-
-      console.log("PLAYLIST ADD SUCCESS: Adding new track", { name: track.name, url: track.url });
-      
-      setPlaylistTracks(prev => {
-        const newTracks = [...prev, playlistTrack];
-        console.log("PLAYLIST STATE UPDATED: New count", newTracks.length);
-        return newTracks;
-      });
-      
-      logger.info("Added track to playlist", { name: track.name });
-      return true;
-    } finally {
-      // Reset the flag after a short delay to ensure state has updated
-      setTimeout(() => {
-        setIsAddingToPlaylist(false);
-      }, 100);
-    }
+    console.log("PLAYLIST ADD SUCCESS: Adding new track", { name: track.name, url: track.url });
+    
+    setPlaylistTracks(prev => {
+      const newTracks = [...prev, playlistTrack];
+      console.log("PLAYLIST STATE UPDATED: New count", newTracks.length);
+      return newTracks;
+    });
+    
+    // Reset the flag quickly to minimize UI flicker
+    setTimeout(() => {
+      setIsAddingToPlaylist(false);
+    }, 50); // Reduced from 100ms to minimize flicker
+    
+    logger.info("Added track to playlist", { name: track.name });
+    return true;
   }, [playlistTracks, isAddingToPlaylist]);
 
   const removeFromPlaylist = useCallback((trackUrl: string): boolean => {
