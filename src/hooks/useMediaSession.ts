@@ -28,7 +28,7 @@ export const useMediaSession = ({
   onSeek,
   randomMode = false,
 }: UseMediaSessionProps) => {
-  // Enhanced media session controls with uRadio branding and better interruption handling
+  // Simplified media session controls - no phone call handling here anymore
   useEffect(() => {
     if ('mediaSession' in navigator) {
       // Set metadata with uRadio branding
@@ -68,15 +68,15 @@ export const useMediaSession = ({
         console.warn("Error setting playback state:", error);
       }
 
-      // Enhanced action handlers with better interruption support
+      // Basic action handlers - interruption handling moved to useAudioInterruption
       try {
         navigator.mediaSession.setActionHandler('play', () => {
-          console.log("Media session play action triggered (could be post-interruption)");
+          console.log("Media session play action triggered");
           setIsPlaying(true);
         });
         
         navigator.mediaSession.setActionHandler('pause', () => {
-          console.log("Media session pause action triggered (could be interruption)");
+          console.log("Media session pause action triggered");
           setIsPlaying(false);
         });
         
@@ -90,7 +90,7 @@ export const useMediaSession = ({
           onSkipNext();
         });
         
-        // Enhanced seek handling for iOS with interruption recovery
+        // Seek handling
         navigator.mediaSession.setActionHandler('seekto', (details) => {
           console.log("Media session seek action triggered:", details);
           if (details.seekTime !== undefined && details.seekTime !== null) {
@@ -98,13 +98,12 @@ export const useMediaSession = ({
           }
         });
 
-        // Enhanced stop handler for better interruption handling
         navigator.mediaSession.setActionHandler('stop', () => {
-          console.log("Media session stop action triggered (system interruption)");
+          console.log("Media session stop action triggered");
           setIsPlaying(false);
         });
 
-        // Add support for additional media session actions that can help with interruptions
+        // Additional seek actions
         try {
           navigator.mediaSession.setActionHandler('seekbackward', (details) => {
             console.log("Media session seek backward:", details);
@@ -120,7 +119,6 @@ export const useMediaSession = ({
             onSeek(newTime);
           });
         } catch (e) {
-          // These actions might not be supported on all browsers
           console.log("Extended media session actions not supported");
         }
 
@@ -128,19 +126,16 @@ export const useMediaSession = ({
         console.warn("Error setting media session action handlers:", error);
       }
 
-      // Fixed playbackRate error - enhanced handling for different stream types
+      // Position state handling
       try {
         if (trackDuration && trackDuration !== Infinity && !isNaN(trackDuration)) {
           const currentTrack = tracks[currentIndex];
           const isHlsStream = currentTrack?.url?.includes('.m3u8');
           
-          // Use different playback rate strategies for different stream types
           let playbackRate: number;
           if (isHlsStream) {
-            // For HLS streams, use a slightly higher minimum to prevent auto-resume issues
             playbackRate = isPlaying ? 1.0 : 0.001;
           } else {
-            // For other streams, use the standard approach
             playbackRate = isPlaying ? 1.0 : 0.0001;
           }
           
@@ -150,7 +145,7 @@ export const useMediaSession = ({
             playbackRate: playbackRate,
           });
           
-          console.log("Set position state with enhanced playback rate:", {
+          console.log("Set position state:", {
             duration: trackDuration,
             position: trackPosition,
             playbackRate,
