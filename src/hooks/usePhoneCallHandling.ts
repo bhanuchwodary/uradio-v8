@@ -1,5 +1,6 @@
 
 import { useEffect, useRef } from "react";
+import { globalAudioRef, updateGlobalPlaybackState, setNavigationState, resetAudioStateForUserAction } from "@/components/music-player/audioInstance";
 
 export const usePhoneCallHandling = (
   isPlaying: boolean,
@@ -16,6 +17,8 @@ export const usePhoneCallHandling = (
         // Page is hidden (could be due to phone call or other interruption)
         if (isPlaying) {
           wasPlayingRef.current = true;
+          // Update global state to indicate interruption, not user pause
+          updateGlobalPlaybackState(false, true, false);
           setIsPlaying(false);
           console.log("Audio paused due to page visibility change (possible phone call)");
         }
@@ -29,6 +32,9 @@ export const usePhoneCallHandling = (
           
           // Wait longer before resuming to ensure call has actually ended
           callDetectionTimeoutRef.current = setTimeout(() => {
+            console.log("Attempting to resume audio after page became visible");
+            // Reset global audio state for automatic resumption
+            resetAudioStateForUserAction();
             setIsPlaying(true);
             wasPlayingRef.current = false;
             console.log("Audio resumed after page became visible");
@@ -47,6 +53,8 @@ export const usePhoneCallHandling = (
           if (audioContext.state === 'interrupted' || audioContext.state === 'suspended') {
             if (isPlaying) {
               wasPlayingRef.current = true;
+              // Update global state to indicate interruption
+              updateGlobalPlaybackState(false, true, false);
               setIsPlaying(false);
               console.log("Audio paused due to audio context interruption (phone call detected)");
             }
@@ -58,6 +66,9 @@ export const usePhoneCallHandling = (
             
             // Add delay before resuming
             callDetectionTimeoutRef.current = setTimeout(() => {
+              console.log("Attempting to resume audio after audio context resumed");
+              // Reset global audio state for automatic resumption
+              resetAudioStateForUserAction();
               setIsPlaying(true);
               wasPlayingRef.current = false;
               console.log("Audio resumed after audio context resumed");
@@ -83,6 +94,8 @@ export const usePhoneCallHandling = (
         navigator.mediaSession.setActionHandler('pause', () => {
           console.log("External pause request (phone call or system interruption)");
           wasPlayingRef.current = true;
+          // Update global state to indicate interruption
+          updateGlobalPlaybackState(false, true, false);
           setIsPlaying(false);
         });
 
@@ -95,6 +108,9 @@ export const usePhoneCallHandling = (
             }
             
             callDetectionTimeoutRef.current = setTimeout(() => {
+              console.log("Resuming from external play request");
+              // Reset global audio state for automatic resumption
+              resetAudioStateForUserAction();
               setIsPlaying(true);
               wasPlayingRef.current = false;
             }, 500);
@@ -105,6 +121,8 @@ export const usePhoneCallHandling = (
         navigator.mediaSession.setActionHandler('stop', () => {
           console.log("External stop request (likely phone call)");
           wasPlayingRef.current = true;
+          // Update global state to indicate interruption
+          updateGlobalPlaybackState(false, true, false);
           setIsPlaying(false);
         });
       }
@@ -122,6 +140,8 @@ export const usePhoneCallHandling = (
     const handleWindowBlur = () => {
       if (isPlaying) {
         wasPlayingRef.current = true;
+        // Update global state to indicate interruption
+        updateGlobalPlaybackState(false, true, false);
         setIsPlaying(false);
         console.log("Audio paused due to window blur (possible phone call)");
       }
@@ -136,6 +156,9 @@ export const usePhoneCallHandling = (
         
         // Longer delay for focus events to ensure call has ended
         callDetectionTimeoutRef.current = setTimeout(() => {
+          console.log("Attempting to resume audio after window focus");
+          // Reset global audio state for automatic resumption
+          resetAudioStateForUserAction();
           setIsPlaying(true);
           wasPlayingRef.current = false;
           console.log("Audio resumed after window focus");
@@ -147,6 +170,8 @@ export const usePhoneCallHandling = (
     const handlePageFreeze = () => {
       if (isPlaying) {
         wasPlayingRef.current = true;
+        // Update global state to indicate interruption
+        updateGlobalPlaybackState(false, true, false);
         setIsPlaying(false);
         console.log("Audio paused due to page freeze (mobile background/call)");
       }
@@ -160,6 +185,9 @@ export const usePhoneCallHandling = (
         }
         
         callDetectionTimeoutRef.current = setTimeout(() => {
+          console.log("Attempting to resume audio after page resume");
+          // Reset global audio state for automatic resumption
+          resetAudioStateForUserAction();
           setIsPlaying(true);
           wasPlayingRef.current = false;
           console.log("Audio resumed after page resume");
