@@ -6,57 +6,68 @@ export const usePhoneCallHandling = (
   setIsPlaying: (isPlaying: boolean) => void
 ) => {
   const wasPlayingRef = useRef(false);
+  const interruptionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    // Handle phone call interruptions using Web Audio API and visibility changes
+    // Enhanced phone call interruption handling for mobile browsers
+    
+    // 1. Page Visibility API - handles most interruptions including phone calls
     const handleVisibilityChange = () => {
+      console.log("Visibility change detected:", document.hidden, "isPlaying:", isPlaying);
+      
       if (document.hidden) {
-        // Page is hidden (could be due to phone call or other interruption)
+        // Page is hidden (phone call, app switch, etc.)
         if (isPlaying) {
           wasPlayingRef.current = true;
           setIsPlaying(false);
-          console.log("Audio paused due to page visibility change (possible phone call)");
+          console.log("Audio paused due to page becoming hidden (possible phone call)");
         }
       } else {
         // Page is visible again
         if (wasPlayingRef.current) {
-          // Small delay to ensure stability
-          setTimeout(() => {
+          // Add a longer delay for phone call scenarios
+          interruptionTimeoutRef.current = setTimeout(() => {
+            console.log("Attempting to resume playback after page became visible");
             setIsPlaying(true);
             wasPlayingRef.current = false;
-            console.log("Audio resumed after page became visible");
-          }, 500);
+          }, 1000); // Increased delay for better stability
         }
       }
     };
 
-    // Handle audio interruptions through audio context state changes
-    const handleAudioInterruption = () => {
+    // 2. Enhanced Audio Context State Monitoring
+    const setupAudioContextMonitoring = () => {
       try {
-        // Create audio context to monitor audio session state
         const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
         
-        const checkAudioState = () => {
+        const handleAudioContextStateChange = () => {
+          console.log("Audio context state changed:", audioContext.state, "isPlaying:", isPlaying);
+          
           if (audioContext.state === 'interrupted' || audioContext.state === 'suspended') {
             if (isPlaying) {
               wasPlayingRef.current = true;
               setIsPlaying(false);
-              console.log("Audio paused due to audio context interruption");
+              console.log("Audio paused due to audio context interruption (phone call detected)");
             }
           } else if (audioContext.state === 'running' && wasPlayingRef.current) {
-            setTimeout(() => {
+            // Clear any existing timeout and set a new one
+            if (interruptionTimeoutRef.current) {
+              clearTimeout(interruptionTimeoutRef.current);
+            }
+            
+            interruptionTimeoutRef.current = setTimeout(() => {
+              console.log("Audio resumed after audio context state became running");
               setIsPlaying(true);
               wasPlayingRef.current = false;
-              console.log("Audio resumed after audio context resumed");
-            }, 500);
+            }, 1500); // Longer delay for audio context recovery
           }
         };
 
-        audioContext.addEventListener('statechange', checkAudioState);
+        audioContext.addEventListener('statechange', handleAudioContextStateChange);
         
         return () => {
-          audioContext.removeEventListener('statechange', checkAudioState);
-          audioContext.close();
+          audioContext.removeEventListener('statechange', handleAudioContextStateChange);
+          audioContext.close().catch(console.warn);
         };
       } catch (error) {
         console.log("Audio context not available for interruption handling:", error);
@@ -64,48 +75,87 @@ export const usePhoneCallHandling = (
       }
     };
 
-    // Handle media session interruptions
-    const handleMediaSessionActions = () => {
+    // 3. Enhanced Media Session API Integration
+    const setupMediaSessionInterruption = () => {
       if ('mediaSession' in navigator) {
+        // Handle interruption through media session
         navigator.mediaSession.setActionHandler('pause', () => {
-          console.log("External pause request (possible phone call)");
+          console.log("Media session pause action (external interruption like phone call)");
           wasPlayingRef.current = true;
           setIsPlaying(false);
         });
 
         navigator.mediaSession.setActionHandler('play', () => {
-          console.log("External play request");
+          console.log("Media session play action (resuming after interruption)");
           if (wasPlayingRef.current) {
             setIsPlaying(true);
             wasPlayingRef.current = false;
           }
         });
+
+        // Handle seek events which can indicate audio focus changes
+        navigator.mediaSession.setActionHandler('seekto', (details) => {
+          console.log("Media session seek action (possible audio focus change)");
+          // This can indicate the system is trying to manage audio focus
+        });
       }
     };
 
-    // Handle beforeunload for app switching
-    const handleBeforeUnload = () => {
-      if (isPlaying) {
-        wasPlayingRef.current = true;
-      }
-    };
-
-    // Handle focus/blur events
+    // 4. Window Focus/Blur Events (backup method)
     const handleWindowBlur = () => {
+      console.log("Window blur detected, isPlaying:", isPlaying);
       if (isPlaying) {
         wasPlayingRef.current = true;
         setIsPlaying(false);
-        console.log("Audio paused due to window blur (possible phone call)");
+        console.log("Audio paused due to window blur (app backgrounded for call)");
       }
     };
 
     const handleWindowFocus = () => {
+      console.log("Window focus detected, wasPlaying:", wasPlayingRef.current);
       if (wasPlayingRef.current) {
-        setTimeout(() => {
+        // Clear existing timeout and set new one
+        if (interruptionTimeoutRef.current) {
+          clearTimeout(interruptionTimeoutRef.current);
+        }
+        
+        interruptionTimeoutRef.current = setTimeout(() => {
+          console.log("Audio resumed after window regained focus");
           setIsPlaying(true);
           wasPlayingRef.current = false;
-          console.log("Audio resumed after window focus");
-        }, 500);
+        }, 800);
+      }
+    };
+
+    // 5. Before Unload Event (for app switching during calls)
+    const handleBeforeUnload = () => {
+      if (isPlaying) {
+        wasPlayingRef.current = true;
+        console.log("Before unload - marking as was playing for potential resume");
+      }
+    };
+
+    // 6. Page Show/Hide Events (iOS Safari specific)
+    const handlePageHide = () => {
+      console.log("Page hide event (iOS Safari specific)");
+      if (isPlaying) {
+        wasPlayingRef.current = true;
+        setIsPlaying(false);
+      }
+    };
+
+    const handlePageShow = (event: PageTransitionEvent) => {
+      console.log("Page show event (iOS Safari specific), persisted:", event.persisted);
+      if (wasPlayingRef.current) {
+        // Clear existing timeout
+        if (interruptionTimeoutRef.current) {
+          clearTimeout(interruptionTimeoutRef.current);
+        }
+        
+        interruptionTimeoutRef.current = setTimeout(() => {
+          setIsPlaying(true);
+          wasPlayingRef.current = false;
+        }, 1200);
       }
     };
 
@@ -114,9 +164,11 @@ export const usePhoneCallHandling = (
     window.addEventListener('beforeunload', handleBeforeUnload);
     window.addEventListener('blur', handleWindowBlur);
     window.addEventListener('focus', handleWindowFocus);
+    window.addEventListener('pagehide', handlePageHide);
+    window.addEventListener('pageshow', handlePageShow as EventListener);
     
-    const audioCleanup = handleAudioInterruption();
-    handleMediaSessionActions();
+    const audioContextCleanup = setupAudioContextMonitoring();
+    setupMediaSessionInterruption();
 
     // Cleanup function
     return () => {
@@ -124,7 +176,14 @@ export const usePhoneCallHandling = (
       window.removeEventListener('beforeunload', handleBeforeUnload);
       window.removeEventListener('blur', handleWindowBlur);
       window.removeEventListener('focus', handleWindowFocus);
-      audioCleanup();
+      window.removeEventListener('pagehide', handlePageHide);
+      window.removeEventListener('pageshow', handlePageShow as EventListener);
+      
+      if (interruptionTimeoutRef.current) {
+        clearTimeout(interruptionTimeoutRef.current);
+      }
+      
+      audioContextCleanup();
     };
   }, [isPlaying, setIsPlaying]);
 
@@ -132,6 +191,20 @@ export const usePhoneCallHandling = (
   useEffect(() => {
     if (isPlaying) {
       wasPlayingRef.current = false;
+      // Clear any pending resume timeouts when playback starts
+      if (interruptionTimeoutRef.current) {
+        clearTimeout(interruptionTimeoutRef.current);
+        interruptionTimeoutRef.current = null;
+      }
     }
   }, [isPlaying]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (interruptionTimeoutRef.current) {
+        clearTimeout(interruptionTimeoutRef.current);
+      }
+    };
+  }, []);
 };

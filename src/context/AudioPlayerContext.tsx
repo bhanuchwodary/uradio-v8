@@ -4,6 +4,7 @@ import { usePlayerCore } from "@/hooks/usePlayerCore";
 import { logger } from "@/utils/logger";
 import { usePlaylist } from "@/context/PlaylistContext";
 import { getVolumePreference } from "@/utils/volumeStorage";
+import { usePhoneCallHandling } from "@/hooks/usePhoneCallHandling";
 
 interface AudioPlayerContextType {
   // Current playback state
@@ -53,6 +54,9 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({
   const { sortedPlaylistTracks } = usePlaylist();
   
   console.log("AudioPlayerContext: randomMode =", randomMode, "playlist tracks =", sortedPlaylistTracks.length);
+  
+  // CRITICAL: Add phone call handling to the main audio player context
+  usePhoneCallHandling(isPlaying, setIsPlaying);
   
   // Sync random mode with prop changes
   useEffect(() => {

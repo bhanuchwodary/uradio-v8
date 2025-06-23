@@ -1,4 +1,3 @@
-
 import { useEffect } from "react";
 import androidAutoService from "../services/androidAutoService";
 import audioWakeLockService from "../services/audioWakeLockService";
@@ -29,7 +28,7 @@ export const useMediaSession = ({
   onSeek,
   randomMode = false,
 }: UseMediaSessionProps) => {
-  // Enhanced media session controls with uRadio branding
+  // Enhanced media session controls with uRadio branding and better interruption handling
   useEffect(() => {
     if ('mediaSession' in navigator) {
       // Set metadata with uRadio branding
@@ -69,15 +68,15 @@ export const useMediaSession = ({
         console.warn("Error setting playback state:", error);
       }
 
-      // Enhanced action handlers with better iOS support and random mode awareness
+      // Enhanced action handlers with better interruption support
       try {
         navigator.mediaSession.setActionHandler('play', () => {
-          console.log("Media session play action triggered");
+          console.log("Media session play action triggered (could be post-interruption)");
           setIsPlaying(true);
         });
         
         navigator.mediaSession.setActionHandler('pause', () => {
-          console.log("Media session pause action triggered");
+          console.log("Media session pause action triggered (could be interruption)");
           setIsPlaying(false);
         });
         
@@ -91,7 +90,7 @@ export const useMediaSession = ({
           onSkipNext();
         });
         
-        // Enhanced seek handling for iOS
+        // Enhanced seek handling for iOS with interruption recovery
         navigator.mediaSession.setActionHandler('seekto', (details) => {
           console.log("Media session seek action triggered:", details);
           if (details.seekTime !== undefined && details.seekTime !== null) {
@@ -99,11 +98,31 @@ export const useMediaSession = ({
           }
         });
 
-        // Additional iOS-specific handlers
+        // Enhanced stop handler for better interruption handling
         navigator.mediaSession.setActionHandler('stop', () => {
-          console.log("Media session stop action triggered");
+          console.log("Media session stop action triggered (system interruption)");
           setIsPlaying(false);
         });
+
+        // Add support for additional media session actions that can help with interruptions
+        try {
+          navigator.mediaSession.setActionHandler('seekbackward', (details) => {
+            console.log("Media session seek backward:", details);
+            const seekTime = (details.seekOffset || 10);
+            const newTime = Math.max(0, trackPosition - seekTime);
+            onSeek(newTime);
+          });
+          
+          navigator.mediaSession.setActionHandler('seekforward', (details) => {
+            console.log("Media session seek forward:", details);
+            const seekTime = (details.seekOffset || 10);
+            const newTime = Math.min(trackDuration || 0, trackPosition + seekTime);
+            onSeek(newTime);
+          });
+        } catch (e) {
+          // These actions might not be supported on all browsers
+          console.log("Extended media session actions not supported");
+        }
 
       } catch (error) {
         console.warn("Error setting media session action handlers:", error);

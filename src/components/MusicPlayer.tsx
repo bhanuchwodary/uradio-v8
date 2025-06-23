@@ -1,4 +1,3 @@
-
 // Streamlined MusicPlayer component that uses usePlayerCore for logic.
 import React, { memo } from "react";
 import PlayerLayout from "@/components/music-player/PlayerLayout";
@@ -8,7 +7,6 @@ import PlayerControlsRow from "@/components/music-player/PlayerControlsRow";
 import PlayerVolume from "@/components/music-player/PlayerVolume";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { usePlayerCore } from "@/hooks/usePlayerCore";
-import { usePhoneCallHandling } from "@/hooks/usePhoneCallHandling";
 
 interface MusicPlayerProps {
   urls: string[];
@@ -46,8 +44,8 @@ const MusicPlayer: React.FC<MusicPlayerProps> = memo(({
     setIsPlaying,
   });
 
-  // Add phone call handling
-  usePhoneCallHandling(isPlaying, setIsPlaying);
+  // Phone call handling is now managed at the AudioPlayerContext level
+  // No need for duplicate handling here
 
   // Show loading spinner if no tracks are available
   if (urls.length === 0) {
