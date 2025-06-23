@@ -1,146 +1,71 @@
 
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { useToast } from '@/hooks/use-toast';
-import { usePlayer } from '../contexts/PlayerContext';
-import { useNavigate } from 'react-router-dom';
+import React from "react";
+import { AppLayout } from "@/components/layout/AppLayout";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import AddUrlForm from "@/components/AddUrlForm";
+import ImportStationsFromCsv from "@/components/ImportStationsFromCsv";
+import { useTrackStateContext } from "@/context/TrackStateContext";
+import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
+import { Upload } from "lucide-react";
 
-export const AddStationPage: React.FC = () => {
-  const [name, setName] = useState('');
-  const [url, setUrl] = useState('');
-  const [language, setLanguage] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  
-  const { addTrack } = usePlayer();
+const AddStationPage: React.FC = () => {
+  const { addUrl } = useTrackStateContext();
   const { toast } = useToast();
   const navigate = useNavigate();
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  
+  const handleImport = (stations: Array<{ name: string; url: string; language?: string }>) => {
+    const addedStations = stations.filter(station => {
+      const result = addUrl(station.url, station.name, false, false, station.language);
+      return result.success;
+    });
     
-    if (!name.trim() || !url.trim()) {
+    if (addedStations.length > 0) {
       toast({
-        title: 'Error',
-        description: 'Please fill in both name and URL fields',
-        variant: 'destructive',
+        title: "Stations Imported",
+        description: `${addedStations.length} stations have been imported to your library.`,
       });
-      return;
-    }
-
-    // Basic URL validation
-    try {
-      new URL(url);
-    } catch {
+      // Navigate to the stations page after successful import
+      setTimeout(() => navigate("/stations"), 500);
+    } else {
       toast({
-        title: 'Error',
-        description: 'Please enter a valid URL',
-        variant: 'destructive',
+        title: "Import Failed",
+        description: "No stations were imported. Please check the format and try again.",
+        variant: "destructive"
       });
-      return;
-    }
-
-    setIsSubmitting(true);
-    
-    try {
-      const newTrack = addTrack({
-        name: name.trim(),
-        url: url.trim(),
-        language: language.trim() || undefined,
-        isFavorite: false,
-        isFeatured: false,
-        playTime: 0,
-      });
-
-      toast({
-        title: 'Station added successfully',
-        description: `"${newTrack.name}" has been added to your stations`,
-      });
-
-      // Reset form
-      setName('');
-      setUrl('');
-      setLanguage('');
-      
-      // Navigate back to home
-      navigate('/');
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to add station. Please try again.',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="container mx-auto px-4 py-6 max-w-2xl">
-      <Card className="p-6">
-        <h1 className="text-2xl font-bold mb-6">Add New Station</h1>
-        
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <Label htmlFor="name">Station Name *</Label>
-            <Input
-              id="name"
-              type="text"
-              placeholder="e.g., BBC Radio 1"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-            />
-          </div>
+    <AppLayout>
+      <div className="container mx-auto max-w-5xl space-y-6 pt-4">
+        <div className="max-w-lg mx-auto space-y-6">
+          <Card className="bg-surface-container border border-outline-variant/30 rounded-lg elevation-1">
+            <CardHeader className="pb-3 px-3 sm:px-6">
+              <CardTitle className="text-xl font-bold text-on-surface">Add Radio Station</CardTitle>
+              <CardDescription>Add a new station to your library. You can then add it to your playlist from the Stations screen.</CardDescription>
+            </CardHeader>
+            <CardContent className="px-3 sm:px-6">
+              <AddUrlForm />
+            </CardContent>
+          </Card>
 
-          <div>
-            <Label htmlFor="url">Stream URL *</Label>
-            <Textarea
-              id="url"
-              placeholder="e.g., https://stream.example.com/radio.mp3"
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-              required
-              rows={3}
-            />
-            <p className="text-sm text-muted-foreground mt-1">
-              Supports MP3, M3U8 (HLS), and other audio stream formats
-            </p>
-          </div>
-
-          <div>
-            <Label htmlFor="language">Language (optional)</Label>
-            <Input
-              id="language"
-              type="text"
-              placeholder="e.g., English, Spanish, French"
-              value={language}
-              onChange={(e) => setLanguage(e.target.value)}
-            />
-          </div>
-
-          <div className="flex space-x-3 pt-4">
-            <Button
-              type="submit"
-              disabled={isSubmitting}
-              className="flex-1"
-            >
-              {isSubmitting ? 'Adding...' : 'Add Station'}
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => navigate('/')}
-              className="flex-1"
-            >
-              Cancel
-            </Button>
-          </div>
-        </form>
-      </Card>
-    </div>
+          <Card className="bg-surface-container border border-outline-variant/30 rounded-lg elevation-1">
+            <CardHeader className="pb-3 px-3 sm:px-6">
+              <CardTitle className="text-xl font-bold text-on-surface flex items-center gap-2">
+                <Upload className="h-4 w-4" />
+                Import Stations
+              </CardTitle>
+              <CardDescription>Import multiple stations from a CSV file to your library</CardDescription>
+            </CardHeader>
+            <CardContent className="px-3 sm:px-6">
+              <ImportStationsFromCsv onImport={handleImport} />
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </AppLayout>
   );
 };
+
+export default AddStationPage;

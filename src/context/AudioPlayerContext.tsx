@@ -4,7 +4,6 @@ import { usePlayerCore } from "@/hooks/usePlayerCore";
 import { logger } from "@/utils/logger";
 import { usePlaylist } from "@/context/PlaylistContext";
 import { getVolumePreference } from "@/utils/volumeStorage";
-import { useAudioInterruption } from "@/hooks/useAudioInterruption";
 
 interface AudioPlayerContextType {
   // Current playback state
@@ -54,18 +53,6 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({
   const { sortedPlaylistTracks } = usePlaylist();
   
   console.log("AudioPlayerContext: randomMode =", randomMode, "playlist tracks =", sortedPlaylistTracks.length);
-  
-  // CRITICAL: Unified audio interruption handling
-  useAudioInterruption({
-    isPlaying,
-    setIsPlaying,
-    onInterruption: () => {
-      console.log('AudioPlayerContext: Playback interrupted (phone call/external audio)');
-    },
-    onResumption: () => {
-      console.log('AudioPlayerContext: Playback resumed after interruption');
-    }
-  });
   
   // Sync random mode with prop changes
   useEffect(() => {

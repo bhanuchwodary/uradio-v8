@@ -1,3 +1,4 @@
+
 import { useEffect } from "react";
 import androidAutoService from "../services/androidAutoService";
 import audioWakeLockService from "../services/audioWakeLockService";
@@ -28,7 +29,7 @@ export const useMediaSession = ({
   onSeek,
   randomMode = false,
 }: UseMediaSessionProps) => {
-  // Simplified media session controls - no phone call handling here anymore
+  // Enhanced media session controls with uRadio branding
   useEffect(() => {
     if ('mediaSession' in navigator) {
       // Set metadata with uRadio branding
@@ -68,7 +69,7 @@ export const useMediaSession = ({
         console.warn("Error setting playback state:", error);
       }
 
-      // Basic action handlers - interruption handling moved to useAudioInterruption
+      // Enhanced action handlers with better iOS support and random mode awareness
       try {
         navigator.mediaSession.setActionHandler('play', () => {
           console.log("Media session play action triggered");
@@ -90,7 +91,7 @@ export const useMediaSession = ({
           onSkipNext();
         });
         
-        // Seek handling
+        // Enhanced seek handling for iOS
         navigator.mediaSession.setActionHandler('seekto', (details) => {
           console.log("Media session seek action triggered:", details);
           if (details.seekTime !== undefined && details.seekTime !== null) {
@@ -98,44 +99,29 @@ export const useMediaSession = ({
           }
         });
 
+        // Additional iOS-specific handlers
         navigator.mediaSession.setActionHandler('stop', () => {
           console.log("Media session stop action triggered");
           setIsPlaying(false);
         });
 
-        // Additional seek actions
-        try {
-          navigator.mediaSession.setActionHandler('seekbackward', (details) => {
-            console.log("Media session seek backward:", details);
-            const seekTime = (details.seekOffset || 10);
-            const newTime = Math.max(0, trackPosition - seekTime);
-            onSeek(newTime);
-          });
-          
-          navigator.mediaSession.setActionHandler('seekforward', (details) => {
-            console.log("Media session seek forward:", details);
-            const seekTime = (details.seekOffset || 10);
-            const newTime = Math.min(trackDuration || 0, trackPosition + seekTime);
-            onSeek(newTime);
-          });
-        } catch (e) {
-          console.log("Extended media session actions not supported");
-        }
-
       } catch (error) {
         console.warn("Error setting media session action handlers:", error);
       }
 
-      // Position state handling
+      // Fixed playbackRate error - enhanced handling for different stream types
       try {
         if (trackDuration && trackDuration !== Infinity && !isNaN(trackDuration)) {
           const currentTrack = tracks[currentIndex];
           const isHlsStream = currentTrack?.url?.includes('.m3u8');
           
+          // Use different playback rate strategies for different stream types
           let playbackRate: number;
           if (isHlsStream) {
+            // For HLS streams, use a slightly higher minimum to prevent auto-resume issues
             playbackRate = isPlaying ? 1.0 : 0.001;
           } else {
+            // For other streams, use the standard approach
             playbackRate = isPlaying ? 1.0 : 0.0001;
           }
           
@@ -145,7 +131,7 @@ export const useMediaSession = ({
             playbackRate: playbackRate,
           });
           
-          console.log("Set position state:", {
+          console.log("Set position state with enhanced playback rate:", {
             duration: trackDuration,
             position: trackPosition,
             playbackRate,
