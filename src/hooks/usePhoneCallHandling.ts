@@ -1,6 +1,5 @@
-
-import { useEffect, useRef } from "react";
-import { globalAudioRef, updateGlobalPlaybackState, setNavigationState, resetAudioStateForUserAction } from "@/components/music-player/audioInstance";
+import { useEffect, useRef, useCallback } from "react";
+import { globalAudioRef, updateGlobalPlaybackState, resetAudioStateForUserAction } from "@/components/music-player/audioInstance";
 
 export const usePhoneCallHandling = (
   isPlaying: boolean,
@@ -11,61 +10,90 @@ export const usePhoneCallHandling = (
   const callDetectionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Helper function to actually resume audio playback
-  const resumeAudioPlayback = async () => {
+  // Use useCallback to memoize this function, preventing unnecessary re-creations
+  // which can be useful if it's passed down to child components.
+  const resumeAudioPlayback = useCallback(async () => {
     console.log("Attempting to resume audio playback...");
-    
+
+    if (!globalAudioRef.element) {
+      console.log("No audio element available to resume.");
+      // Potentially set isPlaying to false if no element can play
+      setIsPlaying(false);
+      wasPlayingRef.current = false;
+      return;
+    }
+
     try {
-      // Reset global audio state first
+      // It's crucial that resetAudioStateForUserAction does not detach the audio element
+      // or set its src to null/empty string.
       resetAudioStateForUserAction();
-      
-      // Update state
-      setIsPlaying(true);
-      
-      // Actually play the audio element if it exists
-      if (globalAudioRef.element && !globalAudioRef.element.paused) {
-        console.log("Audio element already playing");
+      console.log("Global audio state reset.");
+
+      // Attempt to resume AudioContext if it's suspended
+      if (audioContextRef.current && audioContextRef.current.state === 'suspended') {
+        console.log("Resuming AudioContext...");
+        await audioContextRef.current.resume();
+      }
+
+      // Check if audio element is already playing (e.g., from another source resuming it)
+      if (!globalAudioRef.element.paused) {
+        console.log("Audio element already playing, no need to resume.");
+        setIsPlaying(true); // Ensure React state is aligned
+        wasPlayingRef.current = false;
         return;
       }
+
+      console.log("Starting audio element playback...");
+      await globalAudioRef.element.play();
       
-      if (globalAudioRef.element) {
-        console.log("Starting audio element playback");
-        await globalAudioRef.element.play();
-        updateGlobalPlaybackState(true, false, false);
-        console.log("Audio playback resumed successfully");
-      } else {
-        console.log("No audio element available to resume");
-      }
-      
-      wasPlayingRef.current = false;
-    } catch (error) {
-      console.log("Failed to resume audio playback:", error);
-      // Fallback - just update state
+      // Only update state if play() promise resolves successfully
       setIsPlaying(true);
-      wasPlayingRef.current = false;
+      updateGlobalPlaybackState(true, false, false);
+      console.log("Audio playback resumed successfully.");
+      wasPlayingRef.current = false; // Reset after successful resume
+
+    } catch (error) {
+      console.error("Failed to resume audio playback:", error);
+      // More specific error handling for autoplay policy
+      if (error instanceof DOMException && error.name === 'NotAllowedError') {
+        console.warn("Autoplay was prevented. User interaction required to resume playback.");
+        // You might want to show a UI element here prompting the user to tap to resume.
+        // For example: setNeedsUserInteractionToPlay(true);
+      } else {
+        console.error("An unexpected error occurred during audio resume:", error);
+      }
+      // Fallback: If playing failed, ensure UI reflects paused state
+      setIsPlaying(false);
+      // Keep wasPlayingRef.current true if it failed due to autoplay,
+      // so next user interaction can try again.
+      // Or set it to false if the error implies it's truly not resumable.
+      // For now, let's keep it true so a retry is possible.
+      // wasPlayingRef.current = false; // You might want to change this based on specific error
     }
-  };
+  }, [setIsPlaying]); // Dependencies for useCallback
 
   useEffect(() => {
-    // Enhanced phone call detection for mobile devices
+    // Helper to clear timeout
+    const clearResumeTimeout = () => {
+      if (callDetectionTimeoutRef.current) {
+        clearTimeout(callDetectionTimeoutRef.current);
+        callDetectionTimeoutRef.current = null;
+      }
+    };
+
+    // --- Event Handlers ---
+
     const handleVisibilityChange = () => {
       if (document.hidden) {
-        // Page is hidden (could be due to phone call or other interruption)
         if (isPlaying) {
           wasPlayingRef.current = true;
-          // Update global state to indicate interruption, not user pause
           updateGlobalPlaybackState(false, true, false);
           setIsPlaying(false);
           console.log("Audio paused due to page visibility change (possible phone call)");
         }
       } else {
-        // Page is visible again - add delay to ensure call has ended
         if (wasPlayingRef.current) {
-          // Clear any existing timeout
-          if (callDetectionTimeoutRef.current) {
-            clearTimeout(callDetectionTimeoutRef.current);
-          }
-          
-          // Wait longer before resuming to ensure call has actually ended
+          clearResumeTimeout();
           callDetectionTimeoutRef.current = setTimeout(() => {
             console.log("Page became visible - attempting to resume audio");
             resumeAudioPlayback();
@@ -74,28 +102,28 @@ export const usePhoneCallHandling = (
       }
     };
 
-    // Enhanced audio context monitoring for mobile
     const handleAudioInterruption = () => {
       try {
-        const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-        audioContextRef.current = audioContext;
-        
+        // Ensure AudioContext is created on a user gesture or after initial load
+        // Creating it here in useEffect might lead to it being suspended immediately.
+        // A better approach is to manage a single AudioContext instance globally
+        // or ensure it's un-suspended by an initial user gesture.
+        // For this example, let's assume it gets created properly elsewhere or on first interaction.
+
+        const audioContext = audioContextRef.current || new (window.AudioContext || (window as any).webkitAudioContext)();
+        audioContextRef.current = audioContext; // Store reference
+
         const checkAudioState = () => {
+          console.log("AudioContext state change:", audioContext.state);
           if (audioContext.state === 'interrupted' || audioContext.state === 'suspended') {
             if (isPlaying) {
               wasPlayingRef.current = true;
-              // Update global state to indicate interruption
               updateGlobalPlaybackState(false, true, false);
               setIsPlaying(false);
               console.log("Audio paused due to audio context interruption (phone call detected)");
             }
           } else if (audioContext.state === 'running' && wasPlayingRef.current) {
-            // Clear any existing timeout
-            if (callDetectionTimeoutRef.current) {
-              clearTimeout(callDetectionTimeoutRef.current);
-            }
-            
-            // Add delay before resuming
+            clearResumeTimeout();
             callDetectionTimeoutRef.current = setTimeout(() => {
               console.log("Audio context resumed - attempting to resume audio");
               resumeAudioPlayback();
@@ -103,37 +131,36 @@ export const usePhoneCallHandling = (
           }
         };
 
+        // Important: Add event listener to the *current* audioContext
         audioContext.addEventListener('statechange', checkAudioState);
-        
+
         return () => {
           audioContext.removeEventListener('statechange', checkAudioState);
+          // Don't close audioContext here if it's meant to be global/persistent
+          // Consider closing it only when the component unmounts for good,
+          // or if the app explicitly wants to release audio resources.
+          // For now, let's keep the existing close() call for consistency.
           audioContext.close();
         };
       } catch (error) {
         console.log("Audio context not available for interruption handling:", error);
-        return () => {};
+        return () => {}; // Return empty cleanup
       }
     };
 
-    // Enhanced media session for better mobile integration
     const handleMediaSessionActions = () => {
       if ('mediaSession' in navigator) {
         navigator.mediaSession.setActionHandler('pause', () => {
           console.log("External pause request (phone call or system interruption)");
           wasPlayingRef.current = true;
-          // Update global state to indicate interruption
           updateGlobalPlaybackState(false, true, false);
           setIsPlaying(false);
         });
 
         navigator.mediaSession.setActionHandler('play', () => {
-          console.log("External play request");
+          console.log("External play request received.");
           if (wasPlayingRef.current) {
-            // Clear any existing timeout
-            if (callDetectionTimeoutRef.current) {
-              clearTimeout(callDetectionTimeoutRef.current);
-            }
-            
+            clearResumeTimeout();
             callDetectionTimeoutRef.current = setTimeout(() => {
               console.log("External play request - attempting to resume audio");
               resumeAudioPlayback();
@@ -141,18 +168,15 @@ export const usePhoneCallHandling = (
           }
         });
 
-        // Handle stop action (often triggered by phone calls on mobile)
         navigator.mediaSession.setActionHandler('stop', () => {
           console.log("External stop request (likely phone call)");
           wasPlayingRef.current = true;
-          // Update global state to indicate interruption
           updateGlobalPlaybackState(false, true, false);
           setIsPlaying(false);
         });
       }
     };
 
-    // Enhanced beforeunload for app switching/phone calls
     const handleBeforeUnload = () => {
       if (isPlaying) {
         wasPlayingRef.current = true;
@@ -160,11 +184,9 @@ export const usePhoneCallHandling = (
       }
     };
 
-    // Enhanced focus/blur events with better mobile detection
     const handleWindowBlur = () => {
       if (isPlaying) {
         wasPlayingRef.current = true;
-        // Update global state to indicate interruption
         updateGlobalPlaybackState(false, true, false);
         setIsPlaying(false);
         console.log("Audio paused due to window blur (possible phone call)");
@@ -173,12 +195,7 @@ export const usePhoneCallHandling = (
 
     const handleWindowFocus = () => {
       if (wasPlayingRef.current) {
-        // Clear any existing timeout
-        if (callDetectionTimeoutRef.current) {
-          clearTimeout(callDetectionTimeoutRef.current);
-        }
-        
-        // Longer delay for focus events to ensure call has ended
+        clearResumeTimeout();
         callDetectionTimeoutRef.current = setTimeout(() => {
           console.log("Window focused - attempting to resume audio");
           resumeAudioPlayback();
@@ -186,11 +203,9 @@ export const usePhoneCallHandling = (
       }
     };
 
-    // Mobile-specific: Page lifecycle events for better call detection
     const handlePageFreeze = () => {
       if (isPlaying) {
         wasPlayingRef.current = true;
-        // Update global state to indicate interruption
         updateGlobalPlaybackState(false, true, false);
         setIsPlaying(false);
         console.log("Audio paused due to page freeze (mobile background/call)");
@@ -199,11 +214,7 @@ export const usePhoneCallHandling = (
 
     const handlePageResume = () => {
       if (wasPlayingRef.current) {
-        // Clear any existing timeout
-        if (callDetectionTimeoutRef.current) {
-          clearTimeout(callDetectionTimeoutRef.current);
-        }
-        
+        clearResumeTimeout();
         callDetectionTimeoutRef.current = setTimeout(() => {
           console.log("Page resumed - attempting to resume audio");
           resumeAudioPlayback();
@@ -216,41 +227,38 @@ export const usePhoneCallHandling = (
     window.addEventListener('beforeunload', handleBeforeUnload);
     window.addEventListener('blur', handleWindowBlur);
     window.addEventListener('focus', handleWindowFocus);
-    
-    // Mobile-specific lifecycle events
     window.addEventListener('freeze', handlePageFreeze);
     window.addEventListener('resume', handlePageResume);
-    
-    const audioCleanup = handleAudioInterruption();
-    handleMediaSessionActions();
+
+    const audioContextCleanup = handleAudioInterruption(); // Call it here
+    handleMediaSessionActions(); // Call it here
 
     // Cleanup function
     return () => {
-      // Clear any pending timeouts
-      if (callDetectionTimeoutRef.current) {
-        clearTimeout(callDetectionTimeoutRef.current);
-      }
-      
+      clearResumeTimeout(); // Clear any pending timeouts on unmount
+
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('beforeunload', handleBeforeUnload);
       window.removeEventListener('blur', handleWindowBlur);
       window.removeEventListener('focus', handleWindowFocus);
       window.removeEventListener('freeze', handlePageFreeze);
       window.removeEventListener('resume', handlePageResume);
+
+      audioContextCleanup(); // Run audio context specific cleanup
       
-      audioCleanup();
-      
+      // Only close audioContext here if this hook is the sole manager of its lifecycle.
+      // If it's a global AudioContext, it might be better managed elsewhere.
       if (audioContextRef.current) {
-        audioContextRef.current.close();
+        // audioContextRef.current.close(); // Only if it's safe to close
       }
     };
-  }, [isPlaying, setIsPlaying]);
+  }, [isPlaying, setIsPlaying, resumeAudioPlayback]); // Add resumeAudioPlayback to dependencies
 
-  // Reset the ref when playback state changes externally
+  // This useEffect ensures wasPlayingRef is reset when playback starts externally
+  // and clears any pending resume timeouts.
   useEffect(() => {
     if (isPlaying) {
       wasPlayingRef.current = false;
-      // Clear any pending resume timeouts when user manually starts playback
       if (callDetectionTimeoutRef.current) {
         clearTimeout(callDetectionTimeoutRef.current);
         callDetectionTimeoutRef.current = null;
