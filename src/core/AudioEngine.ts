@@ -1,4 +1,3 @@
-
 import Hls from "hls.js";
 
 export interface AudioTrack {
@@ -35,7 +34,7 @@ class AudioEngineCore {
     this.audio = new Audio();
     this.audio.preload = "none";
     this.audio.crossOrigin = "anonymous";
-    this.audio.playsInline = true;
+    this.audio.setAttribute('playsinline', 'true');
     
     this.state = {
       currentTrack: null,
