@@ -94,7 +94,7 @@ export const useAudioInterruption = ({
           const state = audioContextRef.current?.state;
           console.log('Audio context state changed:', state);
           
-          if (state === 'interrupted' || state === 'suspended') {
+          if (state === 'suspended') {
             handleInterruption('audio-context-suspended');
           } else if (state === 'running' && wasPlayingBeforeInterruption.current) {
             handleResumption('audio-context-running', 1500);
