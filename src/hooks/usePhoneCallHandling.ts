@@ -6,9 +6,11 @@ export const usePhoneCallHandling = (
   setIsPlaying: (isPlaying: boolean) => void
 ) => {
   const wasPlayingRef = useRef(false);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const callDetectionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    // Handle phone call interruptions using Web Audio API and visibility changes
+    // Enhanced phone call detection for mobile devices
     const handleVisibilityChange = () => {
       if (document.hidden) {
         // Page is hidden (could be due to phone call or other interruption)
@@ -18,37 +20,48 @@ export const usePhoneCallHandling = (
           console.log("Audio paused due to page visibility change (possible phone call)");
         }
       } else {
-        // Page is visible again
+        // Page is visible again - add delay to ensure call has ended
         if (wasPlayingRef.current) {
-          // Small delay to ensure stability
-          setTimeout(() => {
+          // Clear any existing timeout
+          if (callDetectionTimeoutRef.current) {
+            clearTimeout(callDetectionTimeoutRef.current);
+          }
+          
+          // Wait longer before resuming to ensure call has actually ended
+          callDetectionTimeoutRef.current = setTimeout(() => {
             setIsPlaying(true);
             wasPlayingRef.current = false;
             console.log("Audio resumed after page became visible");
-          }, 500);
+          }, 1000);
         }
       }
     };
 
-    // Handle audio interruptions through audio context state changes
+    // Enhanced audio context monitoring for mobile
     const handleAudioInterruption = () => {
       try {
-        // Create audio context to monitor audio session state
         const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+        audioContextRef.current = audioContext;
         
         const checkAudioState = () => {
           if (audioContext.state === 'interrupted' || audioContext.state === 'suspended') {
             if (isPlaying) {
               wasPlayingRef.current = true;
               setIsPlaying(false);
-              console.log("Audio paused due to audio context interruption");
+              console.log("Audio paused due to audio context interruption (phone call detected)");
             }
           } else if (audioContext.state === 'running' && wasPlayingRef.current) {
-            setTimeout(() => {
+            // Clear any existing timeout
+            if (callDetectionTimeoutRef.current) {
+              clearTimeout(callDetectionTimeoutRef.current);
+            }
+            
+            // Add delay before resuming
+            callDetectionTimeoutRef.current = setTimeout(() => {
               setIsPlaying(true);
               wasPlayingRef.current = false;
               console.log("Audio resumed after audio context resumed");
-            }, 500);
+            }, 1000);
           }
         };
 
@@ -64,11 +77,11 @@ export const usePhoneCallHandling = (
       }
     };
 
-    // Handle media session interruptions
+    // Enhanced media session for better mobile integration
     const handleMediaSessionActions = () => {
       if ('mediaSession' in navigator) {
         navigator.mediaSession.setActionHandler('pause', () => {
-          console.log("External pause request (possible phone call)");
+          console.log("External pause request (phone call or system interruption)");
           wasPlayingRef.current = true;
           setIsPlaying(false);
         });
@@ -76,21 +89,36 @@ export const usePhoneCallHandling = (
         navigator.mediaSession.setActionHandler('play', () => {
           console.log("External play request");
           if (wasPlayingRef.current) {
-            setIsPlaying(true);
-            wasPlayingRef.current = false;
+            // Clear any existing timeout
+            if (callDetectionTimeoutRef.current) {
+              clearTimeout(callDetectionTimeoutRef.current);
+            }
+            
+            callDetectionTimeoutRef.current = setTimeout(() => {
+              setIsPlaying(true);
+              wasPlayingRef.current = false;
+            }, 500);
           }
+        });
+
+        // Handle stop action (often triggered by phone calls on mobile)
+        navigator.mediaSession.setActionHandler('stop', () => {
+          console.log("External stop request (likely phone call)");
+          wasPlayingRef.current = true;
+          setIsPlaying(false);
         });
       }
     };
 
-    // Handle beforeunload for app switching
+    // Enhanced beforeunload for app switching/phone calls
     const handleBeforeUnload = () => {
       if (isPlaying) {
         wasPlayingRef.current = true;
+        console.log("App unloading - pausing audio");
       }
     };
 
-    // Handle focus/blur events
+    // Enhanced focus/blur events with better mobile detection
     const handleWindowBlur = () => {
       if (isPlaying) {
         wasPlayingRef.current = true;
@@ -101,11 +129,41 @@ export const usePhoneCallHandling = (
 
     const handleWindowFocus = () => {
       if (wasPlayingRef.current) {
-        setTimeout(() => {
+        // Clear any existing timeout
+        if (callDetectionTimeoutRef.current) {
+          clearTimeout(callDetectionTimeoutRef.current);
+        }
+        
+        // Longer delay for focus events to ensure call has ended
+        callDetectionTimeoutRef.current = setTimeout(() => {
           setIsPlaying(true);
           wasPlayingRef.current = false;
           console.log("Audio resumed after window focus");
-        }, 500);
+        }, 1500);
+      }
+    };
+
+    // Mobile-specific: Page lifecycle events for better call detection
+    const handlePageFreeze = () => {
+      if (isPlaying) {
+        wasPlayingRef.current = true;
+        setIsPlaying(false);
+        console.log("Audio paused due to page freeze (mobile background/call)");
+      }
+    };
+
+    const handlePageResume = () => {
+      if (wasPlayingRef.current) {
+        // Clear any existing timeout
+        if (callDetectionTimeoutRef.current) {
+          clearTimeout(callDetectionTimeoutRef.current);
+        }
+        
+        callDetectionTimeoutRef.current = setTimeout(() => {
+          setIsPlaying(true);
+          wasPlayingRef.current = false;
+          console.log("Audio resumed after page resume");
+        }, 1000);
       }
     };
 
@@ -115,16 +173,32 @@ export const usePhoneCallHandling = (
     window.addEventListener('blur', handleWindowBlur);
     window.addEventListener('focus', handleWindowFocus);
     
+    // Mobile-specific lifecycle events
+    window.addEventListener('freeze', handlePageFreeze);
+    window.addEventListener('resume', handlePageResume);
+    
     const audioCleanup = handleAudioInterruption();
     handleMediaSessionActions();
 
     // Cleanup function
     return () => {
+      // Clear any pending timeouts
+      if (callDetectionTimeoutRef.current) {
+        clearTimeout(callDetectionTimeoutRef.current);
+      }
+      
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('beforeunload', handleBeforeUnload);
       window.removeEventListener('blur', handleWindowBlur);
       window.removeEventListener('focus', handleWindowFocus);
+      window.removeEventListener('freeze', handlePageFreeze);
+      window.removeEventListener('resume', handlePageResume);
+      
       audioCleanup();
+      
+      if (audioContextRef.current) {
+        audioContextRef.current.close();
+      }
     };
   }, [isPlaying, setIsPlaying]);
 
@@ -132,6 +206,11 @@ export const usePhoneCallHandling = (
   useEffect(() => {
     if (isPlaying) {
       wasPlayingRef.current = false;
+      // Clear any pending resume timeouts when user manually starts playback
+      if (callDetectionTimeoutRef.current) {
+        clearTimeout(callDetectionTimeoutRef.current);
+        callDetectionTimeoutRef.current = null;
+      }
     }
   }, [isPlaying]);
 };
