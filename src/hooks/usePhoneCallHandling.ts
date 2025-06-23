@@ -10,6 +10,41 @@ export const usePhoneCallHandling = (
   const audioContextRef = useRef<AudioContext | null>(null);
   const callDetectionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Helper function to actually resume audio playback
+  const resumeAudioPlayback = async () => {
+    console.log("Attempting to resume audio playback...");
+    
+    try {
+      // Reset global audio state first
+      resetAudioStateForUserAction();
+      
+      // Update state
+      setIsPlaying(true);
+      
+      // Actually play the audio element if it exists
+      if (globalAudioRef.element && !globalAudioRef.element.paused) {
+        console.log("Audio element already playing");
+        return;
+      }
+      
+      if (globalAudioRef.element) {
+        console.log("Starting audio element playback");
+        await globalAudioRef.element.play();
+        updateGlobalPlaybackState(true, false, false);
+        console.log("Audio playback resumed successfully");
+      } else {
+        console.log("No audio element available to resume");
+      }
+      
+      wasPlayingRef.current = false;
+    } catch (error) {
+      console.log("Failed to resume audio playback:", error);
+      // Fallback - just update state
+      setIsPlaying(true);
+      wasPlayingRef.current = false;
+    }
+  };
+
   useEffect(() => {
     // Enhanced phone call detection for mobile devices
     const handleVisibilityChange = () => {
@@ -32,12 +67,8 @@ export const usePhoneCallHandling = (
           
           // Wait longer before resuming to ensure call has actually ended
           callDetectionTimeoutRef.current = setTimeout(() => {
-            console.log("Attempting to resume audio after page became visible");
-            // Reset global audio state for automatic resumption
-            resetAudioStateForUserAction();
-            setIsPlaying(true);
-            wasPlayingRef.current = false;
-            console.log("Audio resumed after page became visible");
+            console.log("Page became visible - attempting to resume audio");
+            resumeAudioPlayback();
           }, 1000);
         }
       }
@@ -66,12 +97,8 @@ export const usePhoneCallHandling = (
             
             // Add delay before resuming
             callDetectionTimeoutRef.current = setTimeout(() => {
-              console.log("Attempting to resume audio after audio context resumed");
-              // Reset global audio state for automatic resumption
-              resetAudioStateForUserAction();
-              setIsPlaying(true);
-              wasPlayingRef.current = false;
-              console.log("Audio resumed after audio context resumed");
+              console.log("Audio context resumed - attempting to resume audio");
+              resumeAudioPlayback();
             }, 1000);
           }
         };
@@ -108,11 +135,8 @@ export const usePhoneCallHandling = (
             }
             
             callDetectionTimeoutRef.current = setTimeout(() => {
-              console.log("Resuming from external play request");
-              // Reset global audio state for automatic resumption
-              resetAudioStateForUserAction();
-              setIsPlaying(true);
-              wasPlayingRef.current = false;
+              console.log("External play request - attempting to resume audio");
+              resumeAudioPlayback();
             }, 500);
           }
         });
@@ -156,12 +180,8 @@ export const usePhoneCallHandling = (
         
         // Longer delay for focus events to ensure call has ended
         callDetectionTimeoutRef.current = setTimeout(() => {
-          console.log("Attempting to resume audio after window focus");
-          // Reset global audio state for automatic resumption
-          resetAudioStateForUserAction();
-          setIsPlaying(true);
-          wasPlayingRef.current = false;
-          console.log("Audio resumed after window focus");
+          console.log("Window focused - attempting to resume audio");
+          resumeAudioPlayback();
         }, 1500);
       }
     };
@@ -185,12 +205,8 @@ export const usePhoneCallHandling = (
         }
         
         callDetectionTimeoutRef.current = setTimeout(() => {
-          console.log("Attempting to resume audio after page resume");
-          // Reset global audio state for automatic resumption
-          resetAudioStateForUserAction();
-          setIsPlaying(true);
-          wasPlayingRef.current = false;
-          console.log("Audio resumed after page resume");
+          console.log("Page resumed - attempting to resume audio");
+          resumeAudioPlayback();
         }, 1000);
       }
     };
