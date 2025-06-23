@@ -1,20 +1,18 @@
-
+// src/hooks/music-player/useHlsHandler.ts
 import { useRef, useEffect } from "react";
 import Hls from "hls.js";
-import { globalAudioRef } from "@/components/music-player/audioInstance";
+import { globalAudioRef, updateGlobalPlaybackState } from "@/components/music-player/audioInstance";
 import { logger } from "@/utils/logger";
 import { detectStreamType, configureAudioForStream, handleDirectStreamError } from "@/utils/streamHandler";
 
 interface UseHlsHandlerProps {
-  audioRef: React.MutableRefObject<HTMLAudioElement | null>;
   url: string | undefined;
-  isPlaying: boolean;
+  isPlaying: boolean; // This indicates the desired state from the UI/logic
   setIsPlaying: (playing: boolean) => void;
   setLoading: (loading: boolean) => void;
 }
 
 export const useHlsHandler = ({
-  audioRef,
   url,
   isPlaying,
   setIsPlaying,
@@ -26,192 +24,126 @@ export const useHlsHandler = ({
   const maxRetries = 3;
 
   useEffect(() => {
-    if (!audioRef.current || !url) {
-      return;
-    }
+    const audio = globalAudioRef.element;
 
-    // CRITICAL: Only handle explicit play/pause requests, never auto-start
-    if (url === lastUrlRef.current && audioRef.current.src) {
-      // URL hasn't changed, just handle play/pause state
-      if (isPlaying) {
-        logger.debug("Explicit play request for current URL");
-        audioRef.current.play().catch(error => {
-          logger.error("Error playing current stream", error);
-          setIsPlaying(false);
-        });
-      } else {
-        logger.debug("Explicit pause request");
-        audioRef.current.pause();
+    if (!audio || !url) {
+      if (audio) {
+        audio.pause();
+        audio.src = "";
+        if (hlsRef.current) {
+          hlsRef.current.destroy();
+          hlsRef.current = null;
+        }
       }
+      setIsPlaying(false);
+      setLoading(false);
       return;
     }
 
-    lastUrlRef.current = url;
-    setLoading(true);
-    
-    // Clean up previous HLS instance if URL changed
-    if (globalAudioRef.hls && audioRef.current.src !== url) {
-      logger.debug("Destroying previous HLS instance for URL change");
-      globalAudioRef.hls.destroy();
-      globalAudioRef.hls = null;
-    }
+    // Only re-configure HLS or change source if URL actually changed
+    if (url !== lastUrlRef.current) {
+      logger.debug(`URL changed from ${lastUrlRef.current} to ${url}. Re-initializing HLS.`);
+      setLoading(true);
 
-    // Detect stream type and configure accordingly
-    const streamConfig = detectStreamType(url);
-    configureAudioForStream(audioRef.current, streamConfig);
+      if (hlsRef.current) {
+        hlsRef.current.destroy();
+        hlsRef.current = null;
+      }
 
-    // Handle HLS streams - LOAD ONLY, NO AUTO-PLAY
-    if (streamConfig.type === 'hls' && Hls.isSupported()) {
-      logger.info("Loading HLS stream (no auto-play)", { url, config: streamConfig });
-      
-      if (!globalAudioRef.hls) {
-        const hls = new Hls({
-          enableWorker: false,
-          maxBufferLength: 15,
-          maxMaxBufferLength: 30,
-          maxBufferSize: 30 * 1000 * 1000,
-          maxBufferHole: 0.3,
-          startLevel: -1,
-          capLevelToPlayerSize: false,
-          autoStartLoad: true,
-          abrEwmaDefaultEstimate: 500000,
-          maxLoadingDelay: 4,
-          fragLoadingMaxRetry: maxRetries,
-          manifestLoadingMaxRetry: maxRetries,
-          levelLoadingMaxRetry: maxRetries
-        });
-        
-        hls.attachMedia(audioRef.current);
-        hls.on(Hls.Events.MEDIA_ATTACHED, () => {
-          hls.loadSource(url);
-        });
-        
-        hls.on(Hls.Events.MANIFEST_PARSED, (event, data) => {
-          logger.info("HLS manifest loaded", { levels: data.levels?.length || 0 });
-          
-          if (data.levels && data.levels.length > 1) {
-            const audioLevels = data.levels.filter(level => !level.videoCodec);
-            const bestLevel = audioLevels.length > 0 
-              ? audioLevels.reduce((prev, current) => 
-                  (prev.bitrate > current.bitrate) ? prev : current) 
-              : null;
-              
-            if (bestLevel) {
-              const bestLevelIdx = data.levels.indexOf(bestLevel);
-              logger.debug(`Selecting best audio quality level: ${bestLevel.bitrate} bps`);
-              hls.currentLevel = bestLevelIdx;
-            }
-          }
-          
-          setLoading(false);
-          retryCountRef.current = 0;
-          
-          // CRITICAL: NEVER auto-play, only play if explicitly requested
-          if (isPlaying) {
-            logger.debug("HLS loaded and explicit play requested, starting playback");
-            audioRef.current?.play().catch(error => {
-              logger.error("Error playing HLS stream", error);
-              setIsPlaying(false);
-            });
-          } else {
-            logger.debug("HLS stream loaded and ready, waiting for user interaction");
-          }
-        });
-        
-        hls.on(Hls.Events.LEVEL_SWITCHED, (event, data) => {
-          logger.debug(`HLS quality level switched to: ${data.level}`);
-        });
-        
+      audio.src = ""; // Clear existing src
+      audio.load();   // Load the new empty source to reset internal state
+
+      const streamType = detectStreamType(url);
+      configureAudioForStream(audio, streamType); // Ensure correct audio type settings
+
+      if (streamType === 'hls' && Hls.isSupported()) {
+        const hls = new Hls();
+        hls.loadSource(url);
+        hls.attachMedia(audio);
+        hlsRef.current = hls;
+
         hls.on(Hls.Events.ERROR, (event, data) => {
-          logger.error("HLS error", data);
-          
+          logger.error("HLS Error:", data);
           if (data.fatal) {
             switch (data.type) {
               case Hls.ErrorTypes.NETWORK_ERROR:
+                logger.warn("HLS network error, attempting to recover...");
                 if (retryCountRef.current < maxRetries) {
-                  logger.warn(`Network error, attempting retry ${retryCountRef.current + 1}/${maxRetries}`);
-                  retryCountRef.current++;
-                  setTimeout(() => hls.startLoad(), 1000 * retryCountRef.current);
-                } else {
-                  logger.error("Max network retries exceeded");
-                  setIsPlaying(false);
-                  setLoading(false);
-                }
-                break;
-              case Hls.ErrorTypes.MEDIA_ERROR:
-                if (retryCountRef.current < maxRetries) {
-                  logger.warn(`Media error, attempting recovery ${retryCountRef.current + 1}/${maxRetries}`);
                   retryCountRef.current++;
                   hls.recoverMediaError();
                 } else {
-                  logger.error("Max media recovery attempts exceeded");
+                  logger.error("Max HLS network retries reached. Stopping playback.");
                   setIsPlaying(false);
                   setLoading(false);
+                  audio.pause();
+                  audio.src = ""; // Clear source on fatal error
+                  updateGlobalPlaybackState(false, false, false);
+                }
+                break;
+              case Hls.ErrorTypes.MEDIA_ERROR:
+                logger.warn("HLS media error, attempting to recover...");
+                if (retryCountRef.current < maxRetries) {
+                  retryCountRef.current++;
+                  hls.recoverMediaError();
+                } else {
+                  logger.error("Max HLS media retries reached. Stopping playback.");
+                  setIsPlaying(false);
+                  setLoading(false);
+                  audio.pause();
+                  audio.src = ""; // Clear source on fatal error
+                  updateGlobalPlaybackState(false, false, false);
                 }
                 break;
               default:
-                logger.error("Unrecoverable HLS error");
+                logger.error("Fatal HLS error, destroying HLS instance.", data);
+                hls.destroy();
+                hlsRef.current = null;
                 setIsPlaying(false);
                 setLoading(false);
+                audio.pause();
+                audio.src = ""; // Clear source on fatal error
+                updateGlobalPlaybackState(false, false, false);
                 break;
             }
           }
         });
-        
-        globalAudioRef.hls = hls;
-      } else if (globalAudioRef.hls) {
-        globalAudioRef.hls.loadSource(url);
-      }
-    } else if (audioRef.current.src !== url) {
-      // Handle direct streams - LOAD ONLY, NO AUTO-PLAY
-      logger.info("Loading direct audio stream (no auto-play)", { url, config: streamConfig });
-      audioRef.current.src = url;
-      audioRef.current.load();
-      
-      audioRef.current.oncanplay = () => {
-        setLoading(false);
-        retryCountRef.current = 0;
-        
-        // CRITICAL: NEVER auto-play, only play if explicitly requested
-        if (isPlaying) {
-          logger.debug("Direct stream loaded and explicit play requested, starting playback");
-          audioRef.current?.play().catch(error => {
-            logger.error("Error playing direct stream", error);
-            setIsPlaying(false);
-          });
-        } else {
-          logger.debug("Direct stream loaded and ready, waiting for user interaction");
-        }
-      };
-
-      audioRef.current.onerror = async () => {
-        logger.warn("Direct stream error, attempting fallback", { url });
-        
-        const success = await handleDirectStreamError(audioRef.current!, streamConfig);
-        if (!success) {
+        hls.on(Hls.Events.MANIFEST_PARSED, () => {
+          logger.debug("HLS manifest parsed.");
           setLoading(false);
-          setIsPlaying(false);
-        }
-      };
-    } else {
-      // URL is the same, handle explicit play/pause
-      if (isPlaying) {
-        logger.debug("Explicit play request for loaded stream");
-        audioRef.current.play().catch(error => {
-          logger.error("Error starting playback", error);
-          setIsPlaying(false);
+          // Only play if 'isPlaying' (desired state) is true
+          // The actual play call is handled by the AudioPlayerContext's effect
         });
       } else {
-        logger.debug("Explicit pause request");
-        audioRef.current.pause();
+        // Direct playback for non-HLS or if HLS is not supported
+        audio.src = url;
+        audio.load();
+        audio.addEventListener('error', () => handleDirectStreamError(audio, setIsPlaying, setLoading, url), { once: true });
+        audio.addEventListener('canplay', () => setLoading(false), { once: true });
       }
-      setLoading(false);
+      lastUrlRef.current = url;
+      retryCountRef.current = 0; // Reset retry count for new URL
     }
 
-    return () => {
-      // Cleanup handled globally to maintain playback across components
-    };
-  }, [url, isPlaying, audioRef, setIsPlaying, setLoading]);
-
-  return { hlsRef };
+    // CONTROL PLAY/PAUSE BASED ON 'isPlaying' PROP AND GLOBAL STATE
+    if (isPlaying && audio.paused) {
+        // Only attempt to play if desired state is 'playing' AND audio is currently paused.
+        // This is the trigger for actual playback.
+        audio.play().then(() => {
+            logger.debug("Playback started (from useHlsHandler).");
+            setIsPlaying(true);
+            updateGlobalPlaybackState(true, false, false); // Mark as playing, clear interruption flags
+        }).catch(error => {
+            logger.error("Error attempting to play stream (from useHlsHandler):", error);
+            // This catch handles common autoplay prevention errors.
+            // Inform user they need to interact.
+            setIsPlaying(false); // Ensure UI reflects paused state
+            updateGlobalPlaybackState(false, false, false);
+            // Potentially show a toast: useToast().toast({ title: "Playback Blocked", description: "Browser prevented autoplay. Please tap play.", variant: "destructive" });
+        });
+    } else if (!isPlaying && !audio.paused) {
+        logger.debug("Playback paused (from useHlsHandler).");
+        audio.pause();
+        updateGlobalPlaybackState(false, false, false); // Not playing, clear flags
+    }
+  }, [url, isPlaying, setIsPlaying, setLoading]); // Added isPlaying to dependencies
 };
