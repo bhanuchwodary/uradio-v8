@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { usePlaylist } from "@/context/PlaylistContext";
 import { useAudioPlayer } from "@/context/AudioPlayerContext";
@@ -43,8 +43,15 @@ const PlaylistPage: React.FC<PlaylistPageProps> = ({
     currentTrack,
     isPlaying,
     playTrack,
-    clearCurrentTrack
+    clearCurrentTrack,
+    setPlaylistTracks
   } = useAudioPlayer();
+
+  // Update the audio player's playlist tracks whenever sortedPlaylistTracks changes
+  useEffect(() => {
+    console.log("PlaylistPage: Updating audio player playlist tracks:", sortedPlaylistTracks.length);
+    setPlaylistTracks(sortedPlaylistTracks);
+  }, [sortedPlaylistTracks, setPlaylistTracks]);
 
   console.log("PLAYLIST DEBUG: Current tracks:", sortedPlaylistTracks.length);
   console.log("PLAYLIST DEBUG: Sorted tracks (favorites first):", sortedPlaylistTracks.map(t => ({ name: t.name, favorite: t.isFavorite })));
@@ -54,6 +61,7 @@ const PlaylistPage: React.FC<PlaylistPageProps> = ({
     const selectedStation = sortedPlaylistTracks[index];
     if (selectedStation) {
       console.log("PlaylistPage: User selected station", selectedStation.name, "with random mode:", randomMode);
+      console.log("PlaylistPage: Calling playTrack with station:", selectedStation);
       playTrack(selectedStation);
     }
   };

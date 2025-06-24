@@ -22,6 +22,9 @@ interface AudioPlayerContextType {
   setVolume: (volume: number) => void;
   setRandomMode: (randomMode: boolean) => void;
   clearCurrentTrack: () => void;
+  // Add playlist-specific methods
+  setPlaylistTracks: (tracks: Track[]) => void;
+  playlistTracks: Track[];
 }
 
 interface AudioPlayerProviderProps {
@@ -52,6 +55,7 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({
   const [volume, setVolume] = useState(0.7);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [playlistTracks, setPlaylistTracks] = useState<Track[]>([]);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   // Use the global audio ref directly from the instance
@@ -68,67 +72,94 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({
   });
 
   const playTrack = useCallback((track: Track) => {
+    console.log("AudioPlayerContext: playTrack called with:", track.name);
     setCurrentTrack(track);
     setIsPlaying(true);
-    logger.debug("playTrack called. Setting isPlaying to true.");
+    logger.debug("playTrack called. Setting isPlaying to true.", { trackName: track.name });
   }, []);
 
   const pausePlayback = useCallback(() => {
+    console.log("AudioPlayerContext: pausePlayback called");
     setIsPlaying(false);
     logger.debug("pausePlayback called. Setting isPlaying to false.");
   }, []);
 
   const resumePlayback = useCallback(() => {
+    console.log("AudioPlayerContext: resumePlayback called");
     setIsPlaying(true);
     logger.debug("resumePlayback called. Setting isPlaying to true.");
   }, []);
 
   const togglePlayPause = useCallback(() => {
+    console.log("AudioPlayerContext: togglePlayPause called, current isPlaying:", isPlaying);
     setIsPlaying(prev => !prev);
     logger.debug("togglePlayPause called.");
-  }, []);
+  }, [isPlaying]);
 
   const clearCurrentTrack = useCallback(() => {
+    console.log("AudioPlayerContext: clearCurrentTrack called");
     setCurrentTrack(null);
     setIsPlaying(false);
     logger.debug("clearCurrentTrack called.");
   }, []);
 
   const nextTrack = useCallback(() => {
-    if (tracks.length === 0 || !currentTrack) return;
+    console.log("AudioPlayerContext: nextTrack called");
+    // Use playlist tracks if available, otherwise fall back to main tracks
+    const activeTrackList = playlistTracks.length > 0 ? playlistTracks : tracks;
     
-    const currentIndex = tracks.findIndex(track => track.url === currentTrack.url);
+    if (activeTrackList.length === 0 || !currentTrack) {
+      console.log("AudioPlayerContext: No tracks available or no current track");
+      return;
+    }
+    
+    const currentIndex = activeTrackList.findIndex(track => track.url === currentTrack.url);
     let nextIndex;
     
     if (randomMode) {
-      nextIndex = Math.floor(Math.random() * tracks.length);
+      nextIndex = Math.floor(Math.random() * activeTrackList.length);
+      console.log("AudioPlayerContext: Random mode - selected index:", nextIndex);
     } else {
-      nextIndex = (currentIndex + 1) % tracks.length;
+      nextIndex = (currentIndex + 1) % activeTrackList.length;
+      console.log("AudioPlayerContext: Sequential mode - next index:", nextIndex);
     }
     
-    setCurrentTrack(tracks[nextIndex]);
+    const nextTrackToPlay = activeTrackList[nextIndex];
+    console.log("AudioPlayerContext: Playing next track:", nextTrackToPlay.name);
+    setCurrentTrack(nextTrackToPlay);
     if (isPlaying) {
       setIsPlaying(true);
     }
-  }, [tracks, currentTrack, randomMode, isPlaying]);
+  }, [playlistTracks, tracks, currentTrack, randomMode, isPlaying]);
 
   const previousTrack = useCallback(() => {
-    if (tracks.length === 0 || !currentTrack) return;
+    console.log("AudioPlayerContext: previousTrack called");
+    // Use playlist tracks if available, otherwise fall back to main tracks
+    const activeTrackList = playlistTracks.length > 0 ? playlistTracks : tracks;
     
-    const currentIndex = tracks.findIndex(track => track.url === currentTrack.url);
+    if (activeTrackList.length === 0 || !currentTrack) {
+      console.log("AudioPlayerContext: No tracks available or no current track");
+      return;
+    }
+    
+    const currentIndex = activeTrackList.findIndex(track => track.url === currentTrack.url);
     let prevIndex;
     
     if (randomMode) {
-      prevIndex = Math.floor(Math.random() * tracks.length);
+      prevIndex = Math.floor(Math.random() * activeTrackList.length);
+      console.log("AudioPlayerContext: Random mode - selected index:", prevIndex);
     } else {
-      prevIndex = (currentIndex - 1 + tracks.length) % tracks.length;
+      prevIndex = (currentIndex - 1 + activeTrackList.length) % activeTrackList.length;
+      console.log("AudioPlayerContext: Sequential mode - previous index:", prevIndex);
     }
     
-    setCurrentTrack(tracks[prevIndex]);
+    const prevTrackToPlay = activeTrackList[prevIndex];
+    console.log("AudioPlayerContext: Playing previous track:", prevTrackToPlay.name);
+    setCurrentTrack(prevTrackToPlay);
     if (isPlaying) {
       setIsPlaying(true);
     }
-  }, [tracks, currentTrack, randomMode, isPlaying]);
+  }, [playlistTracks, tracks, currentTrack, randomMode, isPlaying]);
 
   const contextValue: AudioPlayerContextType = {
     currentTrack,
@@ -147,6 +178,8 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({
     setVolume,
     setRandomMode,
     clearCurrentTrack,
+    setPlaylistTracks,
+    playlistTracks,
   };
 
   return (

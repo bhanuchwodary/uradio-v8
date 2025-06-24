@@ -23,6 +23,9 @@ export const StationCard: React.FC<StationCardProps> = memo(({
   const handlePlayClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     
+    console.log("StationCard: Play button clicked for station:", station.name);
+    console.log("StationCard: Action icon:", actionIcon, "In playlist:", inPlaylist, "Is adding:", isAddingToPlaylist);
+    
     // Prevent adding to playlist if already in playlist or currently being added
     if (actionIcon === "add" && (inPlaylist || isAddingToPlaylist)) {
       console.log("STATION CARD: Blocked click", { 
@@ -34,6 +37,8 @@ export const StationCard: React.FC<StationCardProps> = memo(({
       return;
     }
     
+    // Always call onPlay - let the parent component handle the logic
+    console.log("StationCard: Calling onPlay for station:", station.name);
     onPlay();
   }, [actionIcon, inPlaylist, isAddingToPlaylist, onPlay, station.name, station.url]);
 
