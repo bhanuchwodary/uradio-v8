@@ -23,13 +23,24 @@ export const useHlsHandler = ({
   const retryCountRef = useRef<number>(0);
   const maxRetries = 3;
 
+  // Initialize global audio element if it doesn't exist
+  useEffect(() => {
+    if (!globalAudioRef.element) {
+      console.log("HLS Handler: Creating global audio element");
+      globalAudioRef.element = new Audio();
+      globalAudioRef.element.crossOrigin = "anonymous";
+      globalAudioRef.element.preload = "auto";
+    }
+  }, []);
+
   useEffect(() => {
     const audio = globalAudioRef.element;
+
+    console.log("HLS Handler: Effect triggered", { url, isPlaying, hasAudio: !!audio });
 
     if (!audio || !url) {
       if (audio) {
         audio.pause();
-        audio.src = "";
         if (hlsRef.current) {
           hlsRef.current.destroy();
           hlsRef.current = null;
@@ -42,7 +53,7 @@ export const useHlsHandler = ({
 
     // Only re-configure HLS or change source if URL actually changed
     if (url !== lastUrlRef.current) {
-      logger.debug(`URL changed from ${lastUrlRef.current} to ${url}. Re-initializing HLS.`);
+      console.log("HLS Handler: URL changed, reinitializing", { from: lastUrlRef.current, to: url });
       setLoading(true);
 
       if (hlsRef.current) {
@@ -50,6 +61,7 @@ export const useHlsHandler = ({
         hlsRef.current = null;
       }
 
+      audio.pause();
       audio.src = "";
       audio.load();
 
@@ -57,86 +69,89 @@ export const useHlsHandler = ({
       configureAudioForStream(audio, streamType);
 
       if (streamType === 'hls' && Hls.isSupported()) {
-        const hls = new Hls();
+        console.log("HLS Handler: Setting up HLS for", url);
+        const hls = new Hls({
+          enableWorker: false,
+          lowLatencyMode: true,
+        });
         hls.loadSource(url);
         hls.attachMedia(audio);
         hlsRef.current = hls;
 
-        hls.on(Hls.Events.ERROR, (event, data) => {
-          logger.error("HLS Error:", data);
-          if (data.fatal) {
-            switch (data.type) {
-              case Hls.ErrorTypes.NETWORK_ERROR:
-                logger.warn("HLS network error, attempting to recover...");
-                if (retryCountRef.current < maxRetries) {
-                  retryCountRef.current++;
-                  hls.recoverMediaError();
-                } else {
-                  logger.error("Max HLS network retries reached. Stopping playback.");
-                  setIsPlaying(false);
-                  setLoading(false);
-                  audio.pause();
-                  audio.src = "";
-                  updateGlobalPlaybackState(false, false, false);
-                }
-                break;
-              case Hls.ErrorTypes.MEDIA_ERROR:
-                logger.warn("HLS media error, attempting to recover...");
-                if (retryCountRef.current < maxRetries) {
-                  retryCountRef.current++;
-                  hls.recoverMediaError();
-                } else {
-                  logger.error("Max HLS media retries reached. Stopping playback.");
-                  setIsPlaying(false);
-                  setLoading(false);
-                  audio.pause();
-                  audio.src = "";
-                  updateGlobalPlaybackState(false, false, false);
-                }
-                break;
-              default:
-                logger.error("Fatal HLS error, destroying HLS instance.", data);
-                hls.destroy();
-                hlsRef.current = null;
-                setIsPlaying(false);
-                setLoading(false);
-                audio.pause();
-                audio.src = "";
-                updateGlobalPlaybackState(false, false, false);
-                break;
-            }
-          }
-        });
         hls.on(Hls.Events.MANIFEST_PARSED, () => {
-          logger.debug("HLS manifest parsed.");
+          console.log("HLS Handler: Manifest parsed successfully");
           setLoading(false);
         });
+
+        hls.on(Hls.Events.ERROR, (event, data) => {
+          console.error("HLS Handler: Error occurred", data);
+          if (data.fatal) {
+            console.error("HLS Handler: Fatal error, stopping playback");
+            setIsPlaying(false);
+            setLoading(false);
+          }
+        });
       } else {
-        // Direct playback for non-HLS or if HLS is not supported
+        console.log("HLS Handler: Setting up direct stream for", url);
         audio.src = url;
+        
+        const handleCanPlay = () => {
+          console.log("HLS Handler: Direct stream ready");
+          setLoading(false);
+          audio.removeEventListener('canplay', handleCanPlay);
+        };
+        
+        const handleError = () => {
+          console.error("HLS Handler: Direct stream failed, trying CORS");
+          handleDirectStreamError(audio, setIsPlaying, setLoading, url);
+          audio.removeEventListener('error', handleError);
+        };
+
+        audio.addEventListener('canplay', handleCanPlay);
+        audio.addEventListener('error', handleError);
         audio.load();
-        audio.addEventListener('error', () => handleDirectStreamError(audio, setIsPlaying, setLoading, url), { once: true });
-        audio.addEventListener('canplay', () => setLoading(false), { once: true });
       }
+      
       lastUrlRef.current = url;
       retryCountRef.current = 0;
     }
 
-    // CONTROL PLAY/PAUSE BASED ON 'isPlaying' PROP AND GLOBAL STATE
-    if (isPlaying && audio.paused) {
-        audio.play().then(() => {
-            logger.debug("Playback started (from useHlsHandler).");
-            setIsPlaying(true);
-            updateGlobalPlaybackState(true, false, false);
-        }).catch(error => {
-            logger.error("Error attempting to play stream (from useHlsHandler):", error);
-            setIsPlaying(false);
-            updateGlobalPlaybackState(false, false, false);
-        });
-    } else if (!isPlaying && !audio.paused) {
-        logger.debug("Playback paused (from useHlsHandler).");
+    // Handle play/pause state changes
+    const handlePlaybackState = async () => {
+      console.log("HLS Handler: Handling playback state", { 
+        isPlaying, 
+        audioPaused: audio.paused,
+        audioSrc: audio.src 
+      });
+
+      if (isPlaying && audio.paused && audio.src) {
+        try {
+          console.log("HLS Handler: Starting playback");
+          await audio.play();
+          console.log("HLS Handler: Playback started successfully");
+          updateGlobalPlaybackState(true, false, false);
+        } catch (error) {
+          console.error("HLS Handler: Failed to start playback", error);
+          setIsPlaying(false);
+          updateGlobalPlaybackState(false, false, false);
+        }
+      } else if (!isPlaying && !audio.paused) {
+        console.log("HLS Handler: Pausing playback");
         audio.pause();
-        updateGlobalPlaybackState(false, false, false);
-    }
+        updateGlobalPlaybackState(false, true, true);
+      }
+    };
+
+    handlePlaybackState();
   }, [url, isPlaying, setIsPlaying, setLoading]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (hlsRef.current) {
+        hlsRef.current.destroy();
+        hlsRef.current = null;
+      }
+    };
+  }, []);
 };
