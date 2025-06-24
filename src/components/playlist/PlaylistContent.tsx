@@ -14,6 +14,7 @@ interface PlaylistContentProps {
   currentTrack: Track | null;
   isPlaying: boolean;
   onSelectStation: (index: number) => void;
+  onStationCardPlay: (station: Track) => void;  // New prop for direct station card play/pause
   onEditStation: (station: Track) => void;
   onConfirmDelete: (station: Track) => void;
   onToggleFavorite: (station: Track) => void;
@@ -26,6 +27,7 @@ const PlaylistContent: React.FC<PlaylistContentProps> = ({
   currentTrack,
   isPlaying,
   onSelectStation,
+  onStationCardPlay,
   onEditStation,
   onConfirmDelete,
   onToggleFavorite,
@@ -34,6 +36,15 @@ const PlaylistContent: React.FC<PlaylistContentProps> = ({
   if (process.env.NODE_ENV === 'development') {
     console.log("PlaylistContent rendering with tracks:", playlistTracks.length, playlistTracks);
   }
+
+  // Handle station card click - use the new onStationCardPlay prop
+  const handleStationCardClick = (index: number) => {
+    const station = playlistTracks[index];
+    if (station) {
+      console.log("PlaylistContent: Station card clicked:", station.name);
+      onStationCardPlay(station);
+    }
+  };
 
   return (
     <Card className="bg-surface-container border border-outline-variant/30 rounded-lg elevation-1">
@@ -79,7 +90,7 @@ const PlaylistContent: React.FC<PlaylistContentProps> = ({
             currentIndex={currentIndex}
             currentTrackUrl={currentTrack?.url}
             isPlaying={isPlaying}
-            onSelectStation={onSelectStation}
+            onSelectStation={handleStationCardClick}  // Use the new handler
             onEditStation={onEditStation}
             onDeleteStation={onConfirmDelete}
             onToggleFavorite={onToggleFavorite}

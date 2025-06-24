@@ -75,13 +75,11 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({
     console.log("AudioPlayerContext: playTrack called with:", track.name);
     logger.debug("Playing track", { trackName: track.name, url: track.url });
     
-    // Set the track first, then trigger playback
+    // Set the track and playing state immediately without setTimeout
     setCurrentTrack(track);
+    setIsPlaying(true);
     
-    // Force playback to start
-    setTimeout(() => {
-      setIsPlaying(true);
-    }, 100);
+    console.log("AudioPlayerContext: Immediately set track and playing state");
   }, []);
 
   const pausePlayback = useCallback(() => {
@@ -97,6 +95,18 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({
       logger.debug("Resuming playback");
     }
   }, [currentTrack]);
+
+  const togglePlayPause = useCallback(() => {
+    console.log("AudioPlayerContext: togglePlayPause called, current isPlaying:", isPlaying);
+    if (currentTrack) {
+      if (isPlaying) {
+        pausePlayback();
+      } else {
+        resumePlayback();
+      }
+      logger.debug("Toggling play/pause");
+    }
+  }, [isPlaying, currentTrack, pausePlayback, resumePlayback]);
 
   const nextTrack = useCallback(() => {
     console.log("AudioPlayerContext: nextTrack called");
@@ -167,14 +177,6 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({
     console.log("AudioPlayerContext: Playing previous track:", prevTrackToPlay.name);
     playTrack(prevTrackToPlay);
   }, [playlistTracks, tracks, currentTrack, randomMode, playTrack]);
-
-  const togglePlayPause = useCallback(() => {
-    console.log("AudioPlayerContext: togglePlayPause called, current isPlaying:", isPlaying);
-    if (currentTrack) {
-      setIsPlaying(prev => !prev);
-      logger.debug("Toggling play/pause");
-    }
-  }, [isPlaying, currentTrack]);
 
   const clearCurrentTrack = useCallback(() => {
     console.log("AudioPlayerContext: clearCurrentTrack called");

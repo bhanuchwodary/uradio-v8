@@ -38,11 +38,13 @@ const PlaylistPage: React.FC<PlaylistPageProps> = ({
     updatePlaylistTrackFavorite
   } = usePlaylist();
 
-  // Get audio player state
+  // Get audio player state - THIS IS THE SINGLE SOURCE OF TRUTH
   const {
     currentTrack,
     isPlaying,
     playTrack,
+    pausePlayback,
+    togglePlayPause,
     clearCurrentTrack,
     setPlaylistTracks
   } = useAudioPlayer();
@@ -56,13 +58,28 @@ const PlaylistPage: React.FC<PlaylistPageProps> = ({
   console.log("PLAYLIST DEBUG: Current tracks:", sortedPlaylistTracks.length);
   console.log("PLAYLIST DEBUG: Sorted tracks (favorites first):", sortedPlaylistTracks.map(t => ({ name: t.name, favorite: t.isFavorite })));
 
-  // Handle selecting a station for playback
+  // Handle selecting a station for playback - use the global playTrack function
   const handleSelectStation = (index: number) => {
     const selectedStation = sortedPlaylistTracks[index];
     if (selectedStation) {
       console.log("PlaylistPage: User selected station", selectedStation.name, "with random mode:", randomMode);
       console.log("PlaylistPage: Calling playTrack with station:", selectedStation);
       playTrack(selectedStation);
+    }
+  };
+
+  // Handle play/pause for station cards - use the global functions
+  const handleStationCardPlay = (station: Track) => {
+    console.log("PlaylistPage: Station card play clicked for:", station.name);
+    
+    // If this station is already playing, toggle pause/play
+    if (currentTrack?.url === station.url) {
+      console.log("PlaylistPage: Station is current track, toggling play/pause");
+      togglePlayPause();
+    } else {
+      // Play the new station
+      console.log("PlaylistPage: Playing new station:", station.name);
+      playTrack(station);
     }
   };
 
@@ -199,6 +216,7 @@ const PlaylistPage: React.FC<PlaylistPageProps> = ({
           currentTrack={currentTrack}
           isPlaying={isPlaying}
           onSelectStation={handleSelectStation}
+          onStationCardPlay={handleStationCardPlay}
           onEditStation={handleEditStation}
           onConfirmDelete={handleConfirmDelete}
           onToggleFavorite={handleToggleFavorite}
