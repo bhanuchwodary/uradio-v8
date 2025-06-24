@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useRef } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useTrackStateContext } from "@/context/TrackStateContext";
 import { usePlayerCore } from "@/hooks/usePlayerCore";
@@ -17,6 +17,9 @@ const Index: React.FC = () => {
   const { toast } = useToast();
   const [editingStation, setEditingStation] = useState<Track | null>(null);
   const [stationToDelete, setStationToDelete] = useState<Track | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [randomMode, setRandomMode] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   
   const { 
     tracks, 
@@ -58,25 +61,32 @@ const Index: React.FC = () => {
   // Derive URLs from tracks
   const urls = useMemo(() => tracks.map(track => track.url), [tracks]);
   
+  // Calculate current track
+  const currentTrack = tracks[currentIndex] || null;
+  const [currentTrackState, setCurrentTrackState] = useState<Track | null>(currentTrack);
+
   // Use player core for player functionality
   const {
     volume,
     setVolume,
-    loading,
     handlePlayPause,
     handleNext,
     handlePrevious,
   } = usePlayerCore({
+    currentTrack: currentTrackState,
+    setCurrentTrack: setCurrentTrackState,
+    isPlaying,
+    setIsPlaying,
+    loading,
+    setLoading,
+    audioRef,
+    tracks,
+    randomMode,
+    setRandomMode,
     urls,
     currentIndex,
     setCurrentIndex,
-    isPlaying,
-    setIsPlaying,
-    tracks
   });
-  
-  // Calculate current track
-  const currentTrack = tracks[currentIndex] || null;
 
   // Handle selecting a station from any list
   const handleSelectStation = (stationIndex: number, stationList: typeof tracks) => {
@@ -85,6 +95,7 @@ const Index: React.FC = () => {
       const mainIndex = tracks.findIndex(t => t.url === stationList[stationIndex].url);
       if (mainIndex !== -1) {
         setCurrentIndex(mainIndex);
+        setCurrentTrackState(tracks[mainIndex]);
         setIsPlaying(true);
       } else {
         logger.warn("Station not found in main tracks list", { 
@@ -172,7 +183,7 @@ const Index: React.FC = () => {
             </div>
           }>
             <HomePagePlayer
-              currentTrack={currentTrack}
+              currentTrack={currentTrackState}
               isPlaying={isPlaying}
               handlePlayPause={handlePlayPause}
               handleNext={handleNext}
@@ -192,7 +203,7 @@ const Index: React.FC = () => {
             <FavoritesSection 
               favoriteStations={favoriteStations}
               currentIndex={currentIndex}
-              currentTrackUrl={currentTrack?.url}
+              currentTrackUrl={currentTrackState?.url}
               isPlaying={isPlaying}
               onSelectStation={handleSelectStation}
               onToggleFavorite={handleToggleFavorite}
@@ -211,7 +222,7 @@ const Index: React.FC = () => {
               userStations={userStations}
               featuredStations={featuredStations}
               currentIndex={currentIndex}
-              currentTrackUrl={currentTrack?.url}
+              currentTrackUrl={currentTrackState?.url}
               isPlaying={isPlaying}
               onSelectStation={handleSelectStation}
               onEditStation={handleEditStation}

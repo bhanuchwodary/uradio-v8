@@ -1,3 +1,4 @@
+
 // src/hooks/usePhoneCallHandling.ts
 import { useEffect, useRef, useCallback } from "react";
 import { globalAudioRef, updateGlobalPlaybackState, resetAudioStateForUserAction } from "@/components/music-player/audioInstance";
@@ -48,17 +49,30 @@ export const usePhoneCallHandling = (isPlaying: boolean, setIsPlaying: (playing:
 
   useEffect(() => {
     // Capacitor App State Change Listener
-    const appStateChangeListener = App.addListener('appStateChange', ({ isActive }) => {
-      if (isActive) {
-        handleAppFocusGain();
-      } else {
-        handleAppFocusLoss();
-      }
+    const setupListener = async () => {
+      const appStateChangeListener = await App.addListener('appStateChange', ({ isActive }) => {
+        if (isActive) {
+          handleAppFocusGain();
+        } else {
+          handleAppFocusLoss();
+        }
+      });
+
+      return () => {
+        appStateChangeListener.remove();
+      };
+    };
+
+    let cleanup: (() => void) | undefined;
+    setupListener().then(cleanupFn => {
+      cleanup = cleanupFn;
     });
 
     // Cleanup
     return () => {
-      appStateChangeListener.remove();
+      if (cleanup) {
+        cleanup();
+      }
     };
   }, [handleAppFocusGain, handleAppFocusLoss]);
 

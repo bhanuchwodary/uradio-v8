@@ -1,6 +1,6 @@
 
 // Streamlined MusicPlayer component that uses usePlayerCore for logic.
-import React, { memo } from "react";
+import React, { memo, useState, useRef } from "react";
 import PlayerLayout from "@/components/music-player/PlayerLayout";
 import PlayerTrackInfo from "@/components/music-player/PlayerTrackInfo";
 import PlayerSlider from "@/components/music-player/PlayerSlider";
@@ -9,6 +9,7 @@ import PlayerVolume from "@/components/music-player/PlayerVolume";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { usePlayerCore } from "@/hooks/usePlayerCore";
 import { usePhoneCallHandling } from "@/hooks/usePhoneCallHandling";
+import { Track } from "@/types/track";
 
 interface MusicPlayerProps {
   urls: string[];
@@ -28,22 +29,50 @@ const MusicPlayer: React.FC<MusicPlayerProps> = memo(({
   setIsPlaying,
   tracks = [],
 }) => {
+  // Add missing state variables that usePlayerCore requires
+  const [currentTrack, setCurrentTrack] = useState<Track | null>(
+    tracks[currentIndex] ? {
+      url: tracks[currentIndex].url,
+      name: tracks[currentIndex].name,
+      isFavorite: false,
+      playTime: 0
+    } : null
+  );
+  const [loading, setLoading] = useState(false);
+  const [randomMode, setRandomMode] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Convert tracks to Track type
+  const trackList: Track[] = tracks.map(track => ({
+    url: track.url,
+    name: track.name,
+    isFavorite: false,
+    playTime: 0
+  }));
+
   const {
     duration,
     currentTime,
     volume,
     setVolume,
-    loading,
     handlePlayPause,
     handleNext,
     handlePrevious,
     handleSeek,
   } = usePlayerCore({
+    currentTrack,
+    setCurrentTrack,
+    isPlaying,
+    setIsPlaying,
+    loading,
+    setLoading,
+    audioRef,
+    tracks: trackList,
+    randomMode,
+    setRandomMode,
     urls,
     currentIndex,
     setCurrentIndex,
-    isPlaying,
-    setIsPlaying,
   });
 
   // Add phone call handling
