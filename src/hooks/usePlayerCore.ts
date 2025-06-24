@@ -14,6 +14,10 @@ interface UsePlayerCoreProps {
   tracks: Track[];
   randomMode: boolean;
   setRandomMode: (randomMode: boolean) => void;
+  // Add support for URLs-based usage (backward compatibility)
+  urls?: string[];
+  currentIndex?: number;
+  setCurrentIndex?: (index: number) => void;
 }
 
 export const usePlayerCore = ({
@@ -26,16 +30,21 @@ export const usePlayerCore = ({
   audioRef,
   tracks,
   randomMode,
-  setRandomMode
+  setRandomMode,
+  urls,
+  currentIndex,
+  setCurrentIndex
 }: UsePlayerCoreProps) => {
   const initialVolume = getVolumePreference();
   
-  // Create URLs array from tracks
-  const urls = tracks.map(track => track.url);
-  const currentIndex = currentTrack ? tracks.findIndex(track => track.url === currentTrack.url) : 0;
+  // Handle both track-based and URL-based usage
+  const workingUrls = urls || tracks.map(track => track.url);
+  const workingCurrentIndex = currentIndex !== undefined ? currentIndex : (currentTrack ? tracks.findIndex(track => track.url === currentTrack.url) : 0);
   
-  const setCurrentIndex = (index: number) => {
-    if (index >= 0 && index < tracks.length) {
+  const setCurrentIndexHandler = (index: number) => {
+    if (setCurrentIndex) {
+      setCurrentIndex(index);
+    } else if (index >= 0 && index < tracks.length) {
       setCurrentTrack(tracks[index]);
     }
   };
@@ -48,10 +57,14 @@ export const usePlayerCore = ({
       if (randomMode) {
         nextIndex = Math.floor(Math.random() * tracks.length);
       } else {
-        const current = currentTrack ? tracks.findIndex(track => track.url === currentTrack.url) : 0;
+        const current = currentTrack ? tracks.findIndex(track => track.url === currentTrack.url) : workingCurrentIndex;
         nextIndex = (current + 1) % tracks.length;
       }
-      setCurrentTrack(tracks[nextIndex]);
+      if (setCurrentIndex) {
+        setCurrentIndex(nextIndex);
+      } else {
+        setCurrentTrack(tracks[nextIndex]);
+      }
     },
     handlePrevious: () => {
       if (tracks.length === 0) return;
@@ -59,18 +72,22 @@ export const usePlayerCore = ({
       if (randomMode) {
         prevIndex = Math.floor(Math.random() * tracks.length);
       } else {
-        const current = currentTrack ? tracks.findIndex(track => track.url === currentTrack.url) : 0;
+        const current = currentTrack ? tracks.findIndex(track => track.url === currentTrack.url) : workingCurrentIndex;
         prevIndex = (current - 1 + tracks.length) % tracks.length;
       }
-      setCurrentTrack(tracks[prevIndex]);
+      if (setCurrentIndex) {
+        setCurrentIndex(prevIndex);
+      } else {
+        setCurrentTrack(tracks[prevIndex]);
+      }
     },
     randomMode
   };
 
   const playerProps = useMusicPlayer({
-    urls,
-    currentIndex,
-    setCurrentIndex,
+    urls: workingUrls,
+    currentIndex: workingCurrentIndex,
+    setCurrentIndex: setCurrentIndexHandler,
     isPlaying,
     setIsPlaying,
     tracks,

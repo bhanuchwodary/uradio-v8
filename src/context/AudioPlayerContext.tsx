@@ -20,6 +20,8 @@ interface AudioPlayerContextType {
   nextTrack: () => void;
   previousTrack: () => void;
   setVolume: (volume: number) => void;
+  setRandomMode: (randomMode: boolean) => void;
+  clearCurrentTrack: () => void;
 }
 
 interface AudioPlayerProviderProps {
@@ -86,6 +88,12 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({
     logger.debug("togglePlayPause called.");
   }, []);
 
+  const clearCurrentTrack = useCallback(() => {
+    setCurrentTrack(null);
+    setIsPlaying(false);
+    logger.debug("clearCurrentTrack called.");
+  }, []);
+
   const nextTrack = useCallback(() => {
     if (tracks.length === 0 || !currentTrack) return;
     
@@ -137,6 +145,8 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({
     nextTrack,
     previousTrack,
     setVolume,
+    setRandomMode,
+    clearCurrentTrack,
   };
 
   return (

@@ -1,4 +1,4 @@
-// src/hooks/music-player/usePlayerControls.ts
+
 import { useEffect, useCallback } from "react";
 import { globalAudioRef, updateGlobalPlaybackState, setNavigationState } from "@/components/music-player/audioInstance";
 import { logger } from "@/utils/logger";
@@ -9,6 +9,7 @@ interface UsePlayerControlsProps {
   urls: string[];
   currentIndex: number;
   setCurrentIndex: (index: number) => void;
+  volume: number;
 }
 
 export const usePlayerControls = ({
@@ -17,6 +18,7 @@ export const usePlayerControls = ({
   urls,
   currentIndex,
   setCurrentIndex,
+  volume
 }: UsePlayerControlsProps) => {
   const handleNext = useCallback(() => {
     if (urls.length === 0) return;
@@ -24,17 +26,14 @@ export const usePlayerControls = ({
     logger.info("Navigation: Next track selected, index:", nextIndex);
     setCurrentIndex(nextIndex);
 
-    // If currently playing, explicitly set desired state to true.
-    // useHlsHandler will then attempt to play the new track.
     if (isPlaying) {
       setIsPlaying(true);
       logger.debug("Continuing playback on next track (triggering setIsPlaying).");
     } else {
-      // If paused, keep it paused, just change track
       setIsPlaying(false);
     }
-    updateGlobalPlaybackState(false, false, false); // Clear interruption flags on user navigation
-    setNavigationState(false); // This flag seems to be part of the old system, might need review.
+    updateGlobalPlaybackState(false, false, false);
+    setNavigationState(false);
   }, [currentIndex, isPlaying, setCurrentIndex, setIsPlaying, urls]);
 
   const handlePrevious = useCallback(() => {
@@ -53,5 +52,17 @@ export const usePlayerControls = ({
     setNavigationState(false);
   }, [currentIndex, isPlaying, setCurrentIndex, setIsPlaying, urls]);
 
-  return { handleNext, handlePrevious };
+  const handlePlayPause = useCallback(() => {
+    setIsPlaying(!isPlaying);
+    logger.debug("Play/pause toggled");
+  }, [isPlaying, setIsPlaying]);
+
+  const handleSeek = useCallback((seekTo: number[]) => {
+    if (globalAudioRef.element && seekTo.length > 0) {
+      globalAudioRef.element.currentTime = seekTo[0];
+      logger.debug("Seeked to:", seekTo[0]);
+    }
+  }, []);
+
+  return { handleNext, handlePrevious, handlePlayPause, handleSeek };
 };

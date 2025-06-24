@@ -24,7 +24,6 @@ interface UseMusicPlayerProps {
 }
 
 export const useMusicPlayer = (props?: UseMusicPlayerProps) => {
-  // If we don't have props, provide default values
   const {
     urls = [],
     currentIndex = 0,
@@ -41,15 +40,11 @@ export const useMusicPlayer = (props?: UseMusicPlayerProps) => {
   const [volume, setVolume] = useState<number>(initialVolume);
   const [loading, setLoading] = useState<boolean>(false);
   
-  // Updated to use MutableRefObject since we need to assign to audioRef.current
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  // Updated to use lowercase symbol primitive type instead of Symbol object
   const playerInstanceRef = useRef<symbol>(Symbol("playerInstance"));
 
   // Initialize audio
   useAudioInitialization({
-    audioRef,
-    playerInstanceRef,
     volume
   });
 
@@ -60,7 +55,6 @@ export const useMusicPlayer = (props?: UseMusicPlayerProps) => {
     handlePlayPause,
     handleSeek
   } = usePlayerControls({
-    audioRef,
     isPlaying,
     setIsPlaying,
     urls,
@@ -75,7 +69,6 @@ export const useMusicPlayer = (props?: UseMusicPlayerProps) => {
 
   // Handle HLS streaming
   useHlsHandler({
-    audioRef,
     url: urls[currentIndex],
     isPlaying,
     setIsPlaying,
@@ -99,8 +92,8 @@ export const useMusicPlayer = (props?: UseMusicPlayerProps) => {
     trackDuration: duration,
     trackPosition: currentTime,
     setIsPlaying,
-    onSkipNext: handleNext, // Now uses enhanced handler if available
-    onSkipPrevious: handlePrevious, // Now uses enhanced handler if available
+    onSkipNext: handleNext,
+    onSkipPrevious: handlePrevious,
     onSeek: (position) => {
       handleSeek([position]);
     },
@@ -117,7 +110,6 @@ export const useMusicPlayer = (props?: UseMusicPlayerProps) => {
     handleNext,
     handlePrevious,
     handleSeek,
-    // Include these properties for compatibility with existing code
     urls,
     tracks,
     removeUrl: (index: number) => console.warn("removeUrl not implemented"),
