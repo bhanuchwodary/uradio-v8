@@ -70,76 +70,7 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({
     audioRef.current = globalAudioRef.element;
   }, []);
 
-  // Use the HLS handler for stream management
-  useHlsHandler({
-    url: currentTrack?.url,
-    isPlaying,
-    setIsPlaying,
-    setLoading,
-  });
-
-  // Enhanced media session integration
-  useEnhancedMediaSession({
-    currentTrack,
-    isPlaying,
-    volume,
-    currentTime,
-    duration,
-    onPlay: resumePlayback,
-    onPause: pausePlayback,
-    onNext: nextTrack,
-    onPrevious: previousTrack,
-    onSeek: (time: number) => {
-      const audio = globalAudioRef.element;
-      if (audio) {
-        audio.currentTime = time;
-        logger.debug("Seeked via media session to:", time);
-      }
-    },
-    onVolumeChange: setVolume,
-  });
-
-  // Native media controls for mobile platforms
-  useNativeMediaControls({
-    isPlaying,
-    currentTrackName: currentTrack?.name,
-    onPlay: resumePlayback,
-    onPause: pausePlayback,
-    onNext: nextTrack,
-    onPrevious: previousTrack,
-  });
-
-  // Audio event listeners for time updates
-  useEffect(() => {
-    const audio = globalAudioRef.element;
-    if (!audio) return;
-
-    const handleTimeUpdate = () => setCurrentTime(audio.currentTime);
-    const handleDurationChange = () => setDuration(audio.duration);
-    const handleEnded = () => {
-      logger.debug("Track ended, moving to next track");
-      nextTrack();
-    };
-
-    audio.addEventListener('timeupdate', handleTimeUpdate);
-    audio.addEventListener('durationchange', handleDurationChange);
-    audio.addEventListener('ended', handleEnded);
-
-    return () => {
-      audio.removeEventListener('timeupdate', handleTimeUpdate);
-      audio.removeEventListener('durationchange', handleDurationChange);
-      audio.removeEventListener('ended', handleEnded);
-    };
-  }, []);
-
-  // Volume control
-  useEffect(() => {
-    const audio = globalAudioRef.element;
-    if (audio) {
-      audio.volume = volume;
-    }
-  }, [volume]);
-
+  // Define callback functions FIRST, before using them in hooks
   const playTrack = useCallback((track: Track) => {
     console.log("AudioPlayerContext: playTrack called with:", track.name);
     logger.debug("Playing track", { trackName: track.name, url: track.url });
@@ -166,23 +97,6 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({
       logger.debug("Resuming playback");
     }
   }, [currentTrack]);
-
-  const togglePlayPause = useCallback(() => {
-    console.log("AudioPlayerContext: togglePlayPause called, current isPlaying:", isPlaying);
-    if (currentTrack) {
-      setIsPlaying(prev => !prev);
-      logger.debug("Toggling play/pause");
-    }
-  }, [isPlaying, currentTrack]);
-
-  const clearCurrentTrack = useCallback(() => {
-    console.log("AudioPlayerContext: clearCurrentTrack called");
-    setCurrentTrack(null);
-    setIsPlaying(false);
-    setCurrentTime(0);
-    setDuration(0);
-    logger.debug("Cleared current track");
-  }, []);
 
   const nextTrack = useCallback(() => {
     console.log("AudioPlayerContext: nextTrack called");
@@ -253,6 +167,93 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({
     console.log("AudioPlayerContext: Playing previous track:", prevTrackToPlay.name);
     playTrack(prevTrackToPlay);
   }, [playlistTracks, tracks, currentTrack, randomMode, playTrack]);
+
+  const togglePlayPause = useCallback(() => {
+    console.log("AudioPlayerContext: togglePlayPause called, current isPlaying:", isPlaying);
+    if (currentTrack) {
+      setIsPlaying(prev => !prev);
+      logger.debug("Toggling play/pause");
+    }
+  }, [isPlaying, currentTrack]);
+
+  const clearCurrentTrack = useCallback(() => {
+    console.log("AudioPlayerContext: clearCurrentTrack called");
+    setCurrentTrack(null);
+    setIsPlaying(false);
+    setCurrentTime(0);
+    setDuration(0);
+    logger.debug("Cleared current track");
+  }, []);
+
+  // Use the HLS handler for stream management
+  useHlsHandler({
+    url: currentTrack?.url,
+    isPlaying,
+    setIsPlaying,
+    setLoading,
+  });
+
+  // Enhanced media session integration - NOW called AFTER callbacks are defined
+  useEnhancedMediaSession({
+    currentTrack,
+    isPlaying,
+    volume,
+    currentTime,
+    duration,
+    onPlay: resumePlayback,
+    onPause: pausePlayback,
+    onNext: nextTrack,
+    onPrevious: previousTrack,
+    onSeek: (time: number) => {
+      const audio = globalAudioRef.element;
+      if (audio) {
+        audio.currentTime = time;
+        logger.debug("Seeked via media session to:", time);
+      }
+    },
+    onVolumeChange: setVolume,
+  });
+
+  // Native media controls for mobile platforms - NOW called AFTER callbacks are defined
+  useNativeMediaControls({
+    isPlaying,
+    currentTrackName: currentTrack?.name,
+    onPlay: resumePlayback,
+    onPause: pausePlayback,
+    onNext: nextTrack,
+    onPrevious: previousTrack,
+  });
+
+  // Audio event listeners for time updates
+  useEffect(() => {
+    const audio = globalAudioRef.element;
+    if (!audio) return;
+
+    const handleTimeUpdate = () => setCurrentTime(audio.currentTime);
+    const handleDurationChange = () => setDuration(audio.duration);
+    const handleEnded = () => {
+      logger.debug("Track ended, moving to next track");
+      nextTrack();
+    };
+
+    audio.addEventListener('timeupdate', handleTimeUpdate);
+    audio.addEventListener('durationchange', handleDurationChange);
+    audio.addEventListener('ended', handleEnded);
+
+    return () => {
+      audio.removeEventListener('timeupdate', handleTimeUpdate);
+      audio.removeEventListener('durationchange', handleDurationChange);
+      audio.removeEventListener('ended', handleEnded);
+    };
+  }, [nextTrack]);
+
+  // Volume control
+  useEffect(() => {
+    const audio = globalAudioRef.element;
+    if (audio) {
+      audio.volume = volume;
+    }
+  }, [volume]);
 
   const contextValue: AudioPlayerContextType = {
     currentTrack,
