@@ -24,26 +24,25 @@ export const StationCard: React.FC<StationCardProps> = memo(({
     e.stopPropagation();
     
     console.log("StationCard: Play button clicked for station:", station.name);
-    console.log("StationCard: Action icon:", actionIcon, "In playlist:", inPlaylist, "Is adding:", isAddingToPlaylist);
+    console.log("StationCard: Action icon:", actionIcon, "Context:", context);
     
     // Prevent adding to playlist if already in playlist or currently being added
     if (actionIcon === "add" && (inPlaylist || isAddingToPlaylist)) {
-      console.log("STATION CARD: Blocked click", { 
-        name: station.name, 
-        url: station.url,
-        inPlaylist,
-        isAddingToPlaylist
-      });
+      console.log("StationCard: Blocked click - already in playlist or being added");
       return;
     }
     
-    // Always call onPlay - let the parent component handle the logic
-    console.log("StationCard: Calling onPlay for station:", station.name);
-    onPlay();
-  }, [actionIcon, inPlaylist, isAddingToPlaylist, onPlay, station.name, station.url]);
+    // Always call onPlay for playback actions
+    if (actionIcon === "play" || context === "playlist") {
+      console.log("StationCard: Triggering playback for station:", station.name);
+      onPlay();
+    } else if (actionIcon === "add" && !inPlaylist) {
+      console.log("StationCard: Adding station to playlist:", station.name);
+      onPlay(); // This will handle adding to playlist in the parent
+    }
+  }, [actionIcon, context, inPlaylist, isAddingToPlaylist, onPlay, station.name]);
 
-  // Check if the station is being processed - but don't use global isAddingToPlaylist
-  // Only use it for the specific station being added
+  // Check if the station is being processed
   const isProcessing = actionIcon === "add" && isAddingToPlaylist;
   const isDisabled = actionIcon === "add" && (inPlaylist || isProcessing);
 
@@ -66,7 +65,7 @@ export const StationCard: React.FC<StationCardProps> = memo(({
       onClick={handlePlayClick}
     >
       <div className="px-2 py-2.5 flex flex-col items-center space-y-1.5 h-full">
-        {/* Play Button with enhanced animations and playlist status */}
+        {/* Play Button */}
         <StationCardButton
           station={station}
           isPlaying={isPlaying}
@@ -74,13 +73,13 @@ export const StationCard: React.FC<StationCardProps> = memo(({
           actionIcon={actionIcon}
           context={context}
           inPlaylist={inPlaylist}
-          isAddingToPlaylist={isProcessing} // Only pass processing state for this specific card
+          isAddingToPlaylist={isProcessing}
           onClick={handlePlayClick}
           isDisabled={isDisabled}
           isProcessing={isProcessing}
         />
         
-        {/* Station Name and Language */}
+        {/* Station Info */}
         <StationCardInfo
           station={station}
           isSelected={isSelected}
@@ -101,7 +100,7 @@ export const StationCard: React.FC<StationCardProps> = memo(({
     </Card>
   );
 }, (prevProps, nextProps) => {
-  // Enhanced comparison for better performance - exclude global isAddingToPlaylist from comparison
+  // Enhanced comparison for better performance
   return (
     prevProps.station.url === nextProps.station.url &&
     prevProps.station.name === nextProps.station.name &&
@@ -112,7 +111,6 @@ export const StationCard: React.FC<StationCardProps> = memo(({
     prevProps.context === nextProps.context &&
     prevProps.actionIcon === nextProps.actionIcon &&
     prevProps.inPlaylist === nextProps.inPlaylist
-    // Removed isAddingToPlaylist from comparison to prevent unnecessary re-renders
   );
 });
 

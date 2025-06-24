@@ -22,7 +22,6 @@ interface AudioPlayerContextType {
   setVolume: (volume: number) => void;
   setRandomMode: (randomMode: boolean) => void;
   clearCurrentTrack: () => void;
-  // Add playlist-specific methods
   setPlaylistTracks: (tracks: Track[]) => void;
   playlistTracks: Track[];
 }
@@ -58,12 +57,18 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({
   const [playlistTracks, setPlaylistTracks] = useState<Track[]>([]);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Use the global audio ref directly from the instance
+  // Initialize global audio element if not already done
   useEffect(() => {
+    if (!globalAudioRef.element) {
+      const audio = new Audio();
+      audio.preload = 'auto';
+      globalAudioRef.element = audio;
+      logger.debug("Global audio element initialized");
+    }
     audioRef.current = globalAudioRef.element;
   }, []);
 
-  // Use the HLS handler, passing the currentTrack's URL and isPlaying state
+  // Use the HLS handler for stream management
   useHlsHandler({
     url: currentTrack?.url,
     isPlaying,
@@ -71,45 +76,97 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({
     setLoading,
   });
 
+  // Audio event listeners for time updates
+  useEffect(() => {
+    const audio = globalAudioRef.element;
+    if (!audio) return;
+
+    const handleTimeUpdate = () => setCurrentTime(audio.currentTime);
+    const handleDurationChange = () => setDuration(audio.duration);
+    const handleEnded = () => {
+      logger.debug("Track ended, moving to next track");
+      nextTrack();
+    };
+
+    audio.addEventListener('timeupdate', handleTimeUpdate);
+    audio.addEventListener('durationchange', handleDurationChange);
+    audio.addEventListener('ended', handleEnded);
+
+    return () => {
+      audio.removeEventListener('timeupdate', handleTimeUpdate);
+      audio.removeEventListener('durationchange', handleDurationChange);
+      audio.removeEventListener('ended', handleEnded);
+    };
+  }, []);
+
+  // Volume control
+  useEffect(() => {
+    const audio = globalAudioRef.element;
+    if (audio) {
+      audio.volume = volume;
+    }
+  }, [volume]);
+
   const playTrack = useCallback((track: Track) => {
     console.log("AudioPlayerContext: playTrack called with:", track.name);
+    logger.debug("Playing track", { trackName: track.name, url: track.url });
+    
+    // Set the track first, then trigger playback
     setCurrentTrack(track);
-    setIsPlaying(true);
-    logger.debug("playTrack called. Setting isPlaying to true.", { trackName: track.name });
+    
+    // Force playback to start
+    setTimeout(() => {
+      setIsPlaying(true);
+    }, 100);
   }, []);
 
   const pausePlayback = useCallback(() => {
     console.log("AudioPlayerContext: pausePlayback called");
     setIsPlaying(false);
-    logger.debug("pausePlayback called. Setting isPlaying to false.");
+    logger.debug("Pausing playback");
   }, []);
 
   const resumePlayback = useCallback(() => {
     console.log("AudioPlayerContext: resumePlayback called");
-    setIsPlaying(true);
-    logger.debug("resumePlayback called. Setting isPlaying to true.");
-  }, []);
+    if (currentTrack) {
+      setIsPlaying(true);
+      logger.debug("Resuming playback");
+    }
+  }, [currentTrack]);
 
   const togglePlayPause = useCallback(() => {
     console.log("AudioPlayerContext: togglePlayPause called, current isPlaying:", isPlaying);
-    setIsPlaying(prev => !prev);
-    logger.debug("togglePlayPause called.");
-  }, [isPlaying]);
+    if (currentTrack) {
+      setIsPlaying(prev => !prev);
+      logger.debug("Toggling play/pause");
+    }
+  }, [isPlaying, currentTrack]);
 
   const clearCurrentTrack = useCallback(() => {
     console.log("AudioPlayerContext: clearCurrentTrack called");
     setCurrentTrack(null);
     setIsPlaying(false);
-    logger.debug("clearCurrentTrack called.");
+    setCurrentTime(0);
+    setDuration(0);
+    logger.debug("Cleared current track");
   }, []);
 
   const nextTrack = useCallback(() => {
     console.log("AudioPlayerContext: nextTrack called");
+    
     // Use playlist tracks if available, otherwise fall back to main tracks
     const activeTrackList = playlistTracks.length > 0 ? playlistTracks : tracks;
     
-    if (activeTrackList.length === 0 || !currentTrack) {
-      console.log("AudioPlayerContext: No tracks available or no current track");
+    if (activeTrackList.length === 0) {
+      console.log("AudioPlayerContext: No tracks available for next");
+      return;
+    }
+
+    if (!currentTrack) {
+      // If no current track, play first track
+      const firstTrack = activeTrackList[0];
+      console.log("AudioPlayerContext: No current track, playing first:", firstTrack.name);
+      playTrack(firstTrack);
       return;
     }
     
@@ -126,19 +183,25 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({
     
     const nextTrackToPlay = activeTrackList[nextIndex];
     console.log("AudioPlayerContext: Playing next track:", nextTrackToPlay.name);
-    setCurrentTrack(nextTrackToPlay);
-    if (isPlaying) {
-      setIsPlaying(true);
-    }
-  }, [playlistTracks, tracks, currentTrack, randomMode, isPlaying]);
+    playTrack(nextTrackToPlay);
+  }, [playlistTracks, tracks, currentTrack, randomMode, playTrack]);
 
   const previousTrack = useCallback(() => {
     console.log("AudioPlayerContext: previousTrack called");
+    
     // Use playlist tracks if available, otherwise fall back to main tracks
     const activeTrackList = playlistTracks.length > 0 ? playlistTracks : tracks;
     
-    if (activeTrackList.length === 0 || !currentTrack) {
-      console.log("AudioPlayerContext: No tracks available or no current track");
+    if (activeTrackList.length === 0) {
+      console.log("AudioPlayerContext: No tracks available for previous");
+      return;
+    }
+
+    if (!currentTrack) {
+      // If no current track, play last track
+      const lastTrack = activeTrackList[activeTrackList.length - 1];
+      console.log("AudioPlayerContext: No current track, playing last:", lastTrack.name);
+      playTrack(lastTrack);
       return;
     }
     
@@ -155,11 +218,8 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({
     
     const prevTrackToPlay = activeTrackList[prevIndex];
     console.log("AudioPlayerContext: Playing previous track:", prevTrackToPlay.name);
-    setCurrentTrack(prevTrackToPlay);
-    if (isPlaying) {
-      setIsPlaying(true);
-    }
-  }, [playlistTracks, tracks, currentTrack, randomMode, isPlaying]);
+    playTrack(prevTrackToPlay);
+  }, [playlistTracks, tracks, currentTrack, randomMode, playTrack]);
 
   const contextValue: AudioPlayerContextType = {
     currentTrack,

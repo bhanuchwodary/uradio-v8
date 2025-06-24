@@ -24,9 +24,18 @@ export const useHlsHandler = ({
   const maxRetries = 3;
 
   useEffect(() => {
+    // Ensure global audio element exists
+    if (!globalAudioRef.element) {
+      const audio = new Audio();
+      audio.preload = 'auto';
+      globalAudioRef.element = audio;
+      logger.debug("Created global audio element in HLS handler");
+    }
+
     const audio = globalAudioRef.element;
 
-    if (!audio || !url) {
+    if (!url) {
+      // Clear audio when no URL
       if (audio) {
         audio.pause();
         audio.src = "";
@@ -57,7 +66,12 @@ export const useHlsHandler = ({
       configureAudioForStream(audio, streamType);
 
       if (streamType === 'hls' && Hls.isSupported()) {
-        const hls = new Hls();
+        const hls = new Hls({
+          enableWorker: false,
+          lowLatencyMode: true,
+          backBufferLength: 90
+        });
+        
         hls.loadSource(url);
         hls.attachMedia(audio);
         hlsRef.current = hls;
@@ -75,8 +89,6 @@ export const useHlsHandler = ({
                   logger.error("Max HLS network retries reached. Stopping playback.");
                   setIsPlaying(false);
                   setLoading(false);
-                  audio.pause();
-                  audio.src = "";
                   updateGlobalPlaybackState(false, false, false);
                 }
                 break;
@@ -89,8 +101,6 @@ export const useHlsHandler = ({
                   logger.error("Max HLS media retries reached. Stopping playback.");
                   setIsPlaying(false);
                   setLoading(false);
-                  audio.pause();
-                  audio.src = "";
                   updateGlobalPlaybackState(false, false, false);
                 }
                 break;
@@ -100,43 +110,72 @@ export const useHlsHandler = ({
                 hlsRef.current = null;
                 setIsPlaying(false);
                 setLoading(false);
-                audio.pause();
-                audio.src = "";
                 updateGlobalPlaybackState(false, false, false);
                 break;
             }
           }
         });
+
         hls.on(Hls.Events.MANIFEST_PARSED, () => {
-          logger.debug("HLS manifest parsed.");
+          logger.debug("HLS manifest parsed, ready to play");
+          setLoading(false);
+        });
+
+        hls.on(Hls.Events.FRAG_LOADED, () => {
+          logger.debug("HLS fragment loaded");
           setLoading(false);
         });
       } else {
         // Direct playback for non-HLS or if HLS is not supported
         audio.src = url;
         audio.load();
-        audio.addEventListener('error', () => handleDirectStreamError(audio, setIsPlaying, setLoading, url), { once: true });
-        audio.addEventListener('canplay', () => setLoading(false), { once: true });
+        
+        const handleError = () => {
+          logger.warn("Direct stream error, trying with CORS");
+          handleDirectStreamError(audio, setIsPlaying, setLoading, url);
+        };
+        
+        const handleCanPlay = () => {
+          logger.debug("Audio can play");
+          setLoading(false);
+          audio.removeEventListener('error', handleError);
+          audio.removeEventListener('canplay', handleCanPlay);
+        };
+
+        audio.addEventListener('error', handleError, { once: true });
+        audio.addEventListener('canplay', handleCanPlay, { once: true });
       }
+      
       lastUrlRef.current = url;
       retryCountRef.current = 0;
     }
 
-    // CONTROL PLAY/PAUSE BASED ON 'isPlaying' PROP AND GLOBAL STATE
+    // Handle play/pause based on isPlaying state
     if (isPlaying && audio.paused) {
-        audio.play().then(() => {
-            logger.debug("Playback started (from useHlsHandler).");
-            setIsPlaying(true);
-            updateGlobalPlaybackState(true, false, false);
-        }).catch(error => {
-            logger.error("Error attempting to play stream (from useHlsHandler):", error);
-            setIsPlaying(false);
-            updateGlobalPlaybackState(false, false, false);
-        });
-    } else if (!isPlaying && !audio.paused) {
-        logger.debug("Playback paused (from useHlsHandler).");
-        audio.pause();
+      logger.debug("Starting playback...");
+      audio.play().then(() => {
+        logger.debug("Playback started successfully");
+        updateGlobalPlaybackState(true, false, false);
+      }).catch(error => {
+        logger.error("Error starting playback:", error);
+        setIsPlaying(false);
+        setLoading(false);
         updateGlobalPlaybackState(false, false, false);
+      });
+    } else if (!isPlaying && !audio.paused) {
+      logger.debug("Pausing playback...");
+      audio.pause();
+      updateGlobalPlaybackState(false, true, true);
     }
   }, [url, isPlaying, setIsPlaying, setLoading]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (hlsRef.current) {
+        hlsRef.current.destroy();
+        hlsRef.current = null;
+      }
+    };
+  }, []);
 };
