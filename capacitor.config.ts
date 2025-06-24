@@ -8,8 +8,17 @@ const config: CapacitorConfig = {
   plugins: {
     Media: {
       backgroundColor: "#121212",
-      displayMode: "fullscreen"
+      displayMode: "fullscreen",
+      enableBackgroundMode: true,
+      enableRemoteControls: true,
+      enableNotificationControls: true
+    },
+    App: {
+      backgroundColor: "#121212"
     }
+  },
+  server: {
+    cleartext: true
   }
 };
 

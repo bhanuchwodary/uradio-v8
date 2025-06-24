@@ -29,123 +29,7 @@ export const useMediaSession = ({
   onSeek,
   randomMode = false,
 }: UseMediaSessionProps) => {
-  // Enhanced media session controls with uRadio branding
-  useEffect(() => {
-    if ('mediaSession' in navigator) {
-      // Set metadata with uRadio branding
-      if (tracks.length > 0 && currentIndex < tracks.length) {
-        const currentTrack = tracks[currentIndex];
-        
-        try {
-          navigator.mediaSession.metadata = new MediaMetadata({
-            title: currentTrack?.name || 'Unknown Station',
-            artist: 'uRadio',
-            album: 'Radio Stations',
-            artwork: [
-              { src: '/lovable-uploads/f6bddacc-e4ab-42a4-bdd9-3ea0d18320c0.png', sizes: '96x96', type: 'image/png' },
-              { src: '/lovable-uploads/f6bddacc-e4ab-42a4-bdd9-3ea0d18320c0.png', sizes: '128x128', type: 'image/png' },
-              { src: '/lovable-uploads/f6bddacc-e4ab-42a4-bdd9-3ea0d18320c0.png', sizes: '192x192', type: 'image/png' },
-              { src: '/lovable-uploads/f6bddacc-e4ab-42a4-bdd9-3ea0d18320c0.png', sizes: '256x256', type: 'image/png' },
-              { src: '/lovable-uploads/f6bddacc-e4ab-42a4-bdd9-3ea0d18320c0.png', sizes: '384x384', type: 'image/png' },
-              { src: '/lovable-uploads/f6bddacc-e4ab-42a4-bdd9-3ea0d18320c0.png', sizes: '512x512', type: 'image/png' }
-            ]
-          });
-
-          console.log("Updated media session metadata with uRadio branding:", {
-            title: currentTrack?.name,
-            artist: 'uRadio',
-            stationUrl: currentTrack?.url,
-            randomMode
-          });
-        } catch (error) {
-          console.warn("Error setting media session metadata:", error);
-        }
-      }
-
-      // Set playback state
-      try {
-        navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused';
-      } catch (error) {
-        console.warn("Error setting playback state:", error);
-      }
-
-      // Enhanced action handlers with better iOS support and random mode awareness
-      try {
-        navigator.mediaSession.setActionHandler('play', () => {
-          console.log("Media session play action triggered");
-          setIsPlaying(true);
-        });
-        
-        navigator.mediaSession.setActionHandler('pause', () => {
-          console.log("Media session pause action triggered");
-          setIsPlaying(false);
-        });
-        
-        navigator.mediaSession.setActionHandler('previoustrack', () => {
-          console.log("Media session previous track action triggered", { randomMode });
-          onSkipPrevious();
-        });
-        
-        navigator.mediaSession.setActionHandler('nexttrack', () => {
-          console.log("Media session next track action triggered", { randomMode });
-          onSkipNext();
-        });
-        
-        // Enhanced seek handling for iOS
-        navigator.mediaSession.setActionHandler('seekto', (details) => {
-          console.log("Media session seek action triggered:", details);
-          if (details.seekTime !== undefined && details.seekTime !== null) {
-            onSeek(details.seekTime);
-          }
-        });
-
-        // Additional iOS-specific handlers
-        navigator.mediaSession.setActionHandler('stop', () => {
-          console.log("Media session stop action triggered");
-          setIsPlaying(false);
-        });
-
-      } catch (error) {
-        console.warn("Error setting media session action handlers:", error);
-      }
-
-      // Fixed playbackRate error - enhanced handling for different stream types
-      try {
-        if (trackDuration && trackDuration !== Infinity && !isNaN(trackDuration)) {
-          const currentTrack = tracks[currentIndex];
-          const isHlsStream = currentTrack?.url?.includes('.m3u8');
-          
-          // Use different playback rate strategies for different stream types
-          let playbackRate: number;
-          if (isHlsStream) {
-            // For HLS streams, use a slightly higher minimum to prevent auto-resume issues
-            playbackRate = isPlaying ? 1.0 : 0.001;
-          } else {
-            // For other streams, use the standard approach
-            playbackRate = isPlaying ? 1.0 : 0.0001;
-          }
-          
-          navigator.mediaSession.setPositionState({
-            duration: trackDuration,
-            position: Math.min(trackPosition || 0, trackDuration),
-            playbackRate: playbackRate,
-          });
-          
-          console.log("Set position state with enhanced playback rate:", {
-            duration: trackDuration,
-            position: trackPosition,
-            playbackRate,
-            isHlsStream,
-            streamUrl: currentTrack?.url
-          });
-        }
-      } catch (error) {
-        console.warn("Error setting position state:", error);
-      }
-    }
-  }, [tracks, currentIndex, isPlaying, trackDuration, trackPosition, tracks[currentIndex]?.name, randomMode]);
-
-  // Enhanced initialization with uRadio branding
+  // Enhanced initialization with uRadio branding and Android Auto service
   useEffect(() => {
     const initializeServices = async () => {
       try {
@@ -196,6 +80,7 @@ export const useMediaSession = ({
     };
   }, []);
 
+  // Update Android Auto with track information
   useEffect(() => {
     if (tracks.length > 0 && currentIndex < tracks.length) {
       const currentTrack = tracks[currentIndex];
@@ -210,7 +95,7 @@ export const useMediaSession = ({
           artworkUrl: '/lovable-uploads/f6bddacc-e4ab-42a4-bdd9-3ea0d18320c0.png',
         };
         
-        console.log("Updating track info for notifications with uRadio branding:", trackInfo, { randomMode });
+        console.log("Updating track info for Android Auto with uRadio branding:", trackInfo, { randomMode });
         
         androidAutoService.updateTrackInfo(trackInfo).catch(err => 
           console.warn('Error updating track info:', err)
@@ -219,6 +104,7 @@ export const useMediaSession = ({
     }
   }, [tracks, currentIndex, trackDuration, trackPosition, tracks[currentIndex]?.name, randomMode]);
 
+  // Update playback state for Android Auto
   useEffect(() => {
     console.log("Updating Android Auto playback state:", isPlaying ? "playing" : "paused", { randomMode });
     androidAutoService.updatePlaybackState(isPlaying);

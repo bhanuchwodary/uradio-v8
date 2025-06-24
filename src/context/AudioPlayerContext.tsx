@@ -3,6 +3,8 @@ import React, { createContext, useContext, useState, useRef, useEffect, useCallb
 import { Track } from '@/types/track';
 import { useHlsHandler } from '@/hooks/music-player/useHlsHandler';
 import { globalAudioRef } from '@/components/music-player/audioInstance';
+import { useEnhancedMediaSession } from '@/hooks/useEnhancedMediaSession';
+import { useNativeMediaControls } from '@/hooks/useNativeMediaControls';
 import { logger } from '@/utils/logger';
 
 interface AudioPlayerContextType {
@@ -74,6 +76,37 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({
     isPlaying,
     setIsPlaying,
     setLoading,
+  });
+
+  // Enhanced media session integration
+  useEnhancedMediaSession({
+    currentTrack,
+    isPlaying,
+    volume,
+    currentTime,
+    duration,
+    onPlay: resumePlayback,
+    onPause: pausePlayback,
+    onNext: nextTrack,
+    onPrevious: previousTrack,
+    onSeek: (time: number) => {
+      const audio = globalAudioRef.element;
+      if (audio) {
+        audio.currentTime = time;
+        logger.debug("Seeked via media session to:", time);
+      }
+    },
+    onVolumeChange: setVolume,
+  });
+
+  // Native media controls for mobile platforms
+  useNativeMediaControls({
+    isPlaying,
+    currentTrackName: currentTrack?.name,
+    onPlay: resumePlayback,
+    onPause: pausePlayback,
+    onNext: nextTrack,
+    onPrevious: previousTrack,
   });
 
   // Audio event listeners for time updates
