@@ -7,7 +7,6 @@ import { TrackStateProvider } from "@/context/TrackStateContext";
 import { AudioPlayerProvider } from "@/context/AudioPlayerContext";
 import { PlaylistProvider } from "@/context/PlaylistContext";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
-import Index from "@/pages/Index";
 import PlaylistPage from "@/pages/PlaylistPage";
 import AddStationPage from "@/pages/AddStationPage";
 import NotFound from "@/pages/NotFound";
@@ -25,12 +24,12 @@ const App = () => {
     <ErrorBoundary>
       <ThemeProvider defaultTheme="dark" storageKey="uradio-theme">
         <TrackStateProvider>
-          <TrackStateWrapper randomMode={randomMode} volume={volume}>
-            <PlaylistProvider>
+          <PlaylistProvider>
+            <TrackStateWrapper randomMode={randomMode} volume={volume}>
               <Router>
                 <div className="min-h-screen bg-background">
                   <Routes>
-                    <Route path="/" element={<Index />} />
+                    <Route path="/" element={<PlaylistPage randomMode={randomMode} setRandomMode={setRandomMode} volume={volume} setVolume={setVolume} />} />
                     <Route path="/playlist" element={<PlaylistPage randomMode={randomMode} setRandomMode={setRandomMode} volume={volume} setVolume={setVolume} />} />
                     <Route path="/add" element={<AddStationPage />} />
                     <Route path="/add-station" element={<AddStationPage />} />
@@ -40,8 +39,8 @@ const App = () => {
                   </Routes>
                 </div>
               </Router>
-            </PlaylistProvider>
-          </TrackStateWrapper>
+            </TrackStateWrapper>
+          </PlaylistProvider>
         </TrackStateProvider>
         <Toaster />
       </ThemeProvider>

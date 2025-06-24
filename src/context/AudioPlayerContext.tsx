@@ -22,6 +22,7 @@ interface AudioPlayerContextType {
   setVolume: (volume: number) => void;
   setRandomMode: (randomMode: boolean) => void;
   clearCurrentTrack: () => void;
+  // Add playlist-specific methods
   setPlaylistTracks: (tracks: Track[]) => void;
   playlistTracks: Track[];
 }
@@ -55,8 +56,14 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [playlistTracks, setPlaylistTracks] = useState<Track[]>([]);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Use the HLS handler for audio management
+  // Use the global audio ref directly from the instance
+  useEffect(() => {
+    audioRef.current = globalAudioRef.element;
+  }, []);
+
+  // Use the HLS handler, passing the currentTrack's URL and isPlaying state
   useHlsHandler({
     url: currentTrack?.url,
     isPlaying,
@@ -64,15 +71,8 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({
     setLoading,
   });
 
-  // Update volume on the global audio element
-  useEffect(() => {
-    if (globalAudioRef.element) {
-      globalAudioRef.element.volume = volume;
-    }
-  }, [volume]);
-
   const playTrack = useCallback((track: Track) => {
-    console.log("AudioPlayerContext: playTrack called with:", track.name, track.url);
+    console.log("AudioPlayerContext: playTrack called with:", track.name);
     setCurrentTrack(track);
     setIsPlaying(true);
     logger.debug("playTrack called. Setting isPlaying to true.", { trackName: track.name });
@@ -92,13 +92,9 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({
 
   const togglePlayPause = useCallback(() => {
     console.log("AudioPlayerContext: togglePlayPause called, current isPlaying:", isPlaying);
-    if (currentTrack) {
-      setIsPlaying(prev => !prev);
-      logger.debug("togglePlayPause called.");
-    } else {
-      console.log("AudioPlayerContext: No current track to play/pause");
-    }
-  }, [isPlaying, currentTrack]);
+    setIsPlaying(prev => !prev);
+    logger.debug("togglePlayPause called.");
+  }, [isPlaying]);
 
   const clearCurrentTrack = useCallback(() => {
     console.log("AudioPlayerContext: clearCurrentTrack called");
@@ -109,6 +105,7 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({
 
   const nextTrack = useCallback(() => {
     console.log("AudioPlayerContext: nextTrack called");
+    // Use playlist tracks if available, otherwise fall back to main tracks
     const activeTrackList = playlistTracks.length > 0 ? playlistTracks : tracks;
     
     if (activeTrackList.length === 0 || !currentTrack) {
@@ -129,11 +126,15 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({
     
     const nextTrackToPlay = activeTrackList[nextIndex];
     console.log("AudioPlayerContext: Playing next track:", nextTrackToPlay.name);
-    playTrack(nextTrackToPlay);
-  }, [playlistTracks, tracks, currentTrack, randomMode, playTrack]);
+    setCurrentTrack(nextTrackToPlay);
+    if (isPlaying) {
+      setIsPlaying(true);
+    }
+  }, [playlistTracks, tracks, currentTrack, randomMode, isPlaying]);
 
   const previousTrack = useCallback(() => {
     console.log("AudioPlayerContext: previousTrack called");
+    // Use playlist tracks if available, otherwise fall back to main tracks
     const activeTrackList = playlistTracks.length > 0 ? playlistTracks : tracks;
     
     if (activeTrackList.length === 0 || !currentTrack) {
@@ -154,8 +155,11 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({
     
     const prevTrackToPlay = activeTrackList[prevIndex];
     console.log("AudioPlayerContext: Playing previous track:", prevTrackToPlay.name);
-    playTrack(prevTrackToPlay);
-  }, [playlistTracks, tracks, currentTrack, randomMode, playTrack]);
+    setCurrentTrack(prevTrackToPlay);
+    if (isPlaying) {
+      setIsPlaying(true);
+    }
+  }, [playlistTracks, tracks, currentTrack, randomMode, isPlaying]);
 
   const contextValue: AudioPlayerContextType = {
     currentTrack,
