@@ -11,7 +11,7 @@ interface OptimizedStationCardProps {
   onEdit: (station: Track) => void;
   onDelete: (station: Track) => void;
   onToggleFavorite: (station: Track) => void;
-  context?: string;
+  context?: "playlist" | "library";
 }
 
 const OptimizedStationCard = memo<OptimizedStationCardProps>(({
@@ -22,7 +22,7 @@ const OptimizedStationCard = memo<OptimizedStationCardProps>(({
   onEdit,
   onDelete,
   onToggleFavorite,
-  context
+  context = "library"
 }) => {
   // Memoize callbacks to prevent unnecessary re-renders
   const handlePlay = useCallback(() => {
