@@ -1,4 +1,4 @@
-// src/hooks/music-player/useHlsHandler.ts
+
 import { useRef, useEffect } from "react";
 import Hls from "hls.js";
 import { globalAudioRef, updateGlobalPlaybackState } from "@/components/music-player/audioInstance";
@@ -7,7 +7,7 @@ import { detectStreamType, configureAudioForStream, handleDirectStreamError } fr
 
 interface UseHlsHandlerProps {
   url: string | undefined;
-  isPlaying: boolean; // This indicates the desired state from the UI/logic
+  isPlaying: boolean;
   setIsPlaying: (playing: boolean) => void;
   setLoading: (loading: boolean) => void;
 }
@@ -50,11 +50,11 @@ export const useHlsHandler = ({
         hlsRef.current = null;
       }
 
-      audio.src = ""; // Clear existing src
-      audio.load();   // Load the new empty source to reset internal state
+      audio.src = "";
+      audio.load();
 
       const streamType = detectStreamType(url);
-      configureAudioForStream(audio, streamType); // Ensure correct audio type settings
+      configureAudioForStream(audio, streamType);
 
       if (streamType === 'hls' && Hls.isSupported()) {
         const hls = new Hls();
@@ -76,7 +76,7 @@ export const useHlsHandler = ({
                   setIsPlaying(false);
                   setLoading(false);
                   audio.pause();
-                  audio.src = ""; // Clear source on fatal error
+                  audio.src = "";
                   updateGlobalPlaybackState(false, false, false);
                 }
                 break;
@@ -90,7 +90,7 @@ export const useHlsHandler = ({
                   setIsPlaying(false);
                   setLoading(false);
                   audio.pause();
-                  audio.src = ""; // Clear source on fatal error
+                  audio.src = "";
                   updateGlobalPlaybackState(false, false, false);
                 }
                 break;
@@ -101,7 +101,7 @@ export const useHlsHandler = ({
                 setIsPlaying(false);
                 setLoading(false);
                 audio.pause();
-                audio.src = ""; // Clear source on fatal error
+                audio.src = "";
                 updateGlobalPlaybackState(false, false, false);
                 break;
             }
@@ -110,8 +110,6 @@ export const useHlsHandler = ({
         hls.on(Hls.Events.MANIFEST_PARSED, () => {
           logger.debug("HLS manifest parsed.");
           setLoading(false);
-          // Only play if 'isPlaying' (desired state) is true
-          // The actual play call is handled by the AudioPlayerContext's effect
         });
       } else {
         // Direct playback for non-HLS or if HLS is not supported
@@ -121,29 +119,24 @@ export const useHlsHandler = ({
         audio.addEventListener('canplay', () => setLoading(false), { once: true });
       }
       lastUrlRef.current = url;
-      retryCountRef.current = 0; // Reset retry count for new URL
+      retryCountRef.current = 0;
     }
 
     // CONTROL PLAY/PAUSE BASED ON 'isPlaying' PROP AND GLOBAL STATE
     if (isPlaying && audio.paused) {
-        // Only attempt to play if desired state is 'playing' AND audio is currently paused.
-        // This is the trigger for actual playback.
         audio.play().then(() => {
             logger.debug("Playback started (from useHlsHandler).");
             setIsPlaying(true);
-            updateGlobalPlaybackState(true, false, false); // Mark as playing, clear interruption flags
+            updateGlobalPlaybackState(true, false, false);
         }).catch(error => {
             logger.error("Error attempting to play stream (from useHlsHandler):", error);
-            // This catch handles common autoplay prevention errors.
-            // Inform user they need to interact.
-            setIsPlaying(false); // Ensure UI reflects paused state
+            setIsPlaying(false);
             updateGlobalPlaybackState(false, false, false);
-            // Potentially show a toast: useToast().toast({ title: "Playback Blocked", description: "Browser prevented autoplay. Please tap play.", variant: "destructive" });
         });
     } else if (!isPlaying && !audio.paused) {
         logger.debug("Playback paused (from useHlsHandler).");
         audio.pause();
-        updateGlobalPlaybackState(false, false, false); // Not playing, clear flags
+        updateGlobalPlaybackState(false, false, false);
     }
-  }, [url, isPlaying, setIsPlaying, setLoading]); // Added isPlaying to dependencies
+  }, [url, isPlaying, setIsPlaying, setLoading]);
 };

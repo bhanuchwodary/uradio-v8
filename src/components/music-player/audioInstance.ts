@@ -11,6 +11,7 @@ type AudioInstanceType = {
   isPaused: boolean;
   navigationInProgress: boolean;
   explicitlyPaused: boolean;
+  shouldPlayAfterInterruption: boolean;
 };
 
 // Maintains a shared audio and HLS context across the app
@@ -23,7 +24,8 @@ export const globalAudioRef: AudioInstanceType = {
   isPlaying: false,
   isPaused: false,
   navigationInProgress: false,
-  explicitlyPaused: false
+  explicitlyPaused: false,
+  shouldPlayAfterInterruption: false
 };
 
 // Helper function to update global playback state with navigation awareness

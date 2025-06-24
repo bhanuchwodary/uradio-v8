@@ -4,32 +4,69 @@ import { Track } from "@/types/track";
 import { getVolumePreference } from "@/utils/volumeStorage";
 
 interface UsePlayerCoreProps {
-  urls: string[];
-  currentIndex: number;
-  setCurrentIndex: (index: number) => void;
+  currentTrack: Track | null;
+  setCurrentTrack: (track: Track | null) => void;
   isPlaying: boolean;
   setIsPlaying: (isPlaying: boolean) => void;
-  tracks?: Track[];
-  enhancedHandlers?: {
-    handleNext: () => void;
-    handlePrevious: () => void;
-    randomMode: boolean;
-  };
+  loading: boolean;
+  setLoading: (loading: boolean) => void;
+  audioRef: React.MutableRefObject<HTMLAudioElement | null>;
+  tracks: Track[];
+  randomMode: boolean;
+  setRandomMode: (randomMode: boolean) => void;
 }
 
 export const usePlayerCore = ({
-  urls,
-  currentIndex,
-  setCurrentIndex,
+  currentTrack,
+  setCurrentTrack,
   isPlaying,
   setIsPlaying,
-  tracks = [],
-  enhancedHandlers
+  loading,
+  setLoading,
+  audioRef,
+  tracks,
+  randomMode,
+  setRandomMode
 }: UsePlayerCoreProps) => {
-  // Get initial volume from stored preference
   const initialVolume = getVolumePreference();
   
-  // Pass all props to useMusicPlayer with the initial volume and enhanced handlers
+  // Create URLs array from tracks
+  const urls = tracks.map(track => track.url);
+  const currentIndex = currentTrack ? tracks.findIndex(track => track.url === currentTrack.url) : 0;
+  
+  const setCurrentIndex = (index: number) => {
+    if (index >= 0 && index < tracks.length) {
+      setCurrentTrack(tracks[index]);
+    }
+  };
+
+  // Enhanced handlers for random mode
+  const enhancedHandlers = {
+    handleNext: () => {
+      if (tracks.length === 0) return;
+      let nextIndex;
+      if (randomMode) {
+        nextIndex = Math.floor(Math.random() * tracks.length);
+      } else {
+        const current = currentTrack ? tracks.findIndex(track => track.url === currentTrack.url) : 0;
+        nextIndex = (current + 1) % tracks.length;
+      }
+      setCurrentTrack(tracks[nextIndex]);
+    },
+    handlePrevious: () => {
+      if (tracks.length === 0) return;
+      let prevIndex;
+      if (randomMode) {
+        prevIndex = Math.floor(Math.random() * tracks.length);
+      } else {
+        const current = currentTrack ? tracks.findIndex(track => track.url === currentTrack.url) : 0;
+        prevIndex = (current - 1 + tracks.length) % tracks.length;
+      }
+      setCurrentTrack(tracks[prevIndex]);
+    },
+    randomMode
+  };
+
   const playerProps = useMusicPlayer({
     urls,
     currentIndex,
@@ -41,6 +78,16 @@ export const usePlayerCore = ({
     enhancedHandlers
   });
 
-  // Return all properties from useMusicPlayer for use in components
-  return playerProps;
+  return {
+    ...playerProps,
+    playTrack: (track: Track) => {
+      setCurrentTrack(track);
+      setIsPlaying(true);
+    },
+    pausePlayback: () => setIsPlaying(false),
+    resumePlayback: () => setIsPlaying(true),
+    togglePlayPause: () => setIsPlaying(!isPlaying),
+    nextTrack: enhancedHandlers.handleNext,
+    previousTrack: enhancedHandlers.handlePrevious
+  };
 };

@@ -1,48 +1,36 @@
 
 import { logger } from "@/utils/logger";
 
+export type StreamType = 'hls' | 'direct' | 'vobook';
+
 export interface StreamConfig {
   url: string;
-  type: 'hls' | 'direct' | 'vobook';
+  type: StreamType;
   needsCors?: boolean;
 }
 
-export const detectStreamType = (url: string): StreamConfig => {
+export const detectStreamType = (url: string): StreamType => {
   // Detect HLS streams
   if (url.includes('.m3u8')) {
-    return {
-      url,
-      type: 'hls',
-      needsCors: url.includes('vobook')
-    };
+    return 'hls';
   }
   
   // Detect VoBook streams that need CORS
   if (url.includes('vobook')) {
-    return {
-      url,
-      type: 'vobook',
-      needsCors: true
-    };
+    return 'vobook';
   }
   
   // Default to direct stream
-  return {
-    url,
-    type: 'direct',
-    needsCors: false
-  };
+  return 'direct';
 };
 
-export const configureAudioForStream = (audio: HTMLAudioElement, config: StreamConfig): void => {
+export const configureAudioForStream = (audio: HTMLAudioElement, streamType: StreamType): void => {
   logger.info("Configuring audio for stream", { 
-    type: config.type, 
-    needsCors: config.needsCors,
-    url: config.url 
+    type: streamType
   });
 
   // Configure CORS if needed
-  if (config.needsCors) {
+  if (streamType === 'vobook' || streamType === 'hls') {
     audio.crossOrigin = 'anonymous';
   } else {
     // Remove crossOrigin attribute for non-CORS streams
@@ -59,34 +47,32 @@ export const configureAudioForStream = (audio: HTMLAudioElement, config: StreamC
   audio.autoplay = false;
 };
 
-export const handleDirectStreamError = (audio: HTMLAudioElement, config: StreamConfig): Promise<boolean> => {
-  return new Promise((resolve) => {
-    const handleError = () => {
-      logger.warn("Direct stream failed, trying with CORS", { url: config.url });
-      
-      // Try with CORS as fallback
-      audio.crossOrigin = 'anonymous';
-      audio.load();
-      
-      const handleSecondError = () => {
-        logger.error("Stream failed even with CORS", { url: config.url });
-        audio.removeEventListener('error', handleSecondError);
-        resolve(false);
-      };
-      
-      const handleSuccess = () => {
-        logger.info("Stream loaded successfully with CORS fallback");
-        audio.removeEventListener('canplay', handleSuccess);
-        audio.removeEventListener('error', handleSecondError);
-        resolve(true);
-      };
-      
-      audio.addEventListener('canplay', handleSuccess, { once: true });
-      audio.addEventListener('error', handleSecondError, { once: true });
-      
-      audio.removeEventListener('error', handleError);
-    };
-    
-    audio.addEventListener('error', handleError, { once: true });
-  });
+export const handleDirectStreamError = (
+  audio: HTMLAudioElement, 
+  setIsPlaying: (playing: boolean) => void, 
+  setLoading: (loading: boolean) => void, 
+  url: string
+): void => {
+  logger.warn("Direct stream failed, trying with CORS", { url });
+  
+  // Try with CORS as fallback
+  audio.crossOrigin = 'anonymous';
+  audio.load();
+  
+  const handleSecondError = () => {
+    logger.error("Stream failed even with CORS", { url });
+    audio.removeEventListener('error', handleSecondError);
+    setIsPlaying(false);
+    setLoading(false);
+  };
+  
+  const handleSuccess = () => {
+    logger.info("Stream loaded successfully with CORS fallback");
+    audio.removeEventListener('canplay', handleSuccess);
+    audio.removeEventListener('error', handleSecondError);
+    setLoading(false);
+  };
+  
+  audio.addEventListener('canplay', handleSuccess, { once: true });
+  audio.addEventListener('error', handleSecondError, { once: true });
 };
