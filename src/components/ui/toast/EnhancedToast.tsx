@@ -56,16 +56,14 @@ export const enhancedToast = {
       persistent = false
     } = options;
 
-    const titleWithIcon = (
-      <div className="flex items-center gap-2">
-        {getToastIcon(type)}
-        <span>{title}</span>
-      </div>
-    );
-
     return baseToast({
-      title: titleWithIcon,
-      description,
+      title,
+      description: description ? (
+        <div className="flex items-center gap-2">
+          {getToastIcon(type)}
+          <span>{description}</span>
+        </div>
+      ) : undefined,
       variant: getToastVariant(type),
       duration: persistent ? Infinity : duration,
       action: action ? (

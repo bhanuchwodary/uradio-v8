@@ -6,7 +6,7 @@ import { Track } from "@/types/track";
 interface OptimizedStationCardProps {
   station: Track;
   isPlaying: boolean;
-  isCurrent: boolean;
+  isSelected: boolean;
   onPlay: (station: Track) => void;
   onEdit: (station: Track) => void;
   onDelete: (station: Track) => void;
@@ -17,7 +17,7 @@ interface OptimizedStationCardProps {
 const OptimizedStationCard = memo<OptimizedStationCardProps>(({
   station,
   isPlaying,
-  isCurrent,
+  isSelected,
   onPlay,
   onEdit,
   onDelete,
@@ -45,7 +45,7 @@ const OptimizedStationCard = memo<OptimizedStationCardProps>(({
     <StationCard
       station={station}
       isPlaying={isPlaying}
-      isCurrent={isCurrent}
+      isSelected={isSelected}
       onPlay={handlePlay}
       onEdit={handleEdit}
       onDelete={handleDelete}
@@ -60,7 +60,7 @@ const OptimizedStationCard = memo<OptimizedStationCardProps>(({
     prevProps.station.name === nextProps.station.name &&
     prevProps.station.isFavorite === nextProps.station.isFavorite &&
     prevProps.isPlaying === nextProps.isPlaying &&
-    prevProps.isCurrent === nextProps.isCurrent &&
+    prevProps.isSelected === nextProps.isSelected &&
     prevProps.context === nextProps.context
   );
 });
