@@ -1,8 +1,7 @@
 
 import { Track } from "@/types/track";
 import { logger } from "@/utils/logger";
-
-const STORAGE_KEY = 'uradio-tracks';
+import { STORAGE_KEYS } from "@/constants/app";
 
 export const testLocalStorage = (): boolean => {
   try {
@@ -19,8 +18,8 @@ export const testLocalStorage = (): boolean => {
 export const saveTracksToLocalStorage = (tracks: Track[]): boolean => {
   try {
     const tracksJson = JSON.stringify(tracks);
-    localStorage.setItem(STORAGE_KEY, tracksJson);
-    logger.info(`Saved ${tracks.length} tracks to localStorage`);
+    localStorage.setItem(STORAGE_KEYS.TRACKS, tracksJson);
+    logger.debug(`Saved ${tracks.length} tracks to localStorage`);
     return true;
   } catch (error) {
     logger.error('Failed to save tracks to localStorage', error);
@@ -31,10 +30,10 @@ export const saveTracksToLocalStorage = (tracks: Track[]): boolean => {
 export const loadTracksFromLocalStorage = (): Track[] => {
   try {
     logger.debug('Loading tracks from localStorage...');
-    const tracksJson = localStorage.getItem(STORAGE_KEY);
+    const tracksJson = localStorage.getItem(STORAGE_KEYS.TRACKS);
     
     if (!tracksJson) {
-      logger.info('No saved tracks found in localStorage');
+      logger.debug('No saved tracks found in localStorage');
       return [];
     }
     
@@ -57,7 +56,7 @@ export const loadTracksFromLocalStorage = (): Track[] => {
       logger.warn(`Filtered out ${tracks.length - validTracks.length} invalid tracks`);
     }
     
-    logger.info(`Loaded ${validTracks.length} tracks from localStorage`);
+    logger.debug(`Loaded ${validTracks.length} tracks from localStorage`);
     return validTracks;
   } catch (error) {
     logger.error('Failed to load tracks from localStorage', error);
@@ -67,7 +66,7 @@ export const loadTracksFromLocalStorage = (): Track[] => {
 
 export const clearTracksFromLocalStorage = (): boolean => {
   try {
-    localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(STORAGE_KEYS.TRACKS);
     logger.info('Cleared tracks from localStorage');
     return true;
   } catch (error) {
@@ -79,7 +78,7 @@ export const clearTracksFromLocalStorage = (): boolean => {
 // Simplified sync verification that doesn't cause loops
 export const verifySyncStatus = (currentTracks: Track[]): boolean => {
   try {
-    const storedTracksJson = localStorage.getItem(STORAGE_KEY);
+    const storedTracksJson = localStorage.getItem(STORAGE_KEYS.TRACKS);
     const currentTracksJson = JSON.stringify(currentTracks);
     
     // If no storage data and no current tracks, they're in sync

@@ -5,11 +5,21 @@ interface LogConfig {
   enableConsole: boolean;
   level: LogLevel;
   maxEntries: number;
+  enablePerformance: boolean;
+}
+
+interface PerformanceMetric {
+  name: string;
+  startTime: number;
+  endTime?: number;
+  duration?: number;
+  metadata?: any;
 }
 
 class Logger {
   private config: LogConfig;
   private logs: Array<{ timestamp: Date; level: LogLevel; message: string; data?: any }> = [];
+  private performanceMetrics: Map<string, PerformanceMetric> = new Map();
   private isDevelopment: boolean;
 
   constructor() {
@@ -17,7 +27,8 @@ class Logger {
     this.config = {
       enableConsole: this.isDevelopment,
       level: this.isDevelopment ? 'debug' : 'error',
-      maxEntries: this.isDevelopment ? 100 : 50
+      maxEntries: this.isDevelopment ? 100 : 50,
+      enablePerformance: this.isDevelopment
     };
   }
 
@@ -27,7 +38,6 @@ class Logger {
   }
 
   private addLog(level: LogLevel, message: string, data?: any) {
-    // Only store logs in development or for critical errors
     if (!this.isDevelopment && level !== 'error') return;
     
     if (this.logs.length >= this.config.maxEntries) {
@@ -78,6 +88,33 @@ class Logger {
     }
   }
 
+  // Performance monitoring methods
+  startPerformance(name: string, metadata?: any) {
+    if (!this.config.enablePerformance) return;
+    
+    this.performanceMetrics.set(name, {
+      name,
+      startTime: performance.now(),
+      metadata
+    });
+  }
+
+  endPerformance(name: string) {
+    if (!this.config.enablePerformance) return;
+    
+    const metric = this.performanceMetrics.get(name);
+    if (metric) {
+      const endTime = performance.now();
+      metric.endTime = endTime;
+      metric.duration = endTime - metric.startTime;
+      
+      this.debug(`Performance: ${name}`, {
+        duration: `${metric.duration.toFixed(2)}ms`,
+        metadata: metric.metadata
+      });
+    }
+  }
+
   // Production-safe methods
   getLogs(level?: LogLevel) {
     if (!this.isDevelopment && level !== 'error') return [];
@@ -88,9 +125,20 @@ class Logger {
     return [...this.logs];
   }
 
+  getPerformanceMetrics() {
+    if (!this.isDevelopment) return [];
+    return Array.from(this.performanceMetrics.values()).filter(m => m.duration);
+  }
+
   clearLogs() {
     if (this.isDevelopment) {
       this.logs = [];
+    }
+  }
+
+  clearPerformanceMetrics() {
+    if (this.isDevelopment) {
+      this.performanceMetrics.clear();
     }
   }
 
@@ -102,3 +150,12 @@ class Logger {
 }
 
 export const logger = new Logger();
+
+// Performance utility hooks
+export const usePerformanceLogger = () => {
+  return {
+    startTimer: (name: string, metadata?: any) => logger.startPerformance(name, metadata),
+    endTimer: (name: string) => logger.endPerformance(name),
+    getMetrics: () => logger.getPerformanceMetrics()
+  };
+};
