@@ -76,24 +76,10 @@ const PlaylistContent: React.FC<PlaylistContentProps> = ({
         )}
         
         {/* Controls Row */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-          {/* Status Text */}
-          <div className="flex-1 min-w-0">
-            {isSearching ? (
-              <p className="text-sm text-muted-foreground">
-                {hasResults ? `${playlistTracks.length} result${playlistTracks.length !== 1 ? 's' : ''} found` : 'No results found'}
-              </p>
-            ) : (
-              <p className="text-sm text-muted-foreground">
-                {hasPlaylist ? `${allPlaylistTracks.length} station${allPlaylistTracks.length !== 1 ? 's' : ''} in playlist` : 'Your playlist is empty'}
-              </p>
-            )}
-          </div>
-          
-          {/* Action Buttons */}
-          {hasPlaylist && (
-            <div className="flex items-center gap-2 flex-shrink-0">
-              {/* Random Mode Toggle */}
+        {hasPlaylist && (
+          <div className="flex justify-between items-center gap-3">
+            {/* Left side - Random Mode Toggle */}
+            <div className="flex-shrink-0">
               <Button
                 variant="ghost"
                 size="sm"
@@ -115,7 +101,10 @@ const PlaylistContent: React.FC<PlaylistContentProps> = ({
                   {randomMode ? "Random" : "Sequential"}
                 </span>
               </Button>
-              
+            </div>
+            
+            {/* Right side - Action Buttons */}
+            <div className="flex items-center gap-2 flex-shrink-0">
               {/* Export buttons */}
               <ExportPlaylistButtons 
                 tracks={allPlaylistTracks} 
@@ -143,8 +132,8 @@ const PlaylistContent: React.FC<PlaylistContentProps> = ({
                 </Button>
               )}
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </CardHeader>
       <CardContent className="px-3 sm:px-6 space-y-6">
         {hasResults ? (
