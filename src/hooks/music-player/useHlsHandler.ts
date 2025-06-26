@@ -21,7 +21,9 @@ export const useHlsHandler = ({
   const hlsRef = useRef<Hls | null>(null);
   const lastUrlRef = useRef<string | undefined>(undefined);
   const retryCountRef = useRef<number>(0);
+  const loadTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const maxRetries = 3;
+  const loadTimeout = 15000; // 15 seconds timeout for initial load
 
   useEffect(() => {
     // Ensure global audio element exists
@@ -46,6 +48,11 @@ export const useHlsHandler = ({
       }
       setIsPlaying(false);
       setLoading(false);
+      // Clear any pending timeouts
+      if (loadTimeoutRef.current) {
+        clearTimeout(loadTimeoutRef.current);
+        loadTimeoutRef.current = null;
+      }
       return;
     }
 
@@ -53,6 +60,28 @@ export const useHlsHandler = ({
     if (url !== lastUrlRef.current) {
       logger.debug(`URL changed from ${lastUrlRef.current} to ${url}. Re-initializing HLS.`);
       setLoading(true);
+
+      // Clear any existing timeout
+      if (loadTimeoutRef.current) {
+        clearTimeout(loadTimeoutRef.current);
+        loadTimeoutRef.current = null;
+      }
+
+      // Set a timeout for loading
+      loadTimeoutRef.current = setTimeout(() => {
+        logger.warn("Stream loading timeout reached");
+        if (retryCountRef.current < maxRetries) {
+          retryCountRef.current++;
+          logger.info(`Retrying stream load (attempt ${retryCountRef.current}/${maxRetries})`);
+          // Trigger a retry by setting the URL again
+          lastUrlRef.current = undefined;
+        } else {
+          logger.error("Max retries reached for stream loading");
+          setIsPlaying(false);
+          setLoading(false);
+          updateGlobalPlaybackState(false, false, false);
+        }
+      }, loadTimeout);
 
       if (hlsRef.current) {
         hlsRef.current.destroy();
@@ -69,7 +98,12 @@ export const useHlsHandler = ({
         const hls = new Hls({
           enableWorker: false,
           lowLatencyMode: true,
-          backBufferLength: 90
+          backBufferLength: 90,
+          maxLoadingDelay: 4,
+          maxBufferLength: 30,
+          maxBufferSize: 60 * 1000 * 1000,
+          liveSyncDurationCount: 3,
+          liveMaxLatencyDurationCount: 10
         });
         
         hls.loadSource(url);
@@ -79,12 +113,16 @@ export const useHlsHandler = ({
         hls.on(Hls.Events.ERROR, (event, data) => {
           logger.error("HLS Error:", data);
           if (data.fatal) {
+            const backoffDelay = Math.min(1000 * Math.pow(2, retryCountRef.current), 8000);
+            
             switch (data.type) {
               case Hls.ErrorTypes.NETWORK_ERROR:
-                logger.warn("HLS network error, attempting to recover...");
+                logger.warn(`HLS network error, retrying in ${backoffDelay}ms...`);
                 if (retryCountRef.current < maxRetries) {
                   retryCountRef.current++;
-                  hls.recoverMediaError();
+                  setTimeout(() => {
+                    hls.recoverMediaError();
+                  }, backoffDelay);
                 } else {
                   logger.error("Max HLS network retries reached. Stopping playback.");
                   setIsPlaying(false);
@@ -93,10 +131,12 @@ export const useHlsHandler = ({
                 }
                 break;
               case Hls.ErrorTypes.MEDIA_ERROR:
-                logger.warn("HLS media error, attempting to recover...");
+                logger.warn(`HLS media error, retrying in ${backoffDelay}ms...`);
                 if (retryCountRef.current < maxRetries) {
                   retryCountRef.current++;
-                  hls.recoverMediaError();
+                  setTimeout(() => {
+                    hls.recoverMediaError();
+                  }, backoffDelay);
                 } else {
                   logger.error("Max HLS media retries reached. Stopping playback.");
                   setIsPlaying(false);
@@ -119,14 +159,28 @@ export const useHlsHandler = ({
         hls.on(Hls.Events.MANIFEST_PARSED, () => {
           logger.debug("HLS manifest parsed, ready to play");
           setLoading(false);
+          if (loadTimeoutRef.current) {
+            clearTimeout(loadTimeoutRef.current);
+            loadTimeoutRef.current = null;
+          }
         });
 
         hls.on(Hls.Events.FRAG_LOADED, () => {
           logger.debug("HLS fragment loaded");
           setLoading(false);
+          if (loadTimeoutRef.current) {
+            clearTimeout(loadTimeoutRef.current);
+            loadTimeoutRef.current = null;
+          }
         });
+
+        // Add buffer events for better loading state management
+        hls.on(Hls.Events.BUFFER_APPENDED, () => {
+          setLoading(false);
+        });
+
       } else {
-        // Direct playback for non-HLS or if HLS is not supported
+        // Direct playbook for non-HLS or if HLS is not supported
         audio.src = url;
         audio.load();
         
@@ -138,12 +192,41 @@ export const useHlsHandler = ({
         const handleCanPlay = () => {
           logger.debug("Audio can play");
           setLoading(false);
+          if (loadTimeoutRef.current) {
+            clearTimeout(loadTimeoutRef.current);
+            loadTimeoutRef.current = null;
+          }
           audio.removeEventListener('error', handleError);
           audio.removeEventListener('canplay', handleCanPlay);
         };
 
+        const handleLoadStart = () => {
+          logger.debug("Audio load started");
+          setLoading(true);
+        };
+
+        const handleProgress = () => {
+          if (audio.buffered.length > 0) {
+            logger.debug("Audio buffering progress");
+            setLoading(false);
+          }
+        };
+
         audio.addEventListener('error', handleError, { once: true });
         audio.addEventListener('canplay', handleCanPlay, { once: true });
+        audio.addEventListener('loadstart', handleLoadStart, { once: true });
+        audio.addEventListener('progress', handleProgress);
+
+        // Cleanup function for direct streams
+        const cleanup = () => {
+          audio.removeEventListener('error', handleError);
+          audio.removeEventListener('canplay', handleCanPlay);
+          audio.removeEventListener('loadstart', handleLoadStart);
+          audio.removeEventListener('progress', handleProgress);
+        };
+
+        // Store cleanup for later use
+        (audio as any)._directStreamCleanup = cleanup;
       }
       
       lastUrlRef.current = url;
@@ -175,6 +258,16 @@ export const useHlsHandler = ({
       if (hlsRef.current) {
         hlsRef.current.destroy();
         hlsRef.current = null;
+      }
+      if (loadTimeoutRef.current) {
+        clearTimeout(loadTimeoutRef.current);
+        loadTimeoutRef.current = null;
+      }
+      // Clean up direct stream listeners
+      const audio = globalAudioRef.element;
+      if (audio && (audio as any)._directStreamCleanup) {
+        (audio as any)._directStreamCleanup();
+        (audio as any)._directStreamCleanup = null;
       }
     };
   }, []);

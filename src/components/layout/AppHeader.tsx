@@ -1,8 +1,5 @@
 
 import React, { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Shuffle } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { useTheme } from "@/components/ThemeProvider";
 import { MusicPlayer } from "@/components/ui/player/MusicPlayer";
 import { useAudioPlayer } from "@/context/AudioPlayerContext";
@@ -125,24 +122,6 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
                   loading={loading}
                   compact={true}
                 />
-                {/* Random Mode Toggle */}
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => {
-                    console.log("Random mode toggle clicked, changing from", randomMode, "to", !randomMode);
-                    setRandomMode(!randomMode);
-                  }}
-                  className={cn(
-                    "h-10 w-10 rounded-full transition-all duration-200",
-                    randomMode
-                      ? "bg-primary/20 text-primary"
-                      : "text-on-surface-variant hover:bg-surface-container-high"
-                  )}
-                  title={randomMode ? "Random mode on" : "Random mode off"}
-                >
-                  <Shuffle className="h-5 w-5" />
-                </Button>
               </div>
             </div>
           ) : (
@@ -164,23 +143,6 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
                   loading={false}
                   compact={true}
                 />
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => {
-                    console.log("Random mode toggle clicked, changing from", randomMode, "to", !randomMode);
-                    setRandomMode(!randomMode);
-                  }}
-                  className={cn(
-                    "h-10 w-10 rounded-full transition-all duration-200",
-                    randomMode
-                      ? "bg-primary/20 text-primary"
-                      : "text-on-surface-variant hover:bg-surface-container-high"
-                    )}
-                  title={randomMode ? "Random mode on" : "Random mode off"}
-                >
-                  <Shuffle className="h-5 w-5" />
-                </Button>
               </div>
             </div>
           )}

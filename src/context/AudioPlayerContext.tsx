@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useRef, useEffect, useCallback } from 'react';
 import { Track } from '@/types/track';
 import { useHlsHandler } from '@/hooks/music-player/useHlsHandler';
@@ -58,6 +57,12 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({
   const [duration, setDuration] = useState(0);
   const [playlistTracks, setPlaylistTracks] = useState<Track[]>([]);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const randomModeRef = useRef(randomMode);
+
+  // Keep randomMode ref in sync for stable reference in callbacks
+  useEffect(() => {
+    randomModeRef.current = randomMode;
+  }, [randomMode]);
 
   // Initialize global audio element if not already done
   useEffect(() => {
@@ -74,6 +79,9 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({
   const playTrack = useCallback((track: Track) => {
     console.log("AudioPlayerContext: playTrack called with:", track.name);
     logger.debug("Playing track", { trackName: track.name, url: track.url });
+    
+    // Set loading state immediately for better UX
+    setLoading(true);
     
     // Set the track and playing state immediately without setTimeout
     setCurrentTrack(track);
@@ -109,7 +117,7 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({
   }, [isPlaying, currentTrack, pausePlayback, resumePlayback]);
 
   const nextTrack = useCallback(() => {
-    console.log("AudioPlayerContext: nextTrack called");
+    console.log("AudioPlayerContext: nextTrack called with randomMode:", randomModeRef.current);
     
     // Use playlist tracks if available, otherwise fall back to main tracks
     const activeTrackList = playlistTracks.length > 0 ? playlistTracks : tracks;
@@ -130,8 +138,14 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({
     const currentIndex = activeTrackList.findIndex(track => track.url === currentTrack.url);
     let nextIndex;
     
-    if (randomMode) {
-      nextIndex = Math.floor(Math.random() * activeTrackList.length);
+    if (randomModeRef.current) {
+      // Ensure we don't repeat the same track in random mode
+      const availableIndexes = activeTrackList.map((_, index) => index).filter(index => index !== currentIndex);
+      if (availableIndexes.length > 0) {
+        nextIndex = availableIndexes[Math.floor(Math.random() * availableIndexes.length)];
+      } else {
+        nextIndex = 0; // Fallback if only one track
+      }
       console.log("AudioPlayerContext: Random mode - selected index:", nextIndex);
     } else {
       nextIndex = (currentIndex + 1) % activeTrackList.length;
@@ -141,10 +155,10 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({
     const nextTrackToPlay = activeTrackList[nextIndex];
     console.log("AudioPlayerContext: Playing next track:", nextTrackToPlay.name);
     playTrack(nextTrackToPlay);
-  }, [playlistTracks, tracks, currentTrack, randomMode, playTrack]);
+  }, [playlistTracks, tracks, currentTrack, playTrack]);
 
   const previousTrack = useCallback(() => {
-    console.log("AudioPlayerContext: previousTrack called");
+    console.log("AudioPlayerContext: previousTrack called with randomMode:", randomModeRef.current);
     
     // Use playlist tracks if available, otherwise fall back to main tracks
     const activeTrackList = playlistTracks.length > 0 ? playlistTracks : tracks;
@@ -165,8 +179,14 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({
     const currentIndex = activeTrackList.findIndex(track => track.url === currentTrack.url);
     let prevIndex;
     
-    if (randomMode) {
-      prevIndex = Math.floor(Math.random() * activeTrackList.length);
+    if (randomModeRef.current) {
+      // Ensure we don't repeat the same track in random mode
+      const availableIndexes = activeTrackList.map((_, index) => index).filter(index => index !== currentIndex);
+      if (availableIndexes.length > 0) {
+        prevIndex = availableIndexes[Math.floor(Math.random() * availableIndexes.length)];
+      } else {
+        prevIndex = activeTrackList.length - 1; // Fallback if only one track
+      }
       console.log("AudioPlayerContext: Random mode - selected index:", prevIndex);
     } else {
       prevIndex = (currentIndex - 1 + activeTrackList.length) % activeTrackList.length;
@@ -176,18 +196,19 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({
     const prevTrackToPlay = activeTrackList[prevIndex];
     console.log("AudioPlayerContext: Playing previous track:", prevTrackToPlay.name);
     playTrack(prevTrackToPlay);
-  }, [playlistTracks, tracks, currentTrack, randomMode, playTrack]);
+  }, [playlistTracks, tracks, currentTrack, playTrack]);
 
   const clearCurrentTrack = useCallback(() => {
     console.log("AudioPlayerContext: clearCurrentTrack called");
     setCurrentTrack(null);
     setIsPlaying(false);
+    setLoading(false);
     setCurrentTime(0);
     setDuration(0);
     logger.debug("Cleared current track");
   }, []);
 
-  // Use the HLS handler for stream management
+  // Use the HLS handler for stream management with enhanced loading handling
   useHlsHandler({
     url: currentTrack?.url,
     isPlaying,
@@ -226,7 +247,7 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({
     onPrevious: previousTrack,
   });
 
-  // Audio event listeners for time updates
+  // Audio event listeners for time updates and better loading state management
   useEffect(() => {
     const audio = globalAudioRef.element;
     if (!audio) return;
@@ -237,15 +258,39 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({
       logger.debug("Track ended, moving to next track");
       nextTrack();
     };
+    const handleLoadStart = () => {
+      setLoading(true);
+      logger.debug("Audio loading started");
+    };
+    const handleCanPlay = () => {
+      setLoading(false);
+      logger.debug("Audio can play");
+    };
+    const handleWaiting = () => {
+      setLoading(true);
+      logger.debug("Audio buffering");
+    };
+    const handlePlaying = () => {
+      setLoading(false);
+      logger.debug("Audio playing");
+    };
 
     audio.addEventListener('timeupdate', handleTimeUpdate);
     audio.addEventListener('durationchange', handleDurationChange);
     audio.addEventListener('ended', handleEnded);
+    audio.addEventListener('loadstart', handleLoadStart);
+    audio.addEventListener('canplay', handleCanPlay);
+    audio.addEventListener('waiting', handleWaiting);
+    audio.addEventListener('playing', handlePlaying);
 
     return () => {
       audio.removeEventListener('timeupdate', handleTimeUpdate);
       audio.removeEventListener('durationchange', handleDurationChange);
       audio.removeEventListener('ended', handleEnded);
+      audio.removeEventListener('loadstart', handleLoadStart);
+      audio.removeEventListener('canplay', handleCanPlay);
+      audio.removeEventListener('waiting', handleWaiting);
+      audio.removeEventListener('playing', handlePlaying);
     };
   }, [nextTrack]);
 

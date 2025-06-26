@@ -1,20 +1,27 @@
 
 import React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Trash2 } from "lucide-react";
+import { Trash2, Shuffle } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { StationGrid } from "@/components/ui/player/StationGrid";
+import StationSearch from "@/components/station-list/StationSearch";
 import { Track } from "@/types/track";
 import { PlaylistTrack } from "@/context/PlaylistContext";
 import ExportPlaylistButtons from "./ExportPlaylistButtons";
 
 interface PlaylistContentProps {
   playlistTracks: PlaylistTrack[];
+  allPlaylistTracks: PlaylistTrack[];
   currentIndex: number;
   currentTrack: Track | null;
   isPlaying: boolean;
+  searchTerm: string;
+  onSearchTermChange: (term: string) => void;
+  randomMode: boolean;
+  onRandomModeChange: (random: boolean) => void;
   onSelectStation: (index: number) => void;
-  onStationCardPlay: (station: Track) => void;  // New prop for direct station card play/pause
+  onStationCardPlay: (station: Track) => void;
   onEditStation: (station: Track) => void;
   onConfirmDelete: (station: Track) => void;
   onToggleFavorite: (station: Track) => void;
@@ -23,9 +30,14 @@ interface PlaylistContentProps {
 
 const PlaylistContent: React.FC<PlaylistContentProps> = ({
   playlistTracks,
+  allPlaylistTracks,
   currentIndex,
   currentTrack,
   isPlaying,
+  searchTerm,
+  onSearchTermChange,
+  randomMode,
+  onRandomModeChange,
   onSelectStation,
   onStationCardPlay,
   onEditStation,
@@ -46,51 +58,102 @@ const PlaylistContent: React.FC<PlaylistContentProps> = ({
     }
   };
 
+  const hasResults = playlistTracks.length > 0;
+  const hasPlaylist = allPlaylistTracks.length > 0;
+  const isSearching = searchTerm.trim().length > 0;
+
   return (
     <Card className="bg-surface-container border border-outline-variant/30 rounded-lg elevation-1">
       <CardHeader className="pb-3 px-3 sm:px-6">
-        <div className="flex justify-between items-center">
-          <CardTitle className="text-xl font-bold text-on-surface">
-            My Playlist
-          </CardTitle>
-          <div className="flex items-center gap-2">
-            {/* Export buttons */}
-            <ExportPlaylistButtons 
-              tracks={playlistTracks} 
-              disabled={playlistTracks.length === 0}
+        {/* Search Bar */}
+        {hasPlaylist && (
+          <div className="mb-4">
+            <StationSearch
+              searchTerm={searchTerm}
+              onSearchTermChange={onSearchTermChange}
             />
-            
-            {/* Clear all button */}
-            {playlistTracks.length > 0 && onClearAll && (
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={onClearAll}
-                className="flex items-center gap-2"
-                aria-label="Clear all stations from playlist"
-              >
-                {/* Icon only on mobile */}
-                <span className="inline-flex sm:hidden">
-                  <Trash2 className="h-5 w-5" />
-                </span>
-                {/* Icon + label on desktop */}
-                <span className="hidden sm:inline-flex items-center gap-2">
-                  <Trash2 className="h-4 w-4" />
-                  Clear Playlist
-                </span>
-              </Button>
+          </div>
+        )}
+        
+        {/* Controls Row */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+          {/* Status Text */}
+          <div className="flex-1 min-w-0">
+            {isSearching ? (
+              <p className="text-sm text-muted-foreground">
+                {hasResults ? `${playlistTracks.length} result${playlistTracks.length !== 1 ? 's' : ''} found` : 'No results found'}
+              </p>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                {hasPlaylist ? `${allPlaylistTracks.length} station${allPlaylistTracks.length !== 1 ? 's' : ''} in playlist` : 'Your playlist is empty'}
+              </p>
             )}
           </div>
+          
+          {/* Action Buttons */}
+          {hasPlaylist && (
+            <div className="flex items-center gap-2 flex-shrink-0">
+              {/* Random Mode Toggle */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  console.log("Random mode toggle clicked, changing from", randomMode, "to", !randomMode);
+                  onRandomModeChange(!randomMode);
+                }}
+                className={cn(
+                  "h-9 flex items-center gap-2 transition-all duration-200",
+                  randomMode
+                    ? "bg-primary/20 text-primary"
+                    : "text-on-surface-variant hover:bg-surface-container-high"
+                )}
+                title={randomMode ? "Random mode on" : "Random mode off"}
+              >
+                <Shuffle className="h-4 w-4" />
+                {/* Show text only on larger screens */}
+                <span className="hidden sm:inline">
+                  {randomMode ? "Random" : "Sequential"}
+                </span>
+              </Button>
+              
+              {/* Export buttons */}
+              <ExportPlaylistButtons 
+                tracks={allPlaylistTracks} 
+                disabled={!hasPlaylist}
+              />
+              
+              {/* Clear all button */}
+              {onClearAll && (
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={onClearAll}
+                  className="flex items-center gap-2"
+                  aria-label="Clear all stations from playlist"
+                >
+                  {/* Icon only on mobile */}
+                  <span className="inline-flex sm:hidden">
+                    <Trash2 className="h-4 w-4" />
+                  </span>
+                  {/* Icon + label on desktop */}
+                  <span className="hidden sm:inline-flex items-center gap-2">
+                    <Trash2 className="h-4 w-4" />
+                    Clear
+                  </span>
+                </Button>
+              )}
+            </div>
+          )}
         </div>
       </CardHeader>
       <CardContent className="px-3 sm:px-6 space-y-6">
-        {playlistTracks.length > 0 ? (
+        {hasResults ? (
           <StationGrid
             stations={playlistTracks}
             currentIndex={currentIndex}
             currentTrackUrl={currentTrack?.url}
             isPlaying={isPlaying}
-            onSelectStation={handleStationCardClick}  // Use the new handler
+            onSelectStation={handleStationCardClick}
             onEditStation={onEditStation}
             onDeleteStation={onConfirmDelete}
             onToggleFavorite={onToggleFavorite}
@@ -98,8 +161,17 @@ const PlaylistContent: React.FC<PlaylistContentProps> = ({
           />
         ) : (
           <div className="text-center p-8 bg-gradient-to-br from-background/50 to-background/30 rounded-xl border border-border/50">
-            <p className="text-muted-foreground">Your playlist is empty</p>
-            <p className="text-sm text-muted-foreground/70 mt-1">Add stations from the Stations screen to build your playlist</p>
+            {isSearching ? (
+              <>
+                <p className="text-muted-foreground">No stations match your search</p>
+                <p className="text-sm text-muted-foreground/70 mt-1">Try different keywords or clear the search</p>
+              </>
+            ) : (
+              <>
+                <p className="text-muted-foreground">Your playlist is empty</p>
+                <p className="text-sm text-muted-foreground/70 mt-1">Add stations from the Stations screen to build your playlist</p>
+              </>
+            )}
           </div>
         )}
       </CardContent>

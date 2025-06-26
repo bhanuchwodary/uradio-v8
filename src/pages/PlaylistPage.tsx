@@ -5,6 +5,7 @@ import { usePlaylist } from "@/context/PlaylistContext";
 import { useAudioPlayer } from "@/context/AudioPlayerContext";
 import { useTrackStateContext } from "@/context/TrackStateContext";
 import { useToast } from "@/hooks/use-toast";
+import { usePlaylistSearch } from "@/hooks/playlist/usePlaylistSearch";
 import PlaylistContent from "@/components/playlist/PlaylistContent";
 import PlaylistDialogs from "@/components/playlist/PlaylistDialogs";
 import ClearAllDialog from "@/components/playlist/ClearAllDialog";
@@ -26,6 +27,7 @@ const PlaylistPage: React.FC<PlaylistPageProps> = ({
   const [editingStation, setEditingStation] = useState<Track | null>(null);
   const [stationToDelete, setStationToDelete] = useState<Track | null>(null);
   const [showClearDialog, setShowClearDialog] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const { toast } = useToast();
   const { editStationByValue, toggleFavorite, tracks, addUrl } = useTrackStateContext();
@@ -38,6 +40,9 @@ const PlaylistPage: React.FC<PlaylistPageProps> = ({
     updatePlaylistTrackFavorite
   } = usePlaylist();
 
+  // Filter tracks based on search term
+  const filteredTracks = usePlaylistSearch(sortedPlaylistTracks, searchTerm);
+
   // Get audio player state - THIS IS THE SINGLE SOURCE OF TRUTH
   const {
     currentTrack,
@@ -46,7 +51,8 @@ const PlaylistPage: React.FC<PlaylistPageProps> = ({
     pausePlayback,
     togglePlayPause,
     clearCurrentTrack,
-    setPlaylistTracks
+    setPlaylistTracks,
+    setRandomMode: setPlayerRandomMode
   } = useAudioPlayer();
 
   // Update the audio player's playlist tracks whenever sortedPlaylistTracks changes
@@ -55,12 +61,18 @@ const PlaylistPage: React.FC<PlaylistPageProps> = ({
     setPlaylistTracks(sortedPlaylistTracks);
   }, [sortedPlaylistTracks, setPlaylistTracks]);
 
+  // Sync random mode between page state and player
+  useEffect(() => {
+    console.log("PlaylistPage: Syncing randomMode to player:", randomMode);
+    setPlayerRandomMode(randomMode);
+  }, [randomMode, setPlayerRandomMode]);
+
   console.log("PLAYLIST DEBUG: Current tracks:", sortedPlaylistTracks.length);
-  console.log("PLAYLIST DEBUG: Sorted tracks (favorites first):", sortedPlaylistTracks.map(t => ({ name: t.name, favorite: t.isFavorite })));
+  console.log("PLAYLIST DEBUG: Filtered tracks:", filteredTracks.length);
 
   // Handle selecting a station for playback - use the global playTrack function
   const handleSelectStation = (index: number) => {
-    const selectedStation = sortedPlaylistTracks[index];
+    const selectedStation = filteredTracks[index];
     if (selectedStation) {
       console.log("PlaylistPage: User selected station", selectedStation.name, "with random mode:", randomMode);
       console.log("PlaylistPage: Calling playTrack with station:", selectedStation);
@@ -211,10 +223,15 @@ const PlaylistPage: React.FC<PlaylistPageProps> = ({
     <AppLayout>
       <div className="container mx-auto max-w-5xl space-y-6 pt-4">
         <PlaylistContent
-          playlistTracks={sortedPlaylistTracks}
+          playlistTracks={filteredTracks}
+          allPlaylistTracks={sortedPlaylistTracks}
           currentIndex={-1}
           currentTrack={currentTrack}
           isPlaying={isPlaying}
+          searchTerm={searchTerm}
+          onSearchTermChange={setSearchTerm}
+          randomMode={randomMode}
+          onRandomModeChange={setRandomMode}
           onSelectStation={handleSelectStation}
           onStationCardPlay={handleStationCardPlay}
           onEditStation={handleEditStation}

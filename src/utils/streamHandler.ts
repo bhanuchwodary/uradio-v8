@@ -37,7 +37,7 @@ export const configureAudioForStream = (audio: HTMLAudioElement, streamType: Str
     audio.removeAttribute('crossOrigin');
   }
 
-  // Set additional properties for better compatibility
+  // Set additional properties for better compatibility and performance
   audio.preload = 'auto';
   
   // Set playsInline for mobile compatibility
@@ -45,6 +45,17 @@ export const configureAudioForStream = (audio: HTMLAudioElement, streamType: Str
   
   // Ensure autoplay is controlled
   audio.autoplay = false;
+  
+  // Optimize for live streams
+  if (streamType === 'hls' || streamType === 'direct') {
+    // Set buffer size for better streaming performance
+    try {
+      // These are browser-specific optimizations
+      (audio as any).networkState = HTMLMediaElement.NETWORK_LOADING;
+    } catch (error) {
+      // Silently ignore if browser doesn't support these properties
+    }
+  }
 };
 
 export const handleDirectStreamError = (
@@ -59,15 +70,27 @@ export const handleDirectStreamError = (
   audio.crossOrigin = 'anonymous';
   audio.load();
   
+  // Set a timeout for the CORS retry
+  const corsTimeout = setTimeout(() => {
+    logger.error("CORS fallback also timed out", { url });
+    audio.removeEventListener('error', handleSecondError);
+    audio.removeEventListener('canplay', handleSuccess);
+    setIsPlaying(false);
+    setLoading(false);
+  }, 10000); // 10 second timeout for CORS retry
+  
   const handleSecondError = () => {
     logger.error("Stream failed even with CORS", { url });
+    clearTimeout(corsTimeout);
     audio.removeEventListener('error', handleSecondError);
+    audio.removeEventListener('canplay', handleSuccess);
     setIsPlaying(false);
     setLoading(false);
   };
   
   const handleSuccess = () => {
     logger.info("Stream loaded successfully with CORS fallback");
+    clearTimeout(corsTimeout);
     audio.removeEventListener('canplay', handleSuccess);
     audio.removeEventListener('error', handleSecondError);
     setLoading(false);
@@ -75,4 +98,29 @@ export const handleDirectStreamError = (
   
   audio.addEventListener('canplay', handleSuccess, { once: true });
   audio.addEventListener('error', handleSecondError, { once: true });
+};
+
+// New utility function for creating connection timeout
+export const createConnectionTimeout = (
+  timeoutMs: number,
+  onTimeout: () => void
+): (() => void) => {
+  const timeoutId = setTimeout(onTimeout, timeoutMs);
+  return () => clearTimeout(timeoutId);
+};
+
+// Enhanced error recovery with exponential backoff
+export const createRetryHandler = (
+  maxRetries: number,
+  baseDelay: number = 1000
+) => {
+  let retryCount = 0;
+  
+  return {
+    shouldRetry: () => retryCount < maxRetries,
+    getDelay: () => Math.min(baseDelay * Math.pow(2, retryCount), 8000),
+    incrementRetry: () => retryCount++,
+    reset: () => { retryCount = 0; },
+    getRetryCount: () => retryCount
+  };
 };
