@@ -77,13 +77,16 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   return (
     <header className="fixed top-0 left-0 right-0 h-20 bg-surface-container/95 backdrop-blur-lg border-b border-outline-variant/20 z-20 ios-safe-top ios-safe-left ios-safe-right elevation-1">
       <div className="container mx-auto flex items-center h-full px-4 gap-4 w-full">
-        {/* Logo */}
-        <div className="flex-shrink-0">
+        {/* Logo with Tagline */}
+        <div className="flex-shrink-0 flex flex-col items-center">
           <img
             src={getLogoSrc()}
             alt="uRadio"
-            className={`h-12 w-auto object-contain transition-opacity duration-100 ${logoLoaded ? 'opacity-100' : 'opacity-0'}`}
+            className={`h-10 w-auto object-contain transition-opacity duration-100 ${logoLoaded ? 'opacity-100' : 'opacity-0'}`}
           />
+          <p className="font-handwritten text-xs text-on-surface-variant mt-0.5 leading-none">
+            it's ur radio
+          </p>
         </div>
         
         {/* Main Info/Controls - THIS IS THE ONLY PLAYER IN THE APP */}

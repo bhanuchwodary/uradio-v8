@@ -3,7 +3,7 @@ import { useRef, useEffect } from "react";
 import Hls from "hls.js";
 import { globalAudioRef, updateGlobalPlaybackState } from "@/components/music-player/audioInstance";
 import { logger } from "@/utils/logger";
-import { detectStreamType, configureAudioForStream, handleDirectStreamError } from "@/utils/streamHandler";
+import { detectStreamType, configureAudioForStream, handleDirectStreamError, createRetryHandler } from "@/utils/streamHandler";
 
 interface UseHlsHandlerProps {
   url: string | undefined;
@@ -20,10 +20,48 @@ export const useHlsHandler = ({
 }: UseHlsHandlerProps) => {
   const hlsRef = useRef<Hls | null>(null);
   const lastUrlRef = useRef<string | undefined>(undefined);
-  const retryCountRef = useRef<number>(0);
   const loadTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const maxRetries = 3;
-  const loadTimeout = 15000; // 15 seconds timeout for initial load
+  const retryTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const loadRetryHandler = useRef(createRetryHandler(5, 2000)); // 5 retries with 2s base delay
+  const playRetryHandler = useRef(createRetryHandler(3, 1000)); // 3 play retries with 1s base delay
+  const loadTimeout = 20000; // 20 seconds timeout for initial load
+
+  // Enhanced play function with retry logic
+  const attemptPlay = async (audio: HTMLAudioElement, retryCount: number = 0): Promise<void> => {
+    try {
+      logger.debug(`Attempting to play audio (attempt ${retryCount + 1})`);
+      await audio.play();
+      logger.debug("Playback started successfully");
+      updateGlobalPlaybackState(true, false, false);
+      playRetryHandler.current.reset();
+    } catch (error) {
+      logger.warn(`Play attempt ${retryCount + 1} failed:`, error);
+      
+      if (playRetryHandler.current.shouldRetry()) {
+        const delay = playRetryHandler.current.getDelay();
+        playRetryHandler.current.incrementRetry();
+        
+        logger.info(`Retrying play in ${delay}ms (attempt ${playRetryHandler.current.getRetryCount() + 1})`);
+        
+        return new Promise((resolve, reject) => {
+          retryTimeoutRef.current = setTimeout(async () => {
+            try {
+              await attemptPlay(audio, playRetryHandler.current.getRetryCount());
+              resolve();
+            } catch (retryError) {
+              reject(retryError);
+            }
+          }, delay);
+        });
+      } else {
+        logger.error("Max play retries reached, stopping playback");
+        setIsPlaying(false);
+        setLoading(false);
+        updateGlobalPlaybackState(false, false, false);
+        throw error;
+      }
+    }
+  };
 
   useEffect(() => {
     // Ensure global audio element exists
@@ -53,35 +91,60 @@ export const useHlsHandler = ({
         clearTimeout(loadTimeoutRef.current);
         loadTimeoutRef.current = null;
       }
+      if (retryTimeoutRef.current) {
+        clearTimeout(retryTimeoutRef.current);
+        retryTimeoutRef.current = null;
+      }
       return;
     }
 
     // Only re-configure HLS or change source if URL actually changed
     if (url !== lastUrlRef.current) {
-      logger.debug(`URL changed from ${lastUrlRef.current} to ${url}. Re-initializing HLS.`);
+      logger.debug(`URL changed from ${lastUrlRef.current} to ${url}. Re-initializing stream.`);
       setLoading(true);
 
-      // Clear any existing timeout
+      // Clear any existing timeouts
       if (loadTimeoutRef.current) {
         clearTimeout(loadTimeoutRef.current);
         loadTimeoutRef.current = null;
       }
+      if (retryTimeoutRef.current) {
+        clearTimeout(retryTimeoutRef.current);
+        retryTimeoutRef.current = null;
+      }
 
-      // Set a timeout for loading
-      loadTimeoutRef.current = setTimeout(() => {
-        logger.warn("Stream loading timeout reached");
-        if (retryCountRef.current < maxRetries) {
-          retryCountRef.current++;
-          logger.info(`Retrying stream load (attempt ${retryCountRef.current}/${maxRetries})`);
-          // Trigger a retry by setting the URL again
-          lastUrlRef.current = undefined;
-        } else {
-          logger.error("Max retries reached for stream loading");
-          setIsPlaying(false);
-          setLoading(false);
-          updateGlobalPlaybackState(false, false, false);
-        }
-      }, loadTimeout);
+      // Reset retry handlers for new URL
+      loadRetryHandler.current.reset();
+      playRetryHandler.current.reset();
+
+      // Set a timeout for loading with exponential backoff
+      const setupLoadTimeout = () => {
+        const delay = loadRetryHandler.current.getDelay();
+        loadTimeoutRef.current = setTimeout(() => {
+          logger.warn(`Stream loading timeout reached (${delay}ms)`);
+          
+          if (loadRetryHandler.current.shouldRetry()) {
+            loadRetryHandler.current.incrementRetry();
+            logger.info(`Retrying stream load (attempt ${loadRetryHandler.current.getRetryCount()}/${5})`);
+            
+            // Reset and retry
+            if (hlsRef.current) {
+              hlsRef.current.destroy();
+              hlsRef.current = null;
+            }
+            audio.src = "";
+            audio.load();
+            setupLoadTimeout(); // Setup next timeout
+          } else {
+            logger.error("Max load retries reached for stream");
+            setIsPlaying(false);
+            setLoading(false);
+            updateGlobalPlaybackState(false, false, false);
+          }
+        }, Math.min(loadTimeout + delay, 30000)); // Cap at 30 seconds
+      };
+
+      setupLoadTimeout();
 
       if (hlsRef.current) {
         hlsRef.current.destroy();
@@ -99,11 +162,15 @@ export const useHlsHandler = ({
           enableWorker: false,
           lowLatencyMode: true,
           backBufferLength: 90,
-          maxLoadingDelay: 4,
+          maxLoadingDelay: 6,
           maxBufferLength: 30,
           maxBufferSize: 60 * 1000 * 1000,
           liveSyncDurationCount: 3,
-          liveMaxLatencyDurationCount: 10
+          liveMaxLatencyDurationCount: 10,
+          fragLoadingRetryDelay: 2000,
+          fragLoadingMaxRetry: 4,
+          manifestLoadingRetryDelay: 2000,
+          manifestLoadingMaxRetry: 4
         });
         
         hls.loadSource(url);
@@ -113,15 +180,17 @@ export const useHlsHandler = ({
         hls.on(Hls.Events.ERROR, (event, data) => {
           logger.error("HLS Error:", data);
           if (data.fatal) {
-            const backoffDelay = Math.min(1000 * Math.pow(2, retryCountRef.current), 8000);
+            const backoffDelay = Math.min(2000 * Math.pow(2, loadRetryHandler.current.getRetryCount()), 16000);
             
             switch (data.type) {
               case Hls.ErrorTypes.NETWORK_ERROR:
                 logger.warn(`HLS network error, retrying in ${backoffDelay}ms...`);
-                if (retryCountRef.current < maxRetries) {
-                  retryCountRef.current++;
+                if (loadRetryHandler.current.shouldRetry()) {
+                  loadRetryHandler.current.incrementRetry();
                   setTimeout(() => {
-                    hls.recoverMediaError();
+                    if (hls && !hls.destroyed) {
+                      hls.recoverMediaError();
+                    }
                   }, backoffDelay);
                 } else {
                   logger.error("Max HLS network retries reached. Stopping playback.");
@@ -132,13 +201,15 @@ export const useHlsHandler = ({
                 break;
               case Hls.ErrorTypes.MEDIA_ERROR:
                 logger.warn(`HLS media error, retrying in ${backoffDelay}ms...`);
-                if (retryCountRef.current < maxRetries) {
-                  retryCountRef.current++;
+                if (loadRetryHandler.current.shouldRetry()) {
+                  loadRetryHandler.current.incrementRetry();
                   setTimeout(() => {
-                    hls.recoverMediaError();
+                    if (hls && !hls.destroyed) {
+                      hls.recoverMediaError();
+                    }
                   }, backoffDelay);
                 } else {
-                  logger.error("Max HLS media retries reached. Stopping playback.");
+                  logger.error("Max HLS media retries reached. Stopping playbook.");
                   setIsPlaying(false);
                   setLoading(false);
                   updateGlobalPlaybackState(false, false, false);
@@ -163,6 +234,7 @@ export const useHlsHandler = ({
             clearTimeout(loadTimeoutRef.current);
             loadTimeoutRef.current = null;
           }
+          loadRetryHandler.current.reset();
         });
 
         hls.on(Hls.Events.FRAG_LOADED, () => {
@@ -180,13 +252,26 @@ export const useHlsHandler = ({
         });
 
       } else {
-        // Direct playbook for non-HLS or if HLS is not supported
+        // Enhanced direct stream handling with retry mechanisms
         audio.src = url;
         audio.load();
         
         const handleError = () => {
-          logger.warn("Direct stream error, trying with CORS");
-          handleDirectStreamError(audio, setIsPlaying, setLoading, url);
+          logger.warn("Direct stream error, trying with CORS and retries");
+          
+          if (loadRetryHandler.current.shouldRetry()) {
+            loadRetryHandler.current.incrementRetry();
+            const delay = loadRetryHandler.current.getDelay();
+            
+            setTimeout(() => {
+              handleDirectStreamError(audio, setIsPlaying, setLoading, url);
+            }, delay);
+          } else {
+            logger.error("Max direct stream retries reached");
+            setIsPlaying(false);
+            setLoading(false);
+            updateGlobalPlaybackState(false, false, false);
+          }
         };
         
         const handleCanPlay = () => {
@@ -196,6 +281,7 @@ export const useHlsHandler = ({
             clearTimeout(loadTimeoutRef.current);
             loadTimeoutRef.current = null;
           }
+          loadRetryHandler.current.reset();
           audio.removeEventListener('error', handleError);
           audio.removeEventListener('canplay', handleCanPlay);
         };
@@ -212,43 +298,53 @@ export const useHlsHandler = ({
           }
         };
 
+        // Enhanced error handling with stalled detection
+        const handleStalled = () => {
+          logger.warn("Audio playback stalled, attempting recovery");
+          if (loadRetryHandler.current.shouldRetry()) {
+            loadRetryHandler.current.incrementRetry();
+            const delay = loadRetryHandler.current.getDelay();
+            setTimeout(() => {
+              audio.load();
+            }, delay);
+          }
+        };
+
         audio.addEventListener('error', handleError, { once: true });
         audio.addEventListener('canplay', handleCanPlay, { once: true });
         audio.addEventListener('loadstart', handleLoadStart, { once: true });
         audio.addEventListener('progress', handleProgress);
+        audio.addEventListener('stalled', handleStalled);
 
-        // Cleanup function for direct streams
-        const cleanup = () => {
+        // Store cleanup for later use
+        (audio as any)._directStreamCleanup = () => {
           audio.removeEventListener('error', handleError);
           audio.removeEventListener('canplay', handleCanPlay);
           audio.removeEventListener('loadstart', handleLoadStart);
           audio.removeEventListener('progress', handleProgress);
+          audio.removeEventListener('stalled', handleStalled);
         };
-
-        // Store cleanup for later use
-        (audio as any)._directStreamCleanup = cleanup;
       }
       
       lastUrlRef.current = url;
-      retryCountRef.current = 0;
     }
 
-    // Handle play/pause based on isPlaying state
+    // Enhanced play/pause handling with retry logic
     if (isPlaying && audio.paused) {
-      logger.debug("Starting playback...");
-      audio.play().then(() => {
-        logger.debug("Playback started successfully");
-        updateGlobalPlaybackState(true, false, false);
-      }).catch(error => {
-        logger.error("Error starting playback:", error);
-        setIsPlaying(false);
-        setLoading(false);
-        updateGlobalPlaybackState(false, false, false);
+      logger.debug("Starting playback with retry support...");
+      attemptPlay(audio).catch(error => {
+        logger.error("Failed to start playback after all retries:", error);
       });
     } else if (!isPlaying && !audio.paused) {
       logger.debug("Pausing playback...");
       audio.pause();
       updateGlobalPlaybackState(false, true, true);
+      // Clear any pending play retries
+      if (retryTimeoutRef.current) {
+        clearTimeout(retryTimeoutRef.current);
+        retryTimeoutRef.current = null;
+      }
+      playRetryHandler.current.reset();
     }
   }, [url, isPlaying, setIsPlaying, setLoading]);
 
@@ -262,6 +358,10 @@ export const useHlsHandler = ({
       if (loadTimeoutRef.current) {
         clearTimeout(loadTimeoutRef.current);
         loadTimeoutRef.current = null;
+      }
+      if (retryTimeoutRef.current) {
+        clearTimeout(retryTimeoutRef.current);
+        retryTimeoutRef.current = null;
       }
       // Clean up direct stream listeners
       const audio = globalAudioRef.element;

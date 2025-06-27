@@ -77,7 +77,7 @@ export const handleDirectStreamError = (
     audio.removeEventListener('canplay', handleSuccess);
     setIsPlaying(false);
     setLoading(false);
-  }, 10000); // 10 second timeout for CORS retry
+  }, 15000); // Extended to 15 second timeout for CORS retry
   
   const handleSecondError = () => {
     logger.error("Stream failed even with CORS", { url });
@@ -100,7 +100,7 @@ export const handleDirectStreamError = (
   audio.addEventListener('error', handleSecondError, { once: true });
 };
 
-// New utility function for creating connection timeout
+// Enhanced utility function for creating connection timeout
 export const createConnectionTimeout = (
   timeoutMs: number,
   onTimeout: () => void
@@ -109,7 +109,7 @@ export const createConnectionTimeout = (
   return () => clearTimeout(timeoutId);
 };
 
-// Enhanced error recovery with exponential backoff
+// Enhanced error recovery with exponential backoff and better configuration
 export const createRetryHandler = (
   maxRetries: number,
   baseDelay: number = 1000
@@ -118,7 +118,12 @@ export const createRetryHandler = (
   
   return {
     shouldRetry: () => retryCount < maxRetries,
-    getDelay: () => Math.min(baseDelay * Math.pow(2, retryCount), 8000),
+    getDelay: () => {
+      // Exponential backoff with jitter to prevent thundering herd
+      const exponentialDelay = baseDelay * Math.pow(2, retryCount);
+      const jitter = Math.random() * 0.3 * exponentialDelay; // 30% jitter
+      return Math.min(exponentialDelay + jitter, 30000); // Cap at 30 seconds
+    },
     incrementRetry: () => retryCount++,
     reset: () => { retryCount = 0; },
     getRetryCount: () => retryCount
