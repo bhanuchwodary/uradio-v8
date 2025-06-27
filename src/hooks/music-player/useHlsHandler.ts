@@ -188,8 +188,8 @@ export const useHlsHandler = ({
                 if (loadRetryHandler.current.shouldRetry()) {
                   loadRetryHandler.current.incrementRetry();
                   setTimeout(() => {
-                    if (hls && !hls.destroyed) {
-                      hls.recoverMediaError();
+                    if (hlsRef.current) {
+                      hlsRef.current.recoverMediaError();
                     }
                   }, backoffDelay);
                 } else {
@@ -204,8 +204,8 @@ export const useHlsHandler = ({
                 if (loadRetryHandler.current.shouldRetry()) {
                   loadRetryHandler.current.incrementRetry();
                   setTimeout(() => {
-                    if (hls && !hls.destroyed) {
-                      hls.recoverMediaError();
+                    if (hlsRef.current) {
+                      hlsRef.current.recoverMediaError();
                     }
                   }, backoffDelay);
                 } else {
