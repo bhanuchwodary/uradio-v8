@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Download, X } from 'lucide-react';
-import { logger } from '@/utils/logger';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>;
@@ -15,34 +14,73 @@ export const InstallPrompt: React.FC = () => {
   const [isInstalled, setIsInstalled] = useState(false);
 
   useEffect(() => {
+    console.log('InstallPrompt: Component mounted, checking PWA status...');
+    
     // Check if app is already installed
     const checkIfInstalled = () => {
-      if (window.matchMedia('(display-mode: standalone)').matches) {
-        setIsInstalled(true);
-        logger.debug('PWA is running in standalone mode');
-      }
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+      const isInWebAppiOS = (window.navigator as any).standalone === true;
+      const isInstalled = isStandalone || isInWebAppiOS;
+      
+      console.log('InstallPrompt: PWA installation check:', {
+        isStandalone,
+        isInWebAppiOS,
+        isInstalled,
+        userAgent: navigator.userAgent
+      });
+      
+      setIsInstalled(isInstalled);
+      return isInstalled;
     };
 
-    checkIfInstalled();
+    const installed = checkIfInstalled();
+    
+    if (installed) {
+      console.log('InstallPrompt: App is already installed');
+      return;
+    }
 
     // Listen for beforeinstallprompt event
     const handleBeforeInstallPrompt = (e: Event) => {
+      console.log('InstallPrompt: beforeinstallprompt event fired');
       e.preventDefault();
       setDeferredPrompt(e as BeforeInstallPromptEvent);
-      setShowInstallPrompt(true);
-      logger.debug('Install prompt available');
+      
+      // Check if user has dismissed the prompt in this session
+      const dismissed = sessionStorage.getItem('installPromptDismissed');
+      if (!dismissed) {
+        setShowInstallPrompt(true);
+        console.log('InstallPrompt: Showing install prompt');
+      } else {
+        console.log('InstallPrompt: Prompt was dismissed in this session');
+      }
     };
 
     // Listen for appinstalled event
     const handleAppInstalled = () => {
+      console.log('InstallPrompt: App was installed successfully');
       setIsInstalled(true);
       setShowInstallPrompt(false);
       setDeferredPrompt(null);
-      logger.info('PWA was installed');
+      sessionStorage.removeItem('installPromptDismissed');
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     window.addEventListener('appinstalled', handleAppInstalled);
+
+    // Debug: Check if service worker is registered
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.ready.then(() => {
+        console.log('InstallPrompt: Service worker is ready');
+      });
+    }
+
+    // Debug: Log manifest status
+    if ('getRegistrations' in navigator.serviceWorker) {
+      navigator.serviceWorker.getRegistrations().then(registrations => {
+        console.log('InstallPrompt: Service worker registrations:', registrations.length);
+      });
+    }
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
@@ -51,33 +89,37 @@ export const InstallPrompt: React.FC = () => {
   }, []);
 
   const handleInstall = async () => {
-    if (!deferredPrompt) return;
+    if (!deferredPrompt) {
+      console.log('InstallPrompt: No deferred prompt available');
+      return;
+    }
 
     try {
+      console.log('InstallPrompt: Triggering install prompt...');
       await deferredPrompt.prompt();
       const { outcome } = await deferredPrompt.userChoice;
       
-      if (outcome === 'accepted') {
-        logger.info('User accepted the install prompt');
-      } else {
-        logger.info('User dismissed the install prompt');
-      }
+      console.log('InstallPrompt: User choice:', outcome);
       
       setDeferredPrompt(null);
       setShowInstallPrompt(false);
+      
+      if (outcome === 'dismissed') {
+        sessionStorage.setItem('installPromptDismissed', 'true');
+      }
     } catch (error) {
-      logger.error('Error during install:', error);
+      console.error('InstallPrompt: Error during install:', error);
     }
   };
 
   const handleDismiss = () => {
+    console.log('InstallPrompt: User dismissed install prompt');
     setShowInstallPrompt(false);
-    // Hide for this session
     sessionStorage.setItem('installPromptDismissed', 'true');
   };
 
   // Don't show if already installed or dismissed this session
-  if (isInstalled || !showInstallPrompt || sessionStorage.getItem('installPromptDismissed')) {
+  if (isInstalled || !showInstallPrompt) {
     return null;
   }
 
