@@ -63,6 +63,18 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
       : "/lovable-uploads/f6bddacc-e4ab-42a4-bdd9-3ea0d18320c0.png";
   };
 
+  // Get tagline color based on theme
+  const getTaglineColorClass = () => {
+    const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    const currentTheme = theme === "system" ? systemTheme : theme;
+    
+    if (currentTheme === "light") {
+      return "text-primary"; // Darker brand color for light theme
+    } else {
+      return "text-primary"; // Lighter brand color for dark/metallic themes
+    }
+  };
+
   // Preload both theme logos for instant switching
   useEffect(() => {
     const lightLogo = new window.Image();
@@ -84,7 +96,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
             alt="uRadio"
             className={`h-10 w-auto object-contain transition-opacity duration-100 ${logoLoaded ? 'opacity-100' : 'opacity-0'}`}
           />
-          <p className="font-handwritten text-xs text-on-surface-variant mt-0.5 leading-none">
+          <p className={`font-handwritten text-xs mt-0.5 leading-none transition-colors duration-200 ${getTaglineColorClass()}`}>
             it's ur radio
           </p>
         </div>
