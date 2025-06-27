@@ -7,6 +7,7 @@ import { TrackStateProvider } from "@/context/TrackStateContext";
 import { AudioPlayerProvider } from "@/context/AudioPlayerContext";
 import { PlaylistProvider } from "@/context/PlaylistContext";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
+import { InstallPrompt } from "@/components/pwa/InstallPrompt";
 import PlaylistPage from "@/pages/PlaylistPage";
 import AddStationPage from "@/pages/AddStationPage";
 import NotFound from "@/pages/NotFound";
@@ -29,6 +30,7 @@ const App = () => {
             <TrackStateWrapper randomMode={randomMode} volume={volume}>
               <Router>
                 <div className="min-h-screen bg-background">
+                  <InstallPrompt />
                   <Routes>
                     <Route path="/" element={<PlaylistPage randomMode={randomMode} setRandomMode={setRandomMode} volume={volume} setVolume={setVolume} />} />
                     <Route path="/playlist" element={<PlaylistPage randomMode={randomMode} setRandomMode={setRandomMode} volume={volume} setVolume={setVolume} />} />
