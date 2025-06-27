@@ -69,7 +69,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
     const currentTheme = theme === "system" ? systemTheme : theme;
     
     if (currentTheme === "light") {
-      return "text-primary"; // Darker brand color for light theme
+      return "text-on-primary-container"; // Darker color for light theme
     } else {
       return "text-primary"; // Lighter brand color for dark/metallic themes
     }
