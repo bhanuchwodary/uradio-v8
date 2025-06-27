@@ -81,11 +81,6 @@ export const featuredStations = [
     language: "Telugu"
   },
   {
-    name: "Vividh Bharati",
-    url: "https://air.pc.cdn.bitgravity.com/air/live/pbaudio001/playlist.m3u8",
-    language: "Hindi"
-  },
-  {
     name: "Kishore Kumar Radio",
     url: "https://stream.zeno.fm/0ghtfp8ztm0uv",
     language: "Hindi"
