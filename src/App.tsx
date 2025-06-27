@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Toaster } from "@/components/ui/toaster";
@@ -13,18 +13,10 @@ import NotFound from "@/pages/NotFound";
 import StationListPage from "@/pages/StationListPage";
 import RequestStationPage from "@/pages/RequestStationPage";
 import { useTrackState } from "@/hooks/useTrackState";
-import { getRandomModePreference, setRandomModePreference } from "@/utils/randomModeStorage";
 
 const App = () => {
-  const [randomMode, setRandomMode] = useState(() => getRandomModePreference());
+  const [randomMode, setRandomMode] = useState(false);
   const [volume, setVolume] = useState(0.7);
-
-  // Persist random mode changes
-  const handleSetRandomMode = (newRandomMode: boolean) => {
-    setRandomMode(newRandomMode);
-    setRandomModePreference(newRandomMode);
-    console.log("App: Random mode updated and persisted:", newRandomMode);
-  };
 
   console.log("App: Random mode state is", randomMode);
 
@@ -37,8 +29,8 @@ const App = () => {
               <Router>
                 <div className="min-h-screen bg-background">
                   <Routes>
-                    <Route path="/" element={<PlaylistPage randomMode={randomMode} setRandomMode={handleSetRandomMode} volume={volume} setVolume={setVolume} />} />
-                    <Route path="/playlist" element={<PlaylistPage randomMode={randomMode} setRandomMode={handleSetRandomMode} volume={volume} setVolume={setVolume} />} />
+                    <Route path="/" element={<PlaylistPage randomMode={randomMode} setRandomMode={setRandomMode} volume={volume} setVolume={setVolume} />} />
+                    <Route path="/playlist" element={<PlaylistPage randomMode={randomMode} setRandomMode={setRandomMode} volume={volume} setVolume={setVolume} />} />
                     <Route path="/add" element={<AddStationPage />} />
                     <Route path="/add-station" element={<AddStationPage />} />
                     <Route path="/station-list" element={<StationListPage />} />

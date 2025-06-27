@@ -1,38 +1,31 @@
 
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>uRadio - Your Personal Radio Experience</title>
-    
-    <!-- Google Fonts for handwritten tagline -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Kalam:wght@300;400;700&display=swap" rel="stylesheet">
-    
-    <meta name="description" content="uRadio - Stream your favorite radio stations with a personalized experience. Create playlists, discover new stations, and enjoy seamless audio streaming." />
-    <meta name="keywords" content="radio, streaming, music, audio, playlist, stations" />
-    
-    <!-- Open Graph Meta Tags -->
-    <meta property="og:title" content="uRadio - Your Personal Radio Experience" />
-    <meta property="og:description" content="Stream your favorite radio stations with a personalized experience. Create playlists and discover new stations." />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <title>Uradio</title>
+    <meta name="description" content="Modern Radio Streaming Application" />
+    <meta name="author" content="Uradio" />
     <meta property="og:image" content="/og-image.png" />
-    <meta property="og:type" content="website" />
     
-    <!-- Twitter Card Meta Tags -->
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="uRadio - Your Personal Radio Experience" />
-    <meta name="twitter:description" content="Stream your favorite radio stations with a personalized experience." />
-    <meta name="twitter:image" content="/og-image.png" />
+    <!-- iOS specific meta tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Uradio" />
+    <meta name="theme-color" content="#8B5CF6" />
     
-    <!-- Preload critical resources -->
-    <link rel="preload" href="/lovable-uploads/92c8140b-84fe-439c-a2f8-4d1758ab0998.png" as="image" />
-    <link rel="preload" href="/lovable-uploads/f6bddacc-e4ab-42a4-bdd9-3ea0d18320c0.png" as="image" />
+    <!-- Prevent iOS zoom on input focus -->
+    <meta name="format-detection" content="telephone=no" />
+    
+    <!-- iOS home screen icon -->
+    <link rel="apple-touch-icon" href="/favicon.ico" />
   </head>
+
   <body>
     <div id="root"></div>
+    <!-- IMPORTANT: DO NOT REMOVE THIS SCRIPT TAG OR THIS VERY COMMENT! -->
+    <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

@@ -63,20 +63,6 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
       : "/lovable-uploads/f6bddacc-e4ab-42a4-bdd9-3ea0d18320c0.png";
   };
 
-  // Get tagline color based on theme - M3 compliant
-  const getTaglineColorClass = () => {
-    const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-    const currentTheme = theme === "system" ? systemTheme : theme;
-    
-    if (currentTheme === "light") {
-      return "text-md-sys-color-on-primary-container"; // Darker color for light theme
-    } else if (currentTheme === "metallic") {
-      return "text-md-sys-color-primary"; // Brand color for metallic theme
-    } else {
-      return "text-md-sys-color-primary"; // Brand color for dark theme
-    }
-  };
-
   // Preload both theme logos for instant switching
   useEffect(() => {
     const lightLogo = new window.Image();
@@ -89,18 +75,15 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   }, []);
 
   return (
-    <header className="fixed top-0 left-0 right-0 h-20 bg-md-sys-color-surface-container/95 backdrop-blur-lg border-b border-md-sys-color-outline-variant/20 z-20 ios-safe-top ios-safe-left ios-safe-right elevation-1">
+    <header className="fixed top-0 left-0 right-0 h-20 bg-surface-container/95 backdrop-blur-lg border-b border-outline-variant/20 z-20 ios-safe-top ios-safe-left ios-safe-right elevation-1">
       <div className="container mx-auto flex items-center h-full px-4 gap-4 w-full">
-        {/* Logo with Tagline */}
-        <div className="flex-shrink-0 flex flex-col items-center">
+        {/* Logo */}
+        <div className="flex-shrink-0">
           <img
             src={getLogoSrc()}
             alt="uRadio"
-            className={`h-10 w-auto object-contain transition-opacity duration-100 ${logoLoaded ? 'opacity-100' : 'opacity-0'}`}
+            className={`h-12 w-auto object-contain transition-opacity duration-100 ${logoLoaded ? 'opacity-100' : 'opacity-0'}`}
           />
-          <p className={`font-handwritten text-xs mt-0.5 leading-none transition-colors duration-200 ${getTaglineColorClass()}`}>
-            it's ur radio
-          </p>
         </div>
         
         {/* Main Info/Controls - THIS IS THE ONLY PLAYER IN THE APP */}
@@ -110,17 +93,17 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
               {/* Station Info */}
               <div className="flex-1 min-w-0">
                 <h3
-                  className="text-base font-bold truncate text-md-sys-color-on-surface"
+                  className="text-base font-bold truncate text-on-surface"
                   title={currentTrack.name}
                 >
                   {currentTrack.name}
                 </h3>
                 <div className="flex items-center gap-2 mt-1">
                   {loading && (
-                    <p className="text-xs text-md-sys-color-primary animate-pulse">Loading...</p>
+                    <p className="text-xs text-primary animate-pulse">Loading...</p>
                   )}
                   {currentTrack.language && (
-                    <span className="inline-block px-2 py-0.5 text-xs bg-md-sys-color-primary/20 text-md-sys-color-primary rounded-full font-medium">
+                    <span className="inline-block px-2 py-0.5 text-xs bg-primary/20 text-primary rounded-full font-medium">
                       {currentTrack.language}
                     </span>
                   )}
@@ -144,7 +127,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
           ) : (
             <div className="flex items-center w-full gap-2 sm:gap-3">
               <div className="flex-1 min-w-0">
-                <p className="text-base font-medium text-md-sys-color-on-surface-variant truncate">
+                <p className="text-base font-medium text-on-surface-variant truncate">
                   Select a station to start playing
                 </p>
               </div>
