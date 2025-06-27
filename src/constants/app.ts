@@ -1,4 +1,3 @@
-
 // Application Configuration Constants
 export const APP_CONFIG = {
   NAME: 'uradio-v3-85',
@@ -12,7 +11,8 @@ export const STORAGE_KEYS = {
   VOLUME: 'uradio-volume',
   THEME: 'uradio-theme',
   PLAYLIST: 'uradio-playlist',
-  USER_PREFERENCES: 'uradio-preferences'
+  USER_PREFERENCES: 'uradio-preferences',
+  RANDOM_MODE: 'uradio-random-mode'
 } as const;
 
 // Audio Configuration

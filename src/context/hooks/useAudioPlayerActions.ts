@@ -2,6 +2,8 @@
 import { useCallback } from 'react';
 import { Track } from '@/types/track';
 import { logger } from '@/utils/logger';
+import { handleStreamSwitch } from '@/utils/streamHandler';
+import { globalAudioRef } from '@/components/music-player/audioInstance';
 
 interface UseAudioPlayerActionsProps {
   currentTrack: Track | null;
@@ -28,19 +30,37 @@ export const useAudioPlayerActions = ({
   tracks,
   randomModeRef,
 }: UseAudioPlayerActionsProps) => {
-  const playTrack = useCallback((track: Track) => {
+  const playTrack = useCallback(async (track: Track) => {
     console.log("AudioPlayerContext: playTrack called with:", track.name);
     logger.debug("Playing track", { trackName: track.name, url: track.url });
     
     // Set loading state immediately for better UX
     setLoading(true);
     
-    // Set the track and playing state immediately without setTimeout
+    // Set the track immediately
     setCurrentTrack(track);
-    setIsPlaying(true);
     
-    console.log("AudioPlayerContext: Immediately set track and playing state");
-  }, [setCurrentTrack, setIsPlaying, setLoading]);
+    // If we have a global audio element and are switching tracks, handle gracefully
+    const audio = globalAudioRef.element;
+    if (audio && currentTrack && currentTrack.url !== track.url) {
+      try {
+        // Use enhanced stream switching for reliability
+        await handleStreamSwitch(audio, track.url, setLoading, setIsPlaying);
+        setIsPlaying(true);
+        console.log("AudioPlayerContext: Stream switched successfully");
+      } catch (error) {
+        logger.error("Failed to switch stream", { error, trackName: track.name });
+        setLoading(false);
+        // Still set playing state to let the HLS handler try
+        setIsPlaying(true);
+      }
+    } else {
+      // For initial play or if no current track, proceed normally
+      setIsPlaying(true);
+    }
+    
+    console.log("AudioPlayerContext: Set track and playing state");
+  }, [setCurrentTrack, setIsPlaying, setLoading, currentTrack]);
 
   const pausePlayback = useCallback(() => {
     console.log("AudioPlayerContext: pausePlayback called");
@@ -68,7 +88,7 @@ export const useAudioPlayerActions = ({
     }
   }, [isPlaying, currentTrack, pausePlayback, resumePlayback]);
 
-  const nextTrack = useCallback(() => {
+  const nextTrack = useCallback(async () => {
     console.log("AudioPlayerContext: nextTrack called with randomMode:", randomModeRef.current);
     
     // Use playlist tracks if available, otherwise fall back to main tracks
@@ -83,7 +103,7 @@ export const useAudioPlayerActions = ({
       // If no current track, play first track
       const firstTrack = activeTrackList[0];
       console.log("AudioPlayerContext: No current track, playing first:", firstTrack.name);
-      playTrack(firstTrack);
+      await playTrack(firstTrack);
       return;
     }
     
@@ -106,10 +126,10 @@ export const useAudioPlayerActions = ({
     
     const nextTrackToPlay = activeTrackList[nextIndex];
     console.log("AudioPlayerContext: Playing next track:", nextTrackToPlay.name);
-    playTrack(nextTrackToPlay);
+    await playTrack(nextTrackToPlay);
   }, [playlistTracks, tracks, currentTrack, playTrack, randomModeRef]);
 
-  const previousTrack = useCallback(() => {
+  const previousTrack = useCallback(async () => {
     console.log("AudioPlayerContext: previousTrack called with randomMode:", randomModeRef.current);
     
     // Use playlist tracks if available, otherwise fall back to main tracks
@@ -124,7 +144,7 @@ export const useAudioPlayerActions = ({
       // If no current track, play last track
       const lastTrack = activeTrackList[activeTrackList.length - 1];
       console.log("AudioPlayerContext: No current track, playing last:", lastTrack.name);
-      playTrack(lastTrack);
+      await playTrack(lastTrack);
       return;
     }
     
@@ -147,7 +167,7 @@ export const useAudioPlayerActions = ({
     
     const prevTrackToPlay = activeTrackList[prevIndex];
     console.log("AudioPlayerContext: Playing previous track:", prevTrackToPlay.name);
-    playTrack(prevTrackToPlay);
+    await playTrack(prevTrackToPlay);
   }, [playlistTracks, tracks, currentTrack, playTrack, randomModeRef]);
 
   const clearCurrentTrack = useCallback(() => {

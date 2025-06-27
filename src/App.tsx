@@ -13,9 +13,10 @@ import NotFound from "@/pages/NotFound";
 import StationListPage from "@/pages/StationListPage";
 import RequestStationPage from "@/pages/RequestStationPage";
 import { useTrackState } from "@/hooks/useTrackState";
+import { getRandomModePreference } from "@/utils/randomModeStorage";
 
 const App = () => {
-  const [randomMode, setRandomMode] = useState(false);
+  const [randomMode, setRandomMode] = useState(() => getRandomModePreference());
   const [volume, setVolume] = useState(0.7);
 
   console.log("App: Random mode state is", randomMode);

@@ -124,3 +124,52 @@ export const createRetryHandler = (
     getRetryCount: () => retryCount
   };
 };
+
+// Enhanced stream switching with graceful loading
+export const handleStreamSwitch = (
+  audio: HTMLAudioElement,
+  newUrl: string,
+  setLoading: (loading: boolean) => void,
+  setIsPlaying: (playing: boolean) => void
+): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    logger.info("Switching stream", { newUrl });
+    setLoading(true);
+    
+    // Create a timeout for the stream switch
+    const switchTimeout = setTimeout(() => {
+      logger.warn("Stream switch timeout", { newUrl });
+      setLoading(false);
+      reject(new Error("Stream switch timeout"));
+    }, 15000);
+    
+    const handleLoadSuccess = () => {
+      logger.info("Stream switched successfully", { newUrl });
+      clearTimeout(switchTimeout);
+      setLoading(false);
+      audio.removeEventListener('canplay', handleLoadSuccess);
+      audio.removeEventListener('error', handleLoadError);
+      resolve();
+    };
+    
+    const handleLoadError = (error: Event) => {
+      logger.error("Stream switch failed", { newUrl, error });
+      clearTimeout(switchTimeout);
+      setLoading(false);
+      setIsPlaying(false);
+      audio.removeEventListener('canplay', handleLoadSuccess);
+      audio.removeEventListener('error', handleLoadError);
+      reject(new Error("Stream switch failed"));
+    };
+    
+    // Set up event listeners before changing the source
+    audio.addEventListener('canplay', handleLoadSuccess, { once: true });
+    audio.addEventListener('error', handleLoadError, { once: true });
+    
+    // Configure stream and load
+    const streamType = detectStreamType(newUrl);
+    configureAudioForStream(audio, streamType);
+    audio.src = newUrl;
+    audio.load();
+  });
+};
