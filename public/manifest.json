@@ -10,24 +10,32 @@
   "orientation": "portrait-primary",
   "scope": "/",
   "lang": "en",
+  "dir": "ltr",
   "categories": ["music", "entertainment"],
+  "prefer_related_applications": false,
   "icons": [
     {
-      "src": "/placeholder.svg",
+      "src": "/lovable-uploads/92c8140b-84fe-439c-a2f8-4d1758ab0998.png",
       "sizes": "192x192",
-      "type": "image/svg+xml",
+      "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/placeholder.svg",
+      "src": "/lovable-uploads/92c8140b-84fe-439c-a2f8-4d1758ab0998.png",
       "sizes": "512x512",
-      "type": "image/svg+xml",
+      "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/placeholder.svg",
+      "src": "/lovable-uploads/92c8140b-84fe-439c-a2f8-4d1758ab0998.png",
       "sizes": "192x192",
-      "type": "image/svg+xml",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/lovable-uploads/92c8140b-84fe-439c-a2f8-4d1758ab0998.png",
+      "sizes": "512x512",
+      "type": "image/png",
       "purpose": "maskable"
     }
   ],
@@ -39,9 +47,9 @@
       "url": "/playlist",
       "icons": [
         {
-          "src": "/placeholder.svg",
+          "src": "/lovable-uploads/92c8140b-84fe-439c-a2f8-4d1758ab0998.png",
           "sizes": "96x96",
-          "type": "image/svg+xml"
+          "type": "image/png"
         }
       ]
     },
@@ -52,9 +60,9 @@
       "url": "/add-station",
       "icons": [
         {
-          "src": "/placeholder.svg",
+          "src": "/lovable-uploads/92c8140b-84fe-439c-a2f8-4d1758ab0998.png",
           "sizes": "96x96",
-          "type": "image/svg+xml"
+          "type": "image/png"
         }
       ]
     }

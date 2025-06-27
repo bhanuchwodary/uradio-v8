@@ -1,9 +1,9 @@
 
-const CACHE_NAME = 'uradio-v1.0.1';
+const CACHE_NAME = 'uradio-v1.0.2';
 const STATIC_CACHE_URLS = [
   '/',
   '/manifest.json',
-  '/placeholder.svg'
+  '/lovable-uploads/92c8140b-84fe-439c-a2f8-4d1758ab0998.png'
 ];
 
 // Install event - cache static assets
@@ -45,7 +45,7 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Fetch event - network first strategy for dynamic content
+// Enhanced fetch event handling for mobile PWA
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
@@ -60,7 +60,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Handle navigation requests
+  // Handle navigation requests with better mobile support
   if (request.mode === 'navigate') {
     event.respondWith(
       fetch(request)
@@ -75,15 +75,18 @@ self.addEventListener('fetch', (event) => {
         })
         .catch(() => {
           return caches.match('/').then(cachedResponse => {
-            return cachedResponse || new Response('Offline', { status: 503 });
+            return cachedResponse || new Response('Offline - Please check your connection', { 
+              status: 503,
+              headers: { 'Content-Type': 'text/plain' }
+            });
           });
         })
     );
     return;
   }
 
-  // Handle other requests - cache first for static assets
-  if (STATIC_CACHE_URLS.includes(url.pathname)) {
+  // Handle static assets - cache first for better mobile performance
+  if (STATIC_CACHE_URLS.includes(url.pathname) || url.pathname.includes('lovable-uploads')) {
     event.respondWith(
       caches.match(request)
         .then(response => {
@@ -95,31 +98,52 @@ self.addEventListener('fetch', (event) => {
             return fetchResponse;
           });
         })
+        .catch(() => {
+          // Fallback for offline mode
+          if (url.pathname.includes('lovable-uploads')) {
+            return new Response('', { status: 404 });
+          }
+          return caches.match('/');
+        })
     );
   }
 });
 
-// Background sync
+// Background sync for mobile
 self.addEventListener('sync', (event) => {
   console.log('Uradio SW: Background sync triggered:', event.tag);
 });
 
-// Push notifications
+// Enhanced push notifications for mobile
 self.addEventListener('push', (event) => {
   if (event.data) {
     const options = {
       body: event.data.text(),
-      icon: '/placeholder.svg',
-      badge: '/placeholder.svg',
+      icon: '/lovable-uploads/92c8140b-84fe-439c-a2f8-4d1758ab0998.png',
+      badge: '/lovable-uploads/92c8140b-84fe-439c-a2f8-4d1758ab0998.png',
       vibrate: [100, 50, 100],
       data: {
         dateOfArrival: Date.now(),
         primaryKey: 1
-      }
+      },
+      actions: [
+        {
+          action: 'open',
+          title: 'Open Uradio'
+        }
+      ]
     };
     
     event.waitUntil(
       self.registration.showNotification('Uradio', options)
     );
   }
+});
+
+// Handle notification clicks
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  event.waitUntil(
+    clients.openWindow('/')
+  );
 });
