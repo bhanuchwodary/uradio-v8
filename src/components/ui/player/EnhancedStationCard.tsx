@@ -85,7 +85,7 @@ export const EnhancedStationCard: React.FC<EnhancedStationCardProps> = memo(({
 
   return (
     <Card className={getCardStyles()} onClick={handlePlayClick}>
-      <div className="h-full w-full p-2.5 flex flex-col">
+      <div className="h-full w-full p-3 flex flex-col justify-between">
         {variant === "featured" ? (
           <div className="flex items-center gap-4 h-full">
             <div className="flex-shrink-0">
@@ -131,9 +131,9 @@ export const EnhancedStationCard: React.FC<EnhancedStationCardProps> = memo(({
             </div>
           </div>
         ) : (
-          <div className="flex flex-col h-full justify-between items-center space-y-1">
-            {/* Station Name */}
-            <div className="flex-shrink-0 w-full text-center px-0.5">
+          <>
+            {/* Top Group: Info */}
+            <div className="w-full text-center space-y-2">
               <h3 className={cn(
                 "font-medium text-xs leading-tight line-clamp-2 break-words",
                 "min-h-[1.8rem] flex items-center justify-center",
@@ -144,10 +144,6 @@ export const EnhancedStationCard: React.FC<EnhancedStationCardProps> = memo(({
               )}>
                 {station.name}
               </h3>
-            </div>
-
-            {/* Language Badge */}
-            <div className="flex-shrink-0">
               <span className={cn(
                 "bg-gradient-to-r px-1.5 py-0.5 rounded-full text-[9px] font-medium border shadow-sm",
                 "transition-all duration-200 whitespace-nowrap",
@@ -165,10 +161,10 @@ export const EnhancedStationCard: React.FC<EnhancedStationCardProps> = memo(({
               </span>
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex-shrink-0 flex justify-center items-center w-full space-x-3">
-              {/* Favorite Button */}
-              {onToggleFavorite && (
+            {/* Bottom Group: Actions */}
+            <div className="flex justify-between items-center w-full px-1">
+              {/* Left Slot: Favorite Button */}
+              {onToggleFavorite ? (
                 <button
                   className={cn(
                     "h-9 w-9 flex items-center justify-center transition-all duration-200 rounded-full",
@@ -183,24 +179,26 @@ export const EnhancedStationCard: React.FC<EnhancedStationCardProps> = memo(({
                 >
                   <Star className={cn(
                     "h-5 w-5 transition-all duration-200",
-                    station.isFavorite ? "text-yellow-500 fill-yellow-500" : "text-muted-foreground/70 hover:text-muted-foreground"
+                    station.isFavorite ? "text-yellow-400 fill-yellow-400" : "text-muted-foreground/60 hover:text-muted-foreground"
                   )} />
                 </button>
+              ) : (
+                <div className="w-9 h-9" /> // Placeholder for alignment
               )}
 
-              {/* Play Button */}
+              {/* Center Slot: Play Button */}
               <div
                 className={cn(
                   "flex items-center justify-center transition-all duration-300",
-                  "w-9 h-9", // Make same size as other buttons
+                  "w-9 h-9", // Same size as other buttons
                   "group-hover:scale-110 group-active:scale-95",
                   isPlaying
-                    ? "bg-primary text-primary-foreground shadow-md rounded-full"
+                    ? "bg-primary text-primary-foreground shadow-lg rounded-full"
                     : inPlaylist && actionIcon === "add"
                     ? "bg-green-500/20 text-green-600 border border-green-500/30 rounded-full"
                     : isProcessing
                     ? "bg-blue-500/20 text-blue-600 border border-blue-500/30 animate-pulse rounded-full"
-                    : "bg-secondary/80 text-secondary-foreground rounded-full group-hover:bg-primary/30",
+                    : "bg-secondary/80 text-secondary-foreground rounded-full group-hover:bg-primary/30 shadow",
                   isDisabled && "group-hover:scale-100"
                 )}
                 onClick={handlePlayClick}
@@ -219,10 +217,10 @@ export const EnhancedStationCard: React.FC<EnhancedStationCardProps> = memo(({
                 />
               </div>
 
-              {/* Delete Button */}
-              {onDelete && (
+              {/* Right Slot: Delete Button */}
+              {onDelete ? (
                 <button
-                  className="h-9 w-9 text-destructive/70 hover:text-destructive transition-all duration-200 flex items-center justify-center hover:scale-110 active:scale-90 rounded-full"
+                  className="h-9 w-9 text-destructive/60 hover:text-destructive transition-all duration-200 flex items-center justify-center hover:scale-110 active:scale-90 rounded-full"
                   onClick={(e) => {
                     e.stopPropagation();
                     onDelete();
@@ -232,9 +230,11 @@ export const EnhancedStationCard: React.FC<EnhancedStationCardProps> = memo(({
                 >
                   <Trash2 className="h-5 w-5" />
                 </button>
+              ) : (
+                <div className="w-9 h-9" /> // Placeholder for alignment
               )}
             </div>
-          </div>
+          </>
         )}
       </div>
     </Card>
