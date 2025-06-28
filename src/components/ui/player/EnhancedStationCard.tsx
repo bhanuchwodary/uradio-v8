@@ -131,7 +131,7 @@ export const EnhancedStationCard: React.FC<EnhancedStationCardProps> = memo(({
             </div>
           </div>
         ) : (
-          <div className="flex flex-col h-full justify-between items-center space-y-2">
+          <div className="flex flex-col h-full justify-between items-center space-y-1">
             {/* Station Name */}
             <div className="flex-shrink-0 w-full text-center px-0.5">
               <h3 className={cn(
@@ -166,12 +166,12 @@ export const EnhancedStationCard: React.FC<EnhancedStationCardProps> = memo(({
             </div>
 
             {/* Action Buttons */}
-            <div className="flex-shrink-0 flex justify-between items-center w-full px-2">
+            <div className="flex-shrink-0 flex justify-center items-center w-full space-x-4">
               {/* Favorite Button */}
-              {onToggleFavorite ? (
+              {onToggleFavorite && (
                 <button
                   className={cn(
-                    "h-8 w-8 flex items-center justify-center transition-all duration-200 rounded-full",
+                    "h-9 w-9 flex items-center justify-center transition-all duration-200 rounded-full",
                     "hover:scale-110 active:scale-90"
                   )}
                   onClick={(e) => {
@@ -186,7 +186,7 @@ export const EnhancedStationCard: React.FC<EnhancedStationCardProps> = memo(({
                     station.isFavorite ? "text-yellow-500 fill-yellow-500" : "text-muted-foreground/70 hover:text-muted-foreground"
                   )} />
                 </button>
-              ) : <div className="w-8 h-8"/> /* Placeholder to keep alignment */}
+              )}
 
               {/* Play Button */}
               <div
@@ -221,9 +221,9 @@ export const EnhancedStationCard: React.FC<EnhancedStationCardProps> = memo(({
               </div>
 
               {/* Delete Button */}
-              {onDelete ? (
+              {onDelete && (
                 <button
-                  className="h-8 w-8 text-destructive/70 hover:text-destructive transition-all duration-200 flex items-center justify-center hover:scale-110 active:scale-90 rounded-full"
+                  className="h-9 w-9 text-destructive/70 hover:text-destructive transition-all duration-200 flex items-center justify-center hover:scale-110 active:scale-90 rounded-full"
                   onClick={(e) => {
                     e.stopPropagation();
                     onDelete();
@@ -233,7 +233,7 @@ export const EnhancedStationCard: React.FC<EnhancedStationCardProps> = memo(({
                 >
                   <Trash2 className="h-5 w-5" />
                 </button>
-              ) : <div className="w-8 h-8"/> /* Placeholder to keep alignment */}
+              )}
             </div>
           </div>
         )}
