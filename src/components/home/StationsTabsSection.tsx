@@ -1,10 +1,10 @@
 
-import React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import React, { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { StationGrid } from "@/components/ui/player/StationGrid";
 import { Track } from "@/types/track";
-import { getStations } from "@/data/featuredStationsLoader";
+import { StationGrid } from "@/components/ui/player/StationGrid";
+import { NoStationsEmptyState, NoFeaturedStationsEmptyState } from "@/components/ui/empty-states/StationEmptyStates";
+import { TrendingUp, User, Star, Music } from "lucide-react";
 
 interface StationsTabsSectionProps {
   popularStations: Track[];
@@ -13,7 +13,7 @@ interface StationsTabsSectionProps {
   currentIndex: number;
   currentTrackUrl?: string;
   isPlaying: boolean;
-  onSelectStation: (index: number, stationList: Track[]) => void;
+  onSelectStation: (stationIndex: number, stationList: Track[]) => void;
   onEditStation: (station: Track) => void;
   onDeleteStation: (station: Track) => void;
   onToggleFavorite: (station: Track) => void;
@@ -31,43 +31,84 @@ const StationsTabsSection: React.FC<StationsTabsSectionProps> = ({
   onDeleteStation,
   onToggleFavorite
 }) => {
-  // Group featured stations by language
-  const featuredByLanguage: Record<string, Track[]> = {};
-  
-  featuredStations.forEach(station => {
-    const language = station.language || "Unknown";
-    if (!featuredByLanguage[language]) {
-      featuredByLanguage[language] = [];
-    }
-    featuredByLanguage[language].push(station);
-  });
+  const [activeTab, setActiveTab] = useState("featured");
+
+  const TabHeader: React.FC<{ 
+    icon: React.ComponentType<{ className?: string }>, 
+    title: string, 
+    count: number 
+  }> = ({ icon: Icon, title, count }) => (
+    <div className="flex items-center gap-2">
+      <Icon className="w-4 h-4" />
+      <span>{title}</span>
+      <span className="text-xs bg-muted/50 text-muted-foreground px-2 py-0.5 rounded-full">
+        {count}
+      </span>
+    </div>
+  );
 
   return (
-    <Card className="bg-surface-container border border-outline-variant/30 rounded-lg elevation-1">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-lg text-foreground">My Stations</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <Tabs defaultValue="popular" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="popular">Popular</TabsTrigger>
-            <TabsTrigger value="mystations">My Stations</TabsTrigger>
-            <TabsTrigger value="featured">Featured</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="popular" className="mt-4">
+    <section className="mb-8">
+      <div className="flex items-center gap-3 mb-6">
+        <Music className="w-5 h-5 text-primary" />
+        <h2 className="text-xl font-bold text-foreground">All Stations</h2>
+      </div>
+      
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid w-full grid-cols-3 mb-6 bg-muted/30 p-1">
+          <TabsTrigger value="featured" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <TabHeader icon={Star} title="Featured" count={featuredStations.length} />
+          </TabsTrigger>
+          <TabsTrigger value="popular" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <TabHeader icon={TrendingUp} title="Popular" count={popularStations.length} />
+          </TabsTrigger>
+          <TabsTrigger value="my-stations" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <TabHeader icon={User} title="My Stations" count={userStations.length} />
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="featured" className="mt-0">
+          {featuredStations.length === 0 ? (
+            <NoFeaturedStationsEmptyState />
+          ) : (
+            <StationGrid
+              stations={featuredStations}
+              currentIndex={currentIndex}
+              currentTrackUrl={currentTrackUrl}
+              isPlaying={isPlaying}
+              onSelectStation={(index) => onSelectStation(index, featuredStations)}
+              onToggleFavorite={onToggleFavorite}
+              context="library"
+              showFeatured={true}
+              variant="default"
+            />
+          )}
+        </TabsContent>
+
+        <TabsContent value="popular" className="mt-0">
+          {popularStations.length === 0 ? (
+            <NoStationsEmptyState />
+          ) : (
             <StationGrid
               stations={popularStations}
               currentIndex={currentIndex}
               currentTrackUrl={currentTrackUrl}
               isPlaying={isPlaying}
               onSelectStation={(index) => onSelectStation(index, popularStations)}
-              onToggleFavorite={onToggleFavorite}
+              onEditStation={onEditStation}
               onDeleteStation={onDeleteStation}
+              onToggleFavorite={onToggleFavorite}
+              context="library"
+              variant="large"
+              showFeatured={false}
             />
-          </TabsContent>
-          
-          <TabsContent value="mystations" className="mt-4">
+          )}
+        </TabsContent>
+
+        <TabsContent value="my-stations" className="mt-0">
+          {userStations.length === 0 ? (
+            <NoStationsEmptyState />
+          ) : (
             <StationGrid
               stations={userStations}
               currentIndex={currentIndex}
@@ -77,28 +118,14 @@ const StationsTabsSection: React.FC<StationsTabsSectionProps> = ({
               onEditStation={onEditStation}
               onDeleteStation={onDeleteStation}
               onToggleFavorite={onToggleFavorite}
+              context="library"
+              variant="default"
+              showFeatured={false}
             />
-          </TabsContent>
-          
-          <TabsContent value="featured" className="mt-4 space-y-6">
-            {Object.entries(featuredByLanguage).map(([language, stations]) => (
-              <div key={language} className="mb-4">
-                <h3 className="font-medium text-lg mb-2 text-foreground">{language}</h3>
-                <StationGrid
-                  stations={stations}
-                  currentIndex={currentIndex}
-                  currentTrackUrl={currentTrackUrl}
-                  isPlaying={isPlaying}
-                  onSelectStation={(index) => onSelectStation(index, stations)}
-                  onToggleFavorite={onToggleFavorite}
-                  onDeleteStation={onDeleteStation}
-                />
-              </div>
-            ))}
-          </TabsContent>
-        </Tabs>
-      </CardContent>
-    </Card>
+          )}
+        </TabsContent>
+      </Tabs>
+    </section>
   );
 };
 

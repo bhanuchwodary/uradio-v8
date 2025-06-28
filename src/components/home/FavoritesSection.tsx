@@ -1,16 +1,16 @@
 
 import React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { StationGrid } from "@/components/ui/player/StationGrid";
 import { Track } from "@/types/track";
-import { Star } from "lucide-react";
+import { StationGrid } from "@/components/ui/player/StationGrid";
+import { NoFavoritesEmptyState } from "@/components/ui/empty-states/StationEmptyStates";
+import { Heart } from "lucide-react";
 
 interface FavoritesSectionProps {
   favoriteStations: Track[];
   currentIndex: number;
   currentTrackUrl?: string;
   isPlaying: boolean;
-  onSelectStation: (index: number, stationList: Track[]) => void;
+  onSelectStation: (stationIndex: number, stationList: Track[]) => void;
   onToggleFavorite: (station: Track) => void;
   onDeleteStation: (station: Track) => void;
 }
@@ -25,29 +25,42 @@ const FavoritesSection: React.FC<FavoritesSectionProps> = ({
   onDeleteStation
 }) => {
   if (favoriteStations.length === 0) {
-    return null;
+    return (
+      <section className="mb-8">
+        <div className="flex items-center gap-3 mb-4">
+          <Heart className="w-5 h-5 text-red-500" />
+          <h2 className="text-xl font-bold text-foreground">Favorite Stations</h2>
+        </div>
+        <NoFavoritesEmptyState />
+      </section>
+    );
   }
 
   return (
-    <Card className="bg-gradient-to-br from-background/40 to-background/20 backdrop-blur-md border-border/30 elevation-2">
-      <CardHeader className="pb-3 px-3 sm:px-6">
-        <CardTitle className="text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent flex items-center gap-2">
-          <Star className="h-6 w-6 text-primary" />
-          Favorites
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="px-3 sm:px-6">
-        <StationGrid
-          stations={favoriteStations}
-          currentIndex={currentIndex}
-          currentTrackUrl={currentTrackUrl}
-          isPlaying={isPlaying}
-          onSelectStation={(index) => onSelectStation(index, favoriteStations)}
-          onToggleFavorite={onToggleFavorite}
-          onDeleteStation={onDeleteStation}
-        />
-      </CardContent>
-    </Card>
+    <section className="mb-8">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-3">
+          <Heart className="w-5 h-5 text-red-500" />
+          <h2 className="text-xl font-bold text-foreground">Favorite Stations</h2>
+        </div>
+        <span className="text-sm text-muted-foreground bg-muted/50 px-3 py-1 rounded-full">
+          {favoriteStations.length} station{favoriteStations.length !== 1 ? 's' : ''}
+        </span>
+      </div>
+      
+      <StationGrid
+        stations={favoriteStations}
+        currentIndex={currentIndex}
+        currentTrackUrl={currentTrackUrl}
+        isPlaying={isPlaying}
+        onSelectStation={(index) => onSelectStation(index, favoriteStations)}
+        onDeleteStation={onDeleteStation}
+        onToggleFavorite={onToggleFavorite}
+        context="playlist"
+        variant="large"
+        showFeatured={false}
+      />
+    </section>
   );
 };
 
