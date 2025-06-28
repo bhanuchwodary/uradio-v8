@@ -39,3 +39,9 @@ export interface StationCardActionsProps {
   onEdit?: () => void;
   onDelete?: () => void;
 }
+
+export interface EnhancedStationCardProps extends StationCardProps {
+  variant?: "default" | "featured" | "compact" | "large";
+  showStats?: boolean;
+  priority?: "high" | "medium" | "low";
+}
