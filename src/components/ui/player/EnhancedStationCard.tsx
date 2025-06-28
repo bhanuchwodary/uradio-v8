@@ -2,9 +2,9 @@ import React from "react";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { Star, Trash2, User, TrendingUp } from "lucide-react";
-import StationCardButton from "./StationCardButton";
+import { StationCardButton } from "./StationCardButton";
 import { EnhancedStationCardProps } from "./types";
-import StationCardActions from "./StationCardActions";
+import { StationCardActions } from "./StationCardActions";
 
 export const EnhancedStationCard: React.FC<EnhancedStationCardProps> = React.memo(({
   station,
