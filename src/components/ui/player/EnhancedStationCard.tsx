@@ -1,61 +1,35 @@
-
-import React, { memo, useCallback } from "react";
+import React from "react";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { StationCardButton } from "./StationCardButton";
-import { StationCardInfo } from "./StationCardInfo";
-import { StationCardActions } from "./StationCardActions";
-import { StationCardProps } from "./types";
-import { Star, TrendingUp, User } from "lucide-react";
+import { Star, Trash2, User, TrendingUp } from "lucide-react";
+import StationCardButton from "./StationCardButton";
+import { EnhancedStationCardProps } from "./types";
+import StationCardActions from "./StationCardActions";
 
-export interface EnhancedStationCardProps extends StationCardProps {
-  variant?: "default" | "featured" | "compact" | "large";
-  showStats?: boolean;
-  priority?: "high" | "medium" | "low";
-}
-
-export const EnhancedStationCard: React.FC<EnhancedStationCardProps> = memo(({
+export const EnhancedStationCard: React.FC<EnhancedStationCardProps> = React.memo(({
   station,
   isPlaying,
   isSelected,
-  onPlay,
+  inPlaylist,
+  isProcessing,
+  showStats,
+  onToggleFavorite,
   onEdit,
   onDelete,
-  onToggleFavorite,
-  actionIcon = "play",
-  context = "library",
-  inPlaylist = false,
-  isAddingToPlaylist = false,
-  variant = "default",
-  showStats = false,
-  priority = "medium"
+  actionIcon,
+  context,
+  isDisabled,
+  variant = "default"
 }) => {
-  const handlePlayClick = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-    
-    if (actionIcon === "add" && (inPlaylist || isAddingToPlaylist)) {
-      return;
-    }
-    
-    if (actionIcon === "play" || context === "playlist") {
-      onPlay();
-    } else if (actionIcon === "add" && !inPlaylist) {
-      onPlay();
-    }
-  }, [actionIcon, context, inPlaylist, isAddingToPlaylist, onPlay]);
+  const handlePlayClick = (e?: React.MouseEvent) => {
+    if (isDisabled) return;
+    if (e) e.stopPropagation?.();
+    // Add your play logic here
+  };
 
-  const isProcessing = actionIcon === "add" && isAddingToPlaylist;
-  const isDisabled = actionIcon === "add" && (inPlaylist || isProcessing);
-
-  // Enhanced styling based on variant with consistent squarish shape
   const getCardStyles = () => {
-    const baseStyles = cn(
-      "relative overflow-hidden group transition-all duration-300 cursor-pointer",
-      "transform hover:scale-105 active:scale-95 border-0 backdrop-blur-sm",
-      "hover:shadow-xl hover:-translate-y-1",
-      isDisabled && "hover:scale-100 cursor-default"
-    );
-
+    const baseStyles =
+      "relative overflow-hidden flex flex-col items-center justify-between transition-all duration-200 rounded-xl shadow-md cursor-pointer select-none";
     if (variant === "featured") {
       return cn(
         baseStyles,
@@ -64,13 +38,12 @@ export const EnhancedStationCard: React.FC<EnhancedStationCardProps> = memo(({
         "hover:from-primary/20 hover:to-primary/10 hover:ring-primary/30"
       );
     }
-
     // All other variants use square aspect ratio for consistency
     return cn(
       baseStyles,
       "aspect-square w-full", // Perfect square for all standard cards
-      isSelected 
-        ? "bg-gradient-to-br from-primary/20 to-primary/10 shadow-lg ring-2 ring-primary/30" 
+      isSelected
+        ? "bg-gradient-to-br from-primary/20 to-primary/10 shadow-lg ring-2 ring-primary/30"
         : inPlaylist && actionIcon === "add"
         ? "bg-gradient-to-br from-green-500/10 to-green-500/5 shadow-md ring-1 ring-green-500/20"
         : isProcessing
@@ -80,9 +53,14 @@ export const EnhancedStationCard: React.FC<EnhancedStationCardProps> = memo(({
   };
 
   const getStationIcon = () => {
-    if (station.isFeatured) return <Star className="w-3 h-3 text-yellow-500 flex-shrink-0" />;
-    if (station.playTime && station.playTime > 0) return <TrendingUp className="w-3 h-3 text-green-500 flex-shrink-0" />;
-    if (!station.isFeatured) return <User className="w-3 h-3 text-blue-500 flex-shrink-0" />;
+    if (station.isFeatured)
+      return <Star className="w-3 h-3 text-yellow-500 flex-shrink-0" />;
+    if (station.playTime && station.playTime > 0)
+      return (
+        <TrendingUp className="w-3 h-3 text-green-500 flex-shrink-0" />
+      );
+    if (!station.isFeatured)
+      return <User className="w-3 h-3 text-blue-500 flex-shrink-0" />;
     return null;
   };
 
@@ -135,72 +113,82 @@ export const EnhancedStationCard: React.FC<EnhancedStationCardProps> = memo(({
             </div>
           </div>
         ) : (
-          // Square layout - optimized mobile-friendly vertical layout with reduced spacing
-          <div className="flex flex-col h-full justify-between items-center space-y-1">
-            {/* Station Name - Top section with reduced padding and height */}
-            <div className="flex-shrink-0 w-full text-center px-0.5">
-              <h3 className={cn(
-                "font-medium text-xs leading-tight line-clamp-2 break-words",
-                "min-h-[1.8rem] flex items-center justify-center", // Reduced from 2.5rem to 1.8rem
-                isSelected ? "text-primary font-semibold" 
-                : inPlaylist && actionIcon === "add" ? "text-green-700 font-medium"
-                : isProcessing ? "text-blue-700 font-medium"
-                : "text-foreground"
-              )}>
+          // Square layout - optimized mobile-friendly vertical layout with improved spacing and controls sizing
+          <div className="flex flex-col h-full justify-between items-center space-y-2">
+            {/* Station Name - Top section with improved font size and spacing */}
+            <div className="flex-shrink-0 w-full text-center px-2 pt-2">
+              <h3
+                className={cn(
+                  "font-medium text-base leading-tight line-clamp-2 break-words",
+                  "min-h-[2.2rem] flex items-center justify-center",
+                  isSelected
+                    ? "text-primary font-semibold"
+                    : inPlaylist && actionIcon === "add"
+                    ? "text-green-700 font-medium"
+                    : isProcessing
+                    ? "text-blue-700 font-medium"
+                    : "text-foreground"
+                )}
+              >
                 {station.name}
               </h3>
             </div>
-            
-            {/* Language Badge - Center section with reduced spacing */}
-            <div className="flex-shrink-0">
-              <span className={cn(
-                "bg-gradient-to-r px-1.5 py-0.5 rounded-full text-[9px] font-medium border shadow-sm", // Reduced padding and font size
-                "transition-all duration-200 whitespace-nowrap",
-                isSelected 
-                  ? "from-primary/20 to-primary/10 text-primary border-primary/30" 
-                  : inPlaylist && actionIcon === "add"
-                  ? "from-green-500/20 to-green-500/10 text-green-600 border-green-500/30"
-                  : isProcessing
-                  ? "from-blue-500/20 to-blue-500/10 text-blue-600 border-blue-500/30"
-                  : "from-muted/60 to-muted/40 text-muted-foreground border-muted/50"
-              )}>
+            {/* Language Badge - better spacing and font size */}
+            <div className="flex-shrink-0 mt-1 mb-2">
+              <span
+                className={cn(
+                  "bg-gradient-to-r px-3 py-1 rounded-full text-xs font-medium border shadow-sm",
+                  "transition-all duration-200 whitespace-nowrap",
+                  isSelected
+                    ? "from-primary/20 to-primary/10 text-primary border-primary/30"
+                    : inPlaylist && actionIcon === "add"
+                    ? "from-green-500/20 to-green-500/10 text-green-600 border-green-500/30"
+                    : isProcessing
+                    ? "from-blue-500/20 to-blue-500/10 text-blue-600 border-blue-500/30"
+                    : "from-muted/60 to-muted/40 text-muted-foreground border-muted/50"
+                )}
+              >
                 {station.language || "Unknown"}
                 {inPlaylist && actionIcon === "add" && " ✓"}
                 {isProcessing && " ..."}
               </span>
             </div>
-            
-            {/* Action Buttons - Bottom section with optimized spacing and sizing */}
-            <div className="flex-shrink-0 flex justify-center items-center space-x-1 w-full px-1">
+            {/* Controls - bottom section, more visible and spaced */}
+            <div className="flex-shrink-0 flex justify-center items-center space-x-3 w-full px-2 pb-2">
               {/* Favorite Button */}
               {onToggleFavorite && (
-                <button 
+                <button
                   className={cn(
-                    "h-5 w-5 rounded-full flex items-center justify-center transition-all duration-200 transform hover:scale-110 active:scale-90", // Reduced from h-6 w-6 to h-5 w-5
-                    station.isFavorite 
-                      ? "text-yellow-500 hover:text-yellow-600 bg-yellow-500/10 hover:bg-yellow-500/20" 
+                    "h-7 w-7 rounded-full flex items-center justify-center transition-all duration-200 transform hover:scale-110 active:scale-90",
+                    station.isFavorite
+                      ? "text-yellow-500 hover:text-yellow-600 bg-yellow-500/10 hover:bg-yellow-500/20"
                       : "text-muted-foreground hover:text-yellow-500 hover:bg-yellow-500/10"
                   )}
                   onClick={(e) => {
                     e.stopPropagation();
                     onToggleFavorite();
                   }}
-                  aria-label={station.isFavorite ? "Remove from favorites" : "Add to favorites"}
+                  aria-label={
+                    station.isFavorite
+                      ? "Remove from favorites"
+                      : "Add to favorites"
+                  }
                 >
-                  <Star className={cn(
-                    "h-2.5 w-2.5 transition-all duration-200", // Reduced from h-3 w-3
-                    station.isFavorite && "fill-yellow-500"
-                  )} />
+                  <Star
+                    className={cn(
+                      "h-4 w-4 transition-all duration-200",
+                      station.isFavorite && "fill-yellow-500"
+                    )}
+                  />
                 </button>
               )}
-              
-              {/* Play Button - Smaller size, positioned with other controls */}
-              <div 
+              {/* Play Button */}
+              <div
                 className={cn(
-                  "w-5 h-5 rounded-full flex items-center justify-center transition-all duration-300 shadow-sm", // Reduced from w-6 h-6
+                  "w-7 h-7 rounded-full flex items-center justify-center transition-all duration-300 shadow-sm",
                   "transform group-hover:scale-110 group-active:scale-95",
-                  isPlaying 
-                    ? "bg-primary text-primary-foreground shadow-md" 
+                  isPlaying
+                    ? "bg-primary text-primary-foreground shadow-md"
                     : inPlaylist && actionIcon === "add"
                     ? "bg-green-500/20 text-green-600 border border-green-500/30"
                     : isProcessing
@@ -223,20 +211,21 @@ export const EnhancedStationCard: React.FC<EnhancedStationCardProps> = memo(({
                   isProcessing={isProcessing}
                 />
               </div>
-              
               {/* Delete Button */}
               {onDelete && (
-                <button 
-                  className="h-5 w-5 text-destructive hover:text-destructive/80 hover:bg-destructive/10 rounded-full transition-all duration-200 transform hover:scale-110 active:scale-90 flex items-center justify-center" // Reduced from h-6 w-6
+                <button
+                  className="h-7 w-7 text-destructive hover:text-destructive/80 hover:bg-destructive/10 rounded-full transition-all duration-200 transform hover:scale-110 active:scale-90 flex items-center justify-center"
                   onClick={(e) => {
                     e.stopPropagation();
                     onDelete();
                   }}
-                  aria-label={context === "playlist" ? "Remove from playlist" : "Delete station"}
+                  aria-label={
+                    context === "playlist"
+                      ? "Remove from playlist"
+                      : "Delete station"
+                  }
                 >
-                  <svg className="h-2.5 w-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"> {/* Reduced from h-3 w-3 */}
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                  </svg>
+                  <Trash2 className="h-4 w-4" />
                 </button>
               )}
             </div>
@@ -245,19 +234,19 @@ export const EnhancedStationCard: React.FC<EnhancedStationCardProps> = memo(({
       </div>
     </Card>
   );
-}, (prevProps, nextProps) => {
-  return (
-    prevProps.station.url === nextProps.station.url &&
-    prevProps.station.name === nextProps.station.name &&
-    prevProps.station.language === nextProps.station.language &&
-    prevProps.isPlaying === nextProps.isPlaying &&
-    prevProps.isSelected === nextProps.isSelected &&
-    prevProps.station.isFavorite === nextProps.station.isFavorite &&
-    prevProps.context === nextProps.context &&
-    prevProps.actionIcon === nextProps.actionIcon &&
-    prevProps.inPlaylist === nextProps.inPlaylist &&
-    prevProps.variant === nextProps.variant
-  );
-});
+},
+(prevProps, nextProps) =>
+  prevProps.station.name === nextProps.station.name &&
+  prevProps.station.language === nextProps.station.language &&
+  prevProps.isPlaying === nextProps.isPlaying &&
+  prevProps.isSelected === nextProps.isSelected &&
+  prevProps.station.isFavorite === nextProps.station.isFavorite &&
+  prevProps.context === nextProps.context &&
+  prevProps.actionIcon === nextProps.actionIcon &&
+  prevProps.inPlaylist === nextProps.inPlaylist &&
+  prevProps.variant === nextProps.variant
+);
 
 EnhancedStationCard.displayName = "EnhancedStationCard";
+
+export default EnhancedStationCard;
