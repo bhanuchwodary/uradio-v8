@@ -128,8 +128,8 @@ export const StationGrid: React.FC<StationGridProps> = memo(({
               All Stations
             </h3>
           )}
-          {/* Improved responsive grid with consistent square cards */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 gap-3 md:gap-4">
+          {/* Improved responsive grid optimized for mobile 3-column layout */}
+          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8 gap-2 sm:gap-3 md:gap-4">
             {regularStations.map((station, index) => {
               const stationIndex = stations.findIndex(s => s.url === station.url);
               const isCurrentlyPlaying = station.url === currentTrackUrl && isPlaying;

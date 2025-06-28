@@ -135,65 +135,110 @@ export const EnhancedStationCard: React.FC<EnhancedStationCardProps> = memo(({
             </div>
           </div>
         ) : (
-          // Square layout - vertical with perfect center alignment
-          <div className="flex flex-col items-center justify-between h-full space-y-2">
-            {/* Play Button - Top center */}
-            <div className="flex justify-center pt-1">
-              <StationCardButton
-                station={station}
-                isPlaying={isPlaying}
-                isSelected={isSelected}
-                actionIcon={actionIcon}
-                context={context}
-                inPlaylist={inPlaylist}
-                isAddingToPlaylist={isProcessing}
-                onClick={handlePlayClick}
-                isDisabled={isDisabled}
-                isProcessing={isProcessing}
-              />
+          // Square layout - improved mobile-friendly vertical layout
+          <div className="flex flex-col h-full justify-between items-center space-y-2">
+            {/* Station Name - Top section with proper spacing */}
+            <div className="flex-shrink-0 w-full text-center px-1">
+              <h3 className={cn(
+                "font-medium text-xs leading-tight line-clamp-2 break-words",
+                "min-h-[2.5rem] flex items-center justify-center",
+                isSelected ? "text-primary font-semibold" 
+                : inPlaylist && actionIcon === "add" ? "text-green-700 font-medium"
+                : isProcessing ? "text-blue-700 font-medium"
+                : "text-foreground"
+              )}>
+                {station.name}
+              </h3>
             </div>
             
-            {/* Station Info - Center */}
-            <div className="flex-1 flex flex-col justify-center items-center space-y-1 min-h-0">
-              <div className="flex items-center justify-center gap-1 px-1">
-                {getStationIcon()}
-                <h3 className={cn(
-                  "font-medium text-xs text-center leading-tight px-1",
-                  "line-clamp-2 break-words overflow-hidden",
-                  isSelected ? "text-primary font-semibold" : "text-foreground"
-                )}>
-                  {station.name}
-                </h3>
+            {/* Language Badge - Center section */}
+            <div className="flex-shrink-0">
+              <span className={cn(
+                "bg-gradient-to-r px-2 py-0.5 rounded-full text-[10px] font-medium border shadow-sm",
+                "transition-all duration-200 whitespace-nowrap",
+                isSelected 
+                  ? "from-primary/20 to-primary/10 text-primary border-primary/30" 
+                  : inPlaylist && actionIcon === "add"
+                  ? "from-green-500/20 to-green-500/10 text-green-600 border-green-500/30"
+                  : isProcessing
+                  ? "from-blue-500/20 to-blue-500/10 text-blue-600 border-blue-500/30"
+                  : "from-muted/60 to-muted/40 text-muted-foreground border-muted/50"
+              )}>
+                {station.language || "Unknown"}
+                {inPlaylist && actionIcon === "add" && " ✓"}
+                {isProcessing && " ..."}
+              </span>
+            </div>
+            
+            {/* Action Buttons - Bottom section with play button integrated */}
+            <div className="flex-shrink-0 flex justify-center items-center space-x-1">
+              {/* Favorite Button */}
+              {onToggleFavorite && (
+                <button 
+                  className={cn(
+                    "h-6 w-6 rounded-full flex items-center justify-center transition-all duration-200 transform hover:scale-110 active:scale-90", 
+                    station.isFavorite 
+                      ? "text-yellow-500 hover:text-yellow-600 bg-yellow-500/10 hover:bg-yellow-500/20" 
+                      : "text-muted-foreground hover:text-yellow-500 hover:bg-yellow-500/10"
+                  )}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onToggleFavorite();
+                  }}
+                  aria-label={station.isFavorite ? "Remove from favorites" : "Add to favorites"}
+                >
+                  <Star className={cn(
+                    "h-3 w-3 transition-all duration-200",
+                    station.isFavorite && "fill-yellow-500"
+                  )} />
+                </button>
+              )}
+              
+              {/* Play Button - Smaller size, positioned with other controls */}
+              <div 
+                className={cn(
+                  "w-6 h-6 rounded-full flex items-center justify-center transition-all duration-300 shadow-sm",
+                  "transform group-hover:scale-110 group-active:scale-95",
+                  isPlaying 
+                    ? "bg-primary text-primary-foreground shadow-md" 
+                    : inPlaylist && actionIcon === "add"
+                    ? "bg-green-500/20 text-green-600 border border-green-500/30"
+                    : isProcessing
+                    ? "bg-blue-500/20 text-blue-600 border border-blue-500/30 animate-pulse"
+                    : "bg-secondary/80 text-secondary-foreground group-hover:bg-primary/30",
+                  isDisabled && "group-hover:scale-100"
+                )}
+                onClick={handlePlayClick}
+              >
+                <StationCardButton
+                  station={station}
+                  isPlaying={isPlaying}
+                  isSelected={isSelected}
+                  actionIcon={actionIcon}
+                  context={context}
+                  inPlaylist={inPlaylist}
+                  isAddingToPlaylist={isProcessing}
+                  onClick={handlePlayClick}
+                  isDisabled={isDisabled}
+                  isProcessing={isProcessing}
+                />
               </div>
               
-              <div className="flex justify-center">
-                <span className={cn(
-                  "bg-gradient-to-r px-2 py-0.5 rounded-full text-[10px] font-medium border shadow-sm",
-                  "transition-all duration-200 whitespace-nowrap",
-                  isSelected 
-                    ? "from-primary/20 to-primary/10 text-primary border-primary/30" 
-                    : inPlaylist && actionIcon === "add"
-                    ? "from-green-500/20 to-green-500/10 text-green-600 border-green-500/30"
-                    : isProcessing
-                    ? "from-blue-500/20 to-blue-500/10 text-blue-600 border-blue-500/30"
-                    : "from-muted/60 to-muted/40 text-muted-foreground border-muted/50"
-                )}>
-                  {station.language || "Unknown"}
-                  {inPlaylist && actionIcon === "add" && " ✓"}
-                  {isProcessing && " ..."}
-                </span>
-              </div>
-            </div>
-            
-            {/* Action Buttons - Bottom center */}
-            <div className="flex justify-center pb-1">
-              <StationCardActions
-                station={station}
-                context={context}
-                onToggleFavorite={onToggleFavorite}
-                onEdit={onEdit}
-                onDelete={onDelete}
-              />
+              {/* Delete Button */}
+              {onDelete && (
+                <button 
+                  className="h-6 w-6 text-destructive hover:text-destructive/80 hover:bg-destructive/10 rounded-full transition-all duration-200 transform hover:scale-110 active:scale-90 flex items-center justify-center"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDelete();
+                  }}
+                  aria-label={context === "playlist" ? "Remove from playlist" : "Delete station"}
+                >
+                  <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
+              )}
             </div>
           </div>
         )}
