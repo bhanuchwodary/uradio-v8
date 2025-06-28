@@ -1,4 +1,3 @@
-
 import React, { memo, useCallback } from "react";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -32,11 +31,11 @@ export const EnhancedStationCard: React.FC<EnhancedStationCardProps> = memo(({
 }) => {
   const handlePlayClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
-    
+
     if (actionIcon === "add" && (inPlaylist || isAddingToPlaylist)) {
       return;
     }
-    
+
     if (actionIcon === "play" || context === "playlist") {
       onPlay();
     } else if (actionIcon === "add" && !inPlaylist) {
@@ -47,7 +46,6 @@ export const EnhancedStationCard: React.FC<EnhancedStationCardProps> = memo(({
   const isProcessing = actionIcon === "add" && isAddingToPlaylist;
   const isDisabled = actionIcon === "add" && (inPlaylist || isProcessing);
 
-  // Enhanced styling based on variant with consistent squarish shape
   const getCardStyles = () => {
     const baseStyles = cn(
       "relative overflow-hidden group transition-all duration-300 cursor-pointer",
@@ -59,16 +57,15 @@ export const EnhancedStationCard: React.FC<EnhancedStationCardProps> = memo(({
     if (variant === "featured") {
       return cn(
         baseStyles,
-        "aspect-[2/1] w-full", // 2:1 aspect ratio for featured cards
+        "aspect-[2/1] w-full",
         "bg-gradient-to-br from-primary/15 to-primary/5 shadow-lg ring-1 ring-primary/20",
         "hover:from-primary/20 hover:to-primary/10 hover:ring-primary/30"
       );
     }
 
-    // All other variants use square aspect ratio for consistency
     return cn(
       baseStyles,
-      "aspect-square w-full", // Perfect square for all standard cards
+      "aspect-square w-full",
       isSelected 
         ? "bg-gradient-to-br from-primary/20 to-primary/10 shadow-lg ring-2 ring-primary/30" 
         : inPlaylist && actionIcon === "add"
@@ -90,7 +87,6 @@ export const EnhancedStationCard: React.FC<EnhancedStationCardProps> = memo(({
     <Card className={getCardStyles()} onClick={handlePlayClick}>
       <div className="h-full w-full p-2.5 flex flex-col">
         {variant === "featured" ? (
-          // Featured layout - horizontal with proper alignment
           <div className="flex items-center gap-4 h-full">
             <div className="flex-shrink-0">
               <StationCardButton
@@ -135,13 +131,12 @@ export const EnhancedStationCard: React.FC<EnhancedStationCardProps> = memo(({
             </div>
           </div>
         ) : (
-          // Square layout - optimized mobile-friendly vertical layout with reduced spacing
           <div className="flex flex-col h-full justify-between items-center space-y-1">
-            {/* Station Name - Top section with reduced padding and height */}
+            {/* Station Name */}
             <div className="flex-shrink-0 w-full text-center px-0.5">
               <h3 className={cn(
                 "font-medium text-xs leading-tight line-clamp-2 break-words",
-                "min-h-[1.8rem] flex items-center justify-center", // Reduced from 2.5rem to 1.8rem
+                "min-h-[1.8rem] flex items-center justify-center",
                 isSelected ? "text-primary font-semibold" 
                 : inPlaylist && actionIcon === "add" ? "text-green-700 font-medium"
                 : isProcessing ? "text-blue-700 font-medium"
@@ -150,11 +145,11 @@ export const EnhancedStationCard: React.FC<EnhancedStationCardProps> = memo(({
                 {station.name}
               </h3>
             </div>
-            
-            {/* Language Badge - Center section with reduced spacing */}
+
+            {/* Language Badge */}
             <div className="flex-shrink-0">
               <span className={cn(
-                "bg-gradient-to-r px-1.5 py-0.5 rounded-full text-[9px] font-medium border shadow-sm", // Reduced padding and font size
+                "bg-gradient-to-r px-1.5 py-0.5 rounded-full text-[9px] font-medium border shadow-sm",
                 "transition-all duration-200 whitespace-nowrap",
                 isSelected 
                   ? "from-primary/20 to-primary/10 text-primary border-primary/30" 
@@ -169,46 +164,49 @@ export const EnhancedStationCard: React.FC<EnhancedStationCardProps> = memo(({
                 {isProcessing && " ..."}
               </span>
             </div>
-            
-            {/* Action Buttons - Bottom section with optimized spacing and sizing */}
-            <div className="flex-shrink-0 flex justify-center items-center space-x-1 w-full px-1">
-              {/* Favorite Button */}
+
+            {/* Action Buttons */}
+            <div className="flex-shrink-0 flex justify-center items-center space-x-2 w-full px-1">
+              {/* Favorite Button - now just icon, no overlay */}
               {onToggleFavorite && (
                 <button 
                   className={cn(
-                    "h-5 w-5 rounded-full flex items-center justify-center transition-all duration-200 transform hover:scale-110 active:scale-90", // Reduced from h-6 w-6 to h-5 w-5
-                    station.isFavorite 
-                      ? "text-yellow-500 hover:text-yellow-600 bg-yellow-500/10 hover:bg-yellow-500/20" 
-                      : "text-muted-foreground hover:text-yellow-500 hover:bg-yellow-500/10"
+                    "h-6 w-6 flex items-center justify-center transition-all duration-200",
+                    "hover:scale-110 active:scale-90",
+                    // REMOVED background/rounded-full
                   )}
                   onClick={(e) => {
                     e.stopPropagation();
                     onToggleFavorite();
                   }}
                   aria-label={station.isFavorite ? "Remove from favorites" : "Add to favorites"}
+                  style={{ background: "none", border: "none", padding: 0 }}
                 >
                   <Star className={cn(
-                    "h-2.5 w-2.5 transition-all duration-200", // Reduced from h-3 w-3
-                    station.isFavorite && "fill-yellow-500"
+                    "h-4 w-4 transition-all duration-200", // slightly larger for clarity
+                    station.isFavorite ? "text-yellow-500 fill-yellow-500" : "text-muted-foreground"
                   )} />
                 </button>
               )}
-              
-              {/* Play Button - Smaller size, positioned with other controls */}
+
+              {/* Play Button */}
               <div 
                 className={cn(
-                  "w-5 h-5 rounded-full flex items-center justify-center transition-all duration-300 shadow-sm", // Reduced from w-6 h-6
-                  "transform group-hover:scale-110 group-active:scale-95",
+                  "flex items-center justify-center transition-all duration-300",
+                  // Give a little more space
+                  "w-8 h-8",
+                  "group-hover:scale-110 group-active:scale-95",
                   isPlaying 
-                    ? "bg-primary text-primary-foreground shadow-md" 
+                    ? "bg-primary text-primary-foreground shadow-md rounded-full"
                     : inPlaylist && actionIcon === "add"
-                    ? "bg-green-500/20 text-green-600 border border-green-500/30"
+                    ? "bg-green-500/20 text-green-600 border border-green-500/30 rounded-full"
                     : isProcessing
-                    ? "bg-blue-500/20 text-blue-600 border border-blue-500/30 animate-pulse"
-                    : "bg-secondary/80 text-secondary-foreground group-hover:bg-primary/30",
+                    ? "bg-blue-500/20 text-blue-600 border border-blue-500/30 animate-pulse rounded-full"
+                    : "bg-secondary/80 text-secondary-foreground rounded-full group-hover:bg-primary/30",
                   isDisabled && "group-hover:scale-100"
                 )}
                 onClick={handlePlayClick}
+                style={{ minWidth: 32, minHeight: 32 }} // ensure not clipped
               >
                 <StationCardButton
                   station={station}
@@ -223,19 +221,20 @@ export const EnhancedStationCard: React.FC<EnhancedStationCardProps> = memo(({
                   isProcessing={isProcessing}
                 />
               </div>
-              
+
               {/* Delete Button */}
               {onDelete && (
                 <button 
-                  className="h-5 w-5 text-destructive hover:text-destructive/80 hover:bg-destructive/10 rounded-full transition-all duration-200 transform hover:scale-110 active:scale-90 flex items-center justify-center" // Reduced from h-6 w-6
+                  className="h-6 w-6 text-destructive hover:text-destructive/80 transition-all duration-200 flex items-center justify-center hover:scale-110 active:scale-90"
                   onClick={(e) => {
                     e.stopPropagation();
                     onDelete();
                   }}
                   aria-label={context === "playlist" ? "Remove from playlist" : "Delete station"}
+                  style={{ background: "none", border: "none", padding: 0 }}
                 >
-                  <svg className="h-2.5 w-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"> {/* Reduced from h-3 w-3 */}
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3m5 0H6" />
                   </svg>
                 </button>
               )}
