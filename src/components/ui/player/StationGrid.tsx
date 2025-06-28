@@ -22,7 +22,7 @@ interface StationGridProps {
   isAddingToPlaylist?: boolean;
   searchQuery?: string;
   showFeatured?: boolean;
-  variant?: "default" | "featured" | "compact";
+  variant?: "default" | "featured" | "compact" | "large";
 }
 
 export const StationGrid: React.FC<StationGridProps> = memo(({
