@@ -88,7 +88,8 @@ export const StationGrid: React.FC<StationGridProps> = memo(({
             <span className="w-2 h-2 bg-primary rounded-full"></span>
             Featured Stations
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {/* Responsive grid for featured stations */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {featuredStations.map((station, index) => {
               const stationIndex = stations.findIndex(s => s.url === station.url);
               const isCurrentlyPlaying = station.url === currentTrackUrl && isPlaying;
@@ -127,7 +128,8 @@ export const StationGrid: React.FC<StationGridProps> = memo(({
               All Stations
             </h3>
           )}
-          <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 md:gap-3">
+          {/* Improved responsive grid with consistent square cards */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 gap-3 md:gap-4">
             {regularStations.map((station, index) => {
               const stationIndex = stations.findIndex(s => s.url === station.url);
               const isCurrentlyPlaying = station.url === currentTrackUrl && isPlaying;

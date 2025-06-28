@@ -47,7 +47,7 @@ export const EnhancedStationCard: React.FC<EnhancedStationCardProps> = memo(({
   const isProcessing = actionIcon === "add" && isAddingToPlaylist;
   const isDisabled = actionIcon === "add" && (inPlaylist || isProcessing);
 
-  // Enhanced styling based on variant and priority
+  // Enhanced styling based on variant with consistent squarish shape
   const getCardStyles = () => {
     const baseStyles = cn(
       "relative overflow-hidden group transition-all duration-300 cursor-pointer",
@@ -59,36 +59,16 @@ export const EnhancedStationCard: React.FC<EnhancedStationCardProps> = memo(({
     if (variant === "featured") {
       return cn(
         baseStyles,
-        "col-span-2 h-32",
+        "aspect-[2/1] w-full", // 2:1 aspect ratio for featured cards
         "bg-gradient-to-br from-primary/15 to-primary/5 shadow-lg ring-1 ring-primary/20",
         "hover:from-primary/20 hover:to-primary/10 hover:ring-primary/30"
       );
     }
 
-    if (variant === "large") {
-      return cn(
-        baseStyles,
-        "h-28",
-        isSelected 
-          ? "bg-gradient-to-br from-primary/20 to-primary/10 shadow-lg ring-2 ring-primary/30" 
-          : "bg-gradient-to-br from-accent/20 to-accent/10 shadow-lg ring-1 ring-accent/20"
-      );
-    }
-
-    if (variant === "compact") {
-      return cn(
-        baseStyles,
-        "h-20",
-        isSelected 
-          ? "bg-gradient-to-br from-primary/20 to-primary/10 shadow-lg ring-2 ring-primary/30" 
-          : "bg-gradient-to-br from-background/80 to-background/60 hover:from-accent/40 hover:to-accent/20 shadow-md"
-      );
-    }
-
-    // Default variant
+    // All other variants use square aspect ratio for consistency
     return cn(
       baseStyles,
-      "h-24",
+      "aspect-square w-full", // Perfect square for all standard cards
       isSelected 
         ? "bg-gradient-to-br from-primary/20 to-primary/10 shadow-lg ring-2 ring-primary/30" 
         : inPlaylist && actionIcon === "add"
@@ -99,26 +79,19 @@ export const EnhancedStationCard: React.FC<EnhancedStationCardProps> = memo(({
     );
   };
 
-  const getContentLayout = () => {
-    if (variant === "featured") {
-      return "flex flex-row items-center space-x-4 p-4";
-    }
-    return "flex flex-col items-center space-y-1.5 p-2.5";
-  };
-
   const getStationIcon = () => {
-    if (station.isFeatured) return <Star className="w-3 h-3 text-yellow-500" />;
-    if (station.playTime && station.playTime > 0) return <TrendingUp className="w-3 h-3 text-green-500" />;
-    if (!station.isFeatured) return <User className="w-3 h-3 text-blue-500" />;
+    if (station.isFeatured) return <Star className="w-3 h-3 text-yellow-500 flex-shrink-0" />;
+    if (station.playTime && station.playTime > 0) return <TrendingUp className="w-3 h-3 text-green-500 flex-shrink-0" />;
+    if (!station.isFeatured) return <User className="w-3 h-3 text-blue-500 flex-shrink-0" />;
     return null;
   };
 
   return (
     <Card className={getCardStyles()} onClick={handlePlayClick}>
-      <div className={cn("h-full", getContentLayout())}>
+      <div className="h-full w-full p-3 flex flex-col">
         {variant === "featured" ? (
-          // Featured layout - horizontal
-          <>
+          // Featured layout - horizontal with proper alignment
+          <div className="flex items-center gap-4 h-full">
             <div className="flex-shrink-0">
               <StationCardButton
                 station={station}
@@ -133,8 +106,8 @@ export const EnhancedStationCard: React.FC<EnhancedStationCardProps> = memo(({
                 isProcessing={isProcessing}
               />
             </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-1">
+            <div className="flex-1 min-w-0 space-y-2">
+              <div className="flex items-center gap-2">
                 {getStationIcon()}
                 <h3 className="font-semibold text-sm truncate text-foreground">
                   {station.name}
@@ -160,50 +133,60 @@ export const EnhancedStationCard: React.FC<EnhancedStationCardProps> = memo(({
                 onDelete={onDelete}
               />
             </div>
-          </>
+          </div>
         ) : (
-          // Default vertical layout
-          <>
-            <StationCardButton
-              station={station}
-              isPlaying={isPlaying}
-              isSelected={isSelected}
-              actionIcon={actionIcon}
-              context={context}
-              inPlaylist={inPlaylist}
-              isAddingToPlaylist={isProcessing}
-              onClick={handlePlayClick}
-              isDisabled={isDisabled}
-              isProcessing={isProcessing}
-            />
+          // Square layout - vertical with perfect center alignment
+          <div className="flex flex-col items-center justify-between h-full space-y-2">
+            {/* Play Button - Top center */}
+            <div className="flex justify-center pt-1">
+              <StationCardButton
+                station={station}
+                isPlaying={isPlaying}
+                isSelected={isSelected}
+                actionIcon={actionIcon}
+                context={context}
+                inPlaylist={inPlaylist}
+                isAddingToPlaylist={isProcessing}
+                onClick={handlePlayClick}
+                isDisabled={isDisabled}
+                isProcessing={isProcessing}
+              />
+            </div>
             
-            <div className="flex-1 flex flex-col justify-between w-full">
-              <div className="flex items-center justify-center gap-1 mb-1">
+            {/* Station Info - Center */}
+            <div className="flex-1 flex flex-col justify-center items-center space-y-1 min-h-0">
+              <div className="flex items-center justify-center gap-1 px-1">
                 {getStationIcon()}
                 <h3 className={cn(
-                  "font-medium text-xs line-clamp-2 text-center leading-tight",
-                  variant === "compact" ? "line-clamp-1" : "line-clamp-2",
+                  "font-medium text-xs text-center leading-tight px-1",
+                  "line-clamp-2 break-words overflow-hidden",
                   isSelected ? "text-primary font-semibold" : "text-foreground"
                 )}>
                   {station.name}
                 </h3>
               </div>
               
-              <div className="flex items-center justify-center">
+              <div className="flex justify-center">
                 <span className={cn(
                   "bg-gradient-to-r px-2 py-0.5 rounded-full text-[10px] font-medium border shadow-sm",
-                  "transition-all duration-200",
+                  "transition-all duration-200 whitespace-nowrap",
                   isSelected 
                     ? "from-primary/20 to-primary/10 text-primary border-primary/30" 
+                    : inPlaylist && actionIcon === "add"
+                    ? "from-green-500/20 to-green-500/10 text-green-600 border-green-500/30"
+                    : isProcessing
+                    ? "from-blue-500/20 to-blue-500/10 text-blue-600 border-blue-500/30"
                     : "from-muted/60 to-muted/40 text-muted-foreground border-muted/50"
                 )}>
                   {station.language || "Unknown"}
                   {inPlaylist && actionIcon === "add" && " ✓"}
+                  {isProcessing && " ..."}
                 </span>
               </div>
             </div>
             
-            {variant !== "compact" && (
+            {/* Action Buttons - Bottom center */}
+            <div className="flex justify-center pb-1">
               <StationCardActions
                 station={station}
                 context={context}
@@ -211,8 +194,8 @@ export const EnhancedStationCard: React.FC<EnhancedStationCardProps> = memo(({
                 onEdit={onEdit}
                 onDelete={onDelete}
               />
-            )}
-          </>
+            </div>
+          </div>
         )}
       </div>
     </Card>
