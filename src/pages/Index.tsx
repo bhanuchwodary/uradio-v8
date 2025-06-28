@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useRef } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useTrackStateContext } from "@/context/TrackStateContext";
@@ -9,8 +10,6 @@ import HomePagePlayer from "@/components/home/HomePagePlayer";
 import FavoritesSection from "@/components/home/FavoritesSection";
 import StationsTabsSection from "@/components/home/StationsTabsSection";
 import HomePageDialogs from "@/components/home/HomePageDialogs";
-import { PlayerLoadingState, SectionLoading } from "@/components/ui/loading/LoadingStates";
-import { PlaylistEmptyState } from "@/components/ui/empty-states/StationEmptyStates";
 import { getStations } from "@/data/featuredStationsLoader";
 import { logger } from "@/utils/logger";
 
@@ -173,23 +172,16 @@ const Index: React.FC = () => {
     }
   };
 
-  // Show comprehensive empty state if no tracks at all
-  if (tracks.length === 0) {
-    return (
-      <AppLayout>
-        <div className="container mx-auto max-w-5xl">
-          <PlaylistEmptyState />
-        </div>
-      </AppLayout>
-    );
-  }
-
   return (
     <ErrorBoundary>
       <AppLayout>
         <div className="container mx-auto max-w-5xl space-y-6">
           {/* Player Card */}
-          <ErrorBoundary fallback={<PlayerLoadingState />}>
+          <ErrorBoundary fallback={
+            <div className="text-center p-4 text-muted-foreground">
+              Player temporarily unavailable
+            </div>
+          }>
             <HomePagePlayer
               currentTrack={currentTrackState}
               isPlaying={isPlaying}
@@ -203,7 +195,11 @@ const Index: React.FC = () => {
           </ErrorBoundary>
 
           {/* Favorites Section */}
-          <ErrorBoundary fallback={<SectionLoading title="Favorite Stations" />}>
+          <ErrorBoundary fallback={
+            <div className="text-center p-4 text-muted-foreground">
+              Favorites section temporarily unavailable
+            </div>
+          }>
             <FavoritesSection 
               favoriteStations={favoriteStations}
               currentIndex={currentIndex}
@@ -216,7 +212,11 @@ const Index: React.FC = () => {
           </ErrorBoundary>
           
           {/* All Stations Section with Tabs */}
-          <ErrorBoundary fallback={<SectionLoading title="All Stations" itemCount={12} />}>
+          <ErrorBoundary fallback={
+            <div className="text-center p-4 text-muted-foreground">
+              Stations section temporarily unavailable
+            </div>
+          }>
             <StationsTabsSection
               popularStations={popularStations}
               userStations={userStations}
