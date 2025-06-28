@@ -5,7 +5,7 @@ import { StationCardButton } from "./StationCardButton";
 import { StationCardInfo } from "./StationCardInfo";
 import { StationCardActions } from "./StationCardActions";
 import { StationCardProps } from "./types";
-import { Star, TrendingUp, User } from "lucide-react";
+import { Star, Trash2, TrendingUp, User } from "lucide-react";
 
 export interface EnhancedStationCardProps extends StationCardProps {
   variant?: "default" | "featured" | "compact" | "large";
@@ -66,8 +66,8 @@ export const EnhancedStationCard: React.FC<EnhancedStationCardProps> = memo(({
     return cn(
       baseStyles,
       "aspect-square w-full",
-      isSelected 
-        ? "bg-gradient-to-br from-primary/20 to-primary/10 shadow-lg ring-2 ring-primary/30" 
+      isSelected
+        ? "bg-gradient-to-br from-primary/20 to-primary/10 shadow-lg ring-2 ring-primary/30"
         : inPlaylist && actionIcon === "add"
         ? "bg-gradient-to-br from-green-500/10 to-green-500/5 shadow-md ring-1 ring-green-500/20"
         : isProcessing
@@ -131,13 +131,13 @@ export const EnhancedStationCard: React.FC<EnhancedStationCardProps> = memo(({
             </div>
           </div>
         ) : (
-          <div className="flex flex-col h-full justify-between items-center space-y-1">
+          <div className="flex flex-col h-full justify-between items-center space-y-2">
             {/* Station Name */}
             <div className="flex-shrink-0 w-full text-center px-0.5">
               <h3 className={cn(
                 "font-medium text-xs leading-tight line-clamp-2 break-words",
                 "min-h-[1.8rem] flex items-center justify-center",
-                isSelected ? "text-primary font-semibold" 
+                isSelected ? "text-primary font-semibold"
                 : inPlaylist && actionIcon === "add" ? "text-green-700 font-medium"
                 : isProcessing ? "text-blue-700 font-medium"
                 : "text-foreground"
@@ -151,8 +151,8 @@ export const EnhancedStationCard: React.FC<EnhancedStationCardProps> = memo(({
               <span className={cn(
                 "bg-gradient-to-r px-1.5 py-0.5 rounded-full text-[9px] font-medium border shadow-sm",
                 "transition-all duration-200 whitespace-nowrap",
-                isSelected 
-                  ? "from-primary/20 to-primary/10 text-primary border-primary/30" 
+                isSelected
+                  ? "from-primary/20 to-primary/10 text-primary border-primary/30"
                   : inPlaylist && actionIcon === "add"
                   ? "from-green-500/20 to-green-500/10 text-green-600 border-green-500/30"
                   : isProcessing
@@ -166,14 +166,13 @@ export const EnhancedStationCard: React.FC<EnhancedStationCardProps> = memo(({
             </div>
 
             {/* Action Buttons */}
-            <div className="flex-shrink-0 flex justify-center items-center space-x-2 w-full px-1">
-              {/* Favorite Button - now just icon, no overlay */}
-              {onToggleFavorite && (
-                <button 
+            <div className="flex-shrink-0 flex justify-between items-center w-full px-2">
+              {/* Favorite Button */}
+              {onToggleFavorite ? (
+                <button
                   className={cn(
-                    "h-6 w-6 flex items-center justify-center transition-all duration-200",
-                    "hover:scale-110 active:scale-90",
-                    // REMOVED background/rounded-full
+                    "h-8 w-8 flex items-center justify-center transition-all duration-200 rounded-full",
+                    "hover:scale-110 active:scale-90"
                   )}
                   onClick={(e) => {
                     e.stopPropagation();
@@ -183,20 +182,19 @@ export const EnhancedStationCard: React.FC<EnhancedStationCardProps> = memo(({
                   style={{ background: "none", border: "none", padding: 0 }}
                 >
                   <Star className={cn(
-                    "h-4 w-4 transition-all duration-200", // slightly larger for clarity
-                    station.isFavorite ? "text-yellow-500 fill-yellow-500" : "text-muted-foreground"
+                    "h-5 w-5 transition-all duration-200",
+                    station.isFavorite ? "text-yellow-500 fill-yellow-500" : "text-muted-foreground/70 hover:text-muted-foreground"
                   )} />
                 </button>
-              )}
+              ) : <div className="w-8 h-8"/> /* Placeholder to keep alignment */}
 
               {/* Play Button */}
-              <div 
+              <div
                 className={cn(
                   "flex items-center justify-center transition-all duration-300",
-                  // Give a little more space
-                  "w-8 h-8",
+                  "w-10 h-10", // Slightly larger primary action
                   "group-hover:scale-110 group-active:scale-95",
-                  isPlaying 
+                  isPlaying
                     ? "bg-primary text-primary-foreground shadow-md rounded-full"
                     : inPlaylist && actionIcon === "add"
                     ? "bg-green-500/20 text-green-600 border border-green-500/30 rounded-full"
@@ -206,7 +204,7 @@ export const EnhancedStationCard: React.FC<EnhancedStationCardProps> = memo(({
                   isDisabled && "group-hover:scale-100"
                 )}
                 onClick={handlePlayClick}
-                style={{ minWidth: 32, minHeight: 32 }} // ensure not clipped
+                style={{ minWidth: 40, minHeight: 40 }} // ensure not clipped
               >
                 <StationCardButton
                   station={station}
@@ -223,9 +221,9 @@ export const EnhancedStationCard: React.FC<EnhancedStationCardProps> = memo(({
               </div>
 
               {/* Delete Button */}
-              {onDelete && (
-                <button 
-                  className="h-6 w-6 text-destructive hover:text-destructive/80 transition-all duration-200 flex items-center justify-center hover:scale-110 active:scale-90"
+              {onDelete ? (
+                <button
+                  className="h-8 w-8 text-destructive/70 hover:text-destructive transition-all duration-200 flex items-center justify-center hover:scale-110 active:scale-90 rounded-full"
                   onClick={(e) => {
                     e.stopPropagation();
                     onDelete();
@@ -233,11 +231,9 @@ export const EnhancedStationCard: React.FC<EnhancedStationCardProps> = memo(({
                   aria-label={context === "playlist" ? "Remove from playlist" : "Delete station"}
                   style={{ background: "none", border: "none", padding: 0 }}
                 >
-                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3m5 0H6" />
-                  </svg>
+                  <Trash2 className="h-5 w-5" />
                 </button>
-              )}
+              ) : <div className="w-8 h-8"/> /* Placeholder to keep alignment */}
             </div>
           </div>
         )}
@@ -245,6 +241,7 @@ export const EnhancedStationCard: React.FC<EnhancedStationCardProps> = memo(({
     </Card>
   );
 }, (prevProps, nextProps) => {
+  // Memoization logic remains the same
   return (
     prevProps.station.url === nextProps.station.url &&
     prevProps.station.name === nextProps.station.name &&
