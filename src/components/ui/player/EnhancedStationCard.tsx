@@ -48,7 +48,8 @@ export const EnhancedStationCard: React.FC<EnhancedStationCardProps> = memo(({
 
   const getCardStyles = () => {
     const baseStyles = cn(
-      "relative overflow-hidden group transition-all duration-300 cursor-pointer",
+      // REDUCE RADIUS
+      "relative overflow-hidden group transition-all duration-300 cursor-pointer rounded-md",
       "transform hover:scale-105 active:scale-95 border-0 backdrop-blur-sm",
       "hover:shadow-xl hover:-translate-y-1",
       isDisabled && "hover:scale-100 cursor-default"
@@ -145,7 +146,6 @@ export const EnhancedStationCard: React.FC<EnhancedStationCardProps> = memo(({
                 {station.name}
               </h3>
             </div>
-
             {/* Language Badge */}
             <div className="flex-shrink-0">
               <span className={cn(
@@ -164,16 +164,14 @@ export const EnhancedStationCard: React.FC<EnhancedStationCardProps> = memo(({
                 {isProcessing && " ..."}
               </span>
             </div>
-
-            {/* Action Buttons */}
-            <div className="flex-shrink-0 flex justify-center items-center space-x-2 w-full px-1">
-              {/* Favorite Button - now just icon, no overlay */}
+            {/* Action Buttons - tighter spacing, avoid overflow */}
+            <div className="flex-shrink-0 flex justify-center items-center gap-1 w-full px-1">
+              {/* Favorite Button */}
               {onToggleFavorite && (
                 <button 
                   className={cn(
                     "h-6 w-6 flex items-center justify-center transition-all duration-200",
-                    "hover:scale-110 active:scale-90",
-                    // REMOVED background/rounded-full
+                    "hover:scale-110 active:scale-90"
                   )}
                   onClick={(e) => {
                     e.stopPropagation();
@@ -183,7 +181,7 @@ export const EnhancedStationCard: React.FC<EnhancedStationCardProps> = memo(({
                   style={{ background: "none", border: "none", padding: 0 }}
                 >
                   <Star className={cn(
-                    "h-4 w-4 transition-all duration-200", // slightly larger for clarity
+                    "h-4 w-4 transition-all duration-200",
                     station.isFavorite ? "text-yellow-500 fill-yellow-500" : "text-muted-foreground"
                   )} />
                 </button>
@@ -193,7 +191,6 @@ export const EnhancedStationCard: React.FC<EnhancedStationCardProps> = memo(({
               <div 
                 className={cn(
                   "flex items-center justify-center transition-all duration-300",
-                  // Give a little more space
                   "w-8 h-8",
                   "group-hover:scale-110 group-active:scale-95",
                   isPlaying 
@@ -206,7 +203,7 @@ export const EnhancedStationCard: React.FC<EnhancedStationCardProps> = memo(({
                   isDisabled && "group-hover:scale-100"
                 )}
                 onClick={handlePlayClick}
-                style={{ minWidth: 32, minHeight: 32 }} // ensure not clipped
+                style={{ minWidth: 32, minHeight: 32 }}
               >
                 <StationCardButton
                   station={station}
@@ -221,7 +218,6 @@ export const EnhancedStationCard: React.FC<EnhancedStationCardProps> = memo(({
                   isProcessing={isProcessing}
                 />
               </div>
-
               {/* Delete Button */}
               {onDelete && (
                 <button 
