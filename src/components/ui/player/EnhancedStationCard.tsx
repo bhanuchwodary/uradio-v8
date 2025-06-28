@@ -88,7 +88,7 @@ export const EnhancedStationCard: React.FC<EnhancedStationCardProps> = memo(({
 
   return (
     <Card className={getCardStyles()} onClick={handlePlayClick}>
-      <div className="h-full w-full p-3 flex flex-col">
+      <div className="h-full w-full p-2.5 flex flex-col">
         {variant === "featured" ? (
           // Featured layout - horizontal with proper alignment
           <div className="flex items-center gap-4 h-full">
@@ -135,13 +135,13 @@ export const EnhancedStationCard: React.FC<EnhancedStationCardProps> = memo(({
             </div>
           </div>
         ) : (
-          // Square layout - improved mobile-friendly vertical layout
-          <div className="flex flex-col h-full justify-between items-center space-y-2">
-            {/* Station Name - Top section with proper spacing */}
-            <div className="flex-shrink-0 w-full text-center px-1">
+          // Square layout - optimized mobile-friendly vertical layout with reduced spacing
+          <div className="flex flex-col h-full justify-between items-center space-y-1">
+            {/* Station Name - Top section with reduced padding and height */}
+            <div className="flex-shrink-0 w-full text-center px-0.5">
               <h3 className={cn(
                 "font-medium text-xs leading-tight line-clamp-2 break-words",
-                "min-h-[2.5rem] flex items-center justify-center",
+                "min-h-[1.8rem] flex items-center justify-center", // Reduced from 2.5rem to 1.8rem
                 isSelected ? "text-primary font-semibold" 
                 : inPlaylist && actionIcon === "add" ? "text-green-700 font-medium"
                 : isProcessing ? "text-blue-700 font-medium"
@@ -151,10 +151,10 @@ export const EnhancedStationCard: React.FC<EnhancedStationCardProps> = memo(({
               </h3>
             </div>
             
-            {/* Language Badge - Center section */}
+            {/* Language Badge - Center section with reduced spacing */}
             <div className="flex-shrink-0">
               <span className={cn(
-                "bg-gradient-to-r px-2 py-0.5 rounded-full text-[10px] font-medium border shadow-sm",
+                "bg-gradient-to-r px-1.5 py-0.5 rounded-full text-[9px] font-medium border shadow-sm", // Reduced padding and font size
                 "transition-all duration-200 whitespace-nowrap",
                 isSelected 
                   ? "from-primary/20 to-primary/10 text-primary border-primary/30" 
@@ -170,13 +170,13 @@ export const EnhancedStationCard: React.FC<EnhancedStationCardProps> = memo(({
               </span>
             </div>
             
-            {/* Action Buttons - Bottom section with play button integrated */}
-            <div className="flex-shrink-0 flex justify-center items-center space-x-1">
+            {/* Action Buttons - Bottom section with optimized spacing and sizing */}
+            <div className="flex-shrink-0 flex justify-center items-center space-x-1 w-full px-1">
               {/* Favorite Button */}
               {onToggleFavorite && (
                 <button 
                   className={cn(
-                    "h-6 w-6 rounded-full flex items-center justify-center transition-all duration-200 transform hover:scale-110 active:scale-90", 
+                    "h-5 w-5 rounded-full flex items-center justify-center transition-all duration-200 transform hover:scale-110 active:scale-90", // Reduced from h-6 w-6 to h-5 w-5
                     station.isFavorite 
                       ? "text-yellow-500 hover:text-yellow-600 bg-yellow-500/10 hover:bg-yellow-500/20" 
                       : "text-muted-foreground hover:text-yellow-500 hover:bg-yellow-500/10"
@@ -188,7 +188,7 @@ export const EnhancedStationCard: React.FC<EnhancedStationCardProps> = memo(({
                   aria-label={station.isFavorite ? "Remove from favorites" : "Add to favorites"}
                 >
                   <Star className={cn(
-                    "h-3 w-3 transition-all duration-200",
+                    "h-2.5 w-2.5 transition-all duration-200", // Reduced from h-3 w-3
                     station.isFavorite && "fill-yellow-500"
                   )} />
                 </button>
@@ -197,7 +197,7 @@ export const EnhancedStationCard: React.FC<EnhancedStationCardProps> = memo(({
               {/* Play Button - Smaller size, positioned with other controls */}
               <div 
                 className={cn(
-                  "w-6 h-6 rounded-full flex items-center justify-center transition-all duration-300 shadow-sm",
+                  "w-5 h-5 rounded-full flex items-center justify-center transition-all duration-300 shadow-sm", // Reduced from w-6 h-6
                   "transform group-hover:scale-110 group-active:scale-95",
                   isPlaying 
                     ? "bg-primary text-primary-foreground shadow-md" 
@@ -227,14 +227,14 @@ export const EnhancedStationCard: React.FC<EnhancedStationCardProps> = memo(({
               {/* Delete Button */}
               {onDelete && (
                 <button 
-                  className="h-6 w-6 text-destructive hover:text-destructive/80 hover:bg-destructive/10 rounded-full transition-all duration-200 transform hover:scale-110 active:scale-90 flex items-center justify-center"
+                  className="h-5 w-5 text-destructive hover:text-destructive/80 hover:bg-destructive/10 rounded-full transition-all duration-200 transform hover:scale-110 active:scale-90 flex items-center justify-center" // Reduced from h-6 w-6
                   onClick={(e) => {
                     e.stopPropagation();
                     onDelete();
                   }}
                   aria-label={context === "playlist" ? "Remove from playlist" : "Delete station"}
                 >
-                  <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="h-2.5 w-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"> {/* Reduced from h-3 w-3 */}
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                   </svg>
                 </button>

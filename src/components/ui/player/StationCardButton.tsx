@@ -21,7 +21,7 @@ export const StationCardButton: React.FC<StationCardButtonProps> = ({
 
   return (
     <ActionIcon className={cn(
-      "transition-transform duration-200 w-3 h-3",
+      "transition-transform duration-200 w-2.5 h-2.5", // Reduced from w-3 h-3 to w-2.5 h-2.5 for smaller buttons
       actionIcon !== "add" && !isPlaying && "ml-0.5",
     )} />
   );
