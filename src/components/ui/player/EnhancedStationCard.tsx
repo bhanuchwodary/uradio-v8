@@ -166,7 +166,7 @@ export const EnhancedStationCard: React.FC<EnhancedStationCardProps> = memo(({
             </div>
 
             {/* Action Buttons */}
-            <div className="flex-shrink-0 flex justify-center items-center w-full space-x-4">
+            <div className="flex-shrink-0 flex justify-center items-center w-full space-x-3">
               {/* Favorite Button */}
               {onToggleFavorite && (
                 <button
@@ -192,7 +192,7 @@ export const EnhancedStationCard: React.FC<EnhancedStationCardProps> = memo(({
               <div
                 className={cn(
                   "flex items-center justify-center transition-all duration-300",
-                  "w-10 h-10", // Slightly larger primary action
+                  "w-9 h-9", // Make same size as other buttons
                   "group-hover:scale-110 group-active:scale-95",
                   isPlaying
                     ? "bg-primary text-primary-foreground shadow-md rounded-full"
@@ -204,7 +204,6 @@ export const EnhancedStationCard: React.FC<EnhancedStationCardProps> = memo(({
                   isDisabled && "group-hover:scale-100"
                 )}
                 onClick={handlePlayClick}
-                style={{ minWidth: 40, minHeight: 40 }} // ensure not clipped
               >
                 <StationCardButton
                   station={station}
