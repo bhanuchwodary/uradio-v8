@@ -49,9 +49,9 @@ export const StationCard: React.FC<StationCardProps> = memo(({
   return (
     <Card 
       className={cn(
-        "relative overflow-hidden group transition-all duration-300 cursor-pointer",
+        "relative overflow-hidden group transition-all duration-300 cursor-pointer h-full",
         "transform hover:scale-105 active:scale-95 border-0 backdrop-blur-sm",
-        "hover:shadow-xl hover:-translate-y-1 aspect-square",
+        "hover:shadow-xl hover:-translate-y-1",
         isSelected 
           ? "bg-gradient-to-br from-primary/20 to-primary/10 shadow-lg ring-2 ring-primary/30" 
           : inPlaylist && actionIcon === "add"
@@ -64,44 +64,38 @@ export const StationCard: React.FC<StationCardProps> = memo(({
       )}
       onClick={handlePlayClick}
     >
-      <div className="p-1.5 flex flex-col justify-between h-full">
-        {/* Top section with play button */}
-        <div className="flex justify-center mb-1">
-          <StationCardButton
-            station={station}
-            isPlaying={isPlaying}
-            isSelected={isSelected}
-            actionIcon={actionIcon}
-            context={context}
-            inPlaylist={inPlaylist}
-            isAddingToPlaylist={isProcessing}
-            onClick={handlePlayClick}
-            isDisabled={isDisabled}
-            isProcessing={isProcessing}
-          />
-        </div>
+      <div className="px-2 py-2.5 flex flex-col items-center space-y-1.5 h-full">
+        {/* Play Button */}
+        <StationCardButton
+          station={station}
+          isPlaying={isPlaying}
+          isSelected={isSelected}
+          actionIcon={actionIcon}
+          context={context}
+          inPlaylist={inPlaylist}
+          isAddingToPlaylist={isProcessing}
+          onClick={handlePlayClick}
+          isDisabled={isDisabled}
+          isProcessing={isProcessing}
+        />
         
-        {/* Middle section with station info */}
-        <div className="flex-1 flex flex-col justify-center min-h-0">
-          <StationCardInfo
-            station={station}
-            isSelected={isSelected}
-            inPlaylist={inPlaylist}
-            isProcessing={isProcessing}
-            actionIcon={actionIcon}
-          />
-        </div>
+        {/* Station Info */}
+        <StationCardInfo
+          station={station}
+          isSelected={isSelected}
+          inPlaylist={inPlaylist}
+          isProcessing={isProcessing}
+          actionIcon={actionIcon}
+        />
         
-        {/* Bottom section with action buttons */}
-        <div className="mt-1">
-          <StationCardActions
-            station={station}
-            context={context}
-            onToggleFavorite={onToggleFavorite}
-            onEdit={onEdit}
-            onDelete={onDelete}
-          />
-        </div>
+        {/* Action Buttons */}
+        <StationCardActions
+          station={station}
+          context={context}
+          onToggleFavorite={onToggleFavorite}
+          onEdit={onEdit}
+          onDelete={onDelete}
+        />
       </div>
     </Card>
   );

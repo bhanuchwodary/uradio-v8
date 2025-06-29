@@ -41,13 +41,13 @@ export const StationCardActions: React.FC<StationCardActionsProps> = ({
   };
 
   return (
-    <div className="flex justify-center space-x-0.5 opacity-80 group-hover:opacity-100 transition-opacity duration-200">
+    <div className="flex justify-center space-x-0.5 mt-auto pt-1 opacity-80 group-hover:opacity-100 transition-opacity duration-200">
       {onToggleFavorite && (
         <Button 
           size="icon" 
           variant="ghost" 
           className={cn(
-            "h-5 w-5 rounded-full transition-all duration-200 transform hover:scale-110 active:scale-90", 
+            "h-6 w-6 rounded-full transition-all duration-200 transform hover:scale-110 active:scale-90", 
             station.isFavorite 
               ? "text-yellow-500 hover:text-yellow-600 bg-yellow-500/10 hover:bg-yellow-500/20" 
               : "text-muted-foreground hover:text-yellow-500 hover:bg-yellow-500/10"
@@ -56,7 +56,7 @@ export const StationCardActions: React.FC<StationCardActionsProps> = ({
           aria-label={station.isFavorite ? "Remove from favorites" : "Add to favorites"}
         >
           <Star className={cn(
-            "h-2.5 w-2.5 transition-all duration-200",
+            "h-3 w-3 transition-all duration-200",
             station.isFavorite && "fill-yellow-500"
           )} />
         </Button>
@@ -66,11 +66,11 @@ export const StationCardActions: React.FC<StationCardActionsProps> = ({
         <Button 
           size="icon" 
           variant="ghost" 
-          className="h-5 w-5 text-blue-500 hover:text-blue-600 hover:bg-blue-500/10 rounded-full transition-all duration-200 transform hover:scale-110 active:scale-90"
+          className="h-6 w-6 text-blue-500 hover:text-blue-600 hover:bg-blue-500/10 rounded-full transition-all duration-200 transform hover:scale-110 active:scale-90"
           onClick={handleEditClick}
           aria-label="Edit station"
         >
-          <Edit className="h-2.5 w-2.5" />
+          <Edit className="h-3 w-3" />
         </Button>
       )}
       
@@ -78,11 +78,11 @@ export const StationCardActions: React.FC<StationCardActionsProps> = ({
         <Button 
           size="icon" 
           variant="ghost" 
-          className="h-5 w-5 text-destructive hover:text-destructive/80 hover:bg-destructive/10 rounded-full transition-all duration-200 transform hover:scale-110 active:scale-90"
+          className="h-6 w-6 text-destructive hover:text-destructive/80 hover:bg-destructive/10 rounded-full transition-all duration-200 transform hover:scale-110 active:scale-90"
           onClick={handleDeleteClick}
           aria-label={context === "playlist" ? "Remove from playlist" : "Delete station"}
         >
-          <Trash2 className="h-2.5 w-2.5" />
+          <Trash2 className="h-3 w-3" />
         </Button>
       )}
     </div>

@@ -14,10 +14,11 @@ export const StationCardInfo: React.FC<StationCardInfoProps> = ({
   const stationLanguage = station?.language && station.language !== "" ? station.language : "Unknown";
 
   return (
-    <div className="text-center space-y-1">
+    <>
       {/* Station Name with better typography */}
       <h3 className={cn(
-        "font-medium text-xs line-clamp-2 leading-tight transition-colors duration-200",
+        "font-medium text-xs line-clamp-2 w-full text-center leading-tight px-1",
+        "min-h-[2rem] flex items-center justify-center transition-colors duration-200",
         isSelected ? "text-primary font-semibold" 
         : inPlaylist && actionIcon === "add" ? "text-green-700 font-medium"
         : isProcessing ? "text-blue-700 font-medium"
@@ -29,7 +30,7 @@ export const StationCardInfo: React.FC<StationCardInfoProps> = ({
       {/* Language Badge with enhanced styling and playlist indicator */}
       <div className="flex items-center justify-center">
         <span className={cn(
-          "bg-gradient-to-r px-1.5 py-0.5 rounded-full text-[9px] font-medium border shadow-sm",
+          "bg-gradient-to-r px-2 py-0.5 rounded-full text-[10px] font-medium border shadow-sm",
           "transition-all duration-200 transform group-hover:scale-105",
           isSelected 
             ? "from-primary/20 to-primary/10 text-primary border-primary/30" 
@@ -44,6 +45,6 @@ export const StationCardInfo: React.FC<StationCardInfoProps> = ({
           {isProcessing && " ..."}
         </span>
       </div>
-    </div>
+    </>
   );
 };
