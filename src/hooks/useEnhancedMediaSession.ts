@@ -17,6 +17,12 @@ interface UseEnhancedMediaSessionProps {
   onVolumeChange?: (volume: number) => void;
 }
 
+// Detect iOS platform
+const isIOS = () => {
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+         (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+};
+
 export const useEnhancedMediaSession = ({
   currentTrack,
   isPlaying,
@@ -37,7 +43,7 @@ export const useEnhancedMediaSession = ({
   useEffect(() => {
     if ('mediaSession' in navigator) {
       mediaSessionRef.current = navigator.mediaSession;
-      logger.debug("Enhanced media session initialized");
+      logger.debug("Enhanced media session initialized", { isIOS: isIOS() });
     } else {
       logger.warn("Media Session API not supported");
       return;
@@ -46,10 +52,10 @@ export const useEnhancedMediaSession = ({
     const mediaSession = mediaSessionRef.current;
     if (!mediaSession) return;
 
-    // Set up all action handlers with proper error handling
+    // Set up action handlers with iOS-specific optimization
     const setupActionHandlers = () => {
       try {
-        // Play/Pause handlers
+        // Core play/pause handlers (essential for all platforms)
         mediaSession.setActionHandler('play', () => {
           logger.debug("Media session: play action triggered");
           onPlay();
@@ -60,25 +66,27 @@ export const useEnhancedMediaSession = ({
           onPause();
         });
 
-        // Navigation handlers (critical for external controls)
-        mediaSession.setActionHandler('nexttrack', () => {
-          logger.debug("Media session: next track action triggered");
-          onNext();
-        });
-
-        mediaSession.setActionHandler('previoustrack', () => {
-          logger.debug("Media session: previous track action triggered");
-          onPrevious();
-        });
-
         // Stop handler
         mediaSession.setActionHandler('stop', () => {
           logger.debug("Media session: stop action triggered");
           onPause();
         });
 
-        // Seek handlers (for progress bar on lock screen)
-        if (onSeek) {
+        // CRITICAL: Set next/previous handlers FIRST for iOS
+        // iOS prioritizes these over seek actions for lock screen display
+        mediaSession.setActionHandler('nexttrack', () => {
+          logger.debug("Media session: next track action triggered (iOS optimized)");
+          onNext();
+        });
+
+        mediaSession.setActionHandler('previoustrack', () => {
+          logger.debug("Media session: previous track action triggered (iOS optimized)");
+          onPrevious();
+        });
+
+        // For iOS: Only add seek handlers if explicitly supported and not interfering
+        if (onSeek && !isIOS()) {
+          // Only add seek handlers on non-iOS platforms to avoid conflicts
           mediaSession.setActionHandler('seekto', (details) => {
             logger.debug("Media session: seek action triggered", details);
             if (details.seekTime !== undefined && details.seekTime !== null) {
@@ -97,9 +105,18 @@ export const useEnhancedMediaSession = ({
             const seekTime = Math.min(duration || currentTime + 10, currentTime + (details.seekOffset || 10));
             onSeek(seekTime);
           });
+        } else if (isIOS()) {
+          // For iOS: Explicitly disable seek handlers to prevent interference
+          mediaSession.setActionHandler('seekto', null);
+          mediaSession.setActionHandler('seekbackward', null);
+          mediaSession.setActionHandler('seekforward', null);
+          logger.debug("iOS: Seek handlers disabled to prioritize next/previous track controls");
         }
 
-        logger.debug("All media session action handlers configured successfully");
+        logger.debug("Media session action handlers configured successfully", { 
+          platform: isIOS() ? 'iOS' : 'Other',
+          seekHandlersEnabled: !isIOS() && !!onSeek
+        });
       } catch (error) {
         logger.error("Error setting up media session action handlers:", error);
       }
@@ -154,7 +171,8 @@ export const useEnhancedMediaSession = ({
 
         logger.debug("Media session metadata updated", {
           title: currentTrack.name,
-          artist: 'uRadio'
+          artist: 'uRadio',
+          platform: isIOS() ? 'iOS' : 'Other'
         });
       } catch (error) {
         logger.error("Error updating media session metadata:", error);
@@ -169,19 +187,36 @@ export const useEnhancedMediaSession = ({
 
     try {
       mediaSession.playbackState = isPlaying ? 'playing' : 'paused';
-      logger.debug("Media session playback state updated:", isPlaying ? 'playing' : 'paused');
+      logger.debug("Media session playback state updated:", {
+        state: isPlaying ? 'playing' : 'paused',
+        platform: isIOS() ? 'iOS' : 'Other'
+      });
     } catch (error) {
       logger.error("Error updating playback state:", error);
     }
   }, [isPlaying]);
 
-  // Update position state for progress display
+  // Update position state - iOS-optimized for radio streams
   useEffect(() => {
     const mediaSession = mediaSessionRef.current;
     if (!mediaSession) return;
 
     try {
-      if (duration && duration !== Infinity && !isNaN(duration) && duration > 0) {
+      // For radio streams, we typically don't have meaningful duration/position
+      // But iOS lock screen works better with basic position info
+      if (isIOS()) {
+        // For iOS: Set minimal position state to ensure proper lock screen behavior
+        mediaSession.setPositionState({
+          duration: 0, // Radio streams don't have duration
+          position: 0, // Radio streams don't have position
+          playbackRate: isPlaying ? 1.0 : 0.0,
+        });
+        
+        logger.debug("iOS Media session position state updated (radio optimized)", {
+          playbackRate: isPlaying ? 1.0 : 0.0
+        });
+      } else if (duration && duration !== Infinity && !isNaN(duration) && duration > 0) {
+        // For other platforms: Use full position state when available
         const position = Math.min(currentTime || 0, duration);
         const playbackRate = isPlaying ? 1.0 : 0.0;
 
