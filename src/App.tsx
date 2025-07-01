@@ -1,72 +1,71 @@
 
-import { useState } from "react";
-import { Toaster } from "@/components/ui/toaster";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import React, { useState } from "react";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { Toaster } from "@/components/ui/toaster";
 import { TrackStateProvider } from "@/context/TrackStateContext";
 import { AudioPlayerProvider } from "@/context/AudioPlayerContext";
-import { PlaylistProvider, usePlaylist } from "@/context/PlaylistContext";
-import { useEnhancedMediaSession } from "@/hooks/useEnhancedMediaSession";
+import { PlaylistProvider } from "@/context/PlaylistContext";
+import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import { InstallPrompt } from "@/components/pwa/InstallPrompt";
-import Index from "@/pages/Index";
-import StationListPage from "@/pages/StationListPage";
 import PlaylistPage from "@/pages/PlaylistPage";
 import AddStationPage from "@/pages/AddStationPage";
-import RequestStationPage from "@/pages/RequestStationPage";
 import NotFound from "@/pages/NotFound";
-import "./App.css";
+import StationListPage from "@/pages/StationListPage";
+import RequestStationPage from "@/pages/RequestStationPage";
+import { useTrackState } from "@/hooks/useTrackState";
+import { getRandomModePreference } from "@/utils/randomModeStorage";
 
-const queryClient = new QueryClient();
+const App = () => {
+  const [randomMode, setRandomMode] = useState(() => getRandomModePreference());
+  const [volume, setVolume] = useState(0.7);
 
-// Inner component that has access to playlist context
-const AppWithProviders = () => {
-  const [randomMode, setRandomMode] = useState(() => {
-    const saved = localStorage.getItem('uradio_random_mode');
-    return saved ? JSON.parse(saved) === true : false;
-  });
-  const [volume, setVolume] = useState(0.8);
-
-  // Get playlist context for track state integration
-  const { removeFromPlaylist, playlistTracks } = usePlaylist();
-  const playlistContext = { removeFromPlaylist };
-
-  // Enhanced media session for better mobile experience - pass empty object if no current track
-  useEnhancedMediaSession({});
+  console.log("App: Random mode state is", randomMode);
 
   return (
-    <TrackStateProvider playlistContext={playlistContext}>
-      <AudioPlayerProvider tracks={playlistTracks} randomMode={randomMode}>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/stations" element={<StationListPage />} />
-          <Route path="/playlist" element={<PlaylistPage randomMode={randomMode} setRandomMode={setRandomMode} volume={volume} setVolume={setVolume} />} />
-          <Route path="/add-station" element={<AddStationPage />} />
-          <Route path="/request-station" element={<RequestStationPage />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </AudioPlayerProvider>
-    </TrackStateProvider>
+    <ErrorBoundary>
+      <ThemeProvider defaultTheme="dark" storageKey="uradio-theme">
+        <TrackStateProvider>
+          <PlaylistProvider>
+            <TrackStateWrapper randomMode={randomMode} volume={volume}>
+              <Router>
+                <div className="min-h-screen bg-background">
+                  <InstallPrompt />
+                  <Routes>
+                    <Route path="/" element={<PlaylistPage randomMode={randomMode} setRandomMode={setRandomMode} volume={volume} setVolume={setVolume} />} />
+                    <Route path="/playlist" element={<PlaylistPage randomMode={randomMode} setRandomMode={setRandomMode} volume={volume} setVolume={setVolume} />} />
+                    <Route path="/add" element={<AddStationPage />} />
+                    <Route path="/add-station" element={<AddStationPage />} />
+                    <Route path="/station-list" element={<StationListPage />} />
+                    <Route path="/request-station" element={<RequestStationPage />} />
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </div>
+              </Router>
+            </TrackStateWrapper>
+          </PlaylistProvider>
+        </TrackStateProvider>
+        <Toaster />
+      </ThemeProvider>
+    </ErrorBoundary>
   );
 };
 
-function App() {
+// Wrapper component to access TrackStateContext and pass all tracks
+const TrackStateWrapper: React.FC<{
+  children: React.ReactNode;
+  randomMode: boolean;
+  volume: number;
+}> = ({ children, randomMode, volume }) => {
+  const { tracks } = useTrackState();
+  
+  console.log("TrackStateWrapper: Random mode being passed to AudioPlayerProvider:", randomMode);
+  
   return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-        <TooltipProvider>
-          <BrowserRouter>
-            <PlaylistProvider>
-              <AppWithProviders />
-              <InstallPrompt />
-            </PlaylistProvider>
-            <Toaster />
-          </BrowserRouter>
-        </TooltipProvider>
-      </ThemeProvider>
-    </QueryClientProvider>
+    <AudioPlayerProvider tracks={tracks} randomMode={randomMode}>
+      {children}
+    </AudioPlayerProvider>
   );
-}
+};
 
 export default App;

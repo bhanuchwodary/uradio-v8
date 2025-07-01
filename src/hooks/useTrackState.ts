@@ -5,9 +5,7 @@ import { useTrackManagement } from "./track-state/useTrackManagement";
 import { useTrackDebug } from "./track-state/useTrackDebug";
 import { TrackStateResult } from "./track-state/types";
 
-export const useTrackState = (playlistContext?: {
-  removeFromPlaylist: (trackUrl: string) => boolean;
-}): TrackStateResult => {
+export const useTrackState = (): TrackStateResult => {
   // Get core state management with the tracksRef for direct access
   const {
     tracks,
@@ -23,15 +21,14 @@ export const useTrackState = (playlistContext?: {
     isInitialized
   } = useTrackStateCore();
 
-  // Get track operations with tracksRef for consistent state access and playlist context
+  // Get track operations with tracksRef for consistent state access
   const operations = useTrackOperations(
     tracks,
     setTracks,
     currentIndex,
     setCurrentIndex,
     setIsPlaying,
-    tracksRef,
-    playlistContext
+    tracksRef
   );
 
   // Get track management functions with consistent access to latest tracks

@@ -1,4 +1,3 @@
-
 import { useCallback } from "react";
 import { Track } from "@/types/track";
 import { saveTracksToLocalStorage } from "./trackStorage";
@@ -18,11 +17,7 @@ export const useTrackOperations = (
   currentIndex: number,
   setCurrentIndex: (index: number) => void,
   setIsPlaying: (playing: boolean) => void,
-  tracksRef?: React.MutableRefObject<Track[]>,
-  // Add playlist context as optional parameter
-  playlistContext?: {
-    removeFromPlaylist: (trackUrl: string) => boolean;
-  }
+  tracksRef?: React.MutableRefObject<Track[]>
 ) => {
   const checkIfStationExists = useCallback((url: string) => {
     // Use tracksRef for most up-to-date value when available
@@ -120,8 +115,6 @@ export const useTrackOperations = (
   
   const removeStationByValue = useCallback((station: Track) => {
     console.log("Removing station by value:", JSON.stringify(station));
-    console.log("LIBRARY DELETE: Starting removal process for station:", station.name);
-    
     setTracks(currentTracks => {
       const updatedTracks = removeByValue(currentTracks, station);
       
@@ -134,25 +127,13 @@ export const useTrackOperations = (
       
       return updatedTracks;
     });
-
-    // Also remove from playlist if it exists there
-    if (playlistContext?.removeFromPlaylist) {
-      console.log("LIBRARY DELETE: Also removing from playlist:", station.url);
-      const playlistRemoved = playlistContext.removeFromPlaylist(station.url);
-      if (playlistRemoved) {
-        console.log("LIBRARY DELETE: Successfully removed from playlist");
-      } else {
-        console.log("LIBRARY DELETE: Station was not in playlist");
-      }
-    }
-  }, [setTracks, tracksRef, playlistContext]);
+  }, [setTracks, tracksRef]);
 
   const removeUrl = useCallback((index: number) => {
     console.log("Removing track at index:", index);
     
     // Use tracksRef for most up-to-date value when available
     const currentTracks = tracksRef?.current || tracks;
-    const stationToRemove = currentTracks[index];
     
     const { tracks: updatedTracks, newCurrentIndex, shouldStopPlaying } = 
       removeTrackByIndex(currentTracks, index, currentIndex);
@@ -173,16 +154,7 @@ export const useTrackOperations = (
     if (tracksRef) {
       tracksRef.current = updatedTracks;
     }
-
-    // Also remove from playlist if it exists there
-    if (stationToRemove && playlistContext?.removeFromPlaylist) {
-      console.log("LIBRARY DELETE: Also removing from playlist by index:", stationToRemove.url);
-      const playlistRemoved = playlistContext.removeFromPlaylist(stationToRemove.url);
-      if (playlistRemoved) {
-        console.log("LIBRARY DELETE: Successfully removed from playlist by index");
-      }
-    }
-  }, [tracks, currentIndex, setTracks, setCurrentIndex, setIsPlaying, tracksRef, playlistContext]);
+  }, [tracks, currentIndex, setTracks, setCurrentIndex, setIsPlaying, tracksRef]);
 
   const toggleFavorite = useCallback((index: number) => {
     console.log("Toggling favorite for index:", index);
