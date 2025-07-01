@@ -32,8 +32,8 @@ const AppWithProviders = () => {
   const { removeFromPlaylist, playlistTracks } = usePlaylist();
   const playlistContext = { removeFromPlaylist };
 
-  // Enhanced media session for better mobile experience
-  useEnhancedMediaSession();
+  // Enhanced media session for better mobile experience - pass empty object if no current track
+  useEnhancedMediaSession({});
 
   return (
     <TrackStateProvider playlistContext={playlistContext}>
