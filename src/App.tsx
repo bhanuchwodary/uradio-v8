@@ -29,7 +29,7 @@ const AppWithProviders = () => {
   const [volume, setVolume] = useState(0.8);
 
   // Get playlist context for track state integration
-  const { removeFromPlaylist } = usePlaylist();
+  const { removeFromPlaylist, playlistTracks } = usePlaylist();
   const playlistContext = { removeFromPlaylist };
 
   // Enhanced media session for better mobile experience
@@ -37,7 +37,7 @@ const AppWithProviders = () => {
 
   return (
     <TrackStateProvider playlistContext={playlistContext}>
-      <AudioPlayerProvider>
+      <AudioPlayerProvider tracks={playlistTracks} randomMode={randomMode}>
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/stations" element={<StationListPage />} />
