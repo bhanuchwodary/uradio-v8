@@ -6,6 +6,7 @@ import { StationCardButton } from "./StationCardButton";
 import { StationCardInfo } from "./StationCardInfo";
 import { StationCardActions } from "./StationCardActions";
 import { StationCardProps } from "./types";
+import { logger } from "@/utils/logger";
 
 export const StationCard: React.FC<StationCardProps> = memo(({
   station,
@@ -23,21 +24,26 @@ export const StationCard: React.FC<StationCardProps> = memo(({
   const handlePlayClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     
-    console.log("StationCard: Play button clicked for station:", station.name);
-    console.log("StationCard: Action icon:", actionIcon, "Context:", context);
+    logger.debug("StationCard interaction", { 
+      stationName: station.name, 
+      actionIcon, 
+      context, 
+      inPlaylist, 
+      isAddingToPlaylist 
+    });
     
     // Prevent adding to playlist if already in playlist or currently being added
     if (actionIcon === "add" && (inPlaylist || isAddingToPlaylist)) {
-      console.log("StationCard: Blocked click - already in playlist or being added");
+      logger.debug("StationCard click blocked", { reason: "already in playlist or being added" });
       return;
     }
     
     // Always call onPlay for playback actions
     if (actionIcon === "play" || context === "playlist") {
-      console.log("StationCard: Triggering playback for station:", station.name);
+      logger.debug("StationCard triggering playback", { stationName: station.name });
       onPlay();
     } else if (actionIcon === "add" && !inPlaylist) {
-      console.log("StationCard: Adding station to playlist:", station.name);
+      logger.debug("StationCard adding to playlist", { stationName: station.name });
       onPlay(); // This will handle adding to playlist in the parent
     }
   }, [actionIcon, context, inPlaylist, isAddingToPlaylist, onPlay, station.name]);
@@ -49,8 +55,8 @@ export const StationCard: React.FC<StationCardProps> = memo(({
   return (
     <Card 
       className={cn(
-        "relative overflow-hidden group transition-all duration-300 cursor-pointer h-full",
-        "transform hover:scale-105 active:scale-95 border-0 backdrop-blur-sm",
+        "relative overflow-hidden group material-transition cursor-pointer h-full ios-touch-target",
+        "transform hover:scale-105 active:scale-95 border-0 backdrop-blur-sm elevation-1 hover:elevation-3",
         "hover:shadow-xl hover:-translate-y-1",
         isSelected 
           ? "bg-gradient-to-br from-primary/20 to-primary/10 shadow-lg ring-2 ring-primary/30" 
@@ -58,11 +64,20 @@ export const StationCard: React.FC<StationCardProps> = memo(({
           ? "bg-gradient-to-br from-green-500/10 to-green-500/5 shadow-md ring-1 ring-green-500/20"
           : isProcessing
           ? "bg-gradient-to-br from-blue-500/10 to-blue-500/5 shadow-md ring-1 ring-blue-500/20"
-          : "bg-gradient-to-br from-background/80 to-background/60 hover:from-accent/40 hover:to-accent/20 shadow-md",
+          : "bg-gradient-to-br from-surface-container/80 to-surface-container/60 hover:from-accent/40 hover:to-accent/20",
         // Disable hover effects if already in playlist or being processed
         isDisabled && "hover:scale-100 cursor-default"
       )}
       onClick={handlePlayClick}
+      role="button"
+      tabIndex={0}
+      aria-label={`${actionIcon === "add" ? "Add" : "Play"} ${station.name}`}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          handlePlayClick(e as any);
+        }
+      }}
     >
       <div className="px-2 py-2.5 flex flex-col items-center space-y-1.5 h-full">
         {/* Play Button */}

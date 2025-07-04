@@ -9,6 +9,7 @@ import StationSearch from "@/components/station-list/StationSearch";
 import { Track } from "@/types/track";
 import { PlaylistTrack } from "@/context/PlaylistContext";
 import ExportPlaylistButtons from "./ExportPlaylistButtons";
+import { logger } from "@/utils/logger";
 
 interface PlaylistContentProps {
   playlistTracks: PlaylistTrack[];
@@ -46,14 +47,14 @@ const PlaylistContent: React.FC<PlaylistContentProps> = ({
   onClearAll
 }) => {
   if (process.env.NODE_ENV === 'development') {
-    console.log("PlaylistContent rendering with tracks:", playlistTracks.length, playlistTracks);
+    logger.debug("PlaylistContent rendering", { tracksCount: playlistTracks.length });
   }
 
   // Handle station card click - use the new onStationCardPlay prop
   const handleStationCardClick = (index: number) => {
     const station = playlistTracks[index];
     if (station) {
-      console.log("PlaylistContent: Station card clicked:", station.name);
+      logger.debug("PlaylistContent station card clicked", { stationName: station.name });
       onStationCardPlay(station);
     }
   };
@@ -84,7 +85,7 @@ const PlaylistContent: React.FC<PlaylistContentProps> = ({
                 variant="ghost"
                 size="sm"
                 onClick={() => {
-                  console.log("Random mode toggle clicked, changing from", randomMode, "to", !randomMode);
+                  logger.debug("Random mode toggle", { from: randomMode, to: !randomMode });
                   onRandomModeChange(!randomMode);
                 }}
                 className={cn(

@@ -15,12 +15,13 @@ import StationListPage from "@/pages/StationListPage";
 import RequestStationPage from "@/pages/RequestStationPage";
 import { useTrackState } from "@/hooks/useTrackState";
 import { getRandomModePreference } from "@/utils/randomModeStorage";
+import { logger } from "@/utils/logger";
 
 const App = () => {
   const [randomMode, setRandomMode] = useState(() => getRandomModePreference());
   const [volume, setVolume] = useState(0.7);
 
-  console.log("App: Random mode state is", randomMode);
+  logger.debug("App random mode initialized", { randomMode });
 
   return (
     <ErrorBoundary>
@@ -59,7 +60,7 @@ const TrackStateWrapper: React.FC<{
 }> = ({ children, randomMode, volume }) => {
   const { tracks } = useTrackState();
   
-  console.log("TrackStateWrapper: Random mode being passed to AudioPlayerProvider:", randomMode);
+  logger.debug("AudioPlayerProvider initialized", { randomMode, tracksCount: tracks.length });
   
   return (
     <AudioPlayerProvider tracks={tracks} randomMode={randomMode}>

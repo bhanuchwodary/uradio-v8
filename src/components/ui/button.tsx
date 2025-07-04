@@ -5,7 +5,7 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 material-transition",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background material-transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 ios-touch-target",
   {
     variants: {
       variant: {
@@ -13,17 +13,17 @@ const buttonVariants = cva(
         destructive:
           "bg-destructive text-destructive-foreground hover:bg-destructive/90 elevation-1 hover:elevation-2",
         outline:
-          "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
+          "border border-outline bg-surface hover:bg-accent hover:text-accent-foreground",
         secondary:
           "bg-secondary text-secondary-foreground hover:bg-secondary/80 elevation-1 hover:elevation-2",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
       },
       size: {
-        default: "h-10 px-4 py-2",
-        sm: "h-9 rounded-md px-3",
-        lg: "h-11 rounded-md px-8",
-        icon: "h-10 w-10",
+        default: "h-10 px-4 py-2 min-h-[44px]",
+        sm: "h-9 rounded-md px-3 min-h-[36px]",
+        lg: "h-11 rounded-md px-8 min-h-[48px]",
+        icon: "h-10 w-10 min-h-[44px] min-w-[44px]",
       },
     },
     defaultVariants: {
@@ -39,14 +39,14 @@ export interface ButtonProps
   asChild?: boolean
 }
 
-const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, ...props }, ref) => {
     const Comp = asChild ? Slot : "button"
 
     const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
       const button = event.currentTarget;
       
-      // Create span element
+      // Create ripple effect
       const circle = document.createElement("span");
       const diameter = Math.max(button.clientWidth, button.clientHeight);
       const radius = diameter / 2;
@@ -64,11 +64,11 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         existingRipple.remove();
       }
       
-      // Append and automatically remove
+      // Add ripple effect
       button.appendChild(circle);
       setTimeout(() => {
         circle.remove();
-      }, 600); // Should match animation duration
+      }, 600);
 
       // Forward the click event
       if (props.onClick) {
@@ -78,7 +78,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
     return (
       <Comp
-        className={cn(buttonVariants({ variant, size, className }), "ink-ripple")}
+        className={cn(buttonVariants({ variant, size, className }), "ink-ripple ios-touch-target")}
         ref={ref}
         {...props}
         onClick={handleClick}

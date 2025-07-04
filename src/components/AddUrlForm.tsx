@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { useTrackStateContext } from "@/context/TrackStateContext";
 import { useNavigate } from "react-router-dom";
+import { logger } from "@/utils/logger";
 
 const AddUrlForm: React.FC = () => {
   const [url, setUrl] = useState("");
@@ -48,8 +49,8 @@ const AddUrlForm: React.FC = () => {
 
     // CRITICAL FIX: checkIfStationExists returns an object, not a boolean
     const stationCheck = checkIfStationExists(url.trim());
-    console.log("Station existence check result:", stationCheck);
-    console.log("Checking URL:", url.trim());
+    logger.debug("Station existence check", { url: url.trim(), result: stationCheck });
+    
     
     if (stationCheck.exists) {
       const existsInText = stationCheck.isUserStation ? "your stations" : "featured stations";
@@ -65,7 +66,7 @@ const AddUrlForm: React.FC = () => {
 
     try {
       const result = addUrl(url.trim(), name.trim(), false, false, language.trim());
-      console.log("Add URL result:", result);
+      logger.debug("Add URL operation", { url: url.trim(), name: name.trim(), result });
       
       if (result.success) {
         toast({
