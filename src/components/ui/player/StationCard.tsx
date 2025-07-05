@@ -1,6 +1,8 @@
 
 import React, { memo, useCallback } from "react";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Star, Trash2, Edit } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { StationCardButton } from "./StationCardButton";
 import { StationCardInfo } from "./StationCardInfo";
@@ -79,38 +81,92 @@ export const StationCard: React.FC<StationCardProps> = memo(({
         }
       }}
     >
-      <div className="px-2 py-2.5 flex flex-col items-center space-y-1.5 h-full">
-        {/* Play Button */}
-        <StationCardButton
-          station={station}
-          isPlaying={isPlaying}
-          isSelected={isSelected}
-          actionIcon={actionIcon}
-          context={context}
-          inPlaylist={inPlaylist}
-          isAddingToPlaylist={isProcessing}
-          onClick={handlePlayClick}
-          isDisabled={isDisabled}
-          isProcessing={isProcessing}
-        />
-        
-        {/* Station Info */}
-        <StationCardInfo
-          station={station}
-          isSelected={isSelected}
-          inPlaylist={inPlaylist}
-          isProcessing={isProcessing}
-          actionIcon={actionIcon}
-        />
-        
-        {/* Action Buttons */}
-        <StationCardActions
-          station={station}
-          context={context}
-          onToggleFavorite={onToggleFavorite}
-          onEdit={onEdit}
-          onDelete={onDelete}
-        />
+      <div className="relative p-2 flex flex-col items-center justify-center h-full min-h-[120px]">
+        {/* Top Left Corner - Star Button */}
+        {onToggleFavorite && (
+          <div className="absolute top-1 left-1 z-10">
+            <Button 
+              size="icon" 
+              variant="ghost" 
+              className={cn(
+                "h-6 w-6 transition-all duration-200 transform hover:scale-110 active:scale-90", 
+                station.isFavorite 
+                  ? "text-yellow-500 hover:text-yellow-600" 
+                  : "text-muted-foreground hover:text-yellow-500"
+              )}
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggleFavorite?.();
+              }}
+              aria-label={station.isFavorite ? "Remove from favorites" : "Add to favorites"}
+            >
+              <Star className={cn(
+                "h-3 w-3 transition-all duration-200",
+                station.isFavorite && "fill-yellow-500"
+              )} />
+            </Button>
+          </div>
+        )}
+
+        {/* Bottom Right Corner - Delete Button */}
+        {onDelete && (
+          <div className="absolute bottom-1 right-1 z-10">
+            <Button 
+              size="icon" 
+              variant="ghost" 
+              className="h-6 w-6 text-destructive hover:text-destructive/80 transition-all duration-200 transform hover:scale-110 active:scale-90"
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete?.();
+              }}
+              aria-label={context === "playlist" ? "Remove from playlist" : "Delete station"}
+            >
+              <Trash2 className="h-3 w-3" />
+            </Button>
+          </div>
+        )}
+
+        {/* Center Content */}
+        <div className="flex flex-col items-center space-y-2 flex-1 justify-center px-6">
+          {/* Play Button */}
+          <StationCardButton
+            station={station}
+            isPlaying={isPlaying}
+            isSelected={isSelected}
+            actionIcon={actionIcon}
+            context={context}
+            inPlaylist={inPlaylist}
+            isAddingToPlaylist={isProcessing}
+            onClick={handlePlayClick}
+            isDisabled={isDisabled}
+            isProcessing={isProcessing}
+          />
+          
+          {/* Station Info */}
+          <StationCardInfo
+            station={station}
+            isSelected={isSelected}
+            inPlaylist={inPlaylist}
+            isProcessing={isProcessing}
+            actionIcon={actionIcon}
+          />
+
+          {/* Edit Button - Only show if needed, centered below info */}
+          {!station.isFeatured && onEdit && context !== "playlist" && (
+            <Button 
+              size="icon" 
+              variant="ghost" 
+              className="h-6 w-6 text-blue-500 hover:text-blue-600 transition-all duration-200 transform hover:scale-110 active:scale-90"
+              onClick={(e) => {
+                e.stopPropagation();
+                onEdit?.();
+              }}
+              aria-label="Edit station"
+            >
+              <Edit className="h-3 w-3" />
+            </Button>
+          )}
+        </div>
       </div>
     </Card>
   );
