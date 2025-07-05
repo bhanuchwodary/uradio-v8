@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useTheme } from "@/components/ThemeProvider";
 import { MusicPlayer } from "@/components/ui/player/MusicPlayer";
 import { useAudioPlayer } from "@/context/AudioPlayerContext";
+import { cn } from "@/lib/utils";
 
 interface AppHeaderProps {
   randomMode: boolean;
@@ -75,8 +76,11 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   }, []);
 
   return (
-    <header className="fixed top-0 left-0 right-0 h-20 bg-surface-container/95 backdrop-blur-lg border-b border-outline-variant/20 z-20 ios-safe-top ios-safe-left ios-safe-right elevation-1">
-      <div className="container mx-auto flex items-center h-full px-4 gap-4 w-full">
+    <header className="fixed top-0 left-0 right-0 bg-surface-container/95 backdrop-blur-lg border-b border-outline-variant/20 z-20 elevation-1 ios-safe-left ios-safe-right" style={{ 
+      paddingTop: 'max(env(safe-area-inset-top), 0px)',
+      height: 'calc(5rem + max(env(safe-area-inset-top), 0px))'
+    }}>
+      <div className="container mx-auto flex items-center h-full px-4 gap-4 w-full" style={{ minHeight: '5rem' }}>
         {/* Logo and Tagline */}
         <div className="flex-shrink-0 flex flex-col items-center">
           <img

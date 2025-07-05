@@ -25,8 +25,11 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
       <div
         className={cn(
           "flex-grow pb-32 md:pb-28 overflow-x-hidden w-full ios-smooth-scroll ios-safe-left ios-safe-right",
-          "pt-20 responsive-padding"
+          "responsive-padding"
         )}
+        style={{ 
+          paddingTop: 'calc(5rem + max(env(safe-area-inset-top), 0px))'
+        }}
       >
         {children}
       </div>
