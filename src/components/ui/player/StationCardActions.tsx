@@ -47,10 +47,10 @@ export const StationCardActions: React.FC<StationCardActionsProps> = ({
           size="icon" 
           variant="ghost" 
           className={cn(
-            "h-6 w-6 rounded-full transition-all duration-200 transform hover:scale-110 active:scale-90", 
+            "h-6 w-6 transition-all duration-200 transform hover:scale-110 active:scale-90", 
             station.isFavorite 
-              ? "text-yellow-500 hover:text-yellow-600 bg-yellow-500/10 hover:bg-yellow-500/20" 
-              : "text-muted-foreground hover:text-yellow-500 hover:bg-yellow-500/10"
+              ? "text-yellow-500 hover:text-yellow-600" 
+              : "text-muted-foreground hover:text-yellow-500"
           )}
           onClick={handleFavoriteClick}
           aria-label={station.isFavorite ? "Remove from favorites" : "Add to favorites"}
@@ -66,7 +66,7 @@ export const StationCardActions: React.FC<StationCardActionsProps> = ({
         <Button 
           size="icon" 
           variant="ghost" 
-          className="h-6 w-6 text-blue-500 hover:text-blue-600 hover:bg-blue-500/10 rounded-full transition-all duration-200 transform hover:scale-110 active:scale-90"
+          className="h-6 w-6 text-blue-500 hover:text-blue-600 transition-all duration-200 transform hover:scale-110 active:scale-90"
           onClick={handleEditClick}
           aria-label="Edit station"
         >
@@ -78,7 +78,7 @@ export const StationCardActions: React.FC<StationCardActionsProps> = ({
         <Button 
           size="icon" 
           variant="ghost" 
-          className="h-6 w-6 text-destructive hover:text-destructive/80 hover:bg-destructive/10 rounded-full transition-all duration-200 transform hover:scale-110 active:scale-90"
+          className="h-6 w-6 text-destructive hover:text-destructive/80 transition-all duration-200 transform hover:scale-110 active:scale-90"
           onClick={handleDeleteClick}
           aria-label={context === "playlist" ? "Remove from playlist" : "Delete station"}
         >
