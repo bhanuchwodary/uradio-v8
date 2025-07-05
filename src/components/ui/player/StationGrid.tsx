@@ -56,26 +56,14 @@ export const StationGrid: React.FC<StationGridProps> = memo(({
   }
 
   return (
-    <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 md:gap-3">
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4">
       {stations.map((station, index) => {
         const isCurrentlyPlaying = station.url === currentTrackUrl && isPlaying;
         const isSelected = station.url === currentTrackUrl;
         const stationKey = stationKeys[index];
         const inPlaylist = isInPlaylist ? isInPlaylist(station.url) : false;
         
-        // Only log in development
-        if (process.env.NODE_ENV === 'development') {
-          logger.debug("Rendering station in grid", { 
-            name: station.name, 
-            language: station.language,
-            key: stationKey,
-            isSelected,
-            isPlaying: isCurrentlyPlaying,
-            context,
-            inPlaylist,
-            isAddingToPlaylist
-          });
-        }
+        // Removed excessive debug logging for performance
         
         return (
           <StationCard
