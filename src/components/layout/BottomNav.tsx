@@ -56,7 +56,7 @@ export const BottomNav: React.FC = () => {
           <div className="flex-1 text-center group">
              <ThemeToggle>
               <div className="flex flex-col items-center justify-center gap-1 w-full py-1 transition-all duration-300 ease-out ios-touch-target rounded-xl cursor-pointer">
-                <div className="flex items-center justify-center rounded-full text-on-surface-variant group-hover:bg-on-surface/10 h-8 w-16 transition-all duration-300 ease-in-out">
+                <div className="flex items-center justify-center rounded-full text-on-surface-variant group-hover:bg-on-surface/10 h-10 w-10 sm:h-8 sm:w-16 transition-all duration-300 ease-in-out">
                   <div className="relative h-6 w-6">
                     <Sun className="absolute h-6 w-6 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
                     <Moon className="absolute h-6 w-6 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
