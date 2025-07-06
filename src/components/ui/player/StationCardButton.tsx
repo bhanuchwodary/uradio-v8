@@ -22,7 +22,7 @@ export const StationCardButton: React.FC<StationCardButtonProps> = ({
   return (
     <div 
       className={cn(
-        "w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 shadow-sm",
+        "w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 shadow-sm",
         "transform group-hover:scale-110 group-active:scale-95",
         isPlaying 
           ? "bg-primary text-primary-foreground shadow-md" 
@@ -39,7 +39,7 @@ export const StationCardButton: React.FC<StationCardButtonProps> = ({
       <ActionIcon className={cn(
         "transition-transform duration-200",
         actionIcon !== "add" && !isPlaying && "ml-0.5",
-        "w-5 h-5"
+        "w-4 h-4"
       )} />
     </div>
   );

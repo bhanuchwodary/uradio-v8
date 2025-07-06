@@ -79,7 +79,7 @@ export const StationCard: React.FC<StationCardProps> = memo(({
         }
       }}
     >
-      <div className="px-2 py-2.5 flex flex-col items-center space-y-1.5 h-full">
+      <div className="px-1.5 py-2 flex flex-col items-center space-y-1 h-full min-h-[120px]">
         {/* Play Button */}
         <StationCardButton
           station={station}
